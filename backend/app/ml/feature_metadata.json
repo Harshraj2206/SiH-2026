@@ -1,0 +1,27 @@
+{
+  "model_type": "RandomForestRegressor",
+  "features": [
+    "rainfall_24h",
+    "rainfall_72h",
+    "slope_deg",
+    "soil_moisture",
+    "ndvi",
+    "historical_incidents"
+  ],
+  "n_estimators": 120,
+  "metrics": {
+    "r2_score": 0.9638,
+    "mae": 2.54,
+    "rmse": 3.26
+  },
+  "feature_importances": {
+    "rainfall_24h": 0.0871,
+    "rainfall_72h": 0.1515,
+    "slope_deg": 0.6904,
+    "soil_moisture": 0.0179,
+    "ndvi": 0.0264,
+    "historical_incidents": 0.0267
+  },
+  "trained_date": "2026-08-25",
+  "description": "Trained for SIH26001 Landslide Early Warning System (NER region)"
+}
