@@ -468,7 +468,7 @@ export const LeafletRiskMap = ({
   };
 
   return (
-    <div className="relative w-full h-full min-h-[480px] rounded-2xl overflow-hidden border border-[#262626] bg-[#0B0B0B] flex flex-col" style={{ height: height || '100%' }}>
+    <div className="relative isolate z-0 w-full h-full min-h-[480px] rounded-2xl overflow-hidden border border-[#262626] bg-[#0B0B0B] flex flex-col" style={{ height: height || '100%' }}>
       
       {/* Top Search & Locate Bar - Fully Responsive with Glassmorphic Rounded-Full Radius */}
       <div className="absolute top-3 left-3 right-3 z-[1000] flex items-center justify-between gap-2 pointer-events-none">

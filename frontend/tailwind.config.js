@@ -7,6 +7,13 @@ export default {
   darkMode: 'class',
   theme: {
     extend: {
+      screens: {
+        sm: '640px',
+        md: '768px',
+        lg: '1000px', // Cleanly captures 1024px displays with browser scrollbars (e.g. 1006px innerWidth)
+        xl: '1280px',
+        '2xl': '1536px',
+      },
       colors: {
         hazard: {
           low: '#10b981',      // Emerald 500

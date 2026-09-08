@@ -16,15 +16,24 @@ export const DashboardLayout = () => {
     setSidebarOpen(false);
   }, [location.pathname]);
 
-  // Automatically reset mobile drawer state when resized to desktop (>= 1024px)
+  // Automatically reset mobile drawer state when resized to desktop (>= 1000px) or on Escape
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= 1024) {
+      if (window.innerWidth >= 1000) {
+        setSidebarOpen(false);
+      }
+    };
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
         setSidebarOpen(false);
       }
     };
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
   }, []);
 
   return (
