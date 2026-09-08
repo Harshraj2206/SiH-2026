@@ -4,9 +4,10 @@ Emergency SOS & Multi-Agency Triage Dispatch API
 """
 
 from typing import List, Optional
-from fastapi import APIRouter, HTTPException, Depends, Query, status
+from fastapi import APIRouter, HTTPException, Depends, Query, status, Request
 from backend.app.models.schemas import SOSCreate, SOSTriageUpdate, SOSResponse
 from backend.app.core.security import get_current_user_optional, require_roles
+from backend.app.core.rate_limiter import check_auth_rate_limit
 from backend.app.database.store import db_store
 
 router = APIRouter(prefix="/api/sos", tags=["Emergency SOS & Triage"])
@@ -22,8 +23,11 @@ async def list_sos_requests(
 @router.post("", response_model=SOSResponse, status_code=status.HTTP_201_CREATED)
 async def trigger_emergency_sos(
     payload: SOSCreate,
+    request: Request,
     current_user: Optional[dict] = Depends(get_current_user_optional)
 ):
+    """Rate-limited: 5 distress broadcasts/minute per IP to prevent flood attacks."""
+    check_auth_rate_limit(request, max_attempts=5, window_seconds=60, action_name="sos-broadcast")
     return db_store.add_sos_request(payload.model_dump(), user=current_user)
 
 

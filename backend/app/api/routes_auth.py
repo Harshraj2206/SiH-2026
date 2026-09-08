@@ -1,10 +1,7 @@
-"""
-LANDSLIDEGUARD SIH26001 - Full-Stack Authentication & Profile API
-Implements user registration, dual-identifier login (email or username), profile management, and emergency contacts.
-"""
-
+import os
 from typing import List, Optional
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, HTTPException, Depends, status, Request
+from fastapi.security import HTTPAuthorizationCredentials
 from backend.app.models.schemas import (
     UserRegisterRequest,
     UserLoginRequest,
@@ -13,32 +10,33 @@ from backend.app.models.schemas import (
     EmergencyContactCreate,
     EmergencyContactItem,
     AuthTokenResponse,
-    ForgotPasswordRequest
+    ForgotPasswordRequest,
+    PasswordResetConfirmRequest
 )
 from backend.app.core.security import (
     hash_password,
     verify_password,
     create_access_token,
     get_current_user,
+    blacklist_token,
+    security_bearer,
     validate_password_policy,
     validate_username_policy,
     validate_email_format
 )
+from backend.app.core.rate_limiter import check_auth_rate_limit, DEFAULT_LOGIN_LIMIT, DEFAULT_REGISTER_LIMIT
 from backend.app.database.user_store import user_db
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication & User Management"])
 
 
 @router.post("/register", response_model=AuthTokenResponse, status_code=status.HTTP_201_CREATED)
-async def register_user(payload: UserRegisterRequest):
+async def register_user(payload: UserRegisterRequest, request: Request):
     """
-    Public User Registration Endpoint.
-    - Strictly sets role = 'USER' (Prevents privilege escalation).
-    - Enforces unique username and unique email.
-    - Validates password complexity policy.
-    - Verifies password == confirm_password.
-    - Requires consent to Terms of Service & Privacy Policy.
+    Public User Registration Endpoint (Rate-limited: 5 attempts/min).
     """
+    check_auth_rate_limit(request, max_attempts=DEFAULT_REGISTER_LIMIT, window_seconds=60, action_name="registration")
+
     # 1. Check Terms Acceptance
     if not payload.terms_accepted:
         raise HTTPException(
@@ -134,12 +132,12 @@ async def register_user(payload: UserRegisterRequest):
 
 
 @router.post("/login", response_model=AuthTokenResponse)
-async def login(credentials: UserLoginRequest):
+async def login(credentials: UserLoginRequest, request: Request):
     """
-    Dual-Identifier Login Endpoint.
-    Accepts Email Address OR Username + Password.
-    Returns generic authentication error on failure to prevent user enumeration attacks.
+    Dual-Identifier Login Endpoint (Rate-limited: 5 attempts/min per IP).
     """
+    check_auth_rate_limit(request, max_attempts=DEFAULT_LOGIN_LIMIT, window_seconds=60, action_name="login")
+
     clean_identifier = credentials.identifier.strip()
     if not clean_identifier or not credentials.password:
         raise HTTPException(
@@ -276,21 +274,67 @@ async def delete_emergency_contact(
 
 
 @router.post("/forgot-password")
-async def forgot_password(payload: ForgotPasswordRequest):
+async def forgot_password(payload: ForgotPasswordRequest, request: Request):
     """
-    Forgot Password Request Endpoint.
-    Clearly marks email delivery as not configured in dev/hackathon environment.
+    Forgot Password Request Endpoint (Rate-limited: 3 attempts/hour per IP).
+    Generates a cryptographically random, single-use, 15-minute time-limited reset token.
     """
-    user = user_db.get_by_email(payload.email)
-    # Return generic response for security
+    check_auth_rate_limit(request, max_attempts=3, window_seconds=3600, action_name="password-reset")
+    
+    token = user_db.create_password_reset_token(payload.email, ttl_minutes=15)
+    # Generic security message (prevents account enumeration attacks)
     return {
         "status": "info",
         "email": payload.email,
-        "message": "Password reset instructions have been queued. Note: Email delivery is NOT CONFIGURED in this prototype environment. For demo access, please use the pre-created test credentials on the login screen."
+        "message": "If that email address is registered, password reset instructions have been queued.",
+        # Expose token for local demo/testing if in development environment
+        "reset_token": token if os.environ.get("ENVIRONMENT", "development").lower() != "production" else None
+    }
+
+
+@router.post("/reset-password")
+async def reset_password(payload: PasswordResetConfirmRequest, request: Request):
+    """
+    Password Reset Confirmation Endpoint.
+    - Validates token authenticity, single-use, and expiration (< 15 mins).
+    - Enforces password complexity policy and matching confirmation.
+    - Updates user password and immediately invalidates the reset token.
+    """
+    check_auth_rate_limit(request, max_attempts=5, window_seconds=60, action_name="password-reset-confirm")
+
+    if payload.new_password != payload.confirm_password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Passwords do not match."
+        )
+
+    is_valid_pw, pw_err = validate_password_policy(payload.new_password)
+    if not is_valid_pw:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=pw_err or "Password does not meet enterprise security standards."
+        )
+
+    new_hash = hash_password(payload.new_password)
+    success = user_db.verify_and_consume_reset_token(payload.token, new_hash)
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid, expired, or previously used password reset token."
+        )
+
+    return {
+        "status": "success",
+        "message": "Your password has been successfully reset. You may now log in with your new credentials."
     }
 
 
 @router.post("/logout")
-async def logout(current_user: Optional[dict] = Depends(get_current_user)):
-    """Acknowledge client logout and session clearance."""
-    return {"status": "success", "message": "Successfully logged out."}
+async def logout(
+    current_user: Optional[dict] = Depends(get_current_user),
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security_bearer)
+):
+    """Acknowledge client logout and revoke JWT token immediately in server-side blacklist."""
+    if credentials and credentials.credentials:
+        blacklist_token(credentials.credentials)
+    return {"status": "success", "message": "Successfully logged out. Token revoked."}

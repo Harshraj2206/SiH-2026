@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useEmergency } from '../context/EmergencyContext';
+import { useTheme } from '../context/ThemeContext';
 import { LeafletRiskMap } from '../components/map/LeafletRiskMap';
 import { 
   Activity, 
@@ -14,10 +15,13 @@ import {
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { normalizeWeather } from '../utils/weatherNormalizer';
+import { DataSourcesPanel } from '../components/common/DataSourcesPanel';
 
 export const OverviewPage = () => {
   const navigate = useNavigate();
   const { zones, reports, alerts, selectedZone, setSelectedZone } = useEmergency();
+  const { resolvedTheme } = useTheme();
+  const isLight = resolvedTheme === 'light';
   const [activeTipIndex, setActiveTipIndex] = useState(0);
 
   const awarenessTips = [
@@ -45,7 +49,7 @@ export const OverviewPage = () => {
 
         const weather = normalizeWeather(activeZone);
 
-        const themeStyles = {
+        const darkThemeStyles = {
           snow: {
             border: 'border-cyan-500/40 bg-gradient-to-r from-sky-950/80 via-[#0a1828]/90 to-[#050c14]/90 shadow-cyan-500/10',
             text: 'text-cyan-300',
@@ -98,11 +102,65 @@ export const OverviewPage = () => {
           }
         };
 
+        const lightThemeStyles = {
+          snow: {
+            border: 'border-cyan-300 bg-gradient-to-r from-cyan-50 via-sky-50 to-white shadow-sm',
+            text: 'text-cyan-800',
+            glow: 'bg-cyan-200/30'
+          },
+          clear_cold: {
+            border: 'border-sky-300 bg-gradient-to-r from-sky-50 via-blue-50 to-white shadow-sm',
+            text: 'text-sky-800',
+            glow: 'bg-sky-200/30'
+          },
+          thunderstorm: {
+            border: 'border-indigo-300 bg-gradient-to-r from-indigo-50 via-purple-50 to-white shadow-sm',
+            text: 'text-indigo-900',
+            glow: 'bg-indigo-200/30'
+          },
+          rain: {
+            border: 'border-sky-300 bg-gradient-to-r from-sky-50 via-blue-50 to-white shadow-sm',
+            text: 'text-sky-800',
+            glow: 'bg-sky-200/30'
+          },
+          cloudy: {
+            border: 'border-slate-300 bg-gradient-to-r from-slate-100 via-gray-50 to-white shadow-sm',
+            text: 'text-slate-800',
+            glow: 'bg-slate-200/30'
+          },
+          fog: {
+            border: 'border-slate-300 bg-gradient-to-r from-slate-100 via-zinc-50 to-white shadow-sm',
+            text: 'text-slate-800',
+            glow: 'bg-slate-200/30'
+          },
+          clear_night: {
+            border: 'border-indigo-200 bg-gradient-to-r from-indigo-50 via-blue-50 to-white shadow-sm',
+            text: 'text-indigo-900',
+            glow: 'bg-indigo-200/30'
+          },
+          sunny: {
+            border: 'border-amber-300 bg-gradient-to-r from-amber-50 via-yellow-50 to-orange-50/50 shadow-sm',
+            text: 'text-amber-800',
+            glow: 'bg-amber-200/30'
+          },
+          loading: {
+            border: 'border-slate-200 bg-slate-50',
+            text: 'text-slate-600',
+            glow: 'bg-slate-100'
+          },
+          neutral: {
+            border: 'border-slate-200 bg-slate-50',
+            text: 'text-slate-800',
+            glow: 'bg-slate-100'
+          }
+        };
+
+        const themeStyles = isLight ? lightThemeStyles : darkThemeStyles;
         const currentStyle = themeStyles[weather.theme] || themeStyles.neutral;
         const locationName = activeZone.name || activeZone.formatted_address || activeZone.district || 'Selected Sector';
 
         return (
-          <div className={`relative overflow-hidden p-4 sm:p-5 rounded-2xl border backdrop-blur-xl transition-all duration-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl ${currentStyle.border}`}>
+          <div className={`relative overflow-hidden p-4 sm:p-5 rounded-2xl border backdrop-blur-xl transition-all duration-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-md ${currentStyle.border}`}>
             
             {/* Ambient Weather Glow Particle in Corner */}
             <div className={`absolute -right-10 -top-10 w-64 h-64 rounded-full blur-3xl pointer-events-none ${currentStyle.glow}`} />
@@ -354,10 +412,10 @@ export const OverviewPage = () => {
                 <div>
                   <div className="flex items-center justify-between pb-2 border-b border-[#181818]">
                     <h2 className="text-sm font-bold text-white font-sans">
-                      ML Model Prediction
+                      ML Risk Assessment
                     </h2>
-                    <span className="text-[11px] text-emerald-400 font-mono font-semibold">
-                      94.2% Confidence
+                    <span className="text-[10px] text-emerald-400 font-mono font-semibold bg-emerald-950/40 border border-emerald-800/40 px-2 py-0.5 rounded">
+                      Calibrated Model
                     </span>
                   </div>
 
@@ -366,11 +424,11 @@ export const OverviewPage = () => {
                       <span className={`text-base font-extrabold ${textColor} block font-sans`}>
                         {riskText}
                       </span>
-                      <span className="text-[10px] text-neutral-400 block uppercase tracking-tight mt-0.5">
-                        Predicted Landslide Probability
+                      <span className="text-[10px] text-neutral-400 block uppercase tracking-tight mt-0.5 font-medium">
+                        System Landslide Risk Score
                       </span>
-                      <span className="text-4xl font-black text-white font-sans mt-0.5 block">
-                        {score.toFixed(1)}%
+                      <span className="text-3xl font-black text-white font-sans mt-0.5 block font-mono">
+                        {score.toFixed(1)} <span className="text-sm text-neutral-400 font-normal">/ 100</span>
                       </span>
                     </div>
 
@@ -500,6 +558,9 @@ export const OverviewPage = () => {
         </div>
 
       </div>
+
+      {/* Authoritative Data Sources & Provenance Registry Panel */}
+      <DataSourcesPanel />
 
     </div>
   );

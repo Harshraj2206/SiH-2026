@@ -3,13 +3,14 @@ Landslide Early Warning System - Community Ground Reports API
 """
 
 from typing import List, Optional
-from fastapi import APIRouter, HTTPException, Depends, Query, status
+from fastapi import APIRouter, HTTPException, Depends, Query, status, Request
 from backend.app.models.schemas import (
     CommunityReportCreate,
     CommunityReportResponse,
     CommunityReportVerification
 )
 from backend.app.core.security import get_current_user_optional, require_roles
+from backend.app.core.rate_limiter import check_auth_rate_limit
 from backend.app.database.store import db_store
 
 router = APIRouter(prefix="/api/reports", tags=["Community Reports"])
@@ -29,8 +30,12 @@ async def list_community_reports(
 @router.post("", response_model=CommunityReportResponse, status_code=status.HTTP_201_CREATED)
 async def submit_community_report(
     report_data: CommunityReportCreate,
+    request: Request,
     current_user: Optional[dict] = Depends(get_current_user_optional)
 ):
+    """Rate-limited: 10 reports/minute per IP to prevent spamming."""
+    check_auth_rate_limit(request, max_attempts=10, window_seconds=60, action_name="report-submission")
+
     user_info = current_user or {
         "id": "usr-resident-crowd",
         "username": "community_reporter",

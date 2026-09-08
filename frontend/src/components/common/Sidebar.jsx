@@ -14,7 +14,9 @@ import {
   Settings, 
   PhoneCall,
   Mountain,
-  ChevronRight
+  ChevronRight,
+  BarChart3,
+  AlertTriangle
 } from 'lucide-react';
 
 export const Sidebar = ({ isOpen, onClose }) => {
@@ -26,6 +28,8 @@ export const Sidebar = ({ isOpen, onClose }) => {
     { to: '/ml-model', label: 'ML Predictions', icon: BrainCircuit },
     { to: '/safe-route', label: 'Safe Route', icon: Navigation },
     { to: '/alerts', label: 'Alerts & Advisories', icon: Bell },
+    { to: '/incidents', label: 'Incident Events', icon: AlertTriangle },
+    { to: '/analytics', label: 'Telemetry & Analytics', icon: BarChart3 },
     { to: '/resources', label: 'Emergency Resources', icon: Shield },
     { to: '/sos', label: 'Emergency SOS', icon: Radio },
     { to: '/profile', label: 'Profile & Contacts', icon: User },

@@ -127,6 +127,7 @@ def get_global_live_weather(latitude: float, longitude: float, country_code: Opt
             current_idx = min(72, len(times) - 1) if times else 0
             
             p_1h = round(float(current.get("precipitation", 0.0)), 1)
+            rain_now = round(float(current.get("rain", 0.0)), 1)
             p_24h = 0.0
             p_72h = 0.0
 
@@ -174,6 +175,7 @@ def get_global_live_weather(latitude: float, longitude: float, country_code: Opt
                 "condition": condition_str,
                 "weather_code": weather_code,
                 "precipitation_1h_mm": p_1h,
+                "rain_current_mm": rain_now,
                 "precipitation_24h_mm": p_24h,
                 "precipitation_72h_mm": p_72h,
                 "soil_moisture_m3m3": current_soil,
@@ -207,6 +209,7 @@ def get_global_live_weather(latitude: float, longitude: float, country_code: Opt
             "condition": "DATA UNAVAILABLE",
             "weather_code": None,
             "precipitation_1h_mm": None,
+            "rain_current_mm": None,
             "precipitation_24h_mm": None,
             "precipitation_72h_mm": None,
             "soil_moisture_m3m3": None,
@@ -235,23 +238,35 @@ def _map_wmo_code(code: Optional[int]) -> str:
         return "Overcast"
     elif code in [45, 48]:
         return "Fog / Mist"
-    elif code in [51, 53, 55]:
-        return "Drizzle"
+    elif code in [51, 53]:
+        return "Light Drizzle"
+    elif code == 55:
+        return "Dense Drizzle"
     elif code in [56, 57]:
         return "Freezing Drizzle"
-    elif code in [61, 63, 65]:
-        return "Rain Showers"
+    elif code == 61:
+        return "Light Rain"
+    elif code == 63:
+        return "Moderate Rain"
+    elif code == 65:
+        return "Heavy Rain"
     elif code in [66, 67]:
         return "Freezing Rain"
-    elif code in [71, 73, 75]:
+    elif code in [71, 73]:
         return "Snow Fall"
+    elif code == 75:
+        return "Heavy Snow Fall"
     elif code == 77:
         return "Snow Grains"
-    elif code in [80, 81, 82]:
-        return "Heavy Rain Showers"
+    elif code == 80:
+        return "Slight Rain Showers"
+    elif code == 81:
+        return "Moderate Rain Showers"
+    elif code == 82:
+        return "Violent Rain Showers"
     elif code in [85, 86]:
         return "Snow Showers"
     elif code in [95, 96, 99]:
-        return "Thunderstorm with Precipitation"
+        return "Thunderstorm"
     return "Cloudy"
 

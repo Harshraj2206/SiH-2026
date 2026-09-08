@@ -59,10 +59,10 @@ export function LanguageProvider({ children }) {
       result = fallback !== null ? fallback : key;
     }
 
-    // 5. Interpolation if params provided (e.g. { count: 5, total: 10 })
+    // 5. Safe linear parameter substitution (immune to ReDoS / dynamic regex injection)
     if (params && typeof result === 'string') {
       Object.entries(params).forEach(([paramKey, paramVal]) => {
-        result = result.replace(new RegExp(`\\{${paramKey}\\}`, 'g'), String(paramVal));
+        result = result.replaceAll(`{${paramKey}}`, String(paramVal));
       });
     }
 

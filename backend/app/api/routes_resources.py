@@ -3,8 +3,8 @@ LANDSAFE - Landslide Early Warning & Emergency Response System
 Emergency Resources API: Roads & Blockages, Hospitals, and Evacuation Shelters
 """
 
-from typing import List
-from fastapi import APIRouter, HTTPException, Depends
+from typing import List, Optional
+from fastapi import APIRouter, HTTPException, Depends, Query, Request
 from backend.app.models.schemas import (
     RoadResponse,
     RoadStatusUpdate,
@@ -13,8 +13,41 @@ from backend.app.models.schemas import (
 )
 from backend.app.core.security import require_roles
 from backend.app.database.store import db_store
+from backend.app.services.google_places_service import discover_nearby_emergency_resources
 
 router = APIRouter(prefix="/api/resources", tags=["Emergency Resources"])
+
+
+# ---------------- Live Location-Aware Emergency Resource Discovery ----------------
+@router.get("/nearby")
+async def get_nearby_emergency_resources(
+    request: Request,
+    lat: float = Query(..., ge=-90.0, le=90.0, description="User latitude"),
+    lng: float = Query(..., ge=-180.0, le=180.0, description="User longitude"),
+    radius_km: float = Query(5.0, ge=1.0, le=50.0, description="Search radius in kilometers (1 to 50)"),
+    category: str = Query("hospitals", description="hospitals, police, fire, shelters, ambulance, blood_bank"),
+    keyword: Optional[str] = Query(None, description="Optional search filter keyword")
+):
+    """
+    Search real emergency facilities (hospitals, trauma centers, police, fire stations, shelters)
+    near ANY GPS coordinates in India or worldwide using Google Places API (New) with authentic
+    open geospatial fallback. Never returns fake or static out-of-region data.
+    """
+    api_key_override = request.headers.get("X-Google-Maps-Key")
+    try:
+        data = discover_nearby_emergency_resources(
+            latitude=lat,
+            longitude=lng,
+            radius_km=radius_km,
+            category=category,
+            keyword=keyword,
+            api_key_override=api_key_override
+        )
+        return data
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Emergency resource discovery failed: {str(e)}")
 
 
 # ---------------- Roads & Blockages ----------------

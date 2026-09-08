@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { useEmergency } from '../../context/EmergencyContext';
+import { useTheme } from '../../context/ThemeContext';
 import { normalizeWeather, WEATHER_TYPES } from '../../utils/weatherNormalizer';
 
 /**
@@ -9,6 +10,8 @@ import { normalizeWeather, WEATHER_TYPES } from '../../utils/weatherNormalizer';
  */
 export const WeatherAtmosphericBackground = () => {
   const { selectedZone, zones } = useEmergency();
+  const { resolvedTheme } = useTheme();
+  const isLight = resolvedTheme === 'light';
 
   const activeZone = selectedZone || (zones && zones[0]) || null;
 
@@ -29,12 +32,12 @@ export const WeatherAtmosphericBackground = () => {
         weather.type === WEATHER_TYPES.CLEAR_COLD) && (
         <div className="absolute inset-0 animate-in fade-in duration-700">
           {/* Glacial Ice Frost & Arctic Sky Gradient */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0e2a44] via-[#08182b] to-[#030912]" />
+          <div className={`absolute inset-0 bg-gradient-to-b ${isLight ? 'from-[#e0f2fe] via-[#f0f9ff] to-[#f8fafc]' : 'from-[#0e2a44] via-[#08182b] to-[#030912]'}`} />
           
           {/* Aurora-like Cyan Frost Corona in Top Corners */}
-          <div className="absolute -top-20 left-10 w-[600px] h-[400px] bg-cyan-400/20 rounded-full blur-[100px]" />
-          <div className="absolute top-0 right-10 w-[700px] h-[450px] bg-sky-300/15 rounded-full blur-[120px]" />
-          <div className="absolute bottom-0 inset-x-0 h-64 bg-gradient-to-t from-cyan-950/40 via-sky-950/20 to-transparent blur-2xl" />
+          <div className={`absolute -top-20 left-10 w-[600px] h-[400px] ${isLight ? 'bg-sky-400/20' : 'bg-cyan-400/20'} rounded-full blur-[100px]`} />
+          <div className={`absolute top-0 right-10 w-[700px] h-[450px] ${isLight ? 'bg-cyan-300/25' : 'bg-sky-300/15'} rounded-full blur-[120px]`} />
+          <div className={`absolute bottom-0 inset-x-0 h-64 bg-gradient-to-t ${isLight ? 'from-sky-100/60 to-transparent' : 'from-cyan-950/40 via-sky-950/20 to-transparent'} blur-2xl`} />
 
           {/* 50+ Real Visible Animated Falling Snowflakes */}
           <div className="absolute inset-0 overflow-hidden">
@@ -46,7 +49,7 @@ export const WeatherAtmosphericBackground = () => {
               return (
                 <div
                   key={i}
-                  className="absolute rounded-full bg-white animate-snow-fall shadow-[0_0_8px_rgba(255,255,255,1)]"
+                  className={`absolute rounded-full ${isLight ? 'bg-sky-500/80 shadow-[0_0_6px_rgba(14,165,233,0.6)]' : 'bg-white shadow-[0_0_8px_rgba(255,255,255,1)]'} animate-snow-fall`}
                   style={{
                     width: `${size}px`,
                     height: `${size}px`,
@@ -62,7 +65,7 @@ export const WeatherAtmosphericBackground = () => {
           </div>
 
           {/* Arctic Cold Ice Horizon Glow */}
-          <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-cyan-300/20 via-sky-200/5 to-transparent blur-md" />
+          <div className={`absolute top-0 inset-x-0 h-32 bg-gradient-to-b ${isLight ? 'from-sky-300/30 to-transparent' : 'from-cyan-300/20 via-sky-200/5 to-transparent'} blur-md`} />
         </div>
       )}
 
@@ -75,13 +78,13 @@ export const WeatherAtmosphericBackground = () => {
         weather.type === WEATHER_TYPES.PARTLY_CLOUDY) && (
         <div className="absolute inset-0 animate-in fade-in duration-700">
           {/* Moody Slate Overcast Gradient */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[#182333] via-[#0f1724] to-[#070b12]" />
+          <div className={`absolute inset-0 bg-gradient-to-b ${isLight ? 'from-[#dbeafe] via-[#f1f5f9] to-[#f8fafc]' : 'from-[#182333] via-[#0f1724] to-[#070b12]'}`} />
           
           {/* Large Visible Drifting Cumulus Cloud Layers */}
-          <div className="absolute -top-10 -left-20 w-[800px] h-[350px] bg-slate-400/25 rounded-full blur-[90px] animate-cloud-drift" />
-          <div className="absolute top-16 right-0 w-[850px] h-[400px] bg-slate-300/20 rounded-full blur-[100px] animate-cloud-drift-reverse" />
-          <div className="absolute top-48 left-1/4 w-[650px] h-[300px] bg-slate-500/20 rounded-full blur-[80px] animate-cloud-drift" />
-          <div className="absolute bottom-0 inset-x-0 h-48 bg-gradient-to-t from-slate-900/50 to-transparent blur-xl" />
+          <div className={`absolute -top-10 -left-20 w-[800px] h-[350px] ${isLight ? 'bg-slate-300/40' : 'bg-slate-400/25'} rounded-full blur-[90px] animate-cloud-drift`} />
+          <div className={`absolute top-16 right-0 w-[850px] h-[400px] ${isLight ? 'bg-sky-200/40' : 'bg-slate-300/20'} rounded-full blur-[100px] animate-cloud-drift-reverse`} />
+          <div className={`absolute top-48 left-1/4 w-[650px] h-[300px] ${isLight ? 'bg-slate-200/50' : 'bg-slate-500/20'} rounded-full blur-[80px] animate-cloud-drift`} />
+          <div className={`absolute bottom-0 inset-x-0 h-48 bg-gradient-to-t ${isLight ? 'from-slate-200/40 to-transparent' : 'from-slate-900/50 to-transparent'} blur-xl`} />
         </div>
       )}
 
@@ -92,13 +95,13 @@ export const WeatherAtmosphericBackground = () => {
       {weather.type === WEATHER_TYPES.CLEAR_DAY && (
         <div className="absolute inset-0 animate-in fade-in duration-700">
           {/* Warm Amber Solar Daylight Gradient */}
-          <div className="absolute inset-0 bg-gradient-to-br from-[#301a04] via-[#1a0f02] to-[#080501]" />
-          <div className="absolute top-0 right-0 w-full h-[600px] bg-gradient-to-b from-orange-500/25 via-amber-500/10 to-transparent" />
+          <div className={`absolute inset-0 bg-gradient-to-br ${isLight ? 'from-[#fef3c7] via-[#fffbeb] to-[#f8fafc]' : 'from-[#301a04] via-[#1a0f02] to-[#080501]'}`} />
+          <div className={`absolute top-0 right-0 w-full h-[600px] bg-gradient-to-b ${isLight ? 'from-amber-300/30 via-amber-100/20 to-transparent' : 'from-orange-500/25 via-amber-500/10 to-transparent'}`} />
 
           {/* Glowing Solar Disc & Corona Rays at Top Right */}
           <div className="absolute -top-16 -right-16 w-96 h-96 flex items-center justify-center">
-            <div className="absolute w-full h-full rounded-full bg-gradient-to-br from-amber-400/40 via-orange-500/25 to-transparent blur-3xl animate-sun-pulse" />
-            <div className="absolute w-72 h-72 rounded-full bg-amber-400/30 blur-2xl" />
+            <div className={`absolute w-full h-full rounded-full bg-gradient-to-br ${isLight ? 'from-amber-300/50 via-yellow-200/40 to-transparent' : 'from-amber-400/40 via-orange-500/25 to-transparent'} blur-3xl animate-sun-pulse`} />
+            <div className={`absolute w-72 h-72 rounded-full ${isLight ? 'bg-amber-300/40' : 'bg-amber-400/30'} blur-2xl`} />
             <div className="w-44 h-44 rounded-full bg-gradient-to-tr from-amber-300 to-yellow-100 shadow-[0_0_120px_rgba(251,191,36,0.8)] opacity-90" />
           </div>
 
@@ -107,7 +110,7 @@ export const WeatherAtmosphericBackground = () => {
             {[...Array(24)].map((_, i) => (
               <div
                 key={i}
-                className="absolute w-2 h-2 rounded-full bg-amber-300 shadow-[0_0_10px_#fde047] animate-float-particle"
+                className="absolute w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_10px_#fde047] animate-float-particle"
                 style={{
                   left: `${(i * 4.3) % 100}%`,
                   top: `${10 + (i * 3.7) % 75}%`,
@@ -118,7 +121,7 @@ export const WeatherAtmosphericBackground = () => {
             ))}
           </div>
 
-          <div className="absolute top-12 left-12 w-[600px] h-32 bg-white/10 rounded-full blur-3xl animate-cloud-drift" />
+          <div className={`absolute top-12 left-12 w-[600px] h-32 ${isLight ? 'bg-white/40' : 'white/10'} rounded-full blur-3xl animate-cloud-drift`} />
         </div>
       )}
 
@@ -163,9 +166,9 @@ export const WeatherAtmosphericBackground = () => {
         weather.type === WEATHER_TYPES.DRIZZLE) && (
         <div className="absolute inset-0 animate-in fade-in duration-700">
           {/* Deep Ocean Storm Sky */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0c2742] via-[#071729] to-[#020710]" />
-          <div className="absolute -top-20 left-1/3 w-[850px] h-[550px] bg-sky-600/25 rounded-full blur-[140px]" />
-          <div className="absolute bottom-0 right-10 w-[700px] h-[450px] bg-cyan-700/20 rounded-full blur-[130px]" />
+          <div className={`absolute inset-0 bg-gradient-to-b ${isLight ? 'from-[#e0f2fe] via-[#e2e8f0] to-[#f8fafc]' : 'from-[#0c2742] via-[#071729] to-[#020710]'}`} />
+          <div className={`absolute -top-20 left-1/3 w-[850px] h-[550px] ${isLight ? 'bg-sky-400/20' : 'bg-sky-600/25'} rounded-full blur-[140px]`} />
+          <div className={`absolute bottom-0 right-10 w-[700px] h-[450px] ${isLight ? 'bg-cyan-400/15' : 'bg-cyan-700/20'} rounded-full blur-[130px]`} />
 
           {/* 64+ Visible Falling Rain Streaks */}
           <div className="absolute inset-0 overflow-hidden">
@@ -177,7 +180,7 @@ export const WeatherAtmosphericBackground = () => {
               return (
                 <div
                   key={i}
-                  className="absolute w-[2px] bg-gradient-to-b from-transparent via-sky-300 to-sky-100 rounded-full animate-rain-drop shadow-[0_0_5px_rgba(56,189,248,0.9)]"
+                  className={`absolute w-[2px] ${isLight ? 'bg-gradient-to-b from-transparent via-sky-500 to-sky-600 shadow-[0_0_4px_rgba(14,165,233,0.8)]' : 'bg-gradient-to-b from-transparent via-sky-300 to-sky-100 shadow-[0_0_5px_rgba(56,189,248,0.9)]'} rounded-full animate-rain-drop`}
                   style={{
                     height: `${height}px`,
                     left: `${leftPos}%`,
@@ -191,7 +194,7 @@ export const WeatherAtmosphericBackground = () => {
             })}
           </div>
 
-          <div className="absolute bottom-0 inset-x-0 h-36 bg-gradient-to-t from-sky-950/50 via-slate-900/25 to-transparent blur-md" />
+          <div className={`absolute bottom-0 inset-x-0 h-36 bg-gradient-to-t ${isLight ? 'from-sky-200/40 to-transparent' : 'from-sky-950/50 via-slate-900/25 to-transparent'} blur-md`} />
         </div>
       )}
 
@@ -201,11 +204,11 @@ export const WeatherAtmosphericBackground = () => {
           ═════════════════════════════════════════════════════════════ */}
       {weather.type === WEATHER_TYPES.THUNDERSTORM && (
         <div className="absolute inset-0 animate-in fade-in duration-700">
-          <div className="absolute inset-0 bg-gradient-to-b from-[#221045] via-[#12082b] to-[#04020c]" />
-          <div className="absolute -top-32 left-1/4 w-[900px] h-[600px] bg-indigo-600/35 rounded-full blur-[150px]" />
+          <div className={`absolute inset-0 bg-gradient-to-b ${isLight ? 'from-[#e0e7ff] via-[#e2e8f0] to-[#f8fafc]' : 'from-[#221045] via-[#12082b] to-[#04020c]'}`} />
+          <div className={`absolute -top-32 left-1/4 w-[900px] h-[600px] ${isLight ? 'bg-indigo-300/30' : 'bg-indigo-600/35'} rounded-full blur-[150px]`} />
           
           {/* Animated Lightning Flash */}
-          <div className="absolute inset-0 bg-indigo-200/40 animate-lightning" />
+          <div className={`absolute inset-0 ${isLight ? 'bg-indigo-300/30' : 'bg-indigo-200/40'} animate-lightning`} />
           
           {/* Heavy Storm Rain Streaks */}
           <div className="absolute inset-0 overflow-hidden">
@@ -217,7 +220,7 @@ export const WeatherAtmosphericBackground = () => {
               return (
                 <div
                   key={i}
-                  className="absolute w-[2.5px] bg-gradient-to-b from-transparent via-indigo-200 to-sky-100 rounded-full animate-rain-drop shadow-[0_0_6px_rgba(165,180,252,1)]"
+                  className={`absolute w-[2.5px] ${isLight ? 'bg-gradient-to-b from-transparent via-indigo-500 to-sky-600 shadow-[0_0_5px_rgba(99,102,241,0.8)]' : 'bg-gradient-to-b from-transparent via-indigo-200 to-sky-100 shadow-[0_0_6px_rgba(165,180,252,1)]'} rounded-full animate-rain-drop`}
                   style={{
                     height: `${height}px`,
                     left: `${leftPos}%`,
@@ -239,9 +242,9 @@ export const WeatherAtmosphericBackground = () => {
           ═════════════════════════════════════════════════════════════ */}
       {weather.type === WEATHER_TYPES.FOG && (
         <div className="absolute inset-0 animate-in fade-in duration-700">
-          <div className="absolute inset-0 bg-gradient-to-b from-[#1c242c] via-[#10161d] to-[#070a0d]" />
-          <div className="absolute top-10 inset-x-0 h-96 bg-slate-300/30 blur-[100px] animate-cloud-drift" />
-          <div className="absolute bottom-10 inset-x-0 h-80 bg-slate-400/25 blur-[90px] animate-cloud-drift-reverse" />
+          <div className={`absolute inset-0 bg-gradient-to-b ${isLight ? 'from-[#cbd5e1] via-[#e2e8f0] to-[#f8fafc]' : 'from-[#1c242c] via-[#10161d] to-[#070a0d]'}`} />
+          <div className={`absolute top-10 inset-x-0 h-96 ${isLight ? 'bg-slate-300/50' : 'bg-slate-300/30'} blur-[100px] animate-cloud-drift`} />
+          <div className={`absolute bottom-10 inset-x-0 h-80 ${isLight ? 'bg-slate-200/60' : 'bg-slate-400/25'} blur-[90px] animate-cloud-drift-reverse`} />
         </div>
       )}
 

@@ -5,7 +5,7 @@ for any geographic location on Earth.
 """
 
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from fastapi import APIRouter, Query, HTTPException
 from backend.app.services.data_source_orchestrator import orchestrate_location_intelligence
 from backend.app.services.global_routing_service import get_coordinates_from_query
@@ -14,7 +14,7 @@ router = APIRouter(prefix="/api/location-intelligence", tags=["Location Intellig
 
 
 class LocationSearchRequest(BaseModel):
-    query: str
+    query: str = Field(..., min_length=2, max_length=200)
 
 
 @router.get("")

@@ -44,24 +44,40 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
-// 100% Free Public Basemap Tiles (No API key, No watermarks)
+// 100% Free Public Basemap Tiles (Zero API key required, No watermarks)
 const BASEMAP_TILES = {
+  streets: {
+    label: 'Street Map',
+    name: 'ESRI World Street Map',
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+    attribution: '&copy; Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRC, METI, TomTom'
+  },
+  light: {
+    label: 'Light Canvas',
+    name: 'ESRI Light Gray Canvas',
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+    attribution: '&copy; Esri, DeLorme, NAVTEQ'
+  },
   dark: {
-    name: 'ESRI Dark Gray (No API Key Required)',
+    label: 'Dark Canvas',
+    name: 'ESRI Dark Gray (Dark Mode)',
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
     attribution: '&copy; Esri, DeLorme, NAVTEQ'
   },
   satellite: {
+    label: 'Satellite',
     name: 'ESRI Satellite Terrain',
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
     attribution: '&copy; Esri, Maxar, Earthstar Geographics'
   },
   terrain: {
+    label: 'Terrain',
     name: 'ESRI Topographic Relief',
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
-    attribution: '&copy; Esri, HERE, Garmin'
+    attribution: '&copy; Esri, HERE, Garmin, Intermap'
   },
   osm: {
+    label: 'OpenStreetMap',
     name: 'OpenStreetMap Standard',
     url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     attribution: '&copy; OpenStreetMap contributors'
@@ -220,11 +236,11 @@ export const LeafletRiskMap = ({
   const [activeZoom, setActiveZoom] = useState(mapZoom || (selectedZone ? 10 : 8.5));
 
   // Basemap & Layer Toggles (Adapts default tile provider to active Light / Dark theme)
-  const [activeBasemap, setActiveBasemap] = useState(resolvedTheme === 'light' ? 'voyager' : 'dark');
+  const [activeBasemap, setActiveBasemap] = useState(resolvedTheme === 'light' ? 'light' : 'dark');
 
   // Sync default basemap when user changes theme preference without moving camera
   useEffect(() => {
-    setActiveBasemap(resolvedTheme === 'light' ? 'voyager' : 'dark');
+    setActiveBasemap(resolvedTheme === 'light' ? 'light' : 'dark');
   }, [resolvedTheme]);
   const [layers, setLayers] = useState({
     zones: true,
@@ -521,7 +537,7 @@ export const LeafletRiskMap = ({
                       : 'bg-[#151515] border-[#262626] text-neutral-400 hover:text-neutral-200'
                   }`}
                 >
-                  {item.name.split(' ')[0]}
+                  {item.label || item.name}
                 </button>
               ))}
             </div>
@@ -622,13 +638,19 @@ export const LeafletRiskMap = ({
         />
 
         {/* Selected Basemap Tile Provider with noWrap to prevent horizontal world repetition */}
-        <TileLayer
-          attribution={BASEMAP_TILES[activeBasemap].attribution}
-          url={BASEMAP_TILES[activeBasemap].url}
-          maxZoom={19}
-          noWrap={true}
-          bounds={[[-85, -180], [85, 180]]}
-        />
+        {(() => {
+          const tile = BASEMAP_TILES[activeBasemap] || (resolvedTheme === 'light' ? BASEMAP_TILES.voyager : BASEMAP_TILES.dark) || BASEMAP_TILES.osm;
+          return (
+            <TileLayer
+              key={activeBasemap}
+              attribution={tile.attribution}
+              url={tile.url}
+              maxZoom={19}
+              noWrap={true}
+              bounds={[[-85, -180], [85, 180]]}
+            />
+          );
+        })()}
 
         {/* Single Active Location Pin (GPS or Manual Clicked Point) */}
         {activeLocationPin && (

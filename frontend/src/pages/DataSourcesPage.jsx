@@ -36,7 +36,7 @@ export const DataSourcesPage = () => {
         setSourcesData(res);
       } else {
         // Fallback fetch directly
-        const raw = await fetch('http://127.0.0.1:8000/api/data-sources');
+        const raw = await fetch('/api/data-sources');
         const json = await raw.json();
         setSourcesData(json);
       }
@@ -55,7 +55,7 @@ export const DataSourcesPage = () => {
     e?.preventDefault();
     setInspecting(true);
     try {
-      const raw = await fetch('http://127.0.0.1:8000/api/telemetry/inspect', {
+      const raw = await fetch('/api/telemetry/inspect', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ latitude: parseFloat(testLat), longitude: parseFloat(testLng) })

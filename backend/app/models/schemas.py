@@ -4,7 +4,7 @@ Pydantic Data Models & Schemas (SIH26001 - North Eastern Region)
 """
 
 from typing import List, Optional, Dict, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 from datetime import datetime
 
 
@@ -27,15 +27,25 @@ class UserRegisterRequest(BaseModel):
     username: str = Field(..., min_length=3, max_length=30)
     email: str = Field(..., min_length=5, max_length=150)
     phone: Optional[str] = Field(None, max_length=20)
-    password: str = Field(..., min_length=8)
-    confirm_password: str = Field(..., min_length=8)
+    password: str = Field(..., min_length=8, max_length=128)
+    confirm_password: str = Field(..., min_length=8, max_length=128)
     emergency_contact: Optional[Dict[str, str]] = None
     terms_accepted: bool = Field(..., description="Must accept Terms of Service & Privacy Policy")
 
 
 class UserLoginRequest(BaseModel):
-    identifier: str = Field(..., description="Email address OR Username")
-    password: str = Field(..., min_length=1)
+    identifier: Optional[str] = Field(None, description="Email address OR Username")
+    email: Optional[str] = None
+    username: Optional[str] = None
+    password: str = Field(..., min_length=1, max_length=128)
+
+    @model_validator(mode="after")
+    def populate_identifier(self):
+        if not self.identifier:
+            self.identifier = self.email or self.username
+        if not self.identifier:
+            raise ValueError("Identifier, email, or username is required.")
+        return self
 
 
 class UserProfileResponse(BaseModel):
@@ -64,6 +74,12 @@ class AuthTokenResponse(BaseModel):
 
 class ForgotPasswordRequest(BaseModel):
     email: str = Field(..., min_length=5, max_length=150)
+
+
+class PasswordResetConfirmRequest(BaseModel):
+    token: str = Field(..., min_length=10, max_length=100, description="Cryptographic single-use reset token")
+    new_password: str = Field(..., min_length=8, max_length=128)
+    confirm_password: str = Field(..., min_length=8, max_length=128)
 
 
 # ---------------- Risk Prediction Schemas ----------------
@@ -137,40 +153,58 @@ class RiskZoneSummary(BaseModel):
     alert_status: Optional[str] = None
     recommended_action: str
     forecast_trend: Optional[List[ForecastPoint]] = None
+    temperature_c: Optional[float] = None
+    humidity_pct: Optional[float] = None
+    weather_code: Optional[int] = None
+    condition: Optional[str] = None
+    is_day: Optional[int] = 1
+    cloud_cover_pct: Optional[int] = 0
+    snowfall_cm: Optional[float] = 0.0
+    rainfall_1h: Optional[float] = 0.0
 
 
-# ---------------- Safe Route Schemas ----------------
+# ---------------- Routing Schemas ----------------
 class RouteRequest(BaseModel):
-    start_node: str = Field(..., description="ID of start waypoint, e.g. GHY_HUB")
-    destination_node: str = Field(..., description="ID of destination waypoint, e.g. SHL_CENTER")
-    avoid_blocked_roads: bool = True
+    start_zone_id: str
+    end_zone_id: str
+    risk_weight: float = Field(1.0, ge=0.0, le=5.0)
 
 
-class RouteSegment(BaseModel):
-    from_node: str
-    to_node: str
-    from_name: str
-    to_name: str
-    road_id: Optional[str] = None
-    road_name: str
+class GlobalRouteRequest(BaseModel):
+    origin: Dict[str, float] = Field(..., description="Origin {lat: float, lng: float}")
+    destination: Dict[str, float] = Field(..., description="Destination {lat: float, lng: float}")
+    origin_name: Optional[str] = Field(None, max_length=200)
+    dest_name: Optional[str] = Field(None, max_length=200)
+    risk_weight: float = Field(1.0, ge=0.0, le=5.0)
+    vehicle_type: Optional[str] = Field("car", max_length=50)
+
+
+class GeocodeRequest(BaseModel):
+    query: str = Field(..., min_length=2, max_length=200)
+    limit: int = Field(5, ge=1, le=10)
+
+
+class RouteStep(BaseModel):
+    instruction: str
     distance_km: float
-    travel_time_min: float
-    risk_score: float
-    road_status: str = "OPEN"
+    time_min: int
+    hazard_level: str
     zone_id: Optional[str] = None
+    road_segment: Optional[str] = None
+    is_blocked: bool = False
+    blockage_reason: Optional[str] = None
 
 
 class RoutePathDetails(BaseModel):
-    nodes: List[str]
-    distance_km: float
-    travel_time_min: int
-    average_risk: float
-    max_risk: float
-    safety_level: str
-    zones_crossed: List[str]
-    blocked_roads_avoided: List[str] = []
-    coordinates: List[Dict[str, Any]]
-    segments: List[RouteSegment]
+    total_distance_km: float
+    total_time_min: int
+    risk_exposure_score: float
+    average_hazard_level: str
+    path_nodes: List[str]
+    path_coordinates: List[List[float]]
+    steps: List[RouteStep]
+    zones_traversed: List[str]
+    blocked_roads_encountered: List[str] = []
 
 
 class RouteComparison(BaseModel):
@@ -198,17 +232,17 @@ class CommunityReportCreate(BaseModel):
     zone_id: Optional[str] = None
     latitude: float
     longitude: float
-    report_type: str = Field(..., description="Cracks, Water seepage, Slope movement, Falling rocks, Other")
+    report_type: str = Field(..., max_length=50, description="Cracks, Water seepage, Slope movement, Falling rocks, Other")
     signs_observed: List[str] = []
     has_activity: bool = True
-    description: str
-    photo_url: Optional[str] = None
-    location_name: Optional[str] = None
+    description: str = Field(..., min_length=5, max_length=2000)
+    photo_url: Optional[str] = Field(None, max_length=500)
+    location_name: Optional[str] = Field(None, max_length=200)
 
 
 class CommunityReportVerification(BaseModel):
     status: str = Field(..., description="VERIFIED or REJECTED")
-    reviewer_notes: Optional[str] = None
+    reviewer_notes: Optional[str] = Field(None, max_length=1000)
 
 
 class CommunityReportResponse(BaseModel):
@@ -261,9 +295,9 @@ class CommunityPollResponse(BaseModel):
 
 # ---------------- Incident Management Schemas (GDACS Style) ----------------
 class IncidentCreate(BaseModel):
-    title: str
-    district: str
-    state: str = "Meghalaya"
+    title: str = Field(..., min_length=3, max_length=200)
+    district: str = Field(..., min_length=2, max_length=100)
+    state: str = Field("Meghalaya", max_length=100)
     latitude: float
     longitude: float
     severity: str = Field(..., description="CRITICAL, HIGH, MODERATE, LOW")
@@ -273,7 +307,7 @@ class IncidentCreate(BaseModel):
     injured_people: int = 0
     missing_people: int = 0
     evacuated_people: int = 0
-    description: str
+    description: str = Field(..., min_length=5, max_length=3000)
     source: str = "FIELD_REPORT"
 
 
@@ -284,7 +318,7 @@ class IncidentUpdate(BaseModel):
     injured_people: Optional[int] = None
     missing_people: Optional[int] = None
     evacuated_people: Optional[int] = None
-    notes: Optional[str] = None
+    notes: Optional[str] = Field(None, max_length=2000)
 
 
 class IncidentResponse(BaseModel):
@@ -297,32 +331,85 @@ class IncidentResponse(BaseModel):
     timestamp: str
     severity: str
     status: str
-    affected_zone_id: Optional[str]
-    zone_name: Optional[str]
-    estimated_population: int
-    blocked_roads: List[str]
-    injured_people: int
-    missing_people: int
-    evacuated_people: int
+    affected_zone_id: Optional[str] = None
+    zone_name: Optional[str] = None
+    estimated_population: int = 0
+    blocked_roads: List[str] = []
+    injured_people: int = 0
+    missing_people: int = 0
+    evacuated_people: int = 0
     source: str
     assigned_team_id: Optional[str] = None
     assigned_team_name: Optional[str] = None
     description: str
     updated_at: str
+    # Verified India-Wide Landslide Intelligence Extensions
+    verification_status: Optional[str] = "VERIFIED"
+    category: Optional[str] = "CONFIRMED_INCIDENT"
+    source_url: Optional[str] = None
+    source_type: Optional[str] = "OFFICIAL"
+    source_priority_level: Optional[int] = 1
+    casualties_info: Optional[str] = "Casualties: Not reported"
+    reported_causes: Optional[List[str]] = []
+    contributing_factors: Optional[List[str]] = []
+    why_at_risk: Optional[str] = None
+    freshness_label: Optional[str] = None
+    is_simulation: Optional[bool] = False
+    all_sources: Optional[List[Dict[str, Any]]] = []
+
+
+class LandslideRiskForecast(BaseModel):
+    forecast_id: str
+    title: str
+    location_name: str
+    district: str
+    state: str
+    latitude: float
+    longitude: float
+    risk_level: str  # LOW, MODERATE, HIGH, CRITICAL
+    scientific_reason: str
+    forecast_window_hours: int = 24
+    rainfall_trigger_mm: float = 0.0
+    slope_gradient_deg: float = 0.0
+    gsi_susceptibility: str = "HIGH"
+    official_warning_level: str = "ORANGE_ALERT"
+    primary_source: str
+    source_url: Optional[str] = None
+    source_type: str = "OFFICIAL_MET_GEOLOGICAL"
+    verification_status: str = "OFFICIAL"
+    category: str = "FORECAST_RISK"
+    reported_causes: List[str] = []
+    contributing_factors: List[str] = []
+    why_at_risk: str
+    timestamp: str
+    freshness_label: str
+    radius_km: float = 15.0
+
+
+class IndiaWideIntelligenceResponse(BaseModel):
+    confirmed_incidents: List[IncidentResponse]
+    forecast_risks: List[LandslideRiskForecast]
+    historical_incidents: List[Dict[str, Any]]
+    demo_simulations: List[IncidentResponse]
+    monitored_authorities: List[Dict[str, Any]]
+    last_synced: str
+    sync_status: str
+    coverage_summary: Dict[str, Any]
+
 
 
 # ---------------- Emergency SOS Schemas ----------------
 class SOSCreate(BaseModel):
-    user_name: Optional[str] = "Citizen"
-    emergency_contact: Optional[str] = None
+    user_name: Optional[str] = Field("Citizen", max_length=100)
+    emergency_contact: Optional[str] = Field(None, max_length=50)
     latitude: float
     longitude: float
-    location_name: Optional[str] = None
+    location_name: Optional[str] = Field(None, max_length=200)
     people_count: int = Field(1, ge=1, le=100)
     injury_severity: str = Field(..., description="NONE, MINOR, MODERATE, SEVERE, CRITICAL")
     is_trapped: bool = False
-    message: Optional[str] = None
-    photo_url: Optional[str] = None
+    message: Optional[str] = Field(None, max_length=1000)
+    photo_url: Optional[str] = Field(None, max_length=500)
 
 
 class SOSTriageUpdate(BaseModel):
@@ -331,7 +418,7 @@ class SOSTriageUpdate(BaseModel):
     assigned_team_id: Optional[str] = None
     destination_hospital_id: Optional[str] = None
     destination_shelter_id: Optional[str] = None
-    triage_notes: Optional[str] = None
+    triage_notes: Optional[str] = Field(None, max_length=1000)
 
 
 class SOSResponse(BaseModel):
@@ -418,13 +505,16 @@ class HospitalResponse(BaseModel):
     state: str
     latitude: float
     longitude: float
-    total_beds: int
-    available_beds: int
-    icu_available: int
-    trauma_center: bool
-    blood_bank: bool
-    contact_phone: str
-    emergency_ambulance_count: int
+    total_beds: Optional[int] = None
+    available_beds: Optional[int] = None
+    icu_available: Optional[int] = None
+    capacity_status: Optional[str] = "LIVE CAPACITY UNAVAILABLE"
+    trauma_center: bool = True
+    blood_bank: bool = True
+    contact_phone: str = "108"
+    emergency_ambulance_count: Optional[int] = None
+    source: Optional[str] = "OpenStreetMap Geographic Directory"
+    data_category: Optional[str] = "DIRECTORY RECORD"
 
 
 class ShelterResponse(BaseModel):
@@ -435,14 +525,17 @@ class ShelterResponse(BaseModel):
     state: str
     latitude: float
     longitude: float
-    capacity: int
-    current_occupancy: int
-    facilities: List[str]
-    food_supply_days: int
-    medical_station: bool
-    contact_person: str
-    contact_phone: str
-    accessibility: str
+    capacity: Optional[int] = None
+    current_occupancy: Optional[int] = None
+    capacity_status: Optional[str] = "OCCUPANCY TELEMETRY UNAVAILABLE"
+    facilities: List[str] = ["High-Ground Assembly", "Potable Water Supply"]
+    food_supply_days: Optional[int] = None
+    medical_station: bool = True
+    contact_person: str = "Designated Relief Warden / SDMA Liaison"
+    contact_phone: str = "1070"
+    accessibility: str = "Paved Road Access"
+    source: Optional[str] = "OpenStreetMap Geographic Directory"
+    data_category: Optional[str] = "DIRECTORY RECORD"
 
 
 # ---------------- Post-Disaster Analysis Schemas ----------------
@@ -480,6 +573,10 @@ class AlertItem(BaseModel):
     timestamp: str
     status: str = "ACTIVE"
     affected_highway: Optional[str] = None
+    source: Optional[str] = "State Disaster Management Authority (SDMA) / NDMA SACHET"
+    data_category: Optional[str] = "OFFICIAL WARNING"
+    issued_at: Optional[str] = None
+    expires_at: Optional[str] = None
 
 
 class AlertSubscriptionRequest(BaseModel):

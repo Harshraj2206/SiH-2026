@@ -148,6 +148,8 @@ export const AuthProvider = ({ children }) => {
       // Ignore network errors on logout
     }
     localStorage.removeItem('landslideguard_token');
+    localStorage.removeItem('landsafe_token');
+    localStorage.removeItem('landslide_auth_token');
     setToken(null);
     setCurrentUser(null);
     setAuthError(null);

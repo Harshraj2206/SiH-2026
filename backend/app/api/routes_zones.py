@@ -14,6 +14,58 @@ from backend.app.ml.predictor import predict_landslide_risk, categorize_risk_lev
 router = APIRouter(prefix="/api/risk-zones", tags=["Risk Zones"])
 
 
+import concurrent.futures
+
+def _enrich_single_zone(z: dict) -> dict:
+    center = z.get("center", {})
+    if center.get("lat") and center.get("lng"):
+        try:
+            weather = fetch_live_meteorology(center["lat"], center["lng"])
+            if weather.get("rainfall_24h_mm") is not None:
+                z["rainfall_24h"] = weather["rainfall_24h_mm"]
+                z["rainfall_72h"] = weather["rainfall_72h_mm"]
+            if weather.get("soil_moisture_m3m3") is not None:
+                z["soil_moisture"] = weather["soil_moisture_m3m3"]
+            if weather.get("temperature_c") is not None:
+                z["temperature_c"] = weather["temperature_c"]
+            if weather.get("humidity_pct") is not None:
+                z["humidity_pct"] = weather["humidity_pct"]
+            if weather.get("weather_code") is not None:
+                z["weather_code"] = weather["weather_code"]
+            if weather.get("condition") is not None:
+                z["condition"] = weather["condition"]
+            if weather.get("is_day") is not None:
+                z["is_day"] = weather["is_day"]
+            if weather.get("cloud_cover_pct") is not None:
+                z["cloud_cover_pct"] = weather["cloud_cover_pct"]
+            if weather.get("snowfall_cm") is not None:
+                z["snowfall_cm"] = weather["snowfall_cm"]
+            if weather.get("rainfall_1h_mm") is not None:
+                z["rainfall_1h"] = weather["rainfall_1h_mm"]
+
+            # Predict risk using fresh real observations
+            pred = predict_landslide_risk({
+                "rainfall_24h": z["rainfall_24h"],
+                "rainfall_72h": z["rainfall_72h"],
+                "slope_deg": z["slope_deg"],
+                "soil_moisture": z["soil_moisture"],
+                "ndvi": z.get("ndvi", 0.5),
+                "historical_incidents": z.get("historical_incidents", 0)
+            })
+
+            z["ml_base_score"] = pred["risk_score"]
+            boost = z.get("community_boost", 0.0)
+            final_score = round(min(100.0, z["ml_base_score"] + boost), 1)
+            z["risk_score"] = final_score
+            z["risk_level"] = categorize_risk_level(final_score)
+            z["recommended_action"] = pred.get("xai", {}).get("recommended_action") or get_recommended_action(z["risk_level"], "live meteorological telemetry")
+            z["xai"] = pred.get("xai", {})
+            z["last_updated"] = datetime.now(timezone.utc).isoformat()
+        except Exception:
+            pass
+    return z
+
+
 @router.get("", response_model=List[RiskZoneSummary])
 async def list_risk_zones(
     level: Optional[str] = Query(None, description="Filter by level: LOW, MODERATE, HIGH, CRITICAL"),
@@ -21,38 +73,9 @@ async def list_risk_zones(
 ):
     zones = db_store.get_all_zones()
 
-    # Ingest real-time meteorology for each zone
-    for z in zones:
-        center = z.get("center", {})
-        if center.get("lat") and center.get("lng"):
-            try:
-                weather = fetch_live_meteorology(center["lat"], center["lng"])
-                if weather.get("rainfall_24h_mm") is not None:
-                    z["rainfall_24h"] = weather["rainfall_24h_mm"]
-                    z["rainfall_72h"] = weather["rainfall_72h_mm"]
-                if weather.get("soil_moisture_m3m3") is not None:
-                    z["soil_moisture"] = weather["soil_moisture_m3m3"]
-
-                # Predict risk using fresh real observations
-                pred = predict_landslide_risk({
-                    "rainfall_24h": z["rainfall_24h"],
-                    "rainfall_72h": z["rainfall_72h"],
-                    "slope_deg": z["slope_deg"],
-                    "soil_moisture": z["soil_moisture"],
-                    "ndvi": z.get("ndvi", 0.5),
-                    "historical_incidents": z.get("historical_incidents", 0)
-                })
-
-                z["ml_base_score"] = pred["risk_score"]
-                boost = z.get("community_boost", 0.0)
-                final_score = round(min(100.0, z["ml_base_score"] + boost), 1)
-                z["risk_score"] = final_score
-                z["risk_level"] = categorize_risk_level(final_score)
-                z["recommended_action"] = pred.get("xai", {}).get("recommended_action") or get_recommended_action(z["risk_level"], "live meteorological telemetry")
-                z["xai"] = pred.get("xai", {})
-                z["last_updated"] = datetime.now(timezone.utc).isoformat()
-            except Exception:
-                pass
+    # Ingest real-time meteorology concurrently for monitored zones
+    with concurrent.futures.ThreadPoolExecutor(max_workers=6) as executor:
+        zones = list(executor.map(_enrich_single_zone, zones))
 
     if level:
         zones = [z for z in zones if z["risk_level"] == level.upper()]
@@ -73,27 +96,46 @@ async def get_risk_zone_detail(zone_id: str):
     # Refresh with live weather
     center = zone.get("center", {})
     if center.get("lat") and center.get("lng"):
-        weather = fetch_live_meteorology(center["lat"], center["lng"])
-        if weather.get("rainfall_24h_mm") is not None:
-            zone["rainfall_24h"] = weather["rainfall_24h_mm"]
-            zone["rainfall_72h"] = weather["rainfall_72h_mm"]
-        if weather.get("soil_moisture_m3m3") is not None:
-            zone["soil_moisture"] = weather["soil_moisture_m3m3"]
+        try:
+            weather = fetch_live_meteorology(center["lat"], center["lng"])
+            if weather.get("rainfall_24h_mm") is not None:
+                zone["rainfall_24h"] = weather["rainfall_24h_mm"]
+                zone["rainfall_72h"] = weather["rainfall_72h_mm"]
+            if weather.get("soil_moisture_m3m3") is not None:
+                zone["soil_moisture"] = weather["soil_moisture_m3m3"]
+            if weather.get("temperature_c") is not None:
+                zone["temperature_c"] = weather["temperature_c"]
+            if weather.get("humidity_pct") is not None:
+                zone["humidity_pct"] = weather["humidity_pct"]
+            if weather.get("weather_code") is not None:
+                zone["weather_code"] = weather["weather_code"]
+            if weather.get("condition") is not None:
+                zone["condition"] = weather["condition"]
+            if weather.get("is_day") is not None:
+                zone["is_day"] = weather["is_day"]
+            if weather.get("cloud_cover_pct") is not None:
+                zone["cloud_cover_pct"] = weather["cloud_cover_pct"]
+            if weather.get("snowfall_cm") is not None:
+                zone["snowfall_cm"] = weather["snowfall_cm"]
+            if weather.get("rainfall_1h_mm") is not None:
+                zone["rainfall_1h"] = weather["rainfall_1h_mm"]
 
-        pred = predict_landslide_risk({
-            "rainfall_24h": zone["rainfall_24h"],
-            "rainfall_72h": zone["rainfall_72h"],
-            "slope_deg": zone["slope_deg"],
-            "soil_moisture": zone["soil_moisture"],
-            "ndvi": zone.get("ndvi", 0.5),
-            "historical_incidents": zone.get("historical_incidents", 0)
-        })
+            pred = predict_landslide_risk({
+                "rainfall_24h": zone["rainfall_24h"],
+                "rainfall_72h": zone["rainfall_72h"],
+                "slope_deg": zone["slope_deg"],
+                "soil_moisture": zone["soil_moisture"],
+                "ndvi": zone.get("ndvi", 0.5),
+                "historical_incidents": zone.get("historical_incidents", 0)
+            })
 
-        zone["ml_base_score"] = pred["risk_score"]
-        final_score = round(min(100.0, zone["ml_base_score"] + zone.get("community_boost", 0.0)), 1)
-        zone["risk_score"] = final_score
-        zone["risk_level"] = categorize_risk_level(final_score)
-        zone["xai"] = pred.get("xai", {})
+            zone["ml_base_score"] = pred["risk_score"]
+            final_score = round(min(100.0, zone["ml_base_score"] + zone.get("community_boost", 0.0)), 1)
+            zone["risk_score"] = final_score
+            zone["risk_level"] = categorize_risk_level(final_score)
+            zone["xai"] = pred.get("xai", {})
+        except Exception:
+            pass
 
     all_reports = db_store.get_all_reports()
     zone_reports = [r for r in all_reports if r.get("zone_id") == zone_id]

@@ -15,17 +15,26 @@ import { RegisterPage } from './pages/RegisterPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { TermsPage } from './pages/TermsPage';
 import { PrivacyPage } from './pages/PrivacyPage';
+import { AboutPage } from './pages/AboutPage';
 
 import { OverviewPage } from './pages/OverviewPage';
 import { CommunityPollPage } from './pages/CommunityPollPage';
+import { CommunityReportsPage } from './pages/CommunityReportsPage';
 import { GisMapPage } from './pages/GisMapPage';
 import { MlModelPage } from './pages/MlModelPage';
 import { AlertsPage } from './pages/AlertsPage';
 import { ResourcesPage } from './pages/ResourcesPage';
+import { HospitalsSheltersPage } from './pages/HospitalsSheltersPage';
+import { RescueOperationsPage } from './pages/RescueOperationsPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { SafeRoutePage } from './pages/SafeRoutePage';
 import { SosEmergencyPage } from './pages/SosEmergencyPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { AnalyticsPage } from './pages/AnalyticsPage';
+import { IncidentsExplorerPage } from './pages/IncidentsExplorerPage';
+import { DataSourcesPage } from './pages/DataSourcesPage';
+import { PostDisasterAnalysisPage } from './pages/PostDisasterAnalysisPage';
+import { SimulatorPage } from './pages/SimulatorPage';
 
 export function App() {
   return (
@@ -46,6 +55,7 @@ export function App() {
                   <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                   <Route path="/terms" element={<TermsPage />} />
                   <Route path="/privacy" element={<PrivacyPage />} />
+                  <Route path="/about" element={<AboutPage />} />
 
                   {/* Clean Dashboard Routes */}
                   <Route element={<DashboardLayout />}>
@@ -53,31 +63,54 @@ export function App() {
                     <Route path="/overview" element={<OverviewPage />} />
                     <Route path="/app" element={<Navigate to="/overview" replace />} />
 
-                    {/* 2. Community Poll */}
+                    {/* 2. Community Poll & Field Reports */}
                     <Route path="/community" element={<CommunityPollPage />} />
-                    <Route path="/community-reports" element={<CommunityPollPage />} />
+                    <Route path="/community-poll" element={<CommunityPollPage />} />
+                    <Route path="/community-reports" element={<CommunityReportsPage />} />
+                    <Route path="/reports" element={<CommunityReportsPage />} />
 
-                    {/* 3. GIS Map */}
+                    {/* 3. GIS Hazard Map */}
                     <Route path="/risk-map" element={<GisMapPage />} />
+                    <Route path="/gis-map" element={<GisMapPage />} />
 
-                    {/* 4. ML Model (Predictions & Contributing Factors) */}
+                    {/* 4. ML Model Predictions */}
                     <Route path="/ml-model" element={<MlModelPage />} />
 
-                    {/* 4. Alerts */}
+                    {/* 5. Safe Routing */}
+                    <Route path="/safe-route" element={<SafeRoutePage />} />
+
+                    {/* 6. Alerts & Advisories */}
                     <Route path="/alerts" element={<AlertsPage />} />
 
-                    {/* 5. Resources */}
-                    <Route path="/resources" element={<ResourcesPage />} />
-                    <Route path="/hospitals-shelters" element={<ResourcesPage />} />
-                    <Route path="/rescue" element={<ResourcesPage />} />
+                    {/* 7. Incidents Explorer */}
+                    <Route path="/incidents" element={<IncidentsExplorerPage />} />
+                    <Route path="/explore-incidents" element={<IncidentsExplorerPage />} />
 
-                    {/* 6. Settings */}
-                    <Route path="/settings" element={<SettingsPage />} />
-
-                    {/* Internal Operational Screens */}
-                    <Route path="/safe-route" element={<SafeRoutePage />} />
+                    {/* 8. Emergency SOS */}
                     <Route path="/sos" element={<SosEmergencyPage />} />
+
+                    {/* 9. Rescue Operations */}
+                    <Route path="/rescue" element={<RescueOperationsPage />} />
+
+                    {/* 10. Emergency Resources, Hospitals & Shelters */}
+                    <Route path="/resources" element={<ResourcesPage />} />
+                    <Route path="/hospitals-shelters" element={<HospitalsSheltersPage />} />
+
+                    {/* 11. Regional Analytics & Telemetry */}
+                    <Route path="/analytics" element={<AnalyticsPage />} />
+
+                    {/* 12. Post-Disaster Analysis */}
+                    <Route path="/post-disaster" element={<PostDisasterAnalysisPage />} />
+
+                    {/* 13. Data Sources & Provenance */}
+                    <Route path="/data-sources" element={<DataSourcesPage />} />
+
+                    {/* 14. Demo Simulator */}
+                    <Route path="/simulator" element={<SimulatorPage />} />
+
+                    {/* 15. User Profile & Settings */}
                     <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/settings" element={<SettingsPage />} />
                   </Route>
 
                   {/* Fallback */}

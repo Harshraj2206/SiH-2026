@@ -31,6 +31,7 @@ def fetch_live_meteorology(latitude: float, longitude: float) -> Dict[str, Any]:
         "temperature_c": data.get("temperature_c"),
         "humidity_pct": data.get("relative_humidity_pct"),
         "rainfall_1h_mm": data.get("precipitation_1h_mm", 0.0),
+        "rain_current_mm": data.get("rain_current_mm", 0.0),
         "rainfall_24h_mm": data.get("precipitation_24h_mm", 0.0),
         "rainfall_72h_mm": data.get("precipitation_72h_mm", 0.0),
         "soil_moisture_m3m3": data.get("soil_moisture_m3m3", 0.35),

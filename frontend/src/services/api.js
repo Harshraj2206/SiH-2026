@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -169,6 +169,18 @@ export const incidentsApi = {
     const res = await apiClient.get('/incidents', { params });
     return res.data;
   },
+  getIntelligence: async (forceRefresh = false) => {
+    const res = await apiClient.get('/incidents/intelligence', { params: { force_refresh: forceRefresh } });
+    return res.data;
+  },
+  getProximity: async (lat, lon) => {
+    const res = await apiClient.get('/incidents/proximity', { params: { lat, lon } });
+    return res.data;
+  },
+  refreshIntelligence: async () => {
+    const res = await apiClient.post('/incidents/refresh');
+    return res.data;
+  },
   getIncidentDetail: async (incidentId) => {
     const res = await apiClient.get(`/incidents/${incidentId}`);
     return res.data;
@@ -230,6 +242,18 @@ export const resourcesApi = {
   },
   getShelters: async () => {
     const res = await apiClient.get('/resources/shelters');
+    return res.data;
+  },
+  getNearbyResources: async (lat, lng, radiusKm = 5, category = 'hospitals', keyword = '') => {
+    const res = await apiClient.get('/resources/nearby', {
+      params: {
+        lat,
+        lng,
+        radius_km: radiusKm,
+        category,
+        keyword: keyword || undefined
+      }
+    });
     return res.data;
   }
 };
@@ -308,6 +332,7 @@ export const api = {
   updateRoadStatus: resourcesApi.updateRoadStatus,
   getHospitals: resourcesApi.getHospitals,
   getShelters: resourcesApi.getShelters,
+  getNearbyResources: resourcesApi.getNearbyResources,
 
   getPostDisasterEvents: postDisasterApi.getEvents,
 

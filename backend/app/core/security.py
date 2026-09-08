@@ -5,6 +5,8 @@ Implements JWT tokens, bcrypt password hashing, policy validation, and Role-Base
 
 import os
 import re
+import time
+import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Optional, List, Tuple, Dict, Any
 import jwt
@@ -13,9 +15,10 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from backend.app.database.user_store import user_db, hash_pw, check_pw
 
-SECRET_KEY = os.environ.get("JWT_SECRET", "landslideguard_sih2026_super_secret_key_disaster_mgmt_production")
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days persistent session
+from backend.app.core.config import JWT_SECRET, JWT_ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
+
+SECRET_KEY = JWT_SECRET
+ALGORITHM = JWT_ALGORITHM
 
 security_bearer = HTTPBearer(auto_error=False)
 
@@ -25,7 +28,7 @@ security_bearer = HTTPBearer(auto_error=False)
 def validate_password_policy(password: str) -> Tuple[bool, Optional[str]]:
     """
     Validates that password meets enterprise security standards:
-    - Minimum 8 characters
+    - Minimum 8 characters, Maximum 128 characters
     - At least 1 uppercase letter
     - At least 1 lowercase letter
     - At least 1 numeric digit
@@ -33,6 +36,8 @@ def validate_password_policy(password: str) -> Tuple[bool, Optional[str]]:
     """
     if not password or len(password) < 8:
         return False, "Password must be at least 8 characters long."
+    if len(password) > 128:
+        return False, "Password cannot exceed 128 characters."
     if not re.search(r"[A-Z]", password):
         return False, "Password must contain at least one uppercase letter (A-Z)."
     if not re.search(r"[a-z]", password):
@@ -49,7 +54,7 @@ def validate_username_policy(username: str) -> Tuple[bool, Optional[str]]:
     Validates username rules:
     - 3 to 30 characters
     - Letters, numbers, underscores, dots, hyphens
-    - No unsafe script/SQL injection characters
+    - Linear non-backtracking bounded character class
     """
     if not username or len(username) < 3:
         return False, "Username must be at least 3 characters long."
@@ -61,8 +66,11 @@ def validate_username_policy(username: str) -> Tuple[bool, Optional[str]]:
 
 
 def validate_email_format(email: str) -> bool:
-    """Validate RFC standard email format."""
-    return bool(re.match(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", email))
+    """Validate RFC standard email format with strict length bounds (immune to ReDoS)."""
+    if not email or len(email) > 254 or "@" not in email:
+        return False
+    # Strictly linear non-backtracking RFC pattern with bounded TLD length
+    return bool(re.match(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,63}$", email))
 
 
 # ---------------- Password Hashing & Verification ----------------
@@ -73,7 +81,7 @@ def hash_password(password: str) -> str:
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verify password against bcrypt hash."""
+    """Verify plaintext password strictly against bcrypt hash."""
     return check_pw(plain_password, hashed_password)
 
 
@@ -93,7 +101,48 @@ def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta]
     return encoded_jwt
 
 
+import threading
+
+# Thread-safe in-memory token revocation blacklist
+_BLACKLIST_LOCK = threading.Lock()
+_TOKEN_BLACKLIST: Dict[str, float] = {}  # token_hash -> expiration_timestamp
+
+
+def blacklist_token(token: str) -> None:
+    """Revoke a token immediately on logout."""
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM], options={"verify_exp": False})
+        exp = payload.get("exp", time.time() + 3600)
+    except Exception:
+        exp = time.time() + 3600
+    
+    with _BLACKLIST_LOCK:
+        _TOKEN_BLACKLIST[token] = exp
+        # Prune expired tokens from blacklist memory
+        now = time.time()
+        expired_keys = [k for k, v in _TOKEN_BLACKLIST.items() if v < now]
+        for k in expired_keys:
+            del _TOKEN_BLACKLIST[k]
+
+
+def is_token_blacklisted(token: str) -> bool:
+    """Check if token was explicitly revoked via logout."""
+    with _BLACKLIST_LOCK:
+        if token in _TOKEN_BLACKLIST:
+            if _TOKEN_BLACKLIST[token] > time.time():
+                return True
+            else:
+                del _TOKEN_BLACKLIST[token]
+    return False
+
+
 def decode_token(token: str) -> Dict[str, Any]:
+    if is_token_blacklisted(token):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Session token has been revoked / logged out.",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         return payload
@@ -122,7 +171,7 @@ async def get_current_user_optional(credentials: Optional[HTTPAuthorizationCrede
         user_id = payload.get("sub") or payload.get("id")
         if not user_id:
             return None
-        user = user_db.get_by_id(user_id)
+        user = user_db.get_by_id(user_id) or user_db.get_by_identifier(user_id)
         if user:
             # Strip password hash
             user.pop("password_hash", None)
@@ -148,7 +197,7 @@ async def get_current_user(credentials: Optional[HTTPAuthorizationCredentials] =
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    user = user_db.get_by_id(user_id)
+    user = user_db.get_by_id(user_id) or user_db.get_by_identifier(user_id)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

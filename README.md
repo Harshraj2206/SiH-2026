@@ -152,3 +152,74 @@ This guarantees that when a highway segment crosses a High ($\ge 60$) or Critica
 
 ---
 
+## 🚀 Quickstart & Setup Instructions
+
+### Prerequisites
+* Python 3.10+
+* Node.js 18+ and npm
+
+### 1. Launch FastAPI Backend
+```bash
+# Navigate to backend directory
+cd backend
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Start FastAPI application
+python run_server.py
+```
+* **API Service:** `http://localhost:8000`  
+* **Interactive Swagger UI:** `http://localhost:8000/docs`
+
+### 2. Launch React Frontend
+```bash
+# In a new terminal, navigate to frontend directory
+cd frontend
+
+# Install npm packages
+npm install
+
+# Start Vite development server
+npm run dev
+```
+* **Web Application:** `http://localhost:5173`
+
+---
+
+## 🎬 Step-by-Step Demonstration Flow (SIH 2026)
+
+1. **Landing Page (`/`):**
+   - Present problem statement **SIH26001** and region focus (North Eastern Himalayan Region).
+   - Review the closed-loop **PREDICT $\rightarrow$ ROUTE $\rightarrow$ VERIFY** architecture.
+2. **Overview Command Center (`/overview`):**
+   - Inspect summary KPIs: *Regional Risk Index, Critical Sectors, Verified Reports, Active Alerts*.
+   - View the color-coded GIS map and telemetry feed for monitored sectors (e.g., `NER-042: Nongpoh - Umsning`).
+3. **Risk Map & Explainable AI (`/risk-map`):**
+   - Select a high-hazard sector and open the **Zone Telemetry Drawer**.
+   - Review real-time sensor metrics (Rainfall, Slope, Soil Moisture, NDVI) and the **XAI Factor Attribution breakdown**.
+4. **Safe Evacuation Routing (`/safe-route`):**
+   - Set **Origin:** `Guwahati Khanapara Hub` $\rightarrow$ **Destination:** `Shillong City Center`.
+   - Click **"CALCULATE SAFE ROUTE"** to compare the direct hazardous corridor against the AI Safe Route detour.
+5. **Citizen Ground Truth Submission (`/community-reports`):**
+   - Submit a new observation (*Tension cracks observed, subsurface displacement*).
+   - Show that the submission enters the **PENDING** moderation queue.
+6. **Authority Verification & Real-Time Dynamic Fusion:**
+   - Log in as **District Authority** (`officer@sdim.ner.gov.in` / `authority123`).
+   - Navigate to the **Moderation Tab** and approve the report with field notes.
+   - Observe the live notification confirming **AI + Ground Truth Fusion Activated** and verify the live score increase on the Risk Map.
+7. **SOS Emergency & Evacuation Resources (`/sos`, `/hospitals-shelters`):**
+   - Demonstrate one-click emergency broadcast and nearest medical/shelter facility lookup.
+
+---
+
+## 🔒 Security, Secrets Management & Key Rotation Notice
+
+> [!WARNING]
+> **IMPORTANT SECURITY & ROTATION POLICY:**
+> - **Zero Hardcoded Secrets in Production:** Never commit `.env` files or plaintext production secrets to version control. All environment variables must be supplied via server-side configuration or secure secret vaults.
+> - **Git History Notice & Secret Rotation:** Any default test passwords, demo credentials, or placeholder keys referenced in past prototype commits or documentation are strictly for offline evaluation and **MUST BE ROTATED IMMEDIATELY** prior to production deployment.
+> - **JWT Signing Secret:** Always set a cryptographically secure random key via `JWT_SECRET` in your server environment (`python -c "import secrets; print(secrets.token_urlsafe(32))"`).
+> - **Client-Side Exposure:** Only public-safe variables prefixed with `VITE_` (such as `VITE_API_URL`) may be exposed to the browser. Database connection strings, private API keys, and service-role credentials must remain strictly server-side.
+> - **Template Files:** Refer to [`.env.example`](file:///d:/Visual%20Studio%20Code/Demo2/.env.example), [`backend/.env.example`](file:///d:/Visual%20Studio%20Code/Demo2/backend/.env.example), and [`frontend/.env.example`](file:///d:/Visual%20Studio%20Code/Demo2/frontend/.env.example) for required configuration variables.
+

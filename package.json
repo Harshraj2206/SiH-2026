@@ -1,0 +1,13 @@
+{
+  "name": "landslideguard-root",
+  "version": "1.0.0",
+  "private": true,
+  "description": "LandSafe Root Workspace Scripts",
+  "scripts": {
+    "dev": "npm --prefix frontend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev:backend": "python backend/run_server.py",
+    "build": "npm --prefix frontend run build",
+    "preview": "npm --prefix frontend run preview"
+  }
+}

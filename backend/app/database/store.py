@@ -17,7 +17,7 @@ from backend.app.ml.verifier import verify_landslide_report
 
 class StateStore:
     def __init__(self):
-        self.lock = threading.Lock()
+        self.lock = threading.RLock()
         self.users: Dict[str, Dict[str, Any]] = {}
         self.zones: Dict[str, Dict[str, Any]] = {}
         self.reports: Dict[str, Dict[str, Any]] = {}
@@ -44,13 +44,12 @@ class StateStore:
         self._init_data()
 
     def _init_data(self):
-        # 1. User Accounts (RBAC)
+        # 1. User Accounts (RBAC Metadata)
         self.users = {
             "usr-resident-01": {
                 "id": "usr-resident-01",
                 "username": "resident_nongpoh",
                 "email": "resident@landslideguard.gov.in",
-                "password": "resident123",
                 "role": "RESIDENT",
                 "full_name": "Tariang Lyngdoh",
                 "agency": "Ri-Bhoi Community Watch",
@@ -60,7 +59,6 @@ class StateStore:
                 "id": "usr-auth-01",
                 "username": "officer_sdma",
                 "email": "officer@sdim.ner.gov.in",
-                "password": "authority123",
                 "role": "AUTHORITY",
                 "full_name": "Dr. Anamika Sharma",
                 "agency": "State Disaster Management Authority (SDMA - NER)",
@@ -70,7 +68,6 @@ class StateStore:
                 "id": "usr-admin-01",
                 "username": "ndma_admin",
                 "email": "admin@ndma.gov.in",
-                "password": "admin123",
                 "role": "ADMIN",
                 "full_name": "Col. Rajesh Barua",
                 "agency": "National Disaster Management Authority (NDMA HQ)",
@@ -602,7 +599,7 @@ class StateStore:
             }
         }
 
-        # 5. GDACS-Style Active Incidents Database
+        # 5. GDACS-Style Active Incidents Database (Pre-seeded Training Scenarios)
         self.incidents = {
             "LS-2026-NE-0042": {
                 "incident_id": "LS-2026-NE-0042",
@@ -621,11 +618,21 @@ class StateStore:
                 "injured_people": 3,
                 "missing_people": 0,
                 "evacuated_people": 140,
-                "source": "SDRF Ground Radar & Community Confirmation",
+                "source": "Synthetic Scenario Dataset (NER Benchmark Drill)",
                 "assigned_team_id": "team-sdrf-01",
                 "assigned_team_name": "SDRF Ri-Bhoi Fast Response Unit",
                 "description": "Prolonged rainfall of 85.2mm caused sudden slope failure of 150m retaining section across NH-6. 2 vehicles partially buried, passengers rescued.",
-                "updated_at": "2026-08-25T18:00:00Z"
+                "updated_at": "2026-08-25T18:00:00Z",
+                "verification_status": "DEMO / SIMULATION",
+                "category": "DEMO_SIMULATION",
+                "source_type": "SIMULATION",
+                "source_priority_level": 5,
+                "casualties_info": "Injured: 3 (Simulated Exercise)",
+                "reported_causes": ["Simulated Heavy Rainfall (>85mm)", "Synthetic Slope Cut"],
+                "contributing_factors": ["Simulation Calibration Model"],
+                "why_at_risk": "Pre-seeded drill scenario for testing multi-agency response dispatch. Not an active real-world landslide event.",
+                "freshness_label": "Simulated Drill Scenario",
+                "is_simulation": True
             },
             "LS-2026-NE-0043": {
                 "incident_id": "LS-2026-NE-0043",
@@ -644,11 +651,21 @@ class StateStore:
                 "injured_people": 1,
                 "missing_people": 0,
                 "evacuated_people": 65,
-                "source": "Traffic Police Telemetry",
+                "source": "Synthetic Scenario Dataset (NER Benchmark Drill)",
                 "assigned_team_id": "team-police-01",
                 "assigned_team_name": "Sikkim Traffic & Mountain Police Unit",
                 "description": "Continuous rockfall and slush flow encroaching on left carriageway. Heavy machinery clearing single-lane corridor.",
-                "updated_at": "2026-08-25T17:15:00Z"
+                "updated_at": "2026-08-25T17:15:00Z",
+                "verification_status": "DEMO / SIMULATION",
+                "category": "DEMO_SIMULATION",
+                "source_type": "SIMULATION",
+                "source_priority_level": 5,
+                "casualties_info": "Injured: 1 (Simulated Exercise)",
+                "reported_causes": ["Riverbank Toe Erosion (Simulated)"],
+                "contributing_factors": ["Simulation Calibration Model"],
+                "why_at_risk": "Pre-seeded drill scenario for testing mountain traffic diversion. Not an active real-world landslide event.",
+                "freshness_label": "Simulated Drill Scenario",
+                "is_simulation": True
             },
             "LS-2026-NE-0044": {
                 "incident_id": "LS-2026-NE-0044",
@@ -667,11 +684,21 @@ class StateStore:
                 "injured_people": 0,
                 "missing_people": 0,
                 "evacuated_people": 85,
-                "source": "District Emergency Operations Center (DEOC)",
+                "source": "Synthetic Scenario Dataset (NER Benchmark Drill)",
                 "assigned_team_id": "team-ndrf-01",
                 "assigned_team_name": "12th Battalion NDRF Unit C",
                 "description": "Severe 30cm vertical road drop with creeping embankment. Preventative evacuation of 24 downhill settlement homes underway.",
-                "updated_at": "2026-08-25T18:45:00Z"
+                "updated_at": "2026-08-25T18:45:00Z",
+                "verification_status": "DEMO / SIMULATION",
+                "category": "DEMO_SIMULATION",
+                "source_type": "SIMULATION",
+                "source_priority_level": 5,
+                "casualties_info": "Casualties: None reported (Simulated Exercise)",
+                "reported_causes": ["Roadbed Embankment Creep (Simulated)"],
+                "contributing_factors": ["Simulation Calibration Model"],
+                "why_at_risk": "Pre-seeded drill scenario for testing rapid NDRF evacuation. Not an active real-world landslide event.",
+                "freshness_label": "Simulated Drill Scenario",
+                "is_simulation": True
             }
         }
 
@@ -1284,12 +1311,25 @@ class StateStore:
             return rep
 
     # ---------------- Incidents API ----------------
-    def get_all_incidents(self, status_filter: Optional[str] = None, severity_filter: Optional[str] = None) -> List[Dict[str, Any]]:
+    def get_all_incidents(
+        self, 
+        status_filter: Optional[str] = None, 
+        severity_filter: Optional[str] = None,
+        category_filter: Optional[str] = None,
+        state_filter: Optional[str] = None,
+        include_simulations: bool = True
+    ) -> List[Dict[str, Any]]:
         with self.lock:
             inc_list = list(self.incidents.values())
-            if status_filter:
+            if not include_simulations:
+                inc_list = [i for i in inc_list if not i.get("is_simulation", False)]
+            if category_filter:
+                inc_list = [i for i in inc_list if i.get("category", "").upper() == category_filter.upper()]
+            if state_filter and state_filter.upper() != "ALL":
+                inc_list = [i for i in inc_list if i.get("state", "").lower() == state_filter.lower()]
+            if status_filter and status_filter.upper() != "ALL":
                 inc_list = [i for i in inc_list if i.get("status") == status_filter.upper()]
-            if severity_filter:
+            if severity_filter and severity_filter.upper() != "ALL":
                 inc_list = [i for i in inc_list if i.get("severity") == severity_filter.upper()]
             inc_list.sort(key=lambda x: x["timestamp"], reverse=True)
             return inc_list
