@@ -1,0 +1,28 @@
+# =============================================================================
+# LANDSLIDEGUARD SIH26001 - RENDER DEPLOYMENT BLUEPRINT
+# Auto-deploy backend service with Python 3.10 runtime & Uvicorn
+# =============================================================================
+
+services:
+  - type: web
+    name: landslideguard-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    plan: free
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: PYTHON_VERSION
+        value: 3.10.12
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: 10080
+      - key: DATABASE_PATH
+        value: data/landslideguard_users.db
+      - key: DATA_DIR
+        value: data
+      - key: CORS_ORIGINS
+        value: "*"
