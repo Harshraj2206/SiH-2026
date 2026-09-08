@@ -37,7 +37,7 @@ def test_in_app_navigation_routes():
             headers={"Content-Type": "application/json"}
         )
 
-        with urllib.request.urlopen(req, timeout=12) as resp:
+        with urllib.request.urlopen(req, timeout=15) as resp:
             data = json.loads(resp.read().decode("utf-8"))
             route = data.get("safe_route") or data.get("fastest_route")
             

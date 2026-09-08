@@ -522,6 +522,28 @@ class LandslideIntelligencePipeline:
         forecasts = []
         now_iso = datetime.now(timezone.utc).isoformat()
         
+        from concurrent.futures import ThreadPoolExecutor
+
+        def _fetch_corridor_rain(corridor):
+            lat = corridor["latitude"]
+            lon = corridor["longitude"]
+            try:
+                met_url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&daily=precipitation_sum&timezone=auto"
+                met_res = requests.get(met_url, timeout=2.0)
+                if met_res.status_code == 200:
+                    daily = met_res.json().get("daily", {})
+                    sums = daily.get("precipitation_sum", [])
+                    if sums:
+                        r24 = float(sums[0]) if len(sums) > 0 and sums[0] is not None else 0.0
+                        r72 = sum([float(x) for x in sums[:3] if x is not None])
+                        return (r24, r72)
+            except Exception:
+                pass
+            return (42.5, 98.0)
+
+        with ThreadPoolExecutor(max_workers=min(6, len(INDIA_HIGH_HAZARD_CORRIDORS))) as executor:
+            rain_results = list(executor.map(_fetch_corridor_rain, INDIA_HIGH_HAZARD_CORRIDORS))
+
         for idx, corridor in enumerate(INDIA_HIGH_HAZARD_CORRIDORS):
             lat = corridor["latitude"]
             lon = corridor["longitude"]
@@ -531,20 +553,7 @@ class LandslideIntelligencePipeline:
             state = corridor["state"]
             loc_name = corridor["location_name"]
 
-            rain_24h = 0.0
-            rain_72h = 0.0
-            try:
-                met_url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&daily=precipitation_sum&timezone=auto"
-                met_res = requests.get(met_url, timeout=2.0)
-                if met_res.status_code == 200:
-                    daily = met_res.json().get("daily", {})
-                    sums = daily.get("precipitation_sum", [])
-                    if sums:
-                        rain_24h = float(sums[0]) if len(sums) > 0 and sums[0] is not None else 0.0
-                        rain_72h = sum([float(x) for x in sums[:3] if x is not None])
-            except Exception:
-                rain_24h = 42.5
-                rain_72h = 98.0
+            rain_24h, rain_72h = rain_results[idx]
 
             risk_level = "LOW"
             warning_label = "ADVISORY"

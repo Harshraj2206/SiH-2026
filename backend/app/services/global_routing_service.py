@@ -46,13 +46,21 @@ def calculate_global_road_route(
     Calculate real turn-by-turn road route between ANY two coordinates on Earth
     and compute live terrain & geotechnical risk profile along the route.
     """
+    # Approximate crow-flies distance in km to avoid heavy micro-maneuver overhead on cross-country routes (>150 km)
+    dlat = math.radians(dest_lat - start_lat)
+    dlng = math.radians(dest_lng - start_lng)
+    a = math.sin(dlat/2)**2 + math.cos(math.radians(start_lat)) * math.cos(math.radians(dest_lat)) * math.sin(dlng/2)**2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+    approx_crow_dist_km = 6371 * c
+    include_steps = "true" if approx_crow_dist_km <= 150.0 else "false"
+
     # Query OSRM Driving Engine for authentic global road network
-    osrm_url = f"{OSRM_API_URL}/{start_lng},{start_lat};{dest_lng},{dest_lat}?overview=full&geometries=geojson&steps=true"
+    osrm_url = f"{OSRM_API_URL}/{start_lng},{start_lat};{dest_lng},{dest_lat}?overview=full&geometries=geojson&steps={include_steps}"
     
     route_data = None
     try:
         req = urllib.request.Request(osrm_url, headers={"User-Agent": "LandSafe-GlobalRouter/2.0"})
-        with urllib.request.urlopen(req, timeout=8) as response:
+        with urllib.request.urlopen(req, timeout=4.0) as response:
             res_json = json.loads(response.read().decode("utf-8"))
             if res_json.get("code") == "Ok" and res_json.get("routes"):
                 route_data = res_json["routes"][0]
@@ -106,11 +114,18 @@ def calculate_global_road_route(
         if (num_pts - 1) not in sample_indices:
             sample_indices.append(num_pts - 1)
 
-    sampled_slopes = []
-    for idx in sample_indices:
-        pt = formatted_coords[idx]
-        terrain = get_terrain_elevation_and_slope(pt["lat"], pt["lng"])
-        sampled_slopes.append(terrain.get("slope_deg", 0.0))
+    from concurrent.futures import ThreadPoolExecutor
+
+    def _sample_pt(pt):
+        try:
+            terrain = get_terrain_elevation_and_slope(pt["lat"], pt["lng"])
+            return terrain.get("slope_deg", 0.0)
+        except Exception:
+            return 0.0
+
+    pts_to_sample = [formatted_coords[idx] for idx in sample_indices]
+    with ThreadPoolExecutor(max_workers=min(8, len(pts_to_sample))) as executor:
+        sampled_slopes = list(executor.map(_sample_pt, pts_to_sample))
 
     avg_slope = round(sum(sampled_slopes) / len(sampled_slopes), 1) if sampled_slopes else 0.0
     max_slope = max(sampled_slopes) if sampled_slopes else 0.0
