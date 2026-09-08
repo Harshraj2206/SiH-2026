@@ -1,0 +1,160 @@
+{
+  "matrix": [
+    {
+      "viewport": "320x568",
+      "name": "iPhone SE",
+      "type": "mobile",
+      "initial_backdrops": 0,
+      "initial_main_opacity": "1",
+      "initial_main_filter": "none",
+      "sidebar_docked": false,
+      "opened_backdrops": 1,
+      "sidebar_z_index": "50",
+      "closed_again_backdrops": 0
+    },
+    {
+      "viewport": "375x667",
+      "name": "iPhone 8/SE2",
+      "type": "mobile",
+      "initial_backdrops": 0,
+      "initial_main_opacity": "1",
+      "initial_main_filter": "none",
+      "sidebar_docked": false,
+      "opened_backdrops": 1,
+      "sidebar_z_index": "50",
+      "closed_again_backdrops": 0
+    },
+    {
+      "viewport": "390x844",
+      "name": "iPhone 12/13/14",
+      "type": "mobile",
+      "initial_backdrops": 0,
+      "initial_main_opacity": "1",
+      "initial_main_filter": "none",
+      "sidebar_docked": false,
+      "opened_backdrops": 1,
+      "sidebar_z_index": "50",
+      "closed_again_backdrops": 0
+    },
+    {
+      "viewport": "412x915",
+      "name": "Pixel 7 / Galaxy",
+      "type": "mobile",
+      "initial_backdrops": 0,
+      "initial_main_opacity": "1",
+      "initial_main_filter": "none",
+      "sidebar_docked": false,
+      "opened_backdrops": 1,
+      "sidebar_z_index": "50",
+      "closed_again_backdrops": 0
+    },
+    {
+      "viewport": "768x1024",
+      "name": "iPad Mini",
+      "type": "tablet",
+      "initial_backdrops": 0,
+      "initial_main_opacity": "1",
+      "initial_main_filter": "none",
+      "sidebar_docked": false,
+      "opened_backdrops": 1,
+      "sidebar_z_index": "50",
+      "closed_again_backdrops": 0
+    },
+    {
+      "viewport": "820x1180",
+      "name": "iPad Air",
+      "type": "tablet",
+      "initial_backdrops": 0,
+      "initial_main_opacity": "1",
+      "initial_main_filter": "none",
+      "sidebar_docked": false,
+      "opened_backdrops": 1,
+      "sidebar_z_index": "50",
+      "closed_again_backdrops": 0
+    },
+    {
+      "viewport": "1024x768",
+      "name": "Desktop 1024",
+      "type": "desktop",
+      "initial_backdrops": 0,
+      "initial_main_opacity": "1",
+      "initial_main_filter": "none",
+      "sidebar_docked": true,
+      "opened_backdrops": "N/A (Docked)",
+      "closed_again_backdrops": 0
+    },
+    {
+      "viewport": "1280x720",
+      "name": "HD 720p",
+      "type": "desktop",
+      "initial_backdrops": 0,
+      "initial_main_opacity": "1",
+      "initial_main_filter": "none",
+      "sidebar_docked": true,
+      "opened_backdrops": "N/A (Docked)",
+      "closed_again_backdrops": 0
+    },
+    {
+      "viewport": "1366x768",
+      "name": "Laptop 1366",
+      "type": "desktop",
+      "initial_backdrops": 0,
+      "initial_main_opacity": "1",
+      "initial_main_filter": "none",
+      "sidebar_docked": true,
+      "opened_backdrops": "N/A (Docked)",
+      "closed_again_backdrops": 0
+    },
+    {
+      "viewport": "1440x900",
+      "name": "MacBook 1440",
+      "type": "desktop",
+      "initial_backdrops": 0,
+      "initial_main_opacity": "1",
+      "initial_main_filter": "none",
+      "sidebar_docked": true,
+      "opened_backdrops": "N/A (Docked)",
+      "closed_again_backdrops": 0
+    },
+    {
+      "viewport": "1536x864",
+      "name": "Laptop 1536",
+      "type": "desktop",
+      "initial_backdrops": 0,
+      "initial_main_opacity": "1",
+      "initial_main_filter": "none",
+      "sidebar_docked": true,
+      "opened_backdrops": "N/A (Docked)",
+      "closed_again_backdrops": 0
+    },
+    {
+      "viewport": "1920x1080",
+      "name": "Full HD 1080p",
+      "type": "desktop",
+      "initial_backdrops": 0,
+      "initial_main_opacity": "1",
+      "initial_main_filter": "none",
+      "sidebar_docked": true,
+      "opened_backdrops": "N/A (Docked)",
+      "closed_again_backdrops": 0
+    }
+  ],
+  "mobile_to_desktop": {
+    "activeBackdrops": 0,
+    "asideVisible": true
+  },
+  "desktop_to_mobile": {
+    "activeBackdrops": 0
+  },
+  "route_resources": {
+    "activeBackdrops": 0,
+    "path": "/resources"
+  },
+  "route_dashboard": {
+    "activeBackdrops": 0,
+    "path": "/overview"
+  },
+  "refresh": {
+    "activeBackdrops": 0
+  }
+}
