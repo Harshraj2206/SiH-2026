@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
 import { Header } from '../components/common/Header';
 import { Sidebar } from '../components/common/Sidebar';
 import { WeatherAtmosphericBackground } from '../components/common/WeatherAtmosphericBackground';
@@ -9,6 +9,23 @@ import { CheckCircle2, AlertCircle, Info } from 'lucide-react';
 export const DashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { actionMessage } = useEmergency();
+  const location = useLocation();
+
+  // Automatically dismiss mobile sidebar on page navigation
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname]);
+
+  // Automatically reset mobile drawer state when resized to desktop (>= 1024px)
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setSidebarOpen(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   return (
     <div className="min-h-screen relative text-neutral-100 flex flex-col bg-transparent selection:bg-emerald-500/30 selection:text-white">

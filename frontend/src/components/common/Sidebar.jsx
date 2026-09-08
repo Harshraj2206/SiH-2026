@@ -16,7 +16,8 @@ import {
   Mountain,
   ChevronRight,
   BarChart3,
-  AlertTriangle
+  AlertTriangle,
+  X
 } from 'lucide-react';
 
 export const Sidebar = ({ isOpen, onClose }) => {
@@ -38,21 +39,22 @@ export const Sidebar = ({ isOpen, onClose }) => {
 
   return (
     <>
-      {/* Mobile backdrop */}
+      {/* Mobile-only backdrop: strictly hidden on desktop (lg:hidden) with z-40 */}
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-black/80 z-40 lg:hidden animate-in fade-in"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-200"
           onClick={onClose}
+          aria-hidden="true"
         />
       )}
 
       <aside
-        className={`fixed top-0 bottom-0 left-0 w-64 bg-[#050505] border-r border-[#1a1a1a] flex flex-col justify-between z-40 transition-transform duration-200 ease-out lg:translate-x-0 select-none ${
+        className={`fixed top-0 bottom-0 left-0 w-64 bg-[#050505] border-r border-[#1a1a1a] flex flex-col justify-between z-50 transition-transform duration-200 ease-out lg:translate-x-0 select-none ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         {/* Brand Header */}
-        <div className="p-5 border-b border-[#1a1a1a]">
+        <div className="p-5 border-b border-[#1a1a1a] flex items-center justify-between">
           <div className="flex items-center gap-2.5 group cursor-default">
             <div className="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 transition-transform duration-200 group-hover:scale-105">
               <Mountain className="w-4 h-4 text-emerald-400" />
@@ -66,6 +68,15 @@ export const Sidebar = ({ isOpen, onClose }) => {
               </span>
             </div>
           </div>
+
+          {/* Mobile close button (hidden on desktop) */}
+          <button
+            onClick={onClose}
+            className="lg:hidden p-1.5 rounded-xl text-neutral-400 hover:text-white hover:bg-[#181818] border border-transparent hover:border-[#222222] transition-colors shrink-0"
+            aria-label="Close navigation"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
 
         {/* Navigation List with Subtle Pop Interaction */}
