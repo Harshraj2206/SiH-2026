@@ -29,22 +29,27 @@ import { getRiskScoreColor } from '../utils/formatters';
 export const AnalyticsPage = () => {
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const loadAnalytics = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await api.getAnalytics();
+      setAnalytics(data);
+    } catch (e) {
+      console.error('Analytics aggregation error:', e);
+      setError(e?.response?.data?.detail || e.message || 'Unable to aggregate regional landslide telemetry.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    async function load() {
-      try {
-        const data = await api.getAnalytics();
-        setAnalytics(data);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
+    loadAnalytics();
   }, []);
 
-  if (loading || !analytics) {
+  if (loading) {
     return (
       <div className="p-12 text-center text-slate-400">
         <Activity className="w-8 h-8 animate-spin mx-auto text-cyan-400 mb-3" />
@@ -52,6 +57,25 @@ export const AnalyticsPage = () => {
       </div>
     );
   }
+
+  if (error && !analytics) {
+    return (
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 max-w-xl mx-auto text-center space-y-4 my-12">
+        <ShieldAlert className="w-10 h-10 text-rose-500 mx-auto" />
+        <h2 className="text-lg font-bold text-white">Telemetry Aggregation Unavailable</h2>
+        <p className="text-sm text-slate-400">{error}</p>
+        <button
+          onClick={loadAnalytics}
+          className="inline-flex items-center gap-2 px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold rounded-xl transition"
+        >
+          <Activity className="w-4 h-4" />
+          Retry Aggregation
+        </button>
+      </div>
+    );
+  }
+
+  if (!analytics) return null;
 
   return (
     <div className="space-y-6">

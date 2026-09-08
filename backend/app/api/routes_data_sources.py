@@ -122,10 +122,10 @@ async def inspect_coordinate_telemetry(payload: CoordinateInspectRequest) -> Dic
     hist_count = get_historical_density_score(lat, lng)
 
     # 6. Run ML Model with Real Inputs
-    rain_24h = weather.get("rainfall_24h_mm", 0.0)
-    rain_72h = weather.get("rainfall_72h_mm", 0.0)
-    slope_deg = dem.get("slope_deg", 10.0)
-    moisture = soil.get("volumetric_soil_moisture_m3m3", 0.35)
+    rain_24h = float(weather.get("rainfall_24h_mm") or 0.0)
+    rain_72h = float(weather.get("rainfall_72h_mm") or 0.0)
+    slope_deg = float(dem.get("slope_deg") or 10.0)
+    moisture = float(soil.get("volumetric_soil_moisture_m3m3") or 0.35)
 
     prediction = predict_landslide_risk({
         "rainfall_24h": rain_24h,
@@ -136,7 +136,7 @@ async def inspect_coordinate_telemetry(payload: CoordinateInspectRequest) -> Dic
         "historical_incidents": hist_count
     })
 
-    ml_score = prediction.get("risk_score", 15.0)
+    ml_score = float(prediction.get("risk_score") or 15.0)
     risk_level = prediction.get("risk_level", "LOW")
 
     # Construct dynamic 6h/12h/24h forecast trend

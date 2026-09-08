@@ -12,7 +12,7 @@ import {
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import axios from 'axios';
-import { resourcesApi, safeRouteApi } from '../services/api';
+import apiClient, { resourcesApi, safeRouteApi } from '../services/api';
 import { 
   Shield, 
   Ambulance, 
@@ -478,7 +478,7 @@ export const ResourcesPage = () => {
         // Reverse geocode to get human-readable area / city
         let areaName = `Coordinates: ${latitude.toFixed(4)}°N, ${longitude.toFixed(4)}°E`;
         try {
-          const res = await axios.get('/api/location-intelligence', {
+          const res = await apiClient.get('/location-intelligence', {
             params: { lat: latitude, lng: longitude }
           });
           if (res.data?.location?.display_name) {
@@ -528,7 +528,7 @@ export const ResourcesPage = () => {
     try {
       // Pass optional custom Google API key if user configured it
       const savedKey = localStorage.getItem('landsafe_google_maps_key') || undefined;
-      const res = await axios.get('/api/resources/nearby', {
+      const res = await apiClient.get('/resources/nearby', {
         params: {
           lat,
           lng,
@@ -573,7 +573,7 @@ export const ResourcesPage = () => {
     setIsSearchingLocation(true);
     setLocationError(null);
     try {
-      const res = await axios.post('/api/location-intelligence/search', { query: manualQuery });
+      const res = await apiClient.post('/location-intelligence/search', { query: manualQuery });
       const loc = res.data?.location;
       if (loc && loc.latitude && loc.longitude) {
         setLocationMode('manual');

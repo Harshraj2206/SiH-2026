@@ -33,11 +33,25 @@ JWT_ALGORITHM = os.environ.get("JWT_ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES", str(60 * 24 * 7)))
 
 # CORS Configuration
-_RAW_CORS = os.environ.get("CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173,http://localhost:5174,http://127.0.0.1:5174,http://localhost:5177,http://127.0.0.1:5177,http://localhost:5178,http://127.0.0.1:5178,http://localhost:3000,http://127.0.0.1:3000")
-if _RAW_CORS.strip() == "*":
-    if IS_PRODUCTION:
-        ALLOWED_ORIGINS: List[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]
-    else:
-        ALLOWED_ORIGINS: List[str] = ["*"]
+_DEFAULT_ORIGINS = [
+    "https://si-h-2026.vercel.app",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:5174",
+    "http://localhost:5177",
+    "http://127.0.0.1:5177",
+    "http://localhost:5178",
+    "http://127.0.0.1:5178",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000"
+]
+
+_RAW_CORS = os.environ.get("CORS_ORIGINS", "")
+if _RAW_CORS.strip() and _RAW_CORS.strip() != "*":
+    ALLOWED_ORIGINS: List[str] = list(set(_DEFAULT_ORIGINS + [orig.strip() for orig in _RAW_CORS.split(",") if orig.strip()]))
 else:
-    ALLOWED_ORIGINS = [orig.strip() for orig in _RAW_CORS.split(",") if orig.strip()]
+    ALLOWED_ORIGINS: List[str] = _DEFAULT_ORIGINS
+
+# Regex pattern allowing all Vercel deployments (production domain, branch preview, PR preview)
+ALLOWED_ORIGIN_REGEX = r"^https:\/\/([a-zA-Z0-9_-]+\.)?vercel\.app$"

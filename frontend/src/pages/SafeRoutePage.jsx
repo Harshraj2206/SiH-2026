@@ -120,7 +120,24 @@ export const SafeRoutePage = () => {
             setOriginCoords(geoO);
           }
         } catch {
-          // If geocode fails, keep existing originCoords
+          // Fallback to Nominatim if backend geocode encounters error
+          try {
+            const nomO = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(oTrimmed)}&limit=1`, {
+              headers: { 'User-Agent': 'LandSafe-GlobalRouting/2.0' }
+            });
+            const nomOData = await nomO.json();
+            if (nomOData && nomOData.length > 0) {
+              const geoO = {
+                lat: parseFloat(nomOData[0].lat),
+                lng: parseFloat(nomOData[0].lon),
+                name: nomOData[0].display_name
+              };
+              resolvedOrigin = geoO;
+              setOriginCoords(geoO);
+            }
+          } catch {
+            // Keep existing originCoords
+          }
         }
       }
 
@@ -133,8 +150,27 @@ export const SafeRoutePage = () => {
             resolvedDest = geoD;
             setDestCoords(geoD);
           }
-        } catch (geoErr) {
-          throw new Error(`Destination "${dTrimmed}" could not be resolved. Please enter a valid city, town, or hospital name.`);
+        } catch {
+          // Graceful fallback to client-side Nominatim geocoding if backend is unreachable
+          try {
+            const nomResp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(dTrimmed)}&limit=1`, {
+              headers: { 'User-Agent': 'LandSafe-GlobalRouting/2.0' }
+            });
+            const nomData = await nomResp.json();
+            if (nomData && nomData.length > 0) {
+              const geoD = {
+                lat: parseFloat(nomData[0].lat),
+                lng: parseFloat(nomData[0].lon),
+                name: nomData[0].display_name
+              };
+              resolvedDest = geoD;
+              setDestCoords(geoD);
+            } else {
+              throw new Error(`Destination "${dTrimmed}" could not be resolved. Please enter a valid city, town, or hospital name.`);
+            }
+          } catch {
+            throw new Error(`Destination "${dTrimmed}" could not be resolved. Please enter a valid city, town, or hospital name.`);
+          }
         }
       }
 

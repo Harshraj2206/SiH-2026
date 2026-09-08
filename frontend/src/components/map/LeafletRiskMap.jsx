@@ -336,6 +336,18 @@ export const LeafletRiskMap = ({
         } catch (e) {
           if (reqId !== latestInspectionRef.current) return;
           console.warn('Live telemetry lookup error:', e);
+          if (onSelectZone) {
+            onSelectZone({
+              latitude,
+              longitude,
+              center: { lat: latitude, lng: longitude },
+              is_weather_loading: false,
+              is_live_inspected: true,
+              name: `GPS Location (${latitude.toFixed(3)}, ${longitude.toFixed(3)})`,
+              risk_score: 15.0,
+              risk_level: 'LOW'
+            });
+          }
         }
       },
       (err) => {
@@ -404,10 +416,27 @@ export const LeafletRiskMap = ({
           });
         }
 
-        const liveData = await api.inspectTelemetry(targetLat, targetLng);
-        if (reqId !== latestInspectionRef.current) return;
-        if (liveData && onSelectZone) {
-          onSelectZone({ ...liveData, is_live_inspected: true, is_weather_loading: false });
+        try {
+          const liveData = await api.inspectTelemetry(targetLat, targetLng);
+          if (reqId !== latestInspectionRef.current) return;
+          if (liveData && onSelectZone) {
+            onSelectZone({ ...liveData, is_live_inspected: true, is_weather_loading: false });
+          }
+        } catch (inspectErr) {
+          if (reqId !== latestInspectionRef.current) return;
+          console.warn('Telemetry inspection error on search:', inspectErr);
+          if (onSelectZone) {
+            onSelectZone({
+              latitude: targetLat,
+              longitude: targetLng,
+              center: { lat: targetLat, lng: targetLng },
+              is_weather_loading: false,
+              is_live_inspected: true,
+              name: results[0].display_name || searchQuery,
+              risk_score: 15.0,
+              risk_level: 'LOW'
+            });
+          }
         }
       } else {
         alert(`Location "${searchQuery}" not found. Try searching a city, district, or mountain region.`);
@@ -464,6 +493,18 @@ export const LeafletRiskMap = ({
     } catch (e) {
       if (reqId !== latestInspectionRef.current) return;
       console.warn('Live telemetry click error:', e);
+      if (onSelectZone) {
+        onSelectZone({
+          latitude: latlng.lat,
+          longitude: latlng.lng,
+          center: { lat: latlng.lat, lng: latlng.lng },
+          is_weather_loading: false,
+          is_live_inspected: true,
+          name: `Coordinates (${latlng.lat.toFixed(3)}, ${latlng.lng.toFixed(3)})`,
+          risk_score: 15.0,
+          risk_level: 'LOW'
+        });
+      }
     }
   };
 

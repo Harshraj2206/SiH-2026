@@ -26,7 +26,8 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from backend.app.core.config import (
     ENVIRONMENT,
     IS_PRODUCTION,
-    ALLOWED_ORIGINS
+    ALLOWED_ORIGINS,
+    ALLOWED_ORIGIN_REGEX
 )
 from backend.app.core.security_headers import SecurityHeadersMiddleware
 
@@ -70,6 +71,7 @@ app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
+    allow_origin_regex=ALLOWED_ORIGIN_REGEX,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With", "X-Forwarded-For"],

@@ -31,15 +31,8 @@ export const DataSourcesPage = () => {
   const fetchSources = async () => {
     setLoading(true);
     try {
-      const res = await api.getDataSources ? await api.getDataSources() : null;
-      if (res) {
-        setSourcesData(res);
-      } else {
-        // Fallback fetch directly
-        const raw = await fetch('/api/data-sources');
-        const json = await raw.json();
-        setSourcesData(json);
-      }
+      const res = await api.getDataSources();
+      setSourcesData(res);
     } catch (err) {
       console.warn('Failed to load data sources status:', err);
     } finally {
@@ -55,12 +48,7 @@ export const DataSourcesPage = () => {
     e?.preventDefault();
     setInspecting(true);
     try {
-      const raw = await fetch('/api/telemetry/inspect', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ latitude: parseFloat(testLat), longitude: parseFloat(testLng) })
-      });
-      const data = await raw.json();
+      const data = await api.inspectTelemetry(parseFloat(testLat), parseFloat(testLng));
       setInspectResult(data);
     } catch (err) {
       console.warn('Inspection failed:', err);
