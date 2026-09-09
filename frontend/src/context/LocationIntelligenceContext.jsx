@@ -94,7 +94,11 @@ export const LocationIntelligenceProvider = ({ children }) => {
     normalized: normalizeWeather({ is_weather_loading: true })
   });
 
-  // 4. Consolidated Real-Time Environment State (Celestial + Meteorological)
+  // 4. Simulated time offset in hours (0 = Live Real-Time Clock)
+  const [timeOffsetHours, setTimeOffsetHoursState] = useState(0);
+  const timeOffsetRef = useRef(0);
+
+  // Consolidated Real-Time Environment State (Celestial + Meteorological)
   const [environment, setEnvironment] = useState(() =>
     buildEnvironmentState({
       latitude: DEFAULT_FALLBACK_LOCATION.latitude,
@@ -119,6 +123,7 @@ export const LocationIntelligenceProvider = ({ children }) => {
    * Recalculate environment state with latest timestamp or coordinates.
    */
   const recomputeEnvironment = useCallback((lat, lon, name, tz, tzAbbr, offsetSec, currentWeatherObj) => {
+    const targetDate = new Date(Date.now() + timeOffsetRef.current * 3600 * 1000);
     const updatedEnv = buildEnvironmentState({
       latitude: lat,
       longitude: lon,
@@ -127,11 +132,31 @@ export const LocationIntelligenceProvider = ({ children }) => {
       timezoneAbbr: tzAbbr || 'UTC',
       utcOffsetSeconds: offsetSec || 0,
       weather: currentWeatherObj || {},
-      currentDate: new Date()
+      currentDate: targetDate
     });
     setEnvironment(updatedEnv);
     return updatedEnv;
   }, []);
+
+  const setTimeOffsetHours = useCallback((offset) => {
+    const num = typeof offset === 'number' ? offset : 0;
+    timeOffsetRef.current = num;
+    setTimeOffsetHoursState(num);
+    const targetDate = new Date(Date.now() + num * 3600 * 1000);
+    setEnvironment(() => {
+      const loc = locationRef.current || DEFAULT_FALLBACK_LOCATION;
+      return buildEnvironmentState({
+        latitude: loc.latitude,
+        longitude: loc.longitude,
+        displayName: loc.displayName,
+        timezone: loc.timezone || 'Asia/Kolkata',
+        timezoneAbbr: loc.timezoneAbbr || 'IST',
+        utcOffsetSeconds: loc.utcOffsetSeconds ?? 19800,
+        weather,
+        currentDate: targetDate
+      });
+    });
+  }, [weather]);
 
   /**
    * Fetch weather and update state with normalized attributes and environment state.
@@ -510,11 +535,12 @@ export const LocationIntelligenceProvider = ({ children }) => {
     }
   }, [requestLocation, updateWeatherForCoords]);
 
-  // High-Precision Real-Time Clock Ticker (Every 10 seconds)
+  // High-Precision Real-Time Clock Ticker (Every 3 seconds)
   // Continuously recalculates celestial sun & moon positions and local time
   // without triggering excessive network requests.
   useEffect(() => {
     const clockInterval = setInterval(() => {
+      const targetDate = new Date(Date.now() + timeOffsetRef.current * 3600 * 1000);
       setEnvironment(prev => {
         return buildEnvironmentState({
           latitude: location.latitude,
@@ -524,10 +550,10 @@ export const LocationIntelligenceProvider = ({ children }) => {
           timezoneAbbr: location.timezoneAbbr || weather.timezone_abbreviation || 'UTC',
           utcOffsetSeconds: location.utcOffsetSeconds ?? weather.utc_offset_seconds ?? 19800,
           weather,
-          currentDate: new Date()
+          currentDate: targetDate
         });
       });
-    }, 10000);
+    }, 3000);
 
     return () => clearInterval(clockInterval);
   }, [location.latitude, location.longitude, location.displayName, location.timezone, location.timezoneAbbr, location.utcOffsetSeconds, weather]);
@@ -545,6 +571,8 @@ export const LocationIntelligenceProvider = ({ children }) => {
     requestLocation,
     setManualLocation,
     searchLocation,
+    timeOffsetHours,
+    setTimeOffsetHours,
     refreshWeather: () => updateWeatherForCoords(
       locationRef.current ? locationRef.current.latitude : location.latitude,
       locationRef.current ? locationRef.current.longitude : location.longitude,

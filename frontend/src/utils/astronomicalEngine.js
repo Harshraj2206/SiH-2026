@@ -171,6 +171,7 @@ export function getLunarPosition(lat, lon, date = new Date()) {
   }
 
   const isAboveHorizon = altitudeDeg > 0;
+  const isWaxing = sinElong > 0;
 
   return {
     altitudeDeg,
@@ -178,7 +179,8 @@ export function getLunarPosition(lat, lon, date = new Date()) {
     phaseFraction,
     phaseName,
     illuminationPct,
-    isAboveHorizon
+    isAboveHorizon,
+    isWaxing
   };
 }
 
@@ -389,8 +391,39 @@ export function buildEnvironmentState({
   // Real isDay is strictly driven by solar position (or verified Open-Meteo is_day)
   const isDay = solar.isAboveHorizon;
 
-  // Moon visibility: moon must be above horizon AND sun must not be overpowering it
-  const isMoonVisible = lunar.isAboveHorizon && (!isDay || solar.altitudeDeg < 15.0 || category === 'cloudy');
+  // Weather attenuation factors for celestial bodies (realistic obscuration by clouds/rain/storm)
+  let sunWeatherFactor = 1.0;
+  let moonWeatherFactor = 1.0;
+
+  if (category === 'partly_cloudy') {
+    sunWeatherFactor = 0.85;
+    moonWeatherFactor = 0.80;
+  } else if (category === 'cloudy') {
+    sunWeatherFactor = 0.28;
+    moonWeatherFactor = 0.24;
+  } else if (category === 'rain') {
+    sunWeatherFactor = 0.16;
+    moonWeatherFactor = 0.12;
+  } else if (category === 'heavy_rain') {
+    sunWeatherFactor = 0.08;
+    moonWeatherFactor = 0.06;
+  } else if (category === 'thunderstorm') {
+    sunWeatherFactor = 0.04;
+    moonWeatherFactor = 0.04;
+  } else if (category === 'snow') {
+    sunWeatherFactor = 0.40;
+    moonWeatherFactor = 0.35;
+  } else if (category === 'fog') {
+    sunWeatherFactor = 0.30;
+    moonWeatherFactor = 0.22;
+  }
+
+  // Atmospheric scattering: when sun is near horizon (< 10°), shift to golden-hour / sunset amber
+  const isSunHorizon = solar.altitudeDeg < 12.0 && solar.altitudeDeg >= -3.5;
+  const sunColorTheme = isSunHorizon ? 'sunset' : 'zenith';
+
+  // Moon visibility: moon must be above horizon AND sun must not be completely washing it out
+  const isMoonVisible = lunar.isAboveHorizon && (!isDay || solar.altitudeDeg < 15.0 || category === 'cloudy') && moonWeatherFactor > 0.03;
 
   return {
     latitude,
@@ -410,8 +443,11 @@ export function buildEnvironmentState({
     solarAzimuth: Math.round(solar.azimuthDeg * 10) / 10,
     sunScreenX: sunScreen.xPercent,
     sunScreenY: sunScreen.yPercent,
-    isSunVisible: sunScreen.visible,
-    sunGlowOpacity: sunScreen.glowOpacity,
+    isSunVisible: sunScreen.visible && sunWeatherFactor > 0.03,
+    sunGlowOpacity: Math.round(sunScreen.glowOpacity * sunWeatherFactor * 100) / 100,
+    sunWeatherFactor,
+    isSunHorizon,
+    sunColorTheme,
 
     // Astronomical Moon Telemetry
     moonElevation: Math.round(lunar.altitudeDeg * 10) / 10,
@@ -419,9 +455,11 @@ export function buildEnvironmentState({
     moonScreenX: moonScreen.xPercent,
     moonScreenY: moonScreen.yPercent,
     isMoonVisible,
+    moonWeatherFactor,
     moonPhaseName: lunar.phaseName,
     moonPhaseFraction: Math.round(lunar.phaseFraction * 1000) / 1000,
     moonIlluminationPct: lunar.illuminationPct,
+    isWaxing: lunar.isWaxing,
 
     // Environmental Temporal Classification
     isDay,
