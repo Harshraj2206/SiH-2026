@@ -1,7 +1,7 @@
 /**
  * LANDSAFE SIH 2026 - Authoritative Unified Weather Normalizer
  * Pure, deterministic mapping from real WMO weather codes, live temperature, and current precipitation
- * to normalized weather states, icons, visual themes, and localized labels.
+ * to normalized weather states, icons, visual themes, localized labels, and astronomical day/night states.
  */
 
 export const WEATHER_TYPES = {
@@ -26,12 +26,13 @@ export const WEATHER_TYPES = {
 /**
  * Normalizes raw meteorological telemetry into a deterministic weather descriptor.
  * @param {Object} raw - Raw weather object or inspected zone data.
- * @returns {Object} Normalized weather descriptor.
+ * @returns {Object} Normalized weather descriptor with day/night awareness.
  */
 export function normalizeWeather(raw) {
   if (!raw) {
     return {
       type: WEATHER_TYPES.UNKNOWN,
+      category: 'unknown',
       label: 'Weather Unavailable',
       icon: '🌐',
       temp: null,
@@ -49,6 +50,7 @@ export function normalizeWeather(raw) {
   if (raw.is_weather_loading) {
     return {
       type: WEATHER_TYPES.LOADING,
+      category: 'loading',
       label: 'Updating Weather Telemetry...',
       icon: '⏳',
       temp: null,
@@ -81,7 +83,8 @@ export function normalizeWeather(raw) {
   ) {
     return {
       type: WEATHER_TYPES.THUNDERSTORM,
-      label: 'Thunderstorm',
+      category: 'thunderstorm',
+      label: isDay ? 'Thunderstorm' : 'Night Thunderstorm',
       icon: '⛈️',
       temp,
       tempFormatted,
@@ -89,7 +92,7 @@ export function normalizeWeather(raw) {
       currentRain,
       humidity,
       isDay,
-      theme: 'thunderstorm',
+      theme: isDay ? 'thunderstorm' : 'thunderstorm_night',
       source,
       observationTime
     };
@@ -104,7 +107,8 @@ export function normalizeWeather(raw) {
     const isHeavy = weatherCode === 75 || weatherCode === 86 || conditionStr.includes('heavy') || conditionStr.includes('blizzard');
     return {
       type: isHeavy ? WEATHER_TYPES.HEAVY_SNOW : WEATHER_TYPES.SNOW,
-      label: isHeavy ? 'Heavy Snowfall' : 'Snowfall',
+      category: 'snow',
+      label: isHeavy ? 'Heavy Snowfall' : (isDay ? 'Snowfall' : 'Night Snowfall'),
       icon: '❄️',
       temp,
       tempFormatted,
@@ -112,7 +116,7 @@ export function normalizeWeather(raw) {
       currentRain,
       humidity,
       isDay,
-      theme: 'snow',
+      theme: isDay ? 'snow' : 'snow_night',
       source,
       observationTime
     };
@@ -122,6 +126,7 @@ export function normalizeWeather(raw) {
   if (weatherCode === 56 || weatherCode === 57 || weatherCode === 66 || weatherCode === 67 || conditionStr.includes('freezing')) {
     return {
       type: WEATHER_TYPES.FREEZING_RAIN,
+      category: 'snow',
       label: 'Freezing Rain',
       icon: '🌨️',
       temp,
@@ -130,7 +135,7 @@ export function normalizeWeather(raw) {
       currentRain,
       humidity,
       isDay,
-      theme: 'snow',
+      theme: isDay ? 'snow' : 'snow_night',
       source,
       observationTime
     };
@@ -140,7 +145,8 @@ export function normalizeWeather(raw) {
   if (weatherCode === 65 || weatherCode === 82 || conditionStr.includes('violent rain') || conditionStr.includes('heavy rain')) {
     return {
       type: WEATHER_TYPES.HEAVY_RAIN,
-      label: 'Heavy Rain',
+      category: 'heavy_rain',
+      label: isDay ? 'Heavy Rain' : 'Heavy Night Rain',
       icon: '🌧️',
       temp,
       tempFormatted,
@@ -148,7 +154,7 @@ export function normalizeWeather(raw) {
       currentRain,
       humidity,
       isDay,
-      theme: 'rain',
+      theme: isDay ? 'rain' : 'rain_night',
       source,
       observationTime
     };
@@ -159,7 +165,8 @@ export function normalizeWeather(raw) {
     const isLight = weatherCode === 61 || weatherCode === 80;
     return {
       type: WEATHER_TYPES.RAIN,
-      label: isLight ? 'Light Rain Showers' : 'Rain Showers',
+      category: 'rain',
+      label: isLight ? (isDay ? 'Light Rain Showers' : 'Light Night Showers') : (isDay ? 'Rain Showers' : 'Night Rain Showers'),
       icon: '🌧️',
       temp,
       tempFormatted,
@@ -167,7 +174,7 @@ export function normalizeWeather(raw) {
       currentRain,
       humidity,
       isDay,
-      theme: 'rain',
+      theme: isDay ? 'rain' : 'rain_night',
       source,
       observationTime
     };
@@ -177,7 +184,8 @@ export function normalizeWeather(raw) {
   if (weatherCode === 51 || weatherCode === 53 || weatherCode === 55 || conditionStr.includes('drizzle')) {
     return {
       type: WEATHER_TYPES.DRIZZLE,
-      label: 'Light Drizzle',
+      category: 'rain',
+      label: isDay ? 'Light Drizzle' : 'Night Drizzle',
       icon: '🌦️',
       temp,
       tempFormatted,
@@ -185,7 +193,7 @@ export function normalizeWeather(raw) {
       currentRain,
       humidity,
       isDay,
-      theme: 'rain',
+      theme: isDay ? 'rain' : 'rain_night',
       source,
       observationTime
     };
@@ -195,7 +203,8 @@ export function normalizeWeather(raw) {
   if (weatherCode === 45 || weatherCode === 48 || conditionStr.includes('fog') || conditionStr.includes('mist') || conditionStr.includes('haze')) {
     return {
       type: WEATHER_TYPES.FOG,
-      label: 'Fog / Mist',
+      category: 'fog',
+      label: isDay ? 'Fog / Mist' : 'Night Mist',
       icon: '🌫️',
       temp,
       tempFormatted,
@@ -203,7 +212,7 @@ export function normalizeWeather(raw) {
       currentRain,
       humidity,
       isDay,
-      theme: 'fog',
+      theme: isDay ? 'fog' : 'fog_night',
       source,
       observationTime
     };
@@ -213,7 +222,8 @@ export function normalizeWeather(raw) {
   if (weatherCode === 3 || conditionStr.includes('overcast')) {
     return {
       type: WEATHER_TYPES.OVERCAST,
-      label: 'Overcast',
+      category: 'cloudy',
+      label: isDay ? 'Overcast Sky' : 'Overcast Night',
       icon: '☁️',
       temp,
       tempFormatted,
@@ -221,7 +231,7 @@ export function normalizeWeather(raw) {
       currentRain,
       humidity,
       isDay,
-      theme: 'cloudy',
+      theme: isDay ? 'cloudy' : 'cloudy_night',
       source,
       observationTime
     };
@@ -231,6 +241,7 @@ export function normalizeWeather(raw) {
   if (weatherCode === 2 || conditionStr.includes('partly')) {
     return {
       type: WEATHER_TYPES.PARTLY_CLOUDY,
+      category: 'partly_cloudy',
       label: isDay ? 'Partly Cloudy' : 'Partly Cloudy Night',
       icon: isDay ? '⛅' : '☁️',
       temp,
@@ -239,7 +250,7 @@ export function normalizeWeather(raw) {
       currentRain,
       humidity,
       isDay,
-      theme: 'cloudy',
+      theme: isDay ? 'cloudy' : 'cloudy_night',
       source,
       observationTime
     };
@@ -250,6 +261,7 @@ export function normalizeWeather(raw) {
     if (!isDay) {
       return {
         type: WEATHER_TYPES.CLEAR_NIGHT,
+        category: 'clear',
         label: 'Mainly Clear Night',
         icon: '🌙',
         temp,
@@ -265,7 +277,8 @@ export function normalizeWeather(raw) {
     }
     return {
       type: WEATHER_TYPES.CLEAR_DAY,
-      label: 'Mainly Clear',
+      category: 'clear',
+      label: 'Mainly Clear Sky',
       icon: '🌤️',
       temp,
       tempFormatted,
@@ -284,6 +297,7 @@ export function normalizeWeather(raw) {
     if (temp !== null && temp <= -10) {
       return {
         type: isDay ? WEATHER_TYPES.CLEAR_COLD : WEATHER_TYPES.CLEAR_NIGHT,
+        category: 'clear',
         label: isDay ? 'Sub-Zero Clear' : 'Polar Clear Night',
         icon: isDay ? '☀️' : '🌙',
         temp,
@@ -301,7 +315,8 @@ export function normalizeWeather(raw) {
     if (!isDay) {
       return {
         type: WEATHER_TYPES.CLEAR_NIGHT,
-        label: 'Clear Night',
+        category: 'clear',
+        label: 'Clear Night Sky',
         icon: '🌙',
         temp,
         tempFormatted,
@@ -317,6 +332,7 @@ export function normalizeWeather(raw) {
 
     return {
       type: WEATHER_TYPES.CLEAR_DAY,
+      category: 'clear',
       label: 'Clear Skies',
       icon: '☀️',
       temp,
@@ -335,7 +351,8 @@ export function normalizeWeather(raw) {
   if (conditionStr.includes('rain') || conditionStr.includes('shower')) {
     return {
       type: WEATHER_TYPES.RAIN,
-      label: 'Rain Showers',
+      category: 'rain',
+      label: isDay ? 'Rain Showers' : 'Night Rain',
       icon: '🌧️',
       temp,
       tempFormatted,
@@ -343,7 +360,7 @@ export function normalizeWeather(raw) {
       currentRain,
       humidity,
       isDay,
-      theme: 'rain',
+      theme: isDay ? 'rain' : 'rain_night',
       source,
       observationTime
     };
@@ -352,15 +369,16 @@ export function normalizeWeather(raw) {
   if (conditionStr.includes('cloud')) {
     return {
       type: WEATHER_TYPES.CLOUDY,
-      label: 'Cloudy',
-      icon: '☁️',
+      category: 'cloudy',
+      label: isDay ? 'Cloudy Sky' : 'Cloudy Night',
+      icon: isDay ? '⛅' : '☁️',
       temp,
       tempFormatted,
       rain24h,
       currentRain,
       humidity,
       isDay,
-      theme: 'cloudy',
+      theme: isDay ? 'cloudy' : 'cloudy_night',
       source,
       observationTime
     };
@@ -369,15 +387,16 @@ export function normalizeWeather(raw) {
   // Safe default: Neutral / Unavailable - NEVER fake rain!
   return {
     type: WEATHER_TYPES.UNKNOWN,
-    label: conditionStr ? (conditionStr.charAt(0).toUpperCase() + conditionStr.slice(1)) : 'Weather Unavailable',
-    icon: '⛅',
+    category: 'unknown',
+    label: conditionStr ? (conditionStr.charAt(0).toUpperCase() + conditionStr.slice(1)) : 'Live Weather Standby',
+    icon: isDay ? '⛅' : '🌙',
     temp,
     tempFormatted,
     rain24h,
     currentRain,
     humidity,
     isDay,
-    theme: 'neutral',
+    theme: isDay ? 'neutral' : 'clear_night',
     source,
     observationTime
   };

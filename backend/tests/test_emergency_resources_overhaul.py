@@ -88,3 +88,28 @@ def test_api_key_override_query_param():
     assert data["status"] == "success"
     # Even if Google key fails, fallback to OSM directory guarantees real data
     assert data["total_found"] >= 1
+
+
+def test_cumulative_radius_retention_and_sorting():
+    """Verify that expanding radius retains all inner facilities (cumulative subset) and maintains ascending sort."""
+    res_5km = client.get(f"/api/resources/nearby?lat={TEST_LAT}&lng={TEST_LNG}&radius_km=5&category=hospitals")
+    assert res_5km.status_code == 200
+    places_5km = res_5km.json()["places"]
+    assert len(places_5km) >= 1
+
+    res_10km = client.get(f"/api/resources/nearby?lat={TEST_LAT}&lng={TEST_LNG}&radius_km=10&category=hospitals")
+    assert res_10km.status_code == 200
+    places_10km = res_10km.json()["places"]
+    assert len(places_10km) >= len(places_5km)
+
+    # 1. Check strict ascending sort by distance
+    distances_10km = [p["distance_km"] for p in places_10km]
+    assert distances_10km == sorted(distances_10km), "Results must be strictly sorted by ascending distance"
+
+    # 2. Check all places from 5km are retained in 10km (cumulative invariant)
+    names_10km = {p["name"].lower() for p in places_10km}
+    ids_10km = {p["id"] for p in places_10km}
+    for p5 in places_5km:
+        assert (p5["id"] in ids_10km or p5["name"].lower() in names_10km), (
+            f"Inner place '{p5['name']}' at {p5['distance_km']} km was lost when expanding radius to 10 km!"
+        )

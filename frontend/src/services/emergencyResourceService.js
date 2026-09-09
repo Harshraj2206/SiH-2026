@@ -13,6 +13,45 @@ import { apiClient } from './api';
 const resourceCache = new Map();
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
+// Cumulative spatial repository per geographic location and category
+// Retains all previously discovered resources so radius expansion strictly grows monotonically
+const clientLocationPool = new Map();
+
+function mergeCumulativePlaces(poolKey, incomingPlaces, latitude, longitude, radiusKm) {
+  const existing = clientLocationPool.get(poolKey) || [];
+  const candidates = [...incomingPlaces, ...existing];
+
+  const seenIds = new Set();
+  const seenCoords = new Set();
+  const deduped = [];
+
+  for (const p of candidates) {
+    const pid = p.place_id || p.id;
+    const coordKey = `${Number(p.latitude).toFixed(4)},${Number(p.longitude).toFixed(4)}_${(p.name || '').trim().toLowerCase()}`;
+
+    if (pid && seenIds.has(pid)) continue;
+    if (seenCoords.has(coordKey)) continue;
+
+    if (pid) seenIds.add(pid);
+    seenCoords.add(coordKey);
+
+    const distKm = calculateHaversineDistanceKm(latitude, longitude, p.latitude, p.longitude);
+    deduped.push({
+      ...p,
+      distance_km: distKm
+    });
+  }
+
+  // Update cumulative pool
+  clientLocationPool.set(poolKey, deduped);
+
+  // Filter strictly by maximum radius: distance_km <= radiusKm * 1.05
+  const withinRadius = deduped.filter(p => p.distance_km <= radiusKm * 1.05);
+  withinRadius.sort((a, b) => a.distance_km - b.distance_km);
+
+  return withinRadius;
+}
+
 /**
  * Calculate Great-Circle Haversine distance in kilometers.
  */
@@ -73,7 +112,7 @@ async function fetchDirectOsmFacilities(latitude, longitude, radiusKm, category)
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 6000);
     try {
-      const url = `https://nominatim.openstreetmap.org/search?amenity=${encodeURIComponent(item.amenity)}&viewbox=${minLon},${maxLat},${maxLon},${minLat}&bounded=1&format=json&limit=25&addressdetails=1`;
+      const url = `https://nominatim.openstreetmap.org/search?amenity=${encodeURIComponent(item.amenity)}&viewbox=${minLon},${maxLat},${maxLon},${minLat}&bounded=1&format=json&limit=50&addressdetails=1`;
       const resp = await fetch(url, {
         signal: controller.signal,
         headers: {
@@ -183,7 +222,8 @@ export async function getNearbyEmergencyResources(
   }
 
   const cleanCategory = category.toLowerCase().trim();
-  const cacheKey = `${latitude.toFixed(3)}_${longitude.toFixed(3)}_${radiusKm}_${cleanCategory}_${(keyword || '').trim().toLowerCase()}`;
+  const poolKey = `${latitude.toFixed(3)}_${longitude.toFixed(3)}_${cleanCategory}_${(keyword || '').trim().toLowerCase()}`;
+  const cacheKey = `${poolKey}_${radiusKm}`;
   const now = Date.now();
 
   if (!forceRefresh && resourceCache.has(cacheKey)) {
@@ -216,8 +256,16 @@ export async function getNearbyEmergencyResources(
     });
 
     if (res.data && res.data.status === 'success') {
-      resourceCache.set(cacheKey, { timestamp: now, data: res.data });
-      return res.data;
+      const rawPlaces = res.data.places || [];
+      const pooled = mergeCumulativePlaces(poolKey, rawPlaces, latitude, longitude, radiusKm);
+      const unifiedResult = {
+        ...res.data,
+        places: pooled,
+        total_found: pooled.length,
+        search_radius_km: radiusKm
+      };
+      resourceCache.set(cacheKey, { timestamp: now, data: unifiedResult });
+      return unifiedResult;
     }
   } catch (backendErr) {
     console.warn('[EmergencyResourceService] Backend discovery query failed or timed out. Falling back to direct OSM query:', backendErr.message);
@@ -226,8 +274,16 @@ export async function getNearbyEmergencyResources(
   // Tier 2: Resilient direct browser fetch to OpenStreetMap
   try {
     const directData = await fetchDirectOsmFacilities(latitude, longitude, radiusKm, cleanCategory);
-    resourceCache.set(cacheKey, { timestamp: now, data: directData });
-    return directData;
+    const rawPlaces = directData.places || [];
+    const pooled = mergeCumulativePlaces(poolKey, rawPlaces, latitude, longitude, radiusKm);
+    const unifiedResult = {
+      ...directData,
+      places: pooled,
+      total_found: pooled.length,
+      search_radius_km: radiusKm
+    };
+    resourceCache.set(cacheKey, { timestamp: now, data: unifiedResult });
+    return unifiedResult;
   } catch (directErr) {
     console.error('[EmergencyResourceService] Both backend and direct emergency discovery failed:', directErr);
     throw directErr;

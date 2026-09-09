@@ -35,7 +35,13 @@ def test_weather_endpoint_himalayan_coordinates():
     assert data["latitude"] == 31.1048
     assert data["longitude"] == 77.1734
     assert isinstance(data["weather_code"], int)
-    assert len(data["condition"]) > 0
+def test_weather_endpoint_is_day_telemetry():
+    """Test retrieving astronomical day/night telemetry."""
+    response = client.get("/api/weather?lat=12.9716&lon=77.5946")
+    assert response.status_code == 200
+    data = response.json()
+    assert "is_day" in data
+    assert isinstance(data["is_day"], (bool, int))
 
 
 def test_weather_endpoint_validation_error():

@@ -585,3 +585,18 @@
 .leaflet-control-attribution {
   display: none !important;
 }
+
+/* ==========================================================================
+   ACCESSIBILITY: PREFERS-REDUCED-MOTION OVERRIDES
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .animate-rain-drop,
+  .animate-snow-fall,
+  .animate-star-twinkle,
+  .animate-sun-pulse,
+  .animate-pulse,
+  .animate-spin {
+    animation: none !important;
+    transition: none !important;
+  }
+}

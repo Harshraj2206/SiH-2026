@@ -22,7 +22,7 @@ import { useLocationIntelligence } from '../context/LocationIntelligenceContext'
 export const OverviewPage = () => {
   const navigate = useNavigate();
   const { zones, reports, alerts, selectedZone, setSelectedZone } = useEmergency();
-  const { location, weather: intelWeather, requestLocation } = useLocationIntelligence();
+  const { location, weather: intelWeather, requestLocation, setManualLocation } = useLocationIntelligence();
   const { resolvedTheme } = useTheme();
   const isLight = resolvedTheme === 'light';
   const [activeTipIndex, setActiveTipIndex] = useState(0);
@@ -47,9 +47,7 @@ export const OverviewPage = () => {
       
       {/* Dynamic Weather & Atmospheric Condition Banner */}
       {(() => {
-        const activeZone = selectedZone || (zones && zones[0]);
-        const hasZoneWeather = activeZone && (typeof activeZone.temperature_c === 'number' || typeof activeZone.weather_code === 'number');
-        const weather = hasZoneWeather ? normalizeWeather(activeZone) : (intelWeather?.normalized || normalizeWeather(activeZone));
+        const weather = intelWeather?.normalized || (selectedZone ? normalizeWeather(selectedZone) : (zones && zones[0] ? normalizeWeather(zones[0]) : null));
         if (!weather) return null;
 
         const darkThemeStyles = {
@@ -160,7 +158,7 @@ export const OverviewPage = () => {
 
         const themeStyles = isLight ? lightThemeStyles : darkThemeStyles;
         const currentStyle = themeStyles[weather.theme] || themeStyles.neutral;
-        const locationName = (hasZoneWeather && activeZone?.name) || location?.displayName || activeZone?.name || activeZone?.formatted_address || 'Selected Sector';
+        const locationName = (selectedZone && selectedZone.name) || location?.displayName || (zones && zones[0]?.name) || 'Monitored Region';
 
         return (
           <div className={`relative overflow-hidden p-4 sm:p-5 rounded-2xl border backdrop-blur-xl transition-all duration-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-md ${currentStyle.border}`}>
@@ -506,7 +504,12 @@ export const OverviewPage = () => {
                   return (
                     <div
                       key={zone.zone_id}
-                      onClick={() => setSelectedZone(zone)}
+                      onClick={() => {
+                        setSelectedZone(zone);
+                        if (zone.center?.lat && zone.center?.lng) {
+                          setManualLocation(zone.center.lat, zone.center.lng, zone.name);
+                        }
+                      }}
                       className={`p-2.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
                         selectedZone?.zone_id === zone.zone_id
                           ? 'bg-[#181818] border-emerald-500 text-white'

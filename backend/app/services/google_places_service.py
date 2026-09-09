@@ -18,6 +18,10 @@ from typing import List, Dict, Any, Optional
 _PLACES_QUERY_CACHE: Dict[str, Dict[str, Any]] = {}
 CACHE_TTL_SECONDS = 600  # 10 minutes cache per lat/lng/radius/category query
 
+# Cumulative discovered facilities pool per geographic center and category
+# Ensures radius expansion (5km -> 10km -> 25km -> 50km) strictly preserves all inner resources
+_LOCATION_PLACES_POOL: Dict[str, List[Dict[str, Any]]] = {}
+
 
 def haversine_distance_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     """Calculate the great-circle distance between two points on Earth in kilometers."""
@@ -612,11 +616,16 @@ def discover_nearby_emergency_resources(
         if places:
             used_provider = "OpenStreetMap Real Infrastructure Directory"
 
-    # 4. Deduplicate across categories by place_id or coordinate + name
+    # 4. Merge with cumulative location pool for this geographic center & category
+    # Mathematical rule: resource.distance <= selectedRadius (never drop resources on radius increase)
+    pool_key = f"{round(latitude, 3)}_{round(longitude, 3)}_{category.lower()}_{keyword or ''}"
+    existing_pool = _LOCATION_PLACES_POOL.get(pool_key, [])
+    combined_candidates = places + existing_pool
+
     seen_ids = set()
     seen_coords = set()
     deduped_places = []
-    for p in places:
+    for p in combined_candidates:
         pid = p.get("place_id") or p.get("id")
         coord_key = (round(p["latitude"], 4), round(p["longitude"], 4), p["name"].strip().lower())
         if pid and pid in seen_ids:
@@ -626,11 +635,17 @@ def discover_nearby_emergency_resources(
         if pid:
             seen_ids.add(pid)
         seen_coords.add(coord_key)
+        
+        # Ensure distance is strictly computed from current query center
+        p_dist = haversine_distance_km(latitude, longitude, p["latitude"], p["longitude"])
+        p["distance_km"] = p_dist
         deduped_places.append(p)
-    places = deduped_places
 
-    # 5. Filter strictly within requested radius (with slight 5% tolerance for boundary coordinates)
-    places = [p for p in places if p["distance_km"] <= (radius_km * 1.05)]
+    # Save complete cumulative pool for this center & category
+    _LOCATION_PLACES_POOL[pool_key] = deduped_places
+
+    # 5. Filter strictly within requested maximum radius: distance_km <= radius_km * 1.05
+    places = [p for p in deduped_places if p["distance_km"] <= (radius_km * 1.05)]
 
     # 6. Optional Keyword Filtering
     if keyword and keyword.strip():

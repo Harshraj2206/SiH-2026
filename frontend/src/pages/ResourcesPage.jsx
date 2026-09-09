@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   MapContainer, 
@@ -14,7 +14,7 @@ import 'leaflet/dist/leaflet.css';
 import axios from 'axios';
 import { apiClient, resourcesApi, safeRouteApi } from '../services/api';
 import { useLocationIntelligence } from '../context/LocationIntelligenceContext';
-import { getNearbyEmergencyResources } from '../services/emergencyResourceService';
+import { getNearbyEmergencyResources, calculateHaversineDistanceKm } from '../services/emergencyResourceService';
 import { reverseGeocode } from '../services/reverseGeocodeService';
 import { 
   Shield, 
@@ -244,6 +244,57 @@ export const ResourcesPage = () => {
   const [lastRefreshed, setLastRefreshed] = useState(null);
   const [selectedPlaceId, setSelectedPlaceId] = useState(null);
 
+  // Master cumulative discovery pool per geographic coordinates and category
+  // Guarantees monotonic expansion: Results(5km) ⊆ Results(10km) ⊆ Results(25km) ⊆ Results(50km)
+  const discoveredPoolRef = useRef(new Map());
+
+  const recomputeCumulativePlaces = useCallback((lat, lng, radius, category, incomingPlaces = []) => {
+    if (typeof lat !== 'number' || typeof lng !== 'number' || isNaN(lat) || isNaN(lng)) return [];
+    const poolKey = `${lat.toFixed(3)}_${lng.toFixed(3)}_${category.toLowerCase().trim()}`;
+    
+    if (!discoveredPoolRef.current.has(poolKey)) {
+      discoveredPoolRef.current.set(poolKey, new Map());
+    }
+    const pool = discoveredPoolRef.current.get(poolKey);
+
+    // Merge incoming places into pool
+    for (const p of incomingPlaces) {
+      const pid = p.place_id || p.id;
+      const coordKey = `${Number(p.latitude).toFixed(4)},${Number(p.longitude).toFixed(4)}_${(p.name || '').trim().toLowerCase()}`;
+      const uniqueKey = pid || coordKey;
+
+      const distKm = calculateHaversineDistanceKm(lat, lng, p.latitude, p.longitude);
+      const enrichedPlace = {
+        ...p,
+        distance_km: distKm
+      };
+
+      if (!pool.has(uniqueKey)) {
+        pool.set(uniqueKey, enrichedPlace);
+      } else {
+        const existing = pool.get(uniqueKey);
+        pool.set(uniqueKey, {
+          ...existing,
+          ...enrichedPlace,
+          phone: enrichedPlace.phone || existing.phone,
+          opening_hours: enrichedPlace.opening_hours || existing.opening_hours
+        });
+      }
+    }
+
+    // Recalculate distance for all items in pool from current center
+    const allPlaces = Array.from(pool.values());
+    for (const p of allPlaces) {
+      p.distance_km = calculateHaversineDistanceKm(lat, lng, p.latitude, p.longitude);
+    }
+
+    // Mathematical rule: resource.distance <= selectedRadius (with 5% tolerance for boundary)
+    const withinRadius = allPlaces.filter((p) => p.distance_km <= radius * 1.05);
+    withinRadius.sort((a, b) => a.distance_km - b.distance_km);
+
+    return withinRadius;
+  }, []);
+
   // Map & Layout state
   const [viewLayout, setViewLayout] = useState('split'); // 'split' | 'cards' | 'map'
   const [mapCenter, setMapCenter] = useState({ lat: 12.6445, lng: 77.4365 });
@@ -440,26 +491,38 @@ export const ResourcesPage = () => {
     requestUnifiedGps();
   };
 
-  // 3. Query Real Emergency Resources with Two-Tier Fallback
+  // 3. Query Real Emergency Resources with Two-Tier Fallback and Cumulative Pooling
   const fetchNearby = async (lat, lng, radius, category, keyword = '', forceRefresh = false) => {
     if (typeof lat !== 'number' || typeof lng !== 'number' || isNaN(lat) || isNaN(lng)) return;
     setLoading(true);
     setLocationError(null);
 
+    // Instant local evaluation from cumulative pool so inner resources NEVER vanish or flash
+    const immediatePlaces = recomputeCumulativePlaces(lat, lng, radius, category, []);
+    if (immediatePlaces.length > 0) {
+      setPlaces(immediatePlaces);
+    }
+
     try {
       const data = await getNearbyEmergencyResources(lat, lng, radius, category, keyword, forceRefresh);
       const discoveredPlaces = data.places || [];
-      setPlaces(discoveredPlaces);
+      const updatedCumulative = recomputeCumulativePlaces(lat, lng, radius, category, discoveredPlaces);
+      setPlaces(updatedCumulative);
       setDataSourceInfo(data.data_source || null);
       setLastRefreshed(new Date());
 
-      if (discoveredPlaces.length > 0) {
-        setSelectedPlaceId(discoveredPlaces[0].id);
+      if (updatedCumulative.length > 0) {
+        setSelectedPlaceId((prev) => (updatedCumulative.some((p) => p.id === prev) ? prev : updatedCumulative[0].id));
       }
     } catch (err) {
       console.error('Failed to discover nearby resources:', err);
-      setLocationError(err?.message || 'Unable to contact emergency discovery service. Please check network and retry.');
-      setPlaces([]);
+      const fallbackPool = recomputeCumulativePlaces(lat, lng, radius, category, []);
+      if (fallbackPool.length > 0) {
+        setPlaces(fallbackPool);
+      } else {
+        setLocationError(err?.message || 'Unable to contact emergency discovery service. Please check network and retry.');
+        setPlaces([]);
+      }
     } finally {
       setLoading(false);
     }
@@ -468,6 +531,12 @@ export const ResourcesPage = () => {
   // Trigger search when active category or radius changes
   useEffect(() => {
     if (userCoords?.lat && userCoords?.lng) {
+      // Synchronously evaluate cumulative pool so 5 -> 10km immediately keeps 5km facilities,
+      // and 50 -> 10km immediately filters out > 10km facilities
+      const instant = recomputeCumulativePlaces(userCoords.lat, userCoords.lng, radiusKm, activeCategory, []);
+      if (instant.length > 0) {
+        setPlaces(instant);
+      }
       fetchNearby(userCoords.lat, userCoords.lng, radiusKm, activeCategory, searchKeyword);
     }
   }, [activeCategory, radiusKm]);

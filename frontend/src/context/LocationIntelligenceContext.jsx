@@ -108,21 +108,25 @@ export const LocationIntelligenceProvider = ({ children }) => {
       return rawWeather;
     } catch (err) {
       console.error('[LocationIntelligence] Weather update error:', err);
-      const fallbackWeather = {
-        temperature_c: 24,
-        humidity_pct: 60,
-        rainfall_24h: 0,
-        weather_code: 1,
-        condition: 'Mainly clear',
-        is_day: true,
-        source: 'Atmospheric Model'
-      };
-      setWeather({
-        ...fallbackWeather,
+      setWeather(prev => ({
+        ...prev,
         loading: false,
-        error: err.message,
-        normalized: normalizeWeather(fallbackWeather)
-      });
+        error: err.message || 'Live weather temporarily unavailable',
+        normalized: {
+          type: 'UNKNOWN',
+          label: 'Live weather temporarily unavailable',
+          icon: '⚠️',
+          temp: null,
+          tempFormatted: '—',
+          rain24h: 0,
+          currentRain: 0,
+          humidity: null,
+          isDay: true,
+          theme: 'neutral',
+          source: 'Telemetry Offline',
+          observationTime: null
+        }
+      }));
       return null;
     }
   }, []);

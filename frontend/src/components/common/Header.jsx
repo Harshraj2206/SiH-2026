@@ -10,10 +10,12 @@ import {
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { normalizeWeather } from '../../utils/weatherNormalizer';
+import { useLocationIntelligence } from '../../context/LocationIntelligenceContext';
 
 export const Header = ({ onToggleSidebar }) => {
   const { currentUser, logout, login, PRESET_DEMO_ACCOUNTS } = useAuth();
   const { alerts, selectedZone, zones } = useEmergency();
+  const { location, weather: intelWeather } = useLocationIntelligence();
   const navigate = useNavigate();
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
@@ -55,16 +57,18 @@ export const Header = ({ onToggleSidebar }) => {
         
         {/* Live Location Weather Atmospheric Indicator */}
         {(() => {
-          const activeZone = selectedZone || (zones && zones[0]);
-          if (!activeZone) return null;
-          const weather = normalizeWeather(activeZone);
-          const locationName = activeZone.name || activeZone.formatted_address || activeZone.district || 'Selected Sector';
+          const weather = intelWeather?.normalized || (selectedZone ? normalizeWeather(selectedZone) : (zones && zones[0] ? normalizeWeather(zones[0]) : null));
+          if (!weather) return null;
+          const locationName = location?.displayName || selectedZone?.name || (zones && zones[0]?.name) || 'Monitored Region';
           
           return (
-            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#0d0d0d]/80 border border-[#202020] text-xs backdrop-blur-sm shadow-sm">
+            <div 
+              className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#0d0d0d]/80 border border-[#202020] text-xs backdrop-blur-sm shadow-sm"
+              title={`Live Weather at ${locationName}: ${weather.label}, ${weather.tempFormatted}`}
+            >
               <span className="text-sm">{weather.icon}</span>
               <span className="font-semibold text-neutral-200 font-mono">{weather.tempFormatted}</span>
-              <span className="text-[10px] text-neutral-400 font-medium truncate max-w-[120px]">
+              <span className="text-[10px] text-neutral-400 font-medium truncate max-w-[130px]">
                 {locationName}
               </span>
             </div>
