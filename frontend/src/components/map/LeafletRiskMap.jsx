@@ -323,7 +323,7 @@ export const LeafletRiskMap = ({
     }
 
     setGeoLocating(true);
-    requestContextLocation();
+    requestContextLocation(true);
   };
 
   // Location Search Handler - searches zones, Nominatim, and enriches with real weather

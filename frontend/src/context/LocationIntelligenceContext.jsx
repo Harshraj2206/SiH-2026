@@ -35,6 +35,16 @@ export const LocationIntelligenceProvider = ({ children }) => {
   // 1. Live Physical User GPS Location (stored independently)
   const [userGpsLocation, setUserGpsLocation] = useState(null);
 
+  // 1b. Location Mode: 'gps' (following live GPS) | 'selected' (user intentionally selected on map/search)
+  const [locationMode, setLocationMode] = useState('gps');
+  const locationModeRef = useRef('gps');
+
+  // Keep ref to latest location to prevent callback instability and stale closures
+  const locationRef = useRef(null);
+
+  // Keep ref to ensure auto-discovery runs strictly once on mount
+  const hasAutoDiscoveredRef = useRef(false);
+
   // 2. Authoritative Currently Selected / Inspected Location
   const [location, setLocation] = useState({
     latitude: DEFAULT_FALLBACK_LOCATION.latitude,
@@ -54,6 +64,11 @@ export const LocationIntelligenceProvider = ({ children }) => {
     loading: false,
     error: null
   });
+
+  // Keep locationRef current
+  useEffect(() => {
+    locationRef.current = location;
+  }, [location]);
 
   // 3. Authoritative Live Weather State
   const [weather, setWeather] = useState({
@@ -162,11 +177,12 @@ export const LocationIntelligenceProvider = ({ children }) => {
 
       setWeather(updatedWeather);
 
-      // Recompute authoritative environment state
+      // Recompute authoritative environment state using current location name if not provided
+      const resolvedDisplayName = locationName || (locationRef.current ? locationRef.current.displayName : '');
       recomputeEnvironment(
         lat,
         lon,
-        locationName || location.displayName,
+        resolvedDisplayName,
         targetTz,
         targetAbbr,
         targetOffset,
@@ -197,10 +213,11 @@ export const LocationIntelligenceProvider = ({ children }) => {
       }));
 
       // Recompute environment with fallback
+      const resolvedDisplayName = locationName || (locationRef.current ? locationRef.current.displayName : '');
       recomputeEnvironment(
         lat,
         lon,
-        locationName || location.displayName,
+        resolvedDisplayName,
         'Asia/Kolkata',
         'IST',
         19800,
@@ -208,7 +225,7 @@ export const LocationIntelligenceProvider = ({ children }) => {
       );
       return null;
     }
-  }, [location.displayName, recomputeEnvironment]);
+  }, [recomputeEnvironment]);
 
   /**
    * Asynchronously load deep geospatial intelligence (DEM, slope, risk prediction).
@@ -235,6 +252,10 @@ export const LocationIntelligenceProvider = ({ children }) => {
    * Switches authoritative viewing location away from GPS to the selected map coordinates.
    */
   const setManualLocation = useCallback(async (lat, lon, customName = null) => {
+    // Explicit user action: user chose a specific place on map
+    locationModeRef.current = 'selected';
+    setLocationMode('selected');
+
     const reqId = ++activeReqRef.current;
     setLocation(prev => ({
       ...prev,
@@ -278,26 +299,40 @@ export const LocationIntelligenceProvider = ({ children }) => {
   }, [updateWeatherForCoords, updateDeepIntelligence]);
 
   /**
-   * Request high-accuracy physical GPS location from user browser.
-   * Updates userGpsLocation AND switches viewing location back to user's live GPS.
+   * Request physical GPS location from user browser.
+   * If explicitUserAction is true (e.g. user clicked "Locate Me"), switches locationMode to 'gps'
+   * and updates both userGpsLocation AND location.
+   * If explicitUserAction is false (background / mount check), ONLY updates userGpsLocation,
+   * and only updates location if locationMode is currently 'gps'.
    */
-  const requestLocation = useCallback(() => {
+  const requestLocation = useCallback((explicitUserAction = false) => {
+    const isExplicit = explicitUserAction === true || 
+      (explicitUserAction && typeof explicitUserAction === 'object' && ('nativeEvent' in explicitUserAction || 'type' in explicitUserAction));
+
+    if (isExplicit) {
+      locationModeRef.current = 'gps';
+      setLocationMode('gps');
+    }
+
     if (!navigator.geolocation) {
-      setLocation(prev => ({
-        ...prev,
-        permissionStatus: 'unavailable',
-        loading: false,
-        error: 'Geolocation is not supported by this browser.'
-      }));
+      if (isExplicit || locationModeRef.current === 'gps') {
+        setLocation(prev => ({
+          ...prev,
+          permissionStatus: 'unavailable',
+          loading: false,
+          error: 'Geolocation is not supported by this browser.'
+        }));
+      }
       return;
     }
 
     const reqId = ++activeReqRef.current;
-    setLocation(prev => ({ ...prev, loading: true, error: null }));
+    if (isExplicit || locationModeRef.current === 'gps') {
+      setLocation(prev => ({ ...prev, loading: true, error: null }));
+    }
 
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
-        if (reqId !== activeReqRef.current) return;
         const { latitude, longitude, accuracy } = pos.coords;
 
         // Concurrent: reverse geocode and fetch weather
@@ -305,8 +340,6 @@ export const LocationIntelligenceProvider = ({ children }) => {
           reverseGeocode(latitude, longitude),
           updateWeatherForCoords(latitude, longitude, false, null)
         ]);
-
-        if (reqId !== activeReqRef.current) return;
 
         const resolvedName = geoResult.displayName || formatCoordinateFallback(latitude, longitude);
 
@@ -324,7 +357,18 @@ export const LocationIntelligenceProvider = ({ children }) => {
           permissionStatus: 'granted'
         };
 
+        // Always update live physical GPS state
         setUserGpsLocation(gpsRecord);
+
+        // Discard out-of-order responses
+        if (reqId !== activeReqRef.current) return;
+
+        // CRITICAL: If the user has intentionally selected another location,
+        // DO NOT let background GPS overwrite the user's selected map location!
+        if (locationModeRef.current !== 'gps') {
+          return;
+        }
+
         setLocation({
           ...gpsRecord,
           loading: false,
@@ -351,15 +395,15 @@ export const LocationIntelligenceProvider = ({ children }) => {
           friendlyError = 'GPS position request timed out. Defaulting to sector centroid.';
         }
 
-        setLocation(prev => ({
-          ...prev,
-          permissionStatus: status,
-          loading: false,
-          error: friendlyError
-        }));
-
-        // Fetch weather for fallback location if weather not yet loaded
-        updateWeatherForCoords(DEFAULT_FALLBACK_LOCATION.latitude, DEFAULT_FALLBACK_LOCATION.longitude);
+        if (isExplicit || locationModeRef.current === 'gps') {
+          setLocation(prev => ({
+            ...prev,
+            permissionStatus: status,
+            loading: false,
+            error: friendlyError
+          }));
+          updateWeatherForCoords(DEFAULT_FALLBACK_LOCATION.latitude, DEFAULT_FALLBACK_LOCATION.longitude);
+        }
       },
       {
         enableHighAccuracy: true,
@@ -374,6 +418,11 @@ export const LocationIntelligenceProvider = ({ children }) => {
    */
   const searchLocation = useCallback(async (query) => {
     if (!query || !query.trim()) return null;
+
+    // Explicit user action: user searched for a specific place
+    locationModeRef.current = 'selected';
+    setLocationMode('selected');
+
     const reqId = ++activeReqRef.current;
     setLocation(prev => ({ ...prev, loading: true, error: null }));
 
@@ -416,7 +465,7 @@ export const LocationIntelligenceProvider = ({ children }) => {
         country,
         isGps: false,
         source: `Search: ${query}`,
-        permissionStatus: location.permissionStatus,
+        permissionStatus: locationRef.current ? locationRef.current.permissionStatus : 'prompt',
         loading: false,
         error: null
       };
@@ -434,14 +483,17 @@ export const LocationIntelligenceProvider = ({ children }) => {
       }));
       return null;
     }
-  }, [location.permissionStatus, updateWeatherForCoords, updateDeepIntelligence]);
+  }, [updateWeatherForCoords, updateDeepIntelligence]);
 
-  // Initial Auto-Discovery on mount
+  // Initial Auto-Discovery on mount (strictly runs once)
   useEffect(() => {
+    if (hasAutoDiscoveredRef.current) return;
+    hasAutoDiscoveredRef.current = true;
+
     if (navigator.permissions && navigator.permissions.query) {
       navigator.permissions.query({ name: 'geolocation' }).then((status) => {
         if (status.state === 'granted' || status.state === 'prompt') {
-          requestLocation();
+          requestLocation(false);
         } else {
           setLocation(prev => ({
             ...prev,
@@ -451,10 +503,10 @@ export const LocationIntelligenceProvider = ({ children }) => {
           updateWeatherForCoords(DEFAULT_FALLBACK_LOCATION.latitude, DEFAULT_FALLBACK_LOCATION.longitude);
         }
       }).catch(() => {
-        requestLocation();
+        requestLocation(false);
       });
     } else {
-      requestLocation();
+      requestLocation(false);
     }
   }, [requestLocation, updateWeatherForCoords]);
 
@@ -483,6 +535,9 @@ export const LocationIntelligenceProvider = ({ children }) => {
   const value = {
     location,
     userGpsLocation,
+    liveGpsLocation: userGpsLocation,
+    selectedMapLocation: location,
+    locationMode,
     weather,
     environment,
     intelligence,
@@ -490,7 +545,11 @@ export const LocationIntelligenceProvider = ({ children }) => {
     requestLocation,
     setManualLocation,
     searchLocation,
-    refreshWeather: () => updateWeatherForCoords(location.latitude, location.longitude, true),
+    refreshWeather: () => updateWeatherForCoords(
+      locationRef.current ? locationRef.current.latitude : location.latitude,
+      locationRef.current ? locationRef.current.longitude : location.longitude,
+      true
+    ),
     // Backward-compatibility aliases
     selectedLocation: {
       latitude: location.latitude,
@@ -505,7 +564,7 @@ export const LocationIntelligenceProvider = ({ children }) => {
       timezone: location.timezone,
       utcOffsetSeconds: location.utcOffsetSeconds
     },
-    useLiveGps: requestLocation,
+    useLiveGps: () => requestLocation(true),
     inspectCoordinates: (lat, lng, label) => setManualLocation(lat, lng, label),
     searchPlace: searchLocation,
     loading: location.loading || weather.loading,
