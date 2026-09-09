@@ -26,7 +26,7 @@ export const SafeRoutePage = () => {
   const { t } = useLanguage();
   const { zones, reports } = useEmergency();
   const { userCoordinates } = useAuth();
-  const { selectedLocation } = useLocationIntelligence();
+  const { selectedLocation, requestLocation, location } = useLocationIntelligence();
 
   const [routingMode, setRoutingMode] = useState('global'); // 'global' | 'preset'
   
@@ -229,25 +229,16 @@ export const SafeRoutePage = () => {
 
   // Use Current Live GPS
   const handleUseCurrentLocation = () => {
-    if (navigator.geolocation) {
-      setCalculating(true);
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const coords = {
-            lat: pos.coords.latitude,
-            lng: pos.coords.longitude,
-            name: 'My Current Location'
-          };
-          setOriginCoords(coords);
-          setOriginQuery('My Current GPS Location');
-          handleExecuteGlobalRoute('My Current GPS Location', destQuery);
-        },
-        () => {
-          setCalculating(false);
-          setErrorMsg('GPS location unavailable. Please enter a city or address.');
-        },
-        { timeout: 6000 }
-      );
+    requestLocation();
+    if (location?.latitude && location?.longitude) {
+      const coords = {
+        lat: location.latitude,
+        lng: location.longitude,
+        name: location.displayName || 'My Current Location'
+      };
+      setOriginCoords(coords);
+      setOriginQuery(location.displayName || 'My Current GPS Location');
+      handleExecuteGlobalRoute(location.displayName || 'My Current GPS Location', destQuery);
     }
   };
 
@@ -264,7 +255,7 @@ export const SafeRoutePage = () => {
 
   // Initial calculation on mount
   useEffect(() => {
-    handleExecuteGlobalRoute('My Current GPS Location', 'Bengaluru, Karnataka');
+    handleExecuteGlobalRoute(originQuery, destQuery);
   }, []);
 
   // Quick Corridors

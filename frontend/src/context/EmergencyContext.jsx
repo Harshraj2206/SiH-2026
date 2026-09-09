@@ -64,47 +64,45 @@ export const EmergencyProvider = ({ children }) => {
     return () => clearInterval(interval);
   }, []);
 
-  // Sync selectedZone when user's location or inspected intelligence updates
+  // Sync selectedZone when user's location or weather updates
   useEffect(() => {
-    if (locationIntel?.intelligence?.location && locationIntel?.intelligence?.weather) {
-      const intel = locationIntel.intelligence;
-      const loc = intel.location;
-      const w = intel.weather;
-      const p = intel.precipitation || {};
+    if (locationIntel?.location?.latitude && locationIntel?.weather && !locationIntel.weather.loading) {
+      const loc = locationIntel.location;
+      const w = locationIntel.weather;
+      const intel = locationIntel.intelligence || {};
       const t = intel.terrain || {};
       const r = intel.risk || {};
 
       const lat = Number(loc.latitude);
       const lng = Number(loc.longitude);
 
-      setSelectedZone({
+      setSelectedZone(prev => ({
+        ...prev,
         zone_id: `GPS-${lat.toFixed(2)}-${lng.toFixed(2)}`,
-        name: loc.display_name,
-        state: loc.state_province || loc.country || '',
-        district: loc.district || loc.locality || '',
-        formatted_address: loc.display_name,
+        name: loc.displayName || `Sector (${lat.toFixed(3)}, ${lng.toFixed(3)})`,
+        state: loc.state || loc.country || '',
+        district: loc.city || '',
+        formatted_address: loc.displayName,
         center: { lat, lng },
         coordinates: { lat, lng },
         temperature_c: w.temperature_c,
-        humidity_pct: w.relative_humidity_pct,
+        humidity_pct: w.humidity_pct,
         weather_code: w.weather_code,
         condition: w.condition,
         is_day: w.is_day,
-        cloud_cover_pct: w.cloud_cover_pct,
-        snowfall_cm: w.snowfall_cm || 0,
-        rainfall_1h: w.precipitation_1h_mm || 0,
-        rain_current_mm: w.rain_current_mm || 0,
-        rainfall_24h: p.accum_24h_mm || w.precipitation_24h_mm || 0,
-        rainfall_72h: p.accum_72h_mm || w.precipitation_72h_mm || 0,
+        rainfall_1h: w.precipitation_mm || 0,
+        rain_current_mm: w.precipitation_mm || 0,
+        rainfall_24h: w.rainfall_24h || 0,
         soil_moisture: intel.soil_moisture?.volumetric_m3m3 || 0.35,
         slope_deg: t.slope_deg || 3.5,
-        risk_score: r.risk_score || 10.0,
+        risk_score: r.risk_score || 12.0,
         risk_level: r.risk_level || 'LOW',
+        weather_source: w.source,
         is_live_inspected: true,
         is_weather_loading: false
-      });
+      }));
     }
-  }, [locationIntel?.intelligence]);
+  }, [locationIntel?.location?.latitude, locationIntel?.location?.longitude, locationIntel?.location?.displayName, locationIntel?.weather, locationIntel?.intelligence]);
 
   const selectZoneById = (zoneId) => {
     const found = zones.find(z => z.zone_id === zoneId);

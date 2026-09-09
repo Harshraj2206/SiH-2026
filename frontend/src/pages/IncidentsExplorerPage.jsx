@@ -12,6 +12,7 @@ import 'leaflet/dist/leaflet.css';
 import { incidentsApi } from '../services/api';
 import { formatDate } from '../utils/formatters';
 import { useLanguage } from '../context/LanguageContext';
+import { useLocationIntelligence } from '../context/LocationIntelligenceContext';
 import { 
   AlertTriangle, 
   Search, 
@@ -158,9 +159,18 @@ export const IncidentsExplorerPage = () => {
   const [expandWhyRisk, setExpandWhyRisk] = useState(true);
 
   // User GPS Location & Proximity
+  const { location: unifiedLoc, requestLocation: requestUnifiedLocation } = useLocationIntelligence();
   const [userCoords, setUserCoords] = useState({ lat: 11.5320, lon: 76.1280 }); // Default or GPS
   const [proximityAdvisory, setProximityAdvisory] = useState(null);
   const [locatingUser, setLocatingUser] = useState(false);
+
+  // Sync with unified location provider
+  useEffect(() => {
+    if (unifiedLoc?.latitude && unifiedLoc?.longitude) {
+      setUserCoords({ lat: unifiedLoc.latitude, lon: unifiedLoc.longitude });
+      fetchProximityAdvisory(unifiedLoc.latitude, unifiedLoc.longitude);
+    }
+  }, [unifiedLoc?.latitude, unifiedLoc?.longitude]);
 
   // Map Controls
   const [mapType, setMapType] = useState('dark');
@@ -180,27 +190,7 @@ export const IncidentsExplorerPage = () => {
   }, []);
 
   const detectUserLocation = () => {
-    if (navigator.geolocation) {
-      setLocatingUser(true);
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const lat = pos.coords.latitude;
-          const lon = pos.coords.longitude;
-          setUserCoords({ lat, lon });
-          setLocatingUser(false);
-          fetchProximityAdvisory(lat, lon);
-        },
-        (err) => {
-          console.warn('Geolocation denied or timed out:', err.message);
-          setLocatingUser(false);
-          // Fallback to default coordinates (e.g. Wayanad/Western Ghats monitored baseline)
-          fetchProximityAdvisory(11.5320, 76.1280);
-        },
-        { timeout: 8000, enableHighAccuracy: false }
-      );
-    } else {
-      fetchProximityAdvisory(11.5320, 76.1280);
-    }
+    requestUnifiedLocation();
   };
 
   const fetchProximityAdvisory = async (lat, lon) => {

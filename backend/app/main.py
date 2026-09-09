@@ -46,6 +46,7 @@ from backend.app.api.routes_analytics import router as analytics_router
 from backend.app.api.routes_simulation import router as simulation_router
 from backend.app.api.routes_data_sources import router as data_sources_router
 from backend.app.api.routes_location_intelligence import router as location_intelligence_router
+from backend.app.api.routes_weather import router as weather_router
 from backend.app.database.store import db_store
 
 # Configure Structured Server-Side Logging
@@ -125,6 +126,7 @@ app.include_router(analytics_router)
 app.include_router(simulation_router)
 app.include_router(data_sources_router)
 app.include_router(location_intelligence_router)
+app.include_router(weather_router)
 
 
 @app.get("/api/health", tags=["System"])

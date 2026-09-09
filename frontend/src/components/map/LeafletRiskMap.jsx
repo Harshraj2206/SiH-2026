@@ -20,6 +20,9 @@ import { useLanguage } from '../../context/LanguageContext';
 import { api } from '../../services/api';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
+import { useLocationIntelligence } from '../../context/LocationIntelligenceContext';
+import { getLiveWeather } from '../../services/weatherService';
+import { reverseGeocode, formatCoordinateFallback } from '../../services/reverseGeocodeService';
 import { 
   Layers, 
   Navigation, 
@@ -255,6 +258,14 @@ export const LeafletRiskMap = ({
     routes: true
   });
 
+  const {
+    location: userLocation,
+    weather: userWeather,
+    requestLocation: requestContextLocation,
+    setManualLocation: setContextManualLocation,
+    searchLocation: searchContextLocation
+  } = useLocationIntelligence();
+
   // Single Active Location Pin State (strictly one location marker at a time)
   const [activeLocationPin, setActiveLocationPin] = useState(null); // { lat, lng, type: 'gps' | 'manual', accuracy, name }
   const [geoLocating, setGeoLocating] = useState(false);
@@ -286,13 +297,24 @@ export const LeafletRiskMap = ({
     }
   }, [zoneCenterLat, zoneCenterLng, isLiveInspected]);
 
-  // Handle "Locate Me" - places single GPS pin; toggles off if already located
-  const handleLocateMe = () => {
-    if (!navigator.geolocation) {
-      alert('Browser geolocation is not supported by your browser.');
-      return;
+  // Sync location pin when user GPS is acquired or granted
+  useEffect(() => {
+    if (userLocation.isGps && typeof userLocation.latitude === 'number' && typeof userLocation.longitude === 'number') {
+      setGeoLocating(false);
+      setActiveCenter([userLocation.latitude, userLocation.longitude]);
+      setActiveZoom(14);
+      setActiveLocationPin({
+        lat: userLocation.latitude,
+        lng: userLocation.longitude,
+        type: 'gps',
+        accuracy: userLocation.accuracy || 25,
+        name: userLocation.displayName || 'My GPS Location'
+      });
     }
+  }, [userLocation.isGps, userLocation.latitude, userLocation.longitude, userLocation.displayName, userLocation.accuracy]);
 
+  // Handle "Locate Me" button - requests high-accuracy location via unified provider
+  const handleLocateMe = () => {
     // Toggle off if already showing GPS pin
     if (activeLocationPin && activeLocationPin.type === 'gps') {
       setActiveLocationPin(null);
@@ -301,75 +323,20 @@ export const LeafletRiskMap = ({
     }
 
     setGeoLocating(true);
-    const reqId = ++latestInspectionRef.current;
-
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        setGeoLocating(false);
-        const { latitude, longitude, accuracy } = pos.coords;
-        setActiveCenter([latitude, longitude]);
-        setActiveZoom(14);
-        setActiveLocationPin({
-          lat: latitude,
-          lng: longitude,
-          type: 'gps',
-          accuracy: accuracy || 50,
-          name: 'My GPS Location'
-        });
-
-        if (onSelectZone) {
-          onSelectZone({
-            latitude,
-            longitude,
-            is_weather_loading: true,
-            is_live_inspected: true,
-            name: 'Detecting GPS Telemetry...'
-          });
-        }
-
-        try {
-          const liveData = await api.inspectTelemetry(latitude, longitude);
-          if (reqId !== latestInspectionRef.current) return;
-          if (liveData && onSelectZone) {
-            onSelectZone({ ...liveData, is_live_inspected: true, is_weather_loading: false });
-          }
-        } catch (e) {
-          if (reqId !== latestInspectionRef.current) return;
-          console.warn('Live telemetry lookup error:', e);
-          if (onSelectZone) {
-            onSelectZone({
-              latitude,
-              longitude,
-              center: { lat: latitude, lng: longitude },
-              is_weather_loading: false,
-              is_live_inspected: true,
-              name: `GPS Location (${latitude.toFixed(3)}, ${longitude.toFixed(3)})`,
-              risk_score: 15.0,
-              risk_level: 'LOW'
-            });
-          }
-        }
-      },
-      (err) => {
-        setGeoLocating(false);
-        console.warn('Geolocation error:', err.message);
-        alert('Could not access your location. Please check browser permissions.');
-      },
-      { enableHighAccuracy: true, timeout: 8000 }
-    );
+    requestContextLocation();
   };
 
-  // Location Search Handler
+  // Location Search Handler - searches zones, Nominatim, and enriches with real weather
   const handleSearchSubmit = async (e) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
     const q = searchQuery.toLowerCase().trim();
     const reqId = ++latestInspectionRef.current;
 
-    // 1. Look for matching zone in database
+    // 1. Check existing known zones
     const matchedZone = zones.find(z => 
       z.name.toLowerCase().includes(q) || 
-      z.district.toLowerCase().includes(q) ||
+      z.district?.toLowerCase().includes(q) ||
       z.zone_id.toLowerCase().includes(q)
     );
 
@@ -383,60 +350,58 @@ export const LeafletRiskMap = ({
         name: matchedZone.name
       });
       if (onSelectZone) onSelectZone(matchedZone);
+      setContextManualLocation(matchedZone.center.lat, matchedZone.center.lng, matchedZone.name);
       return;
     }
 
-    // 2. OpenStreetMap Nominatim global search for any place worldwide
+    // 2. Search via unified service
     try {
-      const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=1`, {
-        headers: { 'User-Agent': 'LandSafe-GlobalEngine/2.0' }
-      });
-      const results = await resp.json();
+      const searchRes = await searchContextLocation(searchQuery);
       if (reqId !== latestInspectionRef.current) return;
 
-      if (results && results.length > 0) {
-        const targetLat = parseFloat(results[0].lat);
-        const targetLng = parseFloat(results[0].lon);
-        setActiveCenter([targetLat, targetLng]);
+      if (searchRes) {
+        setActiveCenter([searchRes.latitude, searchRes.longitude]);
         setActiveZoom(12);
         setActiveLocationPin({
-          lat: targetLat,
-          lng: targetLng,
+          lat: searchRes.latitude,
+          lng: searchRes.longitude,
           type: 'manual',
-          name: results[0].display_name || searchQuery
+          name: searchRes.displayName
         });
 
-        if (onSelectZone) {
-          onSelectZone({
-            latitude: targetLat,
-            longitude: targetLng,
-            is_weather_loading: true,
-            is_live_inspected: true,
-            name: results[0].display_name || searchQuery
-          });
+        // Concurrently query backend telemetry if possible
+        let backendData = null;
+        try {
+          backendData = await api.inspectTelemetry(searchRes.latitude, searchRes.longitude);
+        } catch {
+          // Backend optional
         }
 
-        try {
-          const liveData = await api.inspectTelemetry(targetLat, targetLng);
-          if (reqId !== latestInspectionRef.current) return;
-          if (liveData && onSelectZone) {
-            onSelectZone({ ...liveData, is_live_inspected: true, is_weather_loading: false });
-          }
-        } catch (inspectErr) {
-          if (reqId !== latestInspectionRef.current) return;
-          console.warn('Telemetry inspection error on search:', inspectErr);
-          if (onSelectZone) {
-            onSelectZone({
-              latitude: targetLat,
-              longitude: targetLng,
-              center: { lat: targetLat, lng: targetLng },
-              is_weather_loading: false,
-              is_live_inspected: true,
-              name: results[0].display_name || searchQuery,
-              risk_score: 15.0,
-              risk_level: 'LOW'
-            });
-          }
+        if (reqId !== latestInspectionRef.current) return;
+
+        if (onSelectZone) {
+          const liveW = userWeather?.loading ? await getLiveWeather(searchRes.latitude, searchRes.longitude).catch(() => null) : userWeather;
+          onSelectZone({
+            ...(backendData || {}),
+            latitude: searchRes.latitude,
+            longitude: searchRes.longitude,
+            center: { lat: searchRes.latitude, lng: searchRes.longitude },
+            name: searchRes.displayName,
+            state: searchRes.state || '',
+            district: searchRes.city || '',
+            temperature_c: liveW?.temperature_c ?? backendData?.temperature_c ?? null,
+            humidity_pct: liveW?.humidity_pct ?? backendData?.humidity_pct ?? null,
+            weather_code: liveW?.weather_code ?? backendData?.weather_code ?? null,
+            condition: liveW?.condition || backendData?.condition || 'Clear',
+            is_day: liveW?.is_day ?? backendData?.is_day ?? true,
+            rainfall_24h: liveW?.rainfall_24h ?? backendData?.rainfall_24h ?? 0,
+            rainfall_1h: liveW?.precipitation_mm ?? backendData?.rainfall_1h ?? 0,
+            weather_source: liveW?.source || backendData?.weather_source || 'Open-Meteo High-Resolution Real-Time Telemetry',
+            is_weather_loading: false,
+            is_live_inspected: true,
+            risk_score: backendData?.risk_score || 15.0,
+            risk_level: backendData?.risk_level || 'LOW'
+          });
         }
       } else {
         alert(`Location "${searchQuery}" not found. Try searching a city, district, or mountain region.`);
@@ -448,9 +413,9 @@ export const LeafletRiskMap = ({
     }
   };
 
-  // Map Click Inspector - only one pin at a time; clicking same spot again removes the pin
+  // Map Click Inspector - unified with real weather & reverse geocode
   const handleMapClick = async (latlng) => {
-    // If clicked on or near existing pin (within ~400m), toggle it OFF and deselect
+    // If clicked near existing pin (within ~400m), toggle OFF
     if (activeLocationPin) {
       const dLat = Math.abs(latlng.lat - activeLocationPin.lat);
       const dLng = Math.abs(latlng.lng - activeLocationPin.lng);
@@ -461,18 +426,21 @@ export const LeafletRiskMap = ({
       }
     }
 
-    // Move / set the single active pin to the new spot
+    const fallbackName = formatCoordinateFallback(latlng.lat, latlng.lng);
     const newPin = {
       lat: latlng.lat,
       lng: latlng.lng,
       type: 'manual',
-      name: 'Selected Location'
+      name: fallbackName
     };
     setActiveLocationPin(newPin);
 
+    // Sync to context
+    setContextManualLocation(latlng.lat, latlng.lng);
+
     const reqId = ++latestInspectionRef.current;
 
-    // Immediately trigger location update with loading state
+    // Immediately notify consumer with loading state
     if (onSelectZone) {
       onSelectZone({
         latitude: latlng.lat,
@@ -480,31 +448,57 @@ export const LeafletRiskMap = ({
         center: { lat: latlng.lat, lng: latlng.lng },
         is_weather_loading: true,
         is_live_inspected: true,
-        name: `Coordinates (${latlng.lat.toFixed(3)}, ${latlng.lng.toFixed(3)})`
+        name: fallbackName
       });
     }
 
     try {
-      const liveData = await api.inspectTelemetry(latlng.lat, latlng.lng);
-      if (reqId !== latestInspectionRef.current) return; // Stale request guard!
-      if (liveData && onSelectZone) {
-        onSelectZone({ ...liveData, is_live_inspected: true, is_weather_loading: false });
-      }
-    } catch (e) {
+      const [weatherData, geoData] = await Promise.all([
+        getLiveWeather(latlng.lat, latlng.lng).catch(() => null),
+        reverseGeocode(latlng.lat, latlng.lng).catch(() => null)
+      ]);
+
       if (reqId !== latestInspectionRef.current) return;
-      console.warn('Live telemetry click error:', e);
+
+      const resolvedName = geoData?.displayName || fallbackName;
+      setActiveLocationPin(prev => prev ? ({ ...prev, name: resolvedName }) : null);
+
+      let backendData = null;
+      try {
+        backendData = await api.inspectTelemetry(latlng.lat, latlng.lng);
+      } catch {
+        // Backend optional
+      }
+
+      if (reqId !== latestInspectionRef.current) return;
+
       if (onSelectZone) {
         onSelectZone({
+          ...(backendData || {}),
           latitude: latlng.lat,
           longitude: latlng.lng,
           center: { lat: latlng.lat, lng: latlng.lng },
+          name: resolvedName,
+          state: geoData?.state || backendData?.state || '',
+          district: geoData?.city || backendData?.district || '',
+          temperature_c: weatherData?.temperature_c ?? backendData?.temperature_c ?? null,
+          humidity_pct: weatherData?.humidity_pct ?? backendData?.humidity_pct ?? null,
+          weather_code: weatherData?.weather_code ?? backendData?.weather_code ?? null,
+          condition: weatherData?.condition || backendData?.condition || 'Clear',
+          is_day: weatherData?.is_day ?? backendData?.is_day ?? true,
+          rainfall_24h: weatherData?.rainfall_24h ?? backendData?.rainfall_24h ?? 0,
+          rainfall_1h: weatherData?.precipitation_mm ?? backendData?.rainfall_1h ?? 0,
+          weather_source: weatherData?.source || backendData?.weather_source || 'Open-Meteo High-Resolution Real-Time Telemetry',
+          observation_time: weatherData?.observation_time || backendData?.observation_time || new Date().toISOString(),
           is_weather_loading: false,
           is_live_inspected: true,
-          name: `Coordinates (${latlng.lat.toFixed(3)}, ${latlng.lng.toFixed(3)})`,
-          risk_score: 15.0,
-          risk_level: 'LOW'
+          risk_score: backendData?.risk_score || 15.0,
+          risk_level: backendData?.risk_level || 'LOW'
         });
       }
+    } catch (err) {
+      if (reqId !== latestInspectionRef.current) return;
+      console.warn('Map click inspection failed:', err);
     }
   };
 

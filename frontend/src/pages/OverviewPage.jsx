@@ -11,15 +11,18 @@ import {
   Navigation,
   MapPin,
   ChevronRight,
-  Compass
+  Compass,
+  Crosshair
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { normalizeWeather } from '../utils/weatherNormalizer';
 import { DataSourcesPanel } from '../components/common/DataSourcesPanel';
+import { useLocationIntelligence } from '../context/LocationIntelligenceContext';
 
 export const OverviewPage = () => {
   const navigate = useNavigate();
   const { zones, reports, alerts, selectedZone, setSelectedZone } = useEmergency();
+  const { location, weather: intelWeather, requestLocation } = useLocationIntelligence();
   const { resolvedTheme } = useTheme();
   const isLight = resolvedTheme === 'light';
   const [activeTipIndex, setActiveTipIndex] = useState(0);
@@ -45,9 +48,9 @@ export const OverviewPage = () => {
       {/* Dynamic Weather & Atmospheric Condition Banner */}
       {(() => {
         const activeZone = selectedZone || (zones && zones[0]);
-        if (!activeZone) return null;
-
-        const weather = normalizeWeather(activeZone);
+        const hasZoneWeather = activeZone && (typeof activeZone.temperature_c === 'number' || typeof activeZone.weather_code === 'number');
+        const weather = hasZoneWeather ? normalizeWeather(activeZone) : (intelWeather?.normalized || normalizeWeather(activeZone));
+        if (!weather) return null;
 
         const darkThemeStyles = {
           snow: {
@@ -157,7 +160,7 @@ export const OverviewPage = () => {
 
         const themeStyles = isLight ? lightThemeStyles : darkThemeStyles;
         const currentStyle = themeStyles[weather.theme] || themeStyles.neutral;
-        const locationName = activeZone.name || activeZone.formatted_address || activeZone.district || 'Selected Sector';
+        const locationName = (hasZoneWeather && activeZone?.name) || location?.displayName || activeZone?.name || activeZone?.formatted_address || 'Selected Sector';
 
         return (
           <div className={`relative overflow-hidden p-4 sm:p-5 rounded-2xl border backdrop-blur-xl transition-all duration-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-md ${currentStyle.border}`}>
@@ -222,8 +225,17 @@ export const OverviewPage = () => {
                     {weather.tempFormatted}
                   </span>
                 </div>
-                <div className="text-xs text-neutral-300 font-medium mt-1">
-                  Location: <span className="text-white font-bold">{locationName}</span>
+                <div className="flex items-center gap-2 text-xs text-neutral-300 font-medium mt-1 flex-wrap">
+                  <span>Location: <span className="text-white font-bold">{locationName}</span></span>
+                  <button
+                    onClick={requestLocation}
+                    disabled={location?.loading}
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/10 hover:bg-white/20 border border-white/15 text-[10px] text-neutral-200 transition-colors font-sans"
+                    title="Detect live browser GPS"
+                  >
+                    <Crosshair className={`w-3 h-3 ${location?.loading ? 'animate-spin text-amber-400' : (location?.isGps ? 'text-emerald-400' : 'text-neutral-300')}`} />
+                    <span>{location?.loading ? 'Locating...' : (location?.isGps ? 'Live GPS' : 'Locate')}</span>
+                  </button>
                 </div>
               </div>
             </div>
