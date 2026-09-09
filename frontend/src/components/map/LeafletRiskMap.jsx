@@ -53,37 +53,49 @@ const BASEMAP_TILES = {
     label: 'Street Map',
     name: 'ESRI World Street Map',
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
-    attribution: '&copy; Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRC, METI, TomTom'
+    attribution: '&copy; Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRC, METI, TomTom',
+    maxNativeZoom: 17,
+    maxZoom: 19
   },
   light: {
     label: 'Light Canvas',
     name: 'ESRI Light Gray Canvas',
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
-    attribution: '&copy; Esri, DeLorme, NAVTEQ'
+    attribution: '&copy; Esri, DeLorme, NAVTEQ',
+    maxNativeZoom: 16,
+    maxZoom: 19
   },
   dark: {
     label: 'Dark Canvas',
     name: 'ESRI Dark Gray (Dark Mode)',
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
-    attribution: '&copy; Esri, DeLorme, NAVTEQ'
+    attribution: '&copy; Esri, DeLorme, NAVTEQ',
+    maxNativeZoom: 16,
+    maxZoom: 19
   },
   satellite: {
     label: 'Satellite',
     name: 'ESRI Satellite Terrain',
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    attribution: '&copy; Esri, Maxar, Earthstar Geographics'
+    attribution: '&copy; Esri, Maxar, Earthstar Geographics',
+    maxNativeZoom: 18,
+    maxZoom: 19
   },
   terrain: {
     label: 'Terrain',
     name: 'ESRI Topographic Relief',
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
-    attribution: '&copy; Esri, HERE, Garmin, Intermap'
+    attribution: '&copy; Esri, HERE, Garmin, Intermap',
+    maxNativeZoom: 17,
+    maxZoom: 19
   },
   osm: {
     label: 'OpenStreetMap',
     name: 'OpenStreetMap Standard',
     url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    attribution: '&copy; OpenStreetMap contributors'
+    attribution: '&copy; OpenStreetMap contributors',
+    maxNativeZoom: 19,
+    maxZoom: 19
   }
 };
 
@@ -310,20 +322,38 @@ export const LeafletRiskMap = ({
         accuracy: userLocation.accuracy || 25,
         name: userLocation.displayName || 'My GPS Location'
       });
+    } else if (userLocation.error && geoLocating) {
+      setGeoLocating(false);
     }
-  }, [userLocation.isGps, userLocation.latitude, userLocation.longitude, userLocation.displayName, userLocation.accuracy]);
+  }, [userLocation.isGps, userLocation.latitude, userLocation.longitude, userLocation.displayName, userLocation.accuracy, userLocation.error, geoLocating]);
 
   // Handle "Locate Me" button - requests high-accuracy location via unified provider
-  const handleLocateMe = () => {
-    // Toggle off if already showing GPS pin
-    if (activeLocationPin && activeLocationPin.type === 'gps') {
-      setActiveLocationPin(null);
-      if (onSelectZone) onSelectZone(null);
-      return;
-    }
+  const handleLocateMe = async () => {
+    if (geoLocating) return; // Ignore concurrent clicks while active
 
     setGeoLocating(true);
-    requestContextLocation(true);
+    try {
+      const res = await requestContextLocation(true);
+      if (res?.success && res.location) {
+        const { latitude, longitude, displayName, accuracy } = res.location;
+        setActiveCenter([latitude, longitude]);
+        setActiveZoom(14);
+        setActiveLocationPin({
+          lat: latitude,
+          lng: longitude,
+          type: 'gps',
+          accuracy: accuracy || 25,
+          name: displayName || 'My GPS Location'
+        });
+      } else if (res && !res.success && res.error) {
+        alert(res.error);
+      }
+    } catch (err) {
+      console.warn('[LeafletRiskMap] Locate Me failed:', err);
+      alert('Unable to determine your GPS location. Please check browser permissions and try again.');
+    } finally {
+      setGeoLocating(false);
+    }
   };
 
   // Location Search Handler - searches zones, Nominatim, and enriches with real weather
@@ -653,7 +683,7 @@ export const LeafletRiskMap = ({
         center={defaultCenter}
         zoom={6}
         minZoom={2.5}
-        maxZoom={18}
+        maxZoom={19}
         maxBounds={[[-85, -180], [85, 180]]}
         maxBoundsViscosity={1.0}
         worldCopyJump={false}
@@ -680,7 +710,8 @@ export const LeafletRiskMap = ({
               key={activeBasemap}
               attribution={tile.attribution}
               url={tile.url}
-              maxZoom={19}
+              maxNativeZoom={tile.maxNativeZoom || 17}
+              maxZoom={tile.maxZoom || 19}
               noWrap={true}
               bounds={[[-85, -180], [85, 180]]}
             />

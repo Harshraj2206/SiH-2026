@@ -81,6 +81,7 @@ const MAP_TYPES = [
     icon: MapIcon,
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
     attribution: '&copy; Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRC, METI, TomTom',
+    maxNativeZoom: 17,
     maxZoom: 19
   },
   {
@@ -90,7 +91,8 @@ const MAP_TYPES = [
     icon: Globe,
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
     attribution: '&copy; Esri, Maxar, Earthstar Geographics',
-    maxZoom: 18
+    maxNativeZoom: 18,
+    maxZoom: 19
   },
   {
     id: 'terrain',
@@ -99,7 +101,8 @@ const MAP_TYPES = [
     icon: Mountain,
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
     attribution: '&copy; Esri, HERE, Garmin, Intermap',
-    maxZoom: 18
+    maxNativeZoom: 17,
+    maxZoom: 19
   },
   {
     id: 'hybrid',
@@ -109,7 +112,8 @@ const MAP_TYPES = [
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
     overlayUrl: 'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
     attribution: '&copy; Esri, Maxar, Earthstar Geographics',
-    maxZoom: 18
+    maxNativeZoom: 18,
+    maxZoom: 19
   },
   {
     id: 'dark',
@@ -118,7 +122,8 @@ const MAP_TYPES = [
     icon: Compass,
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
     attribution: '&copy; Esri, HERE, Garmin, OpenStreetMap',
-    maxZoom: 18
+    maxNativeZoom: 16,
+    maxZoom: 19
   }
 ];
 
@@ -1085,7 +1090,8 @@ export const ResourcesPage = () => {
                     key={activeMapConfig.id}
                     url={activeMapConfig.url}
                     attribution={activeMapConfig.attribution}
-                    maxZoom={activeMapConfig.maxZoom || 18}
+                    maxNativeZoom={activeMapConfig.maxNativeZoom || 17}
+                    maxZoom={activeMapConfig.maxZoom || 19}
                   />
 
                   {/* If Hybrid mode, add the reference labels & boundaries overlay */}
@@ -1094,7 +1100,8 @@ export const ResourcesPage = () => {
                       key="hybrid-overlay"
                       url={activeMapConfig.overlayUrl}
                       attribution={activeMapConfig.attribution}
-                      maxZoom={18}
+                      maxNativeZoom={18}
+                      maxZoom={19}
                     />
                   )}
 

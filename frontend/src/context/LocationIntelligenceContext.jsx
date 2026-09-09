@@ -329,113 +329,139 @@ export const LocationIntelligenceProvider = ({ children }) => {
    * and updates both userGpsLocation AND location.
    * If explicitUserAction is false (background / mount check), ONLY updates userGpsLocation,
    * and only updates location if locationMode is currently 'gps'.
+   * Returns a Promise resolving to { success: boolean, location?: object, error?: string }.
    */
   const requestLocation = useCallback((explicitUserAction = false) => {
-    const isExplicit = explicitUserAction === true || 
-      (explicitUserAction && typeof explicitUserAction === 'object' && ('nativeEvent' in explicitUserAction || 'type' in explicitUserAction));
+    return new Promise((resolve) => {
+      const isExplicit = explicitUserAction === true || 
+        (explicitUserAction && typeof explicitUserAction === 'object' && ('nativeEvent' in explicitUserAction || 'type' in explicitUserAction));
 
-    if (isExplicit) {
-      locationModeRef.current = 'gps';
-      setLocationMode('gps');
-    }
-
-    if (!navigator.geolocation) {
-      if (isExplicit || locationModeRef.current === 'gps') {
-        setLocation(prev => ({
-          ...prev,
-          permissionStatus: 'unavailable',
-          loading: false,
-          error: 'Geolocation is not supported by this browser.'
-        }));
+      if (isExplicit) {
+        locationModeRef.current = 'gps';
+        setLocationMode('gps');
       }
-      return;
-    }
 
-    const reqId = ++activeReqRef.current;
-    if (isExplicit || locationModeRef.current === 'gps') {
-      setLocation(prev => ({ ...prev, loading: true, error: null }));
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const { latitude, longitude, accuracy } = pos.coords;
-
-        // Concurrent: reverse geocode and fetch weather
-        const [geoResult] = await Promise.all([
-          reverseGeocode(latitude, longitude),
-          updateWeatherForCoords(latitude, longitude, false, null)
-        ]);
-
-        const resolvedName = geoResult.displayName || formatCoordinateFallback(latitude, longitude);
-
-        const gpsRecord = {
-          latitude,
-          longitude,
-          accuracy: Math.round(accuracy || 10),
-          timestamp: new Date(pos.timestamp || Date.now()).toISOString(),
-          displayName: resolvedName,
-          city: geoResult.city || '',
-          state: geoResult.state || '',
-          country: geoResult.country || '',
-          isGps: true,
-          source: 'Live Browser GPS',
-          permissionStatus: 'granted'
-        };
-
-        // Always update live physical GPS state
-        setUserGpsLocation(gpsRecord);
-
-        // Discard out-of-order responses
-        if (reqId !== activeReqRef.current) return;
-
-        // CRITICAL: If the user has intentionally selected another location,
-        // DO NOT let background GPS overwrite the user's selected map location!
-        if (locationModeRef.current !== 'gps') {
-          return;
-        }
-
-        setLocation({
-          ...gpsRecord,
-          loading: false,
-          error: null
-        });
-
-        updateDeepIntelligence(latitude, longitude, 'Live Browser GPS');
-      },
-      (err) => {
-        if (reqId !== activeReqRef.current) return;
-        console.warn('[LocationIntelligence] Geolocation error:', err.code, err.message);
-
-        let status = 'unavailable';
-        let friendlyError = 'Could not retrieve GPS coordinates.';
-
-        if (err.code === 1) { // PERMISSION_DENIED
-          status = 'denied';
-          friendlyError = 'Location access was denied. Defaulting to sector centroid.';
-        } else if (err.code === 2) { // POSITION_UNAVAILABLE
-          status = 'unavailable';
-          friendlyError = 'GPS position unavailable. Defaulting to sector centroid.';
-        } else if (err.code === 3) { // TIMEOUT
-          status = 'timeout';
-          friendlyError = 'GPS position request timed out. Defaulting to sector centroid.';
-        }
-
+      if (!navigator.geolocation) {
+        const errorMsg = 'Geolocation is not supported by this browser.';
         if (isExplicit || locationModeRef.current === 'gps') {
           setLocation(prev => ({
             ...prev,
-            permissionStatus: status,
+            permissionStatus: 'unavailable',
             loading: false,
-            error: friendlyError
+            error: errorMsg
           }));
-          updateWeatherForCoords(DEFAULT_FALLBACK_LOCATION.latitude, DEFAULT_FALLBACK_LOCATION.longitude);
         }
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 30000
+        resolve({ success: false, error: errorMsg, code: 'UNSUPPORTED' });
+        return;
       }
-    );
+
+      const reqId = ++activeReqRef.current;
+      if (isExplicit || locationModeRef.current === 'gps') {
+        setLocation(prev => ({ ...prev, loading: true, error: null }));
+      }
+
+      const attemptGeolocation = (highAccuracy = true) => {
+        navigator.geolocation.getCurrentPosition(
+          async (pos) => {
+            const { latitude, longitude, accuracy } = pos.coords;
+
+            // Concurrent: reverse geocode and fetch weather
+            const [geoResult] = await Promise.all([
+              reverseGeocode(latitude, longitude),
+              updateWeatherForCoords(latitude, longitude, false, null)
+            ]);
+
+            const resolvedName = geoResult.displayName || formatCoordinateFallback(latitude, longitude);
+
+            const gpsRecord = {
+              latitude,
+              longitude,
+              accuracy: Math.round(accuracy || 10),
+              timestamp: new Date(pos.timestamp || Date.now()).toISOString(),
+              displayName: resolvedName,
+              city: geoResult.city || '',
+              state: geoResult.state || '',
+              country: geoResult.country || '',
+              isGps: true,
+              source: 'Live Browser GPS',
+              permissionStatus: 'granted'
+            };
+
+            // Always update live physical GPS state
+            setUserGpsLocation(gpsRecord);
+
+            // Discard out-of-order responses
+            if (reqId !== activeReqRef.current) {
+              resolve({ success: true, location: gpsRecord, stale: true });
+              return;
+            }
+
+            // CRITICAL: If the user has intentionally selected another location,
+            // DO NOT let background GPS overwrite the user's selected map location!
+            if (locationModeRef.current !== 'gps') {
+              resolve({ success: true, location: gpsRecord, preservedSelection: true });
+              return;
+            }
+
+            setLocation({
+              ...gpsRecord,
+              loading: false,
+              error: null
+            });
+
+            updateDeepIntelligence(latitude, longitude, 'Live Browser GPS');
+            resolve({ success: true, location: gpsRecord });
+          },
+          (err) => {
+            // If high accuracy timed out or was unavailable on this device, gracefully retry once with standard accuracy
+            if (highAccuracy && (err.code === 2 || err.code === 3)) {
+              console.warn('[LocationIntelligence] High accuracy geolocation unavailable/timed out, retrying with standard accuracy...');
+              attemptGeolocation(false);
+              return;
+            }
+
+            if (reqId !== activeReqRef.current) {
+              resolve({ success: false, error: 'Request superseded', code: 'SUPERSEDED' });
+              return;
+            }
+            console.warn('[LocationIntelligence] Geolocation error:', err.code, err.message);
+
+            let status = 'unavailable';
+            let friendlyError = 'Could not retrieve GPS coordinates.';
+
+            if (err.code === 1) { // PERMISSION_DENIED
+              status = 'denied';
+              friendlyError = 'Location permission was denied. Please allow location access in your browser.';
+            } else if (err.code === 2) { // POSITION_UNAVAILABLE
+              status = 'unavailable';
+              friendlyError = 'Unable to determine your current location. Please check your device network/GPS connection.';
+            } else if (err.code === 3) { // TIMEOUT
+              status = 'timeout';
+              friendlyError = 'GPS position request timed out. Please try again.';
+            }
+
+            if (isExplicit || locationModeRef.current === 'gps') {
+              setLocation(prev => ({
+                ...prev,
+                permissionStatus: status,
+                loading: false,
+                error: friendlyError
+              }));
+              updateWeatherForCoords(DEFAULT_FALLBACK_LOCATION.latitude, DEFAULT_FALLBACK_LOCATION.longitude);
+            }
+
+            resolve({ success: false, error: friendlyError, code: status, rawCode: err.code });
+          },
+          {
+            enableHighAccuracy: highAccuracy,
+            timeout: highAccuracy ? 10000 : 8000,
+            maximumAge: isExplicit ? 0 : 30000
+          }
+        );
+      };
+
+      attemptGeolocation(true);
+    });
   }, [updateWeatherForCoords, updateDeepIntelligence]);
 
   /**

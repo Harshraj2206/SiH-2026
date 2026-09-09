@@ -118,20 +118,23 @@ const MAP_TYPES = [
     label: 'Satellite',
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
     attribution: '&copy; Esri, Maxar, Earthstar Geographics',
-    maxZoom: 18
+    maxNativeZoom: 18,
+    maxZoom: 19
   },
   {
     id: 'terrain',
     label: 'Terrain / Topo',
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
     attribution: '&copy; Esri, HERE, Intermap',
-    maxZoom: 18
+    maxNativeZoom: 17,
+    maxZoom: 19
   },
   {
     id: 'streets',
     label: 'Roadmap',
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
     attribution: '&copy; Esri, DeLorme, TomTom',
+    maxNativeZoom: 17,
     maxZoom: 19
   }
 ];
@@ -531,7 +534,8 @@ export const IncidentsExplorerPage = () => {
             <TileLayer
               url={activeTileConfig.url}
               attribution={activeTileConfig.attribution}
-              maxZoom={activeTileConfig.maxZoom}
+              maxNativeZoom={activeTileConfig.maxNativeZoom || 17}
+              maxZoom={activeTileConfig.maxZoom || 19}
             />
             <MapController center={mapCenter} zoom={mapZoom} />
 
