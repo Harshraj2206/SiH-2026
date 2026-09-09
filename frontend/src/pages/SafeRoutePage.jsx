@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { safeRouteApi, resourcesApi } from '../services/api';
 import { useEmergency } from '../context/EmergencyContext';
 import { useAuth } from '../context/AuthContext';
@@ -63,6 +64,8 @@ export const SafeRoutePage = () => {
   const [isEvacuating, setIsEvacuating] = useState(false);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
+  const routeLocation = useLocation();
+
   // Initialize with active GPS / Canonical Location
   useEffect(() => {
     if (selectedLocation?.latitude && selectedLocation?.longitude) {
@@ -75,6 +78,17 @@ export const SafeRoutePage = () => {
     }
     loadPresetResources();
   }, [selectedLocation]);
+
+  // Synchronize destination when navigated from Resources or other pages
+  useEffect(() => {
+    if (routeLocation?.state?.destCoords) {
+      setDestCoords(routeLocation.state.destCoords);
+      if (routeLocation.state.destQuery) {
+        setDestQuery(routeLocation.state.destQuery);
+      }
+      setRoutingMode('global');
+    }
+  }, [routeLocation?.state]);
 
   const loadPresetResources = async () => {
     try {

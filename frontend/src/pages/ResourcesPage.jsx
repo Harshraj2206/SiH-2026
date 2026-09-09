@@ -12,7 +12,10 @@ import {
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import axios from 'axios';
-import apiClient, { resourcesApi, safeRouteApi } from '../services/api';
+import { apiClient, resourcesApi, safeRouteApi } from '../services/api';
+import { useLocationIntelligence } from '../context/LocationIntelligenceContext';
+import { getNearbyEmergencyResources } from '../services/emergencyResourceService';
+import { reverseGeocode } from '../services/reverseGeocodeService';
 import { 
   Shield, 
   Ambulance, 
@@ -215,6 +218,11 @@ function MapRouteController({ center, zoom, routeCoords }) {
 
 export const ResourcesPage = () => {
   const navigate = useNavigate();
+  const {
+    location: unifiedLocation,
+    requestLocation: requestUnifiedGps,
+    searchLocation: searchUnifiedLocation
+  } = useLocationIntelligence();
 
   // Location & Geolocation state
   const [geoState, setGeoState] = useState('checking'); // 'checking' | 'granted' | 'prompt' | 'denied' | 'unsupported'
@@ -409,149 +417,48 @@ export const ResourcesPage = () => {
   // Refs
   const cardRefs = useRef({});
 
-  // 1. Check Geolocation Permission on mount
+  // 1. Synchronize with Centralized Location State
   useEffect(() => {
-    checkLocationPermissionAndInit();
-  }, []);
-
-  const checkLocationPermissionAndInit = async () => {
-    if (!navigator.geolocation) {
-      setGeoState('unsupported');
-      // Fall back to Karnataka default inspection point
-      setUserCoords({
-        lat: 12.6445,
-        lng: 77.4365,
-        accuracy: 100,
-        area: 'Harohalli, Karnataka',
-        isDefault: true
-      });
-      fetchNearby(12.6445, 77.4365, radiusKm, activeCategory);
-      return;
+    if (unifiedLocation?.latitude && unifiedLocation?.longitude) {
+      const coords = {
+        lat: unifiedLocation.latitude,
+        lng: unifiedLocation.longitude,
+        accuracy: unifiedLocation.accuracy || 25,
+        area: unifiedLocation.displayName,
+        isDefault: !unifiedLocation.isGps && (unifiedLocation.source || '').includes('Fallback')
+      };
+      setUserCoords(coords);
+      setMapCenter({ lat: unifiedLocation.latitude, lng: unifiedLocation.longitude });
+      setGeoState(unifiedLocation.permissionStatus || (unifiedLocation.isGps ? 'granted' : 'prompt'));
+      fetchNearby(unifiedLocation.latitude, unifiedLocation.longitude, radiusKm, activeCategory, searchKeyword);
     }
+  }, [unifiedLocation?.latitude, unifiedLocation?.longitude, unifiedLocation?.displayName]);
 
-    if (navigator.permissions && navigator.permissions.query) {
-      try {
-        const permissionStatus = await navigator.permissions.query({ name: 'geolocation' });
-        if (permissionStatus.state === 'granted') {
-          setGeoState('granted');
-          requestGpsLocation();
-        } else if (permissionStatus.state === 'prompt') {
-          setGeoState('prompt');
-          // Try acquiring directly or allow user to click [Enable Location]
-          requestGpsLocation(true);
-        } else if (permissionStatus.state === 'denied') {
-          setGeoState('denied');
-          // Fall back to manual search mode
-          setLocationMode('manual');
-        }
-
-        permissionStatus.onchange = () => {
-          if (permissionStatus.state === 'granted') {
-            setGeoState('granted');
-            requestGpsLocation();
-          } else if (permissionStatus.state === 'denied') {
-            setGeoState('denied');
-            setLocationMode('manual');
-          }
-        };
-      } catch {
-        // Fallback for browsers that don't support query for geolocation
-        requestGpsLocation(true);
-      }
-    } else {
-      requestGpsLocation(true);
-    }
+  // 2. Request Fresh GPS Location from Centralized Provider
+  const requestGpsLocation = () => {
+    setLocationMode('gps');
+    requestUnifiedGps();
   };
 
-  // 2. Obtain current GPS position from browser
-  const requestGpsLocation = (isInitial = false) => {
-    if (!navigator.geolocation) return;
-    setLoading(true);
-    setLocationError(null);
-
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const { latitude, longitude, accuracy } = pos.coords;
-        setGeoState('granted');
-        setLocationMode('gps');
-
-        // Reverse geocode to get human-readable area / city
-        let areaName = `Coordinates: ${latitude.toFixed(4)}°N, ${longitude.toFixed(4)}°E`;
-        try {
-          const res = await apiClient.get('/location-intelligence', {
-            params: { lat: latitude, lng: longitude }
-          });
-          if (res.data?.location?.display_name) {
-            areaName = res.data.location.display_name;
-          }
-        } catch (e) {
-          console.warn('Reverse geocode lookup skipped:', e);
-        }
-
-        const coords = {
-          lat: latitude,
-          lng: longitude,
-          accuracy: Math.round(accuracy),
-          area: areaName,
-          isDefault: false
-        };
-
-        setUserCoords(coords);
-        setMapCenter({ lat: latitude, lng: longitude });
-        setMapZoom(13);
-
-        fetchNearby(latitude, longitude, radiusKm, activeCategory);
-      },
-      (err) => {
-        console.warn('Browser GPS error:', err);
-        if (err.code === err.PERMISSION_DENIED) {
-          setGeoState('denied');
-          setLocationMode('manual');
-          setLocationError('Location permission was denied. Please enter your city or PIN code below.');
-        } else if (err.code === err.POSITION_UNAVAILABLE) {
-          setLocationError('GPS signal temporarily unavailable. Please retry or search manually.');
-        } else if (err.code === err.TIMEOUT) {
-          setLocationError('GPS location request timed out. Retrying...');
-        }
-        setLoading(false);
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-    );
-  };
-
-  // 3. Query Real Emergency Resources from Backend
-  const fetchNearby = async (lat, lng, radius, category, keyword = '') => {
-    if (!lat || !lng) return;
+  // 3. Query Real Emergency Resources with Two-Tier Fallback
+  const fetchNearby = async (lat, lng, radius, category, keyword = '', forceRefresh = false) => {
+    if (typeof lat !== 'number' || typeof lng !== 'number' || isNaN(lat) || isNaN(lng)) return;
     setLoading(true);
     setLocationError(null);
 
     try {
-      // Pass optional custom Google API key if user configured it
-      const savedKey = localStorage.getItem('landsafe_google_maps_key') || undefined;
-      const res = await apiClient.get('/resources/nearby', {
-        params: {
-          lat,
-          lng,
-          radius_km: radius,
-          category,
-          keyword: keyword || undefined,
-          api_key_override: savedKey || undefined
-        }
-      });
-
-      const data = res.data;
+      const data = await getNearbyEmergencyResources(lat, lng, radius, category, keyword, forceRefresh);
       const discoveredPlaces = data.places || [];
       setPlaces(discoveredPlaces);
       setDataSourceInfo(data.data_source || null);
       setLastRefreshed(new Date());
 
-      // If results found, center map appropriately
       if (discoveredPlaces.length > 0) {
         setSelectedPlaceId(discoveredPlaces[0].id);
       }
     } catch (err) {
       console.error('Failed to discover nearby resources:', err);
-      setLocationError(err?.response?.data?.detail || 'Unable to contact emergency discovery service.');
+      setLocationError(err?.message || 'Unable to contact emergency discovery service. Please check network and retry.');
       setPlaces([]);
     } finally {
       setLoading(false);
@@ -565,7 +472,7 @@ export const ResourcesPage = () => {
     }
   }, [activeCategory, radiusKm]);
 
-  // 4. Manual Location Search
+  // 4. Manual Location Search using Unified Geocoding
   const handleManualSearch = async (e) => {
     if (e) e.preventDefault();
     if (!manualQuery.trim()) return;
@@ -573,21 +480,20 @@ export const ResourcesPage = () => {
     setIsSearchingLocation(true);
     setLocationError(null);
     try {
-      const res = await apiClient.post('/location-intelligence/search', { query: manualQuery });
-      const loc = res.data?.location;
-      if (loc && loc.latitude && loc.longitude) {
+      const res = await searchUnifiedLocation(manualQuery);
+      if (res && res.latitude && res.longitude) {
         setLocationMode('manual');
         const newCoords = {
-          lat: loc.latitude,
-          lng: loc.longitude,
-          accuracy: loc.accuracy || 20,
-          area: loc.display_name || manualQuery,
+          lat: res.latitude,
+          lng: res.longitude,
+          accuracy: 25,
+          area: res.displayName || manualQuery,
           isManual: true
         };
         setUserCoords(newCoords);
-        setMapCenter({ lat: loc.latitude, lng: loc.longitude });
+        setMapCenter({ lat: res.latitude, lng: res.longitude });
         setMapZoom(13);
-        fetchNearby(loc.latitude, loc.longitude, radiusKm, activeCategory);
+        fetchNearby(res.latitude, res.longitude, radiusKm, activeCategory, searchKeyword, true);
       } else {
         setLocationError(`Could not find "${manualQuery}". Please try another city, landmark, or PIN code.`);
       }
@@ -632,7 +538,7 @@ export const ResourcesPage = () => {
 
   // Format "Updated X ago"
   const getUpdatedAgo = () => {
-    if (!lastRefreshed) return 'Never';
+    if (!lastRefreshed) return 'Ready';
     const seconds = Math.floor((new Date() - lastRefreshed) / 1000);
     if (seconds < 20) return 'Just now';
     if (seconds < 60) return `${seconds}s ago`;
@@ -1529,6 +1435,27 @@ export const ResourcesPage = () => {
                       >
                         <Navigation className="w-3.5 h-3.5" />
                         <span>{activeRoute?.destination?.id === place.id ? 'Route Active' : 'Directions'}</span>
+                      </button>
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate('/safe-route', {
+                            state: {
+                              destCoords: {
+                                lat: place.latitude,
+                                lng: place.longitude,
+                                name: place.name
+                              },
+                              destQuery: place.address || place.name
+                            }
+                          });
+                        }}
+                        className="px-2.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 rounded-xl text-xs font-medium flex items-center gap-1.5 transition-colors"
+                        title="Open in Landslide Evacuation Safe Route Planner"
+                      >
+                        <Shield className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">Safe Route</span>
                       </button>
 
                       <a

@@ -25,23 +25,33 @@ async def get_nearby_emergency_resources(
     lat: float = Query(..., ge=-90.0, le=90.0, description="User latitude"),
     lng: float = Query(..., ge=-180.0, le=180.0, description="User longitude"),
     radius_km: float = Query(5.0, ge=1.0, le=50.0, description="Search radius in kilometers (1 to 50)"),
-    category: str = Query("hospitals", description="hospitals, police, fire, shelters, ambulance, blood_bank"),
-    keyword: Optional[str] = Query(None, description="Optional search filter keyword")
+    category: str = Query("hospitals", description="hospitals, police, fire, shelters, ambulance, blood_bank, all"),
+    keyword: Optional[str] = Query(None, description="Optional search filter keyword"),
+    api_key_override: Optional[str] = Query(None, description="Optional client-provided Google Maps API key")
 ):
     """
     Search real emergency facilities (hospitals, trauma centers, police, fire stations, shelters)
     near ANY GPS coordinates in India or worldwide using Google Places API (New) with authentic
     open geospatial fallback. Never returns fake or static out-of-region data.
     """
-    api_key_override = request.headers.get("X-Google-Maps-Key")
+    effective_key = request.headers.get("X-Google-Maps-Key") or api_key_override
+
+    clean_category = category.lower().strip()
+    valid_categories = {
+        "hospitals", "hospital", "police", "fire", "shelters",
+        "shelter", "ambulance", "blood_bank", "all", "all emergency", "all_emergency"
+    }
+    if clean_category not in valid_categories:
+        clean_category = "hospitals"
+
     try:
         data = discover_nearby_emergency_resources(
             latitude=lat,
             longitude=lng,
             radius_km=radius_km,
-            category=category,
+            category=clean_category,
             keyword=keyword,
-            api_key_override=api_key_override
+            api_key_override=effective_key
         )
         return data
     except ValueError as ve:
