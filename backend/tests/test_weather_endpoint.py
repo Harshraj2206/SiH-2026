@@ -44,6 +44,22 @@ def test_weather_endpoint_is_day_telemetry():
     assert isinstance(data["is_day"], (bool, int))
 
 
+def test_weather_endpoint_astronomical_timezone_telemetry():
+    """Test retrieving timezone, sunrise, and sunset telemetry from Open-Meteo."""
+    response = client.get("/api/weather?lat=12.9716&lon=77.5946")
+    assert response.status_code == 200
+    data = response.json()
+    assert "timezone" in data
+    assert data["timezone"] == "Asia/Kolkata"
+    assert "utc_offset_seconds" in data
+    assert data["utc_offset_seconds"] == 19800
+    assert "sunrise" in data
+    assert "sunset" in data
+    assert data["sunrise"] is not None
+    assert data["sunset"] is not None
+
+
+
 def test_weather_endpoint_validation_error():
     """Test rejection of out-of-bounds latitude/longitude values."""
     # Latitude > 90

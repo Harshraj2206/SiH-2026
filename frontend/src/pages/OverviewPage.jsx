@@ -22,7 +22,7 @@ import { useLocationIntelligence } from '../context/LocationIntelligenceContext'
 export const OverviewPage = () => {
   const navigate = useNavigate();
   const { zones, reports, alerts, selectedZone, setSelectedZone } = useEmergency();
-  const { location, weather: intelWeather, requestLocation, setManualLocation } = useLocationIntelligence();
+  const { location, weather: intelWeather, environment, requestLocation, setManualLocation } = useLocationIntelligence();
   const { resolvedTheme } = useTheme();
   const isLight = resolvedTheme === 'light';
   const [activeTipIndex, setActiveTipIndex] = useState(0);
@@ -225,10 +225,22 @@ export const OverviewPage = () => {
                 </div>
                 <div className="flex items-center gap-2 text-xs text-neutral-300 font-medium mt-1 flex-wrap">
                   <span>Location: <span className="text-white font-bold">{locationName}</span></span>
+                  {environment?.localTimeFormatted && (
+                    <>
+                      <span className="text-neutral-500">•</span>
+                      <span className="text-amber-300 font-mono font-bold" title={`Local time at ${locationName}`}>
+                        {environment.localTimeFormatted} ({environment.timezoneAbbr || 'IST'})
+                      </span>
+                      <span className="text-neutral-500">•</span>
+                      <span className="text-sky-300 font-mono capitalize text-[11px] bg-sky-950/60 px-2 py-0.5 rounded border border-sky-500/30">
+                        {environment.dayPhase || (environment.isDay ? 'Day' : 'Night')}
+                      </span>
+                    </>
+                  )}
                   <button
                     onClick={requestLocation}
                     disabled={location?.loading}
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/10 hover:bg-white/20 border border-white/15 text-[10px] text-neutral-200 transition-colors font-sans"
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/10 hover:bg-white/20 border border-white/15 text-[10px] text-neutral-200 transition-colors font-sans ml-1"
                     title="Detect live browser GPS"
                   >
                     <Crosshair className={`w-3 h-3 ${location?.loading ? 'animate-spin text-amber-400' : (location?.isGps ? 'text-emerald-400' : 'text-neutral-300')}`} />
@@ -274,7 +286,7 @@ export const OverviewPage = () => {
         <div className="lg:col-span-8 flex flex-col space-y-4">
           
           {/* Card 1: GIS Map Overview */}
-          <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-2xl p-4 flex flex-col relative shadow-sm">
+          <div className="bg-[#0a0f18]/85 backdrop-blur-xl border border-white/10 rounded-2xl p-4 flex flex-col relative shadow-xl">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -305,7 +317,7 @@ export const OverviewPage = () => {
           </div>
 
           {/* Card 2: Recent Alerts Card Below Map */}
-          <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-2xl p-4 space-y-3 shadow-sm">
+          <div className="bg-[#0a0f18]/85 backdrop-blur-xl border border-white/10 rounded-2xl p-4 space-y-3 shadow-xl">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4 text-red-400" />
@@ -418,14 +430,14 @@ export const OverviewPage = () => {
             const slopeVal = typeof currentZone.slope_deg === 'number' ? `${currentZone.slope_deg.toFixed(1)}°` : '0.0°';
 
             return (
-              <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-2xl p-5 space-y-4 shadow-sm flex flex-col justify-between">
+              <div className="bg-[#0a0f18]/85 backdrop-blur-xl border border-white/10 rounded-2xl p-5 space-y-4 shadow-xl flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between pb-2 border-b border-[#181818]">
                     <h2 className="text-sm font-bold text-white font-sans">
                       ML Risk Assessment
                     </h2>
-                    <span className="text-[10px] text-emerald-400 font-mono font-semibold bg-emerald-950/40 border border-emerald-800/40 px-2 py-0.5 rounded">
-                      Calibrated Model
+                    <span className="text-[10px] text-emerald-400 font-mono font-semibold bg-emerald-950/40 border border-emerald-800/40 px-2 py-0.5 rounded" title="Machine Learning Inference from Random Forest Regressor">
+                      ML Model Prediction
                     </span>
                   </div>
 
@@ -488,13 +500,13 @@ export const OverviewPage = () => {
           })()}
 
           {/* Card B: Monitored Risk Zones Quick Selector */}
-          <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-2xl p-5 space-y-3 shadow-sm flex-1 flex flex-col justify-between">
+          <div className="bg-[#0a0f18]/85 backdrop-blur-xl border border-white/10 rounded-2xl p-5 space-y-3 shadow-xl flex-1 flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between pb-2 border-b border-[#181818]">
                 <h3 className="text-xs font-bold text-white uppercase tracking-wider">
                   Monitored Mountain Zones ({zones.length})
                 </h3>
-                <span className="text-[11px] text-emerald-400 font-medium font-mono">Live Radar Active</span>
+                <span className="text-[11px] text-emerald-400 font-medium font-mono" title="12 National High-Hazard Corridors monitored via IMD & GSI precipitation thresholds">12 Monitored Corridors</span>
               </div>
 
               <div className="space-y-2 mt-2 max-h-56 overflow-y-auto pr-1">
@@ -541,7 +553,7 @@ export const OverviewPage = () => {
           </div>
 
           {/* Card C: Awareness Advisory Card */}
-          <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-2xl p-4 shadow-sm flex items-center justify-between gap-3">
+          <div className="bg-[#0a0f18]/85 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-xl flex items-center justify-between gap-3">
             <div className="flex items-start gap-3">
               <div className="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
                 <Mountain className="w-4 h-4 text-emerald-400" />

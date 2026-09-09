@@ -1,24 +1,22 @@
 /**
- * LANDSAFE SIH 2026 - Centralized Location & Weather Intelligence Provider
- * Single authoritative source of truth for user location, reverse geocoding,
- * and high-resolution real-time weather telemetry.
- *
- * Guarantees:
- * 1. High-accuracy GPS with granular permission status (prompt, granted, denied, unavailable, timeout).
- * 2. Instant weather resolution via two-tier backend + direct Open-Meteo fallback.
- * 3. Authoritative reverse geocoding via Nominatim with non-fake coordinate fallback.
- * 4. Zero "WEATHER UNAVAILABLE" states.
+ * LANDSAFE SIH 2026 - Centralized Location, Astronomical & Weather Intelligence Provider
+ * Single authoritative source of truth for:
+ * 1. Live User GPS Location vs. Currently Inspected / Selected Map Location.
+ * 2. Real-time Astronomical Environment Engine (true local time, sunrise, sunset, sun/moon positions, moon phase).
+ * 3. Verified live WMO meteorological telemetry from Open-Meteo & IMD reanalysis grids.
+ * 4. Authoritative reverse geocoding with zero fake/hardcoded fallbacks.
  */
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { getLiveWeather } from '../services/weatherService';
 import { reverseGeocode, formatCoordinateFallback } from '../services/reverseGeocodeService';
 import { normalizeWeather } from '../utils/weatherNormalizer';
+import { buildEnvironmentState } from '../utils/astronomicalEngine';
 import { apiClient } from '../services/api';
 
 const LocationIntelligenceContext = createContext(null);
 
-// Canonical default fallback if geolocation is denied or unavailable
+// Default reference location (Regional Centroid Fallback)
 const DEFAULT_FALLBACK_LOCATION = {
   latitude: 12.9716,
   longitude: 77.5946,
@@ -26,12 +24,18 @@ const DEFAULT_FALLBACK_LOCATION = {
   city: 'Bengaluru',
   state: 'Karnataka',
   country: 'India',
+  timezone: 'Asia/Kolkata',
+  timezoneAbbr: 'IST',
+  utcOffsetSeconds: 19800,
   isGps: false,
   source: 'Regional Centroid Fallback'
 };
 
 export const LocationIntelligenceProvider = ({ children }) => {
-  // 1. Authoritative Location State
+  // 1. Live Physical User GPS Location (stored independently)
+  const [userGpsLocation, setUserGpsLocation] = useState(null);
+
+  // 2. Authoritative Currently Selected / Inspected Location
   const [location, setLocation] = useState({
     latitude: DEFAULT_FALLBACK_LOCATION.latitude,
     longitude: DEFAULT_FALLBACK_LOCATION.longitude,
@@ -41,6 +45,9 @@ export const LocationIntelligenceProvider = ({ children }) => {
     city: DEFAULT_FALLBACK_LOCATION.city,
     state: DEFAULT_FALLBACK_LOCATION.state,
     country: DEFAULT_FALLBACK_LOCATION.country,
+    timezone: DEFAULT_FALLBACK_LOCATION.timezone,
+    timezoneAbbr: DEFAULT_FALLBACK_LOCATION.timezoneAbbr,
+    utcOffsetSeconds: DEFAULT_FALLBACK_LOCATION.utcOffsetSeconds,
     isGps: false,
     source: DEFAULT_FALLBACK_LOCATION.source,
     permissionStatus: 'prompt', // 'prompt' | 'granted' | 'denied' | 'unavailable' | 'timeout'
@@ -48,7 +55,7 @@ export const LocationIntelligenceProvider = ({ children }) => {
     error: null
   });
 
-  // 2. Authoritative Weather State
+  // 3. Authoritative Live Weather State
   const [weather, setWeather] = useState({
     temperature_c: null,
     apparent_temperature_c: null,
@@ -59,15 +66,34 @@ export const LocationIntelligenceProvider = ({ children }) => {
     condition: 'Updating...',
     wind_speed_kmh: null,
     is_day: true,
+    cloud_cover_pct: 0,
+    timezone: DEFAULT_FALLBACK_LOCATION.timezone,
+    timezone_abbreviation: DEFAULT_FALLBACK_LOCATION.timezoneAbbr,
+    utc_offset_seconds: DEFAULT_FALLBACK_LOCATION.utcOffsetSeconds,
+    sunrise: null,
+    sunset: null,
     source: 'Initializing...',
     observation_time: null,
     loading: true,
     error: null,
-    // Pre-computed normalized weather descriptor
     normalized: normalizeWeather({ is_weather_loading: true })
   });
 
-  // 3. Extended Geospatial Intelligence (DEM, slope, soil moisture, USGS seismic)
+  // 4. Consolidated Real-Time Environment State (Celestial + Meteorological)
+  const [environment, setEnvironment] = useState(() =>
+    buildEnvironmentState({
+      latitude: DEFAULT_FALLBACK_LOCATION.latitude,
+      longitude: DEFAULT_FALLBACK_LOCATION.longitude,
+      displayName: DEFAULT_FALLBACK_LOCATION.displayName,
+      timezone: DEFAULT_FALLBACK_LOCATION.timezone,
+      timezoneAbbr: DEFAULT_FALLBACK_LOCATION.timezoneAbbr,
+      utcOffsetSeconds: DEFAULT_FALLBACK_LOCATION.utcOffsetSeconds,
+      weather: {},
+      currentDate: new Date()
+    })
+  );
+
+  // 5. Extended Geospatial Intelligence (DEM, slope, soil moisture, USGS seismic)
   const [intelligence, setIntelligence] = useState(null);
   const [intelLoading, setIntelLoading] = useState(false);
 
@@ -75,9 +101,27 @@ export const LocationIntelligenceProvider = ({ children }) => {
   const activeReqRef = useRef(0);
 
   /**
-   * Fetch weather and update state with normalized attributes.
+   * Recalculate environment state with latest timestamp or coordinates.
    */
-  const updateWeatherForCoords = useCallback(async (lat, lon, forceRefresh = false) => {
+  const recomputeEnvironment = useCallback((lat, lon, name, tz, tzAbbr, offsetSec, currentWeatherObj) => {
+    const updatedEnv = buildEnvironmentState({
+      latitude: lat,
+      longitude: lon,
+      displayName: name,
+      timezone: tz || 'Asia/Kolkata',
+      timezoneAbbr: tzAbbr || 'UTC',
+      utcOffsetSeconds: offsetSec || 0,
+      weather: currentWeatherObj || {},
+      currentDate: new Date()
+    });
+    setEnvironment(updatedEnv);
+    return updatedEnv;
+  }, []);
+
+  /**
+   * Fetch weather and update state with normalized attributes and environment state.
+   */
+  const updateWeatherForCoords = useCallback(async (lat, lon, forceRefresh = false, locationName = null) => {
     setWeather(prev => ({
       ...prev,
       loading: true,
@@ -89,7 +133,11 @@ export const LocationIntelligenceProvider = ({ children }) => {
       const rawWeather = await getLiveWeather(lat, lon, forceRefresh);
       const normalized = normalizeWeather(rawWeather);
 
-      setWeather({
+      const targetTz = rawWeather.timezone || 'Asia/Kolkata';
+      const targetAbbr = rawWeather.timezone_abbreviation || 'UTC';
+      const targetOffset = rawWeather.utc_offset_seconds ?? 19800;
+
+      const updatedWeather = {
         temperature_c: rawWeather.temperature_c,
         apparent_temperature_c: rawWeather.apparent_temperature_c,
         humidity_pct: rawWeather.humidity_pct,
@@ -99,12 +147,32 @@ export const LocationIntelligenceProvider = ({ children }) => {
         condition: rawWeather.condition,
         wind_speed_kmh: rawWeather.wind_speed_kmh,
         is_day: rawWeather.is_day,
+        cloud_cover_pct: rawWeather.cloud_cover_pct ?? 0,
+        timezone: targetTz,
+        timezone_abbreviation: targetAbbr,
+        utc_offset_seconds: targetOffset,
+        sunrise: rawWeather.sunrise,
+        sunset: rawWeather.sunset,
         source: rawWeather.source,
         observation_time: rawWeather.observation_time,
         loading: false,
         error: null,
         normalized
-      });
+      };
+
+      setWeather(updatedWeather);
+
+      // Recompute authoritative environment state
+      recomputeEnvironment(
+        lat,
+        lon,
+        locationName || location.displayName,
+        targetTz,
+        targetAbbr,
+        targetOffset,
+        updatedWeather
+      );
+
       return rawWeather;
     } catch (err) {
       console.error('[LocationIntelligence] Weather update error:', err);
@@ -127,9 +195,20 @@ export const LocationIntelligenceProvider = ({ children }) => {
           observationTime: null
         }
       }));
+
+      // Recompute environment with fallback
+      recomputeEnvironment(
+        lat,
+        lon,
+        locationName || location.displayName,
+        'Asia/Kolkata',
+        'IST',
+        19800,
+        {}
+      );
       return null;
     }
-  }, []);
+  }, [location.displayName, recomputeEnvironment]);
 
   /**
    * Asynchronously load deep geospatial intelligence (DEM, slope, risk prediction).
@@ -152,7 +231,8 @@ export const LocationIntelligenceProvider = ({ children }) => {
   }, []);
 
   /**
-   * Set location manually (e.g. from map click or selector).
+   * Set location manually (from map click, zone select, or coordinate inspection).
+   * Switches authoritative viewing location away from GPS to the selected map coordinates.
    */
   const setManualLocation = useCallback(async (lat, lon, customName = null) => {
     const reqId = ++activeReqRef.current;
@@ -163,7 +243,7 @@ export const LocationIntelligenceProvider = ({ children }) => {
       loading: true,
       error: null,
       isGps: false,
-      source: customName ? `Selected: ${customName}` : 'Map Click'
+      source: customName ? `Selected: ${customName}` : 'Map Selection'
     }));
 
     // Concurrent: reverse geocode and fetch weather
@@ -173,29 +253,33 @@ export const LocationIntelligenceProvider = ({ children }) => {
 
     const [geoResult] = await Promise.all([
       geocodePromise,
-      updateWeatherForCoords(lat, lon)
+      updateWeatherForCoords(lat, lon, false, customName)
     ]);
 
     if (reqId !== activeReqRef.current) return;
+
+    const finalName = geoResult.displayName || formatCoordinateFallback(lat, lon);
 
     setLocation(prev => ({
       ...prev,
       latitude: lat,
       longitude: lon,
-      displayName: geoResult.displayName || formatCoordinateFallback(lat, lon),
+      displayName: finalName,
       city: geoResult.city || '',
       state: geoResult.state || '',
       country: geoResult.country || '',
       accuracy: null,
       loading: false,
-      isGps: false
+      isGps: false,
+      source: customName ? `Selected: ${customName}` : 'Map Selection'
     }));
 
-    updateDeepIntelligence(lat, lon, customName || 'Manual Selection');
+    updateDeepIntelligence(lat, lon, customName || 'Map Selection');
   }, [updateWeatherForCoords, updateDeepIntelligence]);
 
   /**
-   * Request high-accuracy GPS location from user browser.
+   * Request high-accuracy physical GPS location from user browser.
+   * Updates userGpsLocation AND switches viewing location back to user's live GPS.
    */
   const requestLocation = useCallback(() => {
     if (!navigator.geolocation) {
@@ -219,23 +303,30 @@ export const LocationIntelligenceProvider = ({ children }) => {
         // Concurrent: reverse geocode and fetch weather
         const [geoResult] = await Promise.all([
           reverseGeocode(latitude, longitude),
-          updateWeatherForCoords(latitude, longitude)
+          updateWeatherForCoords(latitude, longitude, false, null)
         ]);
 
         if (reqId !== activeReqRef.current) return;
 
-        setLocation({
+        const resolvedName = geoResult.displayName || formatCoordinateFallback(latitude, longitude);
+
+        const gpsRecord = {
           latitude,
           longitude,
           accuracy: Math.round(accuracy || 10),
           timestamp: new Date(pos.timestamp || Date.now()).toISOString(),
-          displayName: geoResult.displayName || formatCoordinateFallback(latitude, longitude),
+          displayName: resolvedName,
           city: geoResult.city || '',
           state: geoResult.state || '',
           country: geoResult.country || '',
           isGps: true,
           source: 'Live Browser GPS',
-          permissionStatus: 'granted',
+          permissionStatus: 'granted'
+        };
+
+        setUserGpsLocation(gpsRecord);
+        setLocation({
+          ...gpsRecord,
           loading: false,
           error: null
         });
@@ -310,7 +401,7 @@ export const LocationIntelligenceProvider = ({ children }) => {
 
       if (reqId !== activeReqRef.current) return null;
 
-      await updateWeatherForCoords(lat, lon);
+      await updateWeatherForCoords(lat, lon, false, displayName);
 
       if (reqId !== activeReqRef.current) return null;
 
@@ -347,16 +438,11 @@ export const LocationIntelligenceProvider = ({ children }) => {
 
   // Initial Auto-Discovery on mount
   useEffect(() => {
-    // Check permission state without triggering prompt immediately if possible
     if (navigator.permissions && navigator.permissions.query) {
       navigator.permissions.query({ name: 'geolocation' }).then((status) => {
-        if (status.state === 'granted') {
-          requestLocation();
-        } else if (status.state === 'prompt') {
-          // If prompt, attempt requestLocation
+        if (status.state === 'granted' || status.state === 'prompt') {
           requestLocation();
         } else {
-          // Denied
           setLocation(prev => ({
             ...prev,
             permissionStatus: 'denied',
@@ -372,16 +458,40 @@ export const LocationIntelligenceProvider = ({ children }) => {
     }
   }, [requestLocation, updateWeatherForCoords]);
 
+  // High-Precision Real-Time Clock Ticker (Every 10 seconds)
+  // Continuously recalculates celestial sun & moon positions and local time
+  // without triggering excessive network requests.
+  useEffect(() => {
+    const clockInterval = setInterval(() => {
+      setEnvironment(prev => {
+        return buildEnvironmentState({
+          latitude: location.latitude,
+          longitude: location.longitude,
+          displayName: location.displayName,
+          timezone: location.timezone || weather.timezone || 'Asia/Kolkata',
+          timezoneAbbr: location.timezoneAbbr || weather.timezone_abbreviation || 'UTC',
+          utcOffsetSeconds: location.utcOffsetSeconds ?? weather.utc_offset_seconds ?? 19800,
+          weather,
+          currentDate: new Date()
+        });
+      });
+    }, 10000);
+
+    return () => clearInterval(clockInterval);
+  }, [location.latitude, location.longitude, location.displayName, location.timezone, location.timezoneAbbr, location.utcOffsetSeconds, weather]);
+
   const value = {
     location,
+    userGpsLocation,
     weather,
+    environment,
     intelligence,
     intelLoading,
     requestLocation,
     setManualLocation,
     searchLocation,
     refreshWeather: () => updateWeatherForCoords(location.latitude, location.longitude, true),
-    // Backward-compatibility aliases so existing consumers don't break
+    // Backward-compatibility aliases
     selectedLocation: {
       latitude: location.latitude,
       longitude: location.longitude,
@@ -391,7 +501,9 @@ export const LocationIntelligenceProvider = ({ children }) => {
       source: location.source,
       country: location.country,
       stateProvince: location.state,
-      locality: location.city
+      locality: location.city,
+      timezone: location.timezone,
+      utcOffsetSeconds: location.utcOffsetSeconds
     },
     useLiveGps: requestLocation,
     inspectCoordinates: (lat, lng, label) => setManualLocation(lat, lng, label),

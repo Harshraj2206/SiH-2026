@@ -472,7 +472,7 @@ export const SafeRoutePage = () => {
               <span className="w-3 h-3 rounded-full bg-emerald-500 animate-ping" />
               <div>
                 <span className="text-xs font-black text-emerald-400 uppercase tracking-widest block">
-                  MOVE TOWARD SAFE ZONE • LIVE TURN GUIDANCE
+                  MOVE TOWARD SAFE ZONE • TURN-BY-TURN ROAD GUIDANCE
                 </span>
                 <span className="text-white text-xs font-bold">
                   Destination: {routeResult.destination?.name}

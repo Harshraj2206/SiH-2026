@@ -107,6 +107,7 @@ def get_global_live_weather(latitude: float, longitude: float, country_code: Opt
         f"https://api.open-meteo.com/v1/forecast?"
         f"latitude={latitude:.4f}&longitude={longitude:.4f}"
         f"&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,rain,snowfall,weather_code,surface_pressure,wind_speed_10m,wind_direction_10m,is_day,cloud_cover"
+        f"&daily=sunrise,sunset,precipitation_sum"
         f"&hourly=temperature_2m,precipitation,precipitation_probability,soil_moisture_0_to_7cm"
         f"&timezone=auto&past_days=3&forecast_days=3"
     )
@@ -117,6 +118,7 @@ def get_global_live_weather(latitude: float, longitude: float, country_code: Opt
             data = json.loads(resp.read().decode("utf-8"))
 
             current = data.get("current", {})
+            daily = data.get("daily", {})
             hourly = data.get("hourly", {})
             times = hourly.get("time", [])
             precip = hourly.get("precipitation", [])
@@ -162,6 +164,9 @@ def get_global_live_weather(latitude: float, longitude: float, country_code: Opt
             weather_code = current.get("weather_code", 0)
             condition_str = _map_wmo_code(weather_code)
 
+            sunrises = daily.get("sunrise", [])
+            sunsets = daily.get("sunset", [])
+
             result = {
                 "temperature_c": current.get("temperature_2m"),
                 "feels_like_c": current.get("apparent_temperature"),
@@ -180,6 +185,11 @@ def get_global_live_weather(latitude: float, longitude: float, country_code: Opt
                 "precipitation_72h_mm": p_72h,
                 "soil_moisture_m3m3": current_soil,
                 "forecast_trend": forecast_trend,
+                "timezone": data.get("timezone", "Asia/Kolkata"),
+                "timezone_abbreviation": data.get("timezone_abbreviation", "UTC"),
+                "utc_offset_seconds": data.get("utc_offset_seconds", 19800),
+                "sunrise": sunrises[0] if sunrises else None,
+                "sunset": sunsets[0] if sunsets else None,
                 "source": provider_info["provider_name"],
                 "agency": provider_info["agency"],
                 "tier": provider_info["tier"],

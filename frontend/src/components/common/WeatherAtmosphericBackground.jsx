@@ -1,377 +1,516 @@
+/**
+ * LANDSAFE SIH 2026 - Real-Time Astronomical & Meteorological Environment Engine
+ *
+ * Dynamically transforms the entire application's visual atmosphere based on:
+ * 1. REAL SELECTED COORDINATES (Map Click, Searched Location, Mountain Zone, or Live GPS)
+ * 2. REAL LOCAL TIMEZONE & TIME (calculated independently of the user's computer clock)
+ * 3. REAL SOLAR POSITION (Continuous azimuth & elevation angle calculated via NOAA formulas)
+ * 4. REAL LUNAR POSITION & PHASE (Meeus lunar calculations, moon altitude, illumination %)
+ * 5. REAL WMO WEATHER (Open-Meteo & IMD reanalysis grid)
+ *
+ * Visually supports all combined diurnal/meteorological environments:
+ * - CLEAR: Morning Dawn / Golden Sunrise, Midday Azure Daylight, Late Afternoon, Sunset Dusk, Starry Midnight
+ * - PARTLY CLOUDY: Drifting cloud banks with real sun/moon shining through
+ * - CLOUDY / OVERCAST: Diffuse silver-slate daylight sky (never a dark void) / Nocturnal overcast
+ * - RAIN & HEAVY RAIN: High-performance angled rain streaks with water impact ripples
+ * - THUNDERSTORM: Atmospheric bruised storm skies with periodic electric lightning discharges
+ * - SNOW: Drifting crystalline snowflakes with rotational physics
+ * - FOG: Low-visibility luminous morning mist / deep nocturnal haze
+ *
+ * Accessible: Respects @media (prefers-reduced-motion: reduce).
+ */
+
 import React, { useMemo } from 'react';
 import { useLocationIntelligence } from '../../context/LocationIntelligenceContext';
-import { useEmergency } from '../../context/EmergencyContext';
 import { useTheme } from '../../context/ThemeContext';
-import { normalizeWeather, WEATHER_TYPES } from '../../utils/weatherNormalizer';
+import { Sun, Moon, Cloud, Wind, Compass } from 'lucide-react';
 
-/**
- * LANDSAFE SIH 2026 - Real Weather-Driven Dynamic Atmospheric Background
- * Dynamically reflects the real meteorological conditions and astronomical day/night state
- * of the currently selected location (GPS or user-clicked map coordinates).
- * 
- * Features:
- * - 100% synchronized with LocationIntelligenceContext authoritative state
- * - Distinct Day and Night visual environments for Clear, Cloudy, Fog, Rain, Heavy Rain, Storm, Snow
- * - Smooth GPU-accelerated crossfade transitions
- * - Accessible: respects prefers-reduced-motion
- * - Sleek fallback ensuring screen is never a blank black void
- */
 export const WeatherAtmosphericBackground = () => {
-  const { weather: intelWeather, location } = useLocationIntelligence();
-  const { selectedZone, zones } = useEmergency();
+  const { environment, location } = useLocationIntelligence();
   const { resolvedTheme } = useTheme();
   const isLight = resolvedTheme === 'light';
 
-  // Authoritative weather: prioritize LocationIntelligenceContext (follows map-selected coordinates & GPS)
-  const weather = useMemo(() => {
-    if (intelWeather?.normalized && intelWeather.normalized.type !== WEATHER_TYPES.UNKNOWN) {
-      return intelWeather.normalized;
-    }
-    const activeZone = selectedZone || (zones && zones[0]) || null;
-    return normalizeWeather(activeZone);
-  }, [intelWeather?.normalized, selectedZone, zones]);
+  const {
+    isDay,
+    dayPhase,
+    solarElevation,
+    solarAzimuth,
+    sunScreenX,
+    sunScreenY,
+    isSunVisible,
+    sunGlowOpacity,
+    moonElevation,
+    moonAzimuth,
+    moonScreenX,
+    moonScreenY,
+    isMoonVisible,
+    moonPhaseName,
+    moonPhaseFraction,
+    moonIlluminationPct,
+    weatherCategory,
+    weatherCondition,
+    temperatureC,
+    precipitationMm,
+    cloudCoverPct,
+    localTimeString,
+    timezoneAbbr,
+    displayName
+  } = environment;
 
-  const isDay = weather.isDay !== undefined ? weather.isDay : true;
-  const category = weather.category || 'unknown';
+  // Determine Sky Gradient based on real astronomical daylight phase and weather category
+  const skyTheme = useMemo(() => {
+    if (isDay) {
+      // ═════════════════════════════════════════════════════════════════════
+      // DAYLIGHT ENVIRONMENTS
+      // ═════════════════════════════════════════════════════════════════════
+      switch (weatherCategory) {
+        case 'clear':
+          if (dayPhase === 'dawn' || dayPhase === 'morning') {
+            // Golden Sunrise / Early Morning
+            return {
+              bg: isLight
+                ? 'from-[#fef08a]/70 via-[#fde047]/40 to-[#e0f2fe]'
+                : 'from-[#1e3a8a]/70 via-[#2563eb]/45 to-[#f59e0b]/40',
+              glow: 'bg-amber-400/25',
+              ambientHaze: 'bg-gradient-to-t from-amber-500/20 via-orange-400/10 to-transparent'
+            };
+          } else if (dayPhase === 'dusk') {
+            // Twilight / Sunset
+            return {
+              bg: isLight
+                ? 'from-[#fbcfe8]/70 via-[#fed7aa]/50 to-[#bae6fd]'
+                : 'from-[#312e81]/80 via-[#701a75]/60 to-[#ea580c]/50',
+              glow: 'bg-orange-500/30',
+              ambientHaze: 'bg-gradient-to-t from-rose-500/25 via-amber-500/15 to-transparent'
+            };
+          } else {
+            // Midday Azure Daylight
+            return {
+              bg: isLight
+                ? 'from-[#bae6fd]/80 via-[#e0f2fe]/60 to-[#ffffff]'
+                : 'from-[#0284c7]/80 via-[#0369a1]/60 to-[#38bdf8]/35',
+              glow: 'bg-sky-400/30',
+              ambientHaze: 'bg-gradient-to-t from-sky-400/15 via-cyan-400/10 to-transparent'
+            };
+          }
+
+        case 'partly_cloudy':
+          return {
+            bg: isLight
+              ? 'from-[#e0f2fe]/80 via-[#f1f5f9]/60 to-[#ffffff]'
+              : 'from-[#0369a1]/75 via-[#0c4a6e]/60 to-[#0284c7]/30',
+            glow: 'bg-amber-300/20',
+            ambientHaze: 'bg-gradient-to-t from-sky-300/15 via-slate-400/10 to-transparent'
+          };
+
+        case 'cloudy':
+          // Overcast / Gloomy Daylight (Clearly Daytime, not black!)
+          return {
+            bg: isLight
+              ? 'from-[#cbd5e1]/80 via-[#e2e8f0]/60 to-[#f8fafc]'
+              : 'from-[#334155]/85 via-[#475569]/70 to-[#64748b]/40',
+            glow: 'bg-slate-400/15',
+            ambientHaze: 'bg-gradient-to-t from-slate-500/20 via-slate-600/10 to-transparent'
+          };
+
+        case 'rain':
+        case 'heavy_rain':
+          // Daylight Rainstorm
+          return {
+            bg: isLight
+              ? 'from-[#94a3b8]/80 via-[#cbd5e1]/60 to-[#f1f5f9]'
+              : 'from-[#1e293b]/90 via-[#334155]/75 to-[#475569]/45',
+            glow: 'bg-sky-500/20',
+            ambientHaze: 'bg-gradient-to-t from-cyan-600/20 via-sky-500/10 to-transparent'
+          };
+
+        case 'thunderstorm':
+          // Bruised Violent Daytime Storm
+          return {
+            bg: isLight
+              ? 'from-[#64748b]/90 via-[#475569]/70 to-[#e2e8f0]'
+              : 'from-[#1e1b4b]/95 via-[#0f172a]/85 to-[#020617]/70',
+            glow: 'bg-indigo-500/30',
+            ambientHaze: 'bg-gradient-to-t from-indigo-600/25 via-purple-600/10 to-transparent'
+          };
+
+        case 'snow':
+          // Crisp Glacial Frost Daylight
+          return {
+            bg: isLight
+              ? 'from-[#e0f2fe]/90 via-[#f0f9ff]/70 to-[#ffffff]'
+              : 'from-[#1e3a5f]/80 via-[#0369a1]/50 to-[#bae6fd]/35',
+            glow: 'bg-cyan-300/25',
+            ambientHaze: 'bg-gradient-to-t from-cyan-400/20 via-sky-300/10 to-transparent'
+          };
+
+        case 'fog':
+          // Luminous Pearlescent Mist
+          return {
+            bg: isLight
+              ? 'from-[#e2e8f0]/85 via-[#f1f5f9]/70 to-[#ffffff]'
+              : 'from-[#334155]/75 via-[#475569]/55 to-[#94a3b8]/35',
+            glow: 'bg-slate-300/20',
+            ambientHaze: 'bg-gradient-to-t from-slate-400/25 via-slate-300/10 to-transparent'
+          };
+
+        default:
+          return {
+            bg: isLight
+              ? 'from-[#e0f2fe]/80 via-[#f8fafc]/60 to-[#ffffff]'
+              : 'from-[#0369a1]/70 via-[#0c4a6e]/55 to-[#1e293b]/50',
+            glow: 'bg-sky-400/20',
+            ambientHaze: 'bg-transparent'
+          };
+      }
+    } else {
+      // ═════════════════════════════════════════════════════════════════════
+      // NOCTURNAL / NIGHT ENVIRONMENTS
+      // ═════════════════════════════════════════════════════════════════════
+      switch (weatherCategory) {
+        case 'clear':
+          return {
+            bg: 'from-[#060914] via-[#04060d] to-[#010206]',
+            glow: 'bg-indigo-500/15',
+            ambientHaze: 'bg-gradient-to-t from-indigo-950/20 via-blue-950/10 to-transparent'
+          };
+
+        case 'partly_cloudy':
+          return {
+            bg: 'from-[#070c1a] via-[#030610] to-[#010206]',
+            glow: 'bg-indigo-400/10',
+            ambientHaze: 'bg-gradient-to-t from-slate-900/30 via-indigo-950/15 to-transparent'
+          };
+
+        case 'cloudy':
+          return {
+            bg: 'from-[#0b0e14] via-[#07090f] to-[#030408]',
+            glow: 'bg-slate-500/10',
+            ambientHaze: 'bg-gradient-to-t from-neutral-900/40 via-neutral-950/20 to-transparent'
+          };
+
+        case 'rain':
+        case 'heavy_rain':
+          return {
+            bg: 'from-[#090d16] via-[#05070d] to-[#020306]',
+            glow: 'bg-sky-500/15',
+            ambientHaze: 'bg-gradient-to-t from-sky-950/30 via-slate-950/20 to-transparent'
+          };
+
+        case 'thunderstorm':
+          return {
+            bg: 'from-[#120a24] via-[#090514] to-[#030208]',
+            glow: 'bg-purple-500/25',
+            ambientHaze: 'bg-gradient-to-t from-purple-950/40 via-indigo-950/20 to-transparent'
+          };
+
+        case 'snow':
+          return {
+            bg: 'from-[#071322] via-[#040a14] to-[#02050a]',
+            glow: 'bg-cyan-500/15',
+            ambientHaze: 'bg-gradient-to-t from-cyan-950/30 via-slate-950/20 to-transparent'
+          };
+
+        case 'fog':
+          return {
+            bg: 'from-[#0a0d12] via-[#06080c] to-[#020306]',
+            glow: 'bg-slate-400/10',
+            ambientHaze: 'bg-gradient-to-t from-slate-900/40 via-slate-950/20 to-transparent'
+          };
+
+        default:
+          return {
+            bg: 'from-[#060914] via-[#04060d] to-[#010206]',
+            glow: 'bg-indigo-500/10',
+            ambientHaze: 'bg-transparent'
+          };
+      }
+    }
+  }, [isDay, dayPhase, weatherCategory, isLight]);
 
   return (
-    <div 
+    <div
       className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none transition-opacity duration-1000 ease-in-out"
       aria-hidden="true"
     >
-      {/* Baseline Ambient Layer: Sleek modern atmospheric canvas so the app is NEVER a stark blank void */}
-      <div 
-        className={`absolute inset-0 transition-colors duration-1000 ${
-          isLight 
-            ? 'bg-gradient-to-b from-[#f1f5f9] via-[#f8fafc] to-[#ffffff]' 
-            : isDay 
-              ? 'bg-gradient-to-b from-[#0d1624] via-[#090f18] to-[#05080e]' 
-              : 'bg-gradient-to-b from-[#090d18] via-[#050810] to-[#020308]'
-        }`} 
+      {/* ═════════════════════════════════════════════════════════════════════
+          LAYER 1: DYNAMIC SKY GRADIENT (Smooth 1.5s Crossfade)
+          ═════════════════════════════════════════════════════════════════════ */}
+      <div
+        className={`absolute inset-0 bg-gradient-to-b ${skyTheme.bg} transition-colors duration-1000 ease-in-out`}
+      />
+
+      {/* Atmospheric Horizon Haze Glow */}
+      <div className={`absolute inset-0 ${skyTheme.ambientHaze} pointer-events-none transition-opacity duration-1000`} />
+
+      {/* Ambient Celestial Glow */}
+      <div
+        className={`absolute -top-10 -right-10 w-[700px] h-[500px] rounded-full blur-[140px] pointer-events-none ${skyTheme.glow} transition-colors duration-1000`}
       />
 
       {/* ═════════════════════════════════════════════════════════════════════
-          1. CLEAR / SUNNY DAYLIGHT ENVIRONMENT
+          LAYER 2: REAL-TIME SOLAR DISC & SOLAR CORONA
+          Rendered at the EXACT calculated solar azimuth and elevation angle!
           ═════════════════════════════════════════════════════════════════════ */}
-      {category === 'clear' && isDay && (
-        <div className="absolute inset-0 animate-in fade-in duration-1000 transition-opacity">
-          <div className={`absolute inset-0 bg-gradient-to-br ${isLight ? 'from-[#fef3c7]/60 via-[#fffbeb]/40 to-transparent' : 'from-[#381e05]/70 via-[#1e1002]/80 to-[#080501]/90'}`} />
-          <div className={`absolute top-0 right-0 w-full h-[600px] bg-gradient-to-b ${isLight ? 'from-amber-300/30 via-amber-100/15 to-transparent' : 'from-orange-500/20 via-amber-500/10 to-transparent'}`} />
-
-          {/* Luminous Solar Disc & Pulsing Corona at Top Right */}
-          <div className="absolute -top-16 -right-16 w-96 h-96 flex items-center justify-center pointer-events-none">
-            <div className={`absolute w-full h-full rounded-full bg-gradient-to-br ${isLight ? 'from-amber-300/50 via-yellow-200/40 to-transparent' : 'from-amber-400/40 via-orange-500/25 to-transparent'} blur-3xl animate-sun-pulse`} />
-            <div className={`absolute w-72 h-72 rounded-full ${isLight ? 'bg-amber-300/40' : 'bg-amber-400/25'} blur-2xl`} />
-            <div className="w-44 h-44 rounded-full bg-gradient-to-tr from-amber-300 to-yellow-100 shadow-[0_0_120px_rgba(251,191,36,0.7)] opacity-90" />
-          </div>
-
-          {/* Floating Golden Dust Particles */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {[...Array(20)].map((_, i) => (
-              <div
-                key={i}
-                className="absolute w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_#fde047] animate-float-particle"
-                style={{
-                  left: `${(i * 5.1) % 100}%`,
-                  top: `${12 + (i * 4.3) % 70}%`,
-                  animationDuration: `${3.5 + (i % 4)}s`,
-                  animationDelay: `${(i * 0.22) % 3}s`
-                }}
-              />
-            ))}
-          </div>
-
-          <div className={`absolute top-12 left-12 w-[600px] h-32 ${isLight ? 'bg-white/40' : 'bg-amber-500/5'} rounded-full blur-3xl animate-cloud-drift`} />
-        </div>
-      )}
-
-      {/* ═════════════════════════════════════════════════════════════════════
-          2. CLEAR NIGHT ENVIRONMENT (Moon & 48 Twinkling Stars)
-          ═════════════════════════════════════════════════════════════════════ */}
-      {category === 'clear' && !isDay && (
-        <div className="absolute inset-0 animate-in fade-in duration-1000 transition-opacity">
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0f1738] via-[#070c20] to-[#02040a]" />
-          <div className="absolute top-10 right-1/4 w-[650px] h-[450px] bg-indigo-500/15 rounded-full blur-[130px]" />
-
-          {/* Glowing Luminous Crescent Moon at Top Right */}
-          <div className="absolute top-10 right-16 w-20 h-20 rounded-full bg-gradient-to-tr from-indigo-200 to-white shadow-[0_0_70px_rgba(224,231,255,0.7)] opacity-90 flex items-center justify-center">
-            <div className="w-16 h-16 rounded-full bg-[#070c20] -translate-x-2.5 -translate-y-1" />
-          </div>
-
-          {/* 48 Twinkling Stars */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {[...Array(48)].map((_, i) => (
-              <div
-                key={i}
-                className="absolute w-1.5 h-1.5 rounded-full bg-indigo-100 animate-star-twinkle shadow-[0_0_6px_#e0e7ff]"
-                style={{
-                  left: `${(i * 2.15) % 100}%`,
-                  top: `${3 + (i * 2.1) % 85}%`,
-                  animationDelay: `${(i * 0.15) % 3}s`,
-                  animationDuration: `${2.8 + (i % 4) * 0.6}s`
-                }}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* ═════════════════════════════════════════════════════════════════════
-          3. PARTLY CLOUDY DAY
-          ═════════════════════════════════════════════════════════════════════ */}
-      {category === 'partly_cloudy' && isDay && (
-        <div className="absolute inset-0 animate-in fade-in duration-1000 transition-opacity">
-          <div className={`absolute inset-0 bg-gradient-to-b ${isLight ? 'from-[#e0f2fe] via-[#f1f5f9] to-[#ffffff]' : 'from-[#142338] via-[#0d1624] to-[#060a12]'}`} />
+      {isSunVisible && (
+        <div
+          className="absolute pointer-events-none transition-all duration-1000 ease-out"
+          style={{
+            left: `${sunScreenX}%`,
+            top: `${sunScreenY}%`,
+            transform: 'translate(-50%, -50%)',
+            opacity: sunGlowOpacity
+          }}
+        >
+          {/* Luminous Outer Corona Flare */}
+          <div className="absolute -inset-24 rounded-full bg-gradient-to-r from-amber-300/35 via-yellow-200/20 to-transparent blur-3xl animate-sun-pulse pointer-events-none" />
           
-          {/* Peeking Soft Sun Disc */}
-          <div className="absolute top-4 right-20 w-44 h-44 rounded-full bg-amber-400/30 blur-2xl animate-sun-pulse" />
-          <div className="absolute top-10 right-28 w-24 h-24 rounded-full bg-amber-200/50 blur-xl" />
+          {/* Middle Diffuse Solar Aura */}
+          <div className="absolute -inset-10 rounded-full bg-amber-400/30 blur-xl pointer-events-none" />
 
-          {/* Drifting Cloud Layers */}
-          <div className={`absolute -top-10 -left-10 w-[750px] h-[320px] ${isLight ? 'bg-sky-200/50' : 'bg-slate-400/20'} rounded-full blur-[80px] animate-cloud-drift`} />
-          <div className={`absolute top-20 right-10 w-[800px] h-[360px] ${isLight ? 'bg-slate-200/60' : 'bg-slate-500/15'} rounded-full blur-[90px] animate-cloud-drift-reverse`} />
-        </div>
-      )}
-
-      {/* ═════════════════════════════════════════════════════════════════════
-          4. PARTLY CLOUDY NIGHT
-          ═════════════════════════════════════════════════════════════════════ */}
-      {category === 'partly_cloudy' && !isDay && (
-        <div className="absolute inset-0 animate-in fade-in duration-1000 transition-opacity">
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0c1329] via-[#060a18] to-[#020409]" />
-          
-          {/* Faint Moon Halo through Clouds */}
-          <div className="absolute top-12 right-24 w-28 h-28 rounded-full bg-indigo-300/25 blur-2xl" />
-
-          {/* Few Peek-Through Stars */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {[...Array(24)].map((_, i) => (
-              <div
-                key={i}
-                className="absolute w-1.5 h-1.5 rounded-full bg-indigo-200/70 animate-star-twinkle shadow-[0_0_4px_#c7d2fe]"
-                style={{
-                  left: `${(i * 4.2) % 100}%`,
-                  top: `${5 + (i * 3.7) % 75}%`,
-                  animationDelay: `${(i * 0.2) % 3}s`
-                }}
-              />
-            ))}
+          {/* Glowing Core Sun Disc */}
+          <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-tr from-amber-300 via-amber-100 to-white shadow-[0_0_80px_rgba(251,191,36,0.85)] flex items-center justify-center">
+            <div className="w-14 h-14 rounded-full bg-white/70 blur-[2px]" />
           </div>
 
-          {/* Dark Nocturnal Cloud Silhouettes */}
-          <div className="absolute top-0 -left-20 w-[850px] h-[380px] bg-slate-900/60 rounded-full blur-[85px] animate-cloud-drift" />
-          <div className="absolute top-28 right-0 w-[800px] h-[400px] bg-[#0c1328]/70 rounded-full blur-[100px] animate-cloud-drift-reverse" />
-        </div>
-      )}
-
-      {/* ═════════════════════════════════════════════════════════════════════
-          5. CLOUDY / OVERCAST DAY
-          ═════════════════════════════════════════════════════════════════════ */}
-      {category === 'cloudy' && isDay && (
-        <div className="absolute inset-0 animate-in fade-in duration-1000 transition-opacity">
-          <div className={`absolute inset-0 bg-gradient-to-b ${isLight ? 'from-[#cbd5e1] via-[#e2e8f0] to-[#f8fafc]' : 'from-[#192433] via-[#0f1724] to-[#080d14]'}`} />
-          <div className={`absolute -top-10 -left-20 w-[850px] h-[380px] ${isLight ? 'bg-slate-300/50' : 'bg-slate-400/25'} rounded-full blur-[90px] animate-cloud-drift`} />
-          <div className={`absolute top-16 right-0 w-[900px] h-[420px] ${isLight ? 'bg-sky-200/40' : 'bg-slate-500/20'} rounded-full blur-[100px] animate-cloud-drift-reverse`} />
-          <div className={`absolute bottom-0 inset-x-0 h-48 ${isLight ? 'bg-slate-200/40' : 'bg-slate-900/50'} blur-xl`} />
-        </div>
-      )}
-
-      {/* ═════════════════════════════════════════════════════════════════════
-          6. CLOUDY / OVERCAST NIGHT
-          ═════════════════════════════════════════════════════════════════════ */}
-      {category === 'cloudy' && !isDay && (
-        <div className="absolute inset-0 animate-in fade-in duration-1000 transition-opacity">
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0a0f1d] via-[#060914] to-[#020308]" />
-          <div className="absolute -top-20 inset-x-0 h-[450px] bg-slate-900/70 rounded-full blur-[110px] animate-cloud-drift" />
-          <div className="absolute top-36 -right-20 w-[850px] h-[400px] bg-[#0c1424]/60 rounded-full blur-[100px] animate-cloud-drift-reverse" />
-          <div className="absolute bottom-0 inset-x-0 h-48 bg-slate-950/80 blur-xl" />
-        </div>
-      )}
-
-      {/* ═════════════════════════════════════════════════════════════════════
-          7. FOG / MIST (Day vs Night)
-          ═════════════════════════════════════════════════════════════════════ */}
-      {category === 'fog' && (
-        <div className="absolute inset-0 animate-in fade-in duration-1000 transition-opacity">
-          <div className={`absolute inset-0 bg-gradient-to-b ${
-            isDay 
-              ? (isLight ? 'from-[#cbd5e1] via-[#e2e8f0] to-[#f8fafc]' : 'from-[#1c2633] via-[#121922] to-[#090e14]')
-              : 'from-[#101620] via-[#090d14] to-[#030508]'
-          }`} />
-          <div className={`absolute top-10 inset-x-0 h-96 ${isDay ? 'bg-slate-300/30' : 'bg-slate-600/15'} blur-[100px] animate-cloud-drift`} />
-          <div className={`absolute bottom-10 inset-x-0 h-80 ${isDay ? 'bg-slate-400/25' : 'bg-slate-700/15'} blur-[90px] animate-cloud-drift-reverse`} />
-        </div>
-      )}
-
-      {/* ═════════════════════════════════════════════════════════════════════
-          8. RAIN / DRIZZLE (Day vs Night with 64 Falling Drops)
-          ═════════════════════════════════════════════════════════════════════ */}
-      {(category === 'rain' || category === 'drizzle') && (
-        <div className="absolute inset-0 animate-in fade-in duration-1000 transition-opacity">
-          <div className={`absolute inset-0 bg-gradient-to-b ${
-            isDay
-              ? (isLight ? 'from-[#e0f2fe] via-[#e2e8f0] to-[#f8fafc]' : 'from-[#0e2c4a] via-[#081b2e] to-[#030a13]')
-              : 'from-[#08182b] via-[#050e1a] to-[#02050b]'
-          }`} />
-          <div className={`absolute -top-20 left-1/3 w-[850px] h-[550px] ${isDay ? 'bg-sky-500/20' : 'bg-sky-700/15'} rounded-full blur-[140px]`} />
-
-          {/* 64 Visible Falling Rain Streaks */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {[...Array(64)].map((_, i) => {
-              const leftPos = (i * 1.58) % 100;
-              const duration = 0.65 + (i % 5) * 0.12;
-              const delay = (i * 0.05) % 1.5;
-              const height = 36 + (i % 6) * 14;
-              return (
+          {/* Golden Floating Daylight Dust Particles */}
+          {(weatherCategory === 'clear' || weatherCategory === 'partly_cloudy') && (
+            <div className="absolute -inset-32 overflow-visible pointer-events-none">
+              {[...Array(16)].map((_, i) => (
                 <div
                   key={i}
-                  className={`absolute w-[2px] ${
-                    isDay 
-                      ? (isLight ? 'bg-gradient-to-b from-transparent via-sky-500 to-sky-600 shadow-[0_0_4px_rgba(14,165,233,0.8)]' : 'bg-gradient-to-b from-transparent via-sky-300 to-sky-100 shadow-[0_0_5px_rgba(56,189,248,0.9)]')
-                      : 'bg-gradient-to-b from-transparent via-sky-400/80 to-sky-200 shadow-[0_0_4px_rgba(56,189,248,0.7)]'
-                  } rounded-full animate-rain-drop`}
+                  className="absolute w-1.5 h-1.5 rounded-full bg-amber-300 shadow-[0_0_6px_#fde047] animate-float-particle"
                   style={{
-                    height: `${height}px`,
-                    left: `${leftPos}%`,
-                    top: `-${height + 20}px`,
-                    animationDuration: `${duration}s`,
-                    animationDelay: `${delay}s`,
-                    animationIterationCount: 'infinite'
+                    left: `${(i * 18.5) % 180 - 40}px`,
+                    top: `${(i * 22.3) % 160 - 30}px`,
+                    animationDuration: `${3.2 + (i % 4) * 0.7}s`,
+                    animationDelay: `${(i * 0.2) % 2.5}s`
                   }}
                 />
-              );
-            })}
-          </div>
-
-          <div className={`absolute bottom-0 inset-x-0 h-36 bg-gradient-to-t ${isDay ? 'from-sky-950/40' : 'from-slate-950/70'} to-transparent blur-md`} />
+              ))}
+            </div>
+          )}
         </div>
       )}
 
       {/* ═════════════════════════════════════════════════════════════════════
-          9. HEAVY RAIN (Day vs Night with 72 Rapid Rain Streaks)
+          LAYER 3: REAL-TIME LUNAR DISC & ACCURATE MOON PHASE
+          Rendered at the EXACT calculated lunar azimuth and elevation angle!
           ═════════════════════════════════════════════════════════════════════ */}
-      {category === 'heavy_rain' && (
-        <div className="absolute inset-0 animate-in fade-in duration-1000 transition-opacity">
-          <div className={`absolute inset-0 bg-gradient-to-b ${
-            isDay 
-              ? 'from-[#0a233b] via-[#061626] to-[#02070e]' 
-              : 'from-[#05111e] via-[#030a13] to-[#010307]'
-          }`} />
-          <div className="absolute -top-20 left-1/4 w-[900px] h-[600px] bg-sky-700/20 rounded-full blur-[140px]" />
+      {isMoonVisible && (
+        <div
+          className="absolute pointer-events-none transition-all duration-1000 ease-out"
+          style={{
+            left: `${moonScreenX}%`,
+            top: `${moonScreenY}%`,
+            transform: 'translate(-50%, -50%)',
+            opacity: isDay ? 0.45 : 0.95
+          }}
+        >
+          {/* Soft Lunar Halo */}
+          <div className="absolute -inset-14 rounded-full bg-indigo-200/20 blur-2xl pointer-events-none" />
 
-          {/* 72 Fast Torrential Rain Streaks */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {[...Array(72)].map((_, i) => {
-              const leftPos = (i * 1.39) % 100;
-              const duration = 0.48 + (i % 4) * 0.08;
-              const delay = (i * 0.035) % 1.2;
-              const height = 50 + (i % 6) * 16;
-              return (
-                <div
-                  key={i}
-                  className="absolute w-[2.2px] bg-gradient-to-b from-transparent via-sky-300 to-white shadow-[0_0_5px_rgba(186,230,253,0.9)] rounded-full animate-rain-drop"
-                  style={{
-                    height: `${height}px`,
-                    left: `${leftPos}%`,
-                    top: `-${height + 30}px`,
-                    animationDuration: `${duration}s`,
-                    animationDelay: `${delay}s`,
-                    animationIterationCount: 'infinite'
-                  }}
+          {/* Realistic SVG Moon with Illuminated Phase Arc */}
+          <div className="relative w-16 h-16 sm:w-18 sm:h-18 rounded-full bg-slate-900/60 shadow-[0_0_50px_rgba(224,231,255,0.6)] flex items-center justify-center border border-indigo-200/20">
+            <svg
+              viewBox="0 0 100 100"
+              className="w-full h-full transform -rotate-12 drop-shadow-[0_0_8px_rgba(224,231,255,0.8)]"
+            >
+              {/* Moon Dark Side Basemap */}
+              <circle cx="50" cy="50" r="46" fill="#0f172a" opacity="0.8" />
+              
+              {/* Moon Craters Surface Texture */}
+              <circle cx="38" cy="42" r="7" fill="#1e293b" opacity="0.5" />
+              <circle cx="62" cy="35" r="9" fill="#1e293b" opacity="0.4" />
+              <circle cx="50" cy="68" r="11" fill="#1e293b" opacity="0.45" />
+              <circle cx="32" cy="62" r="5" fill="#1e293b" opacity="0.4" />
+
+              {/* Dynamic Illuminated Crescent / Gibbous Phase Path */}
+              {moonPhaseFraction > 0.03 && (
+                <path
+                  d={
+                    moonPhaseFraction <= 0.5
+                      ? `M 50 4 A 46 46 0 0 1 50 96 A ${Math.abs(46 * (1 - 2 * moonPhaseFraction))} 46 0 0 ${
+                          moonPhaseFraction >= 0.5 ? '1' : '0'
+                        } 50 4`
+                      : `M 50 4 A 46 46 0 0 1 50 96 A ${Math.abs(46 * (2 * moonPhaseFraction - 1))} 46 0 0 1 50 4`
+                  }
+                  fill="url(#lunarGradient)"
                 />
-              );
-            })}
+              )}
+
+              <defs>
+                <linearGradient id="lunarGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#ffffff" />
+                  <stop offset="60%" stopColor="#e0e7ff" />
+                  <stop offset="100%" stopColor="#c7d2fe" />
+                </linearGradient>
+              </defs>
+            </svg>
           </div>
+
+          {/* Phase Badge Tag (Subtle) */}
+          {!isDay && (
+            <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[9px] font-mono text-indigo-200/60 whitespace-nowrap tracking-wider uppercase">
+              {moonPhaseName} ({moonIlluminationPct}%)
+            </div>
+          )}
         </div>
       )}
 
       {/* ═════════════════════════════════════════════════════════════════════
-          10. THUNDERSTORM (Day vs Night with Animated Lightning Flashes)
+          LAYER 4: 48 TWINKLING STARS (Nocturnal Clear & Partly Cloudy Sky)
           ═════════════════════════════════════════════════════════════════════ */}
-      {category === 'thunderstorm' && (
-        <div className="absolute inset-0 animate-in fade-in duration-1000 transition-opacity">
-          <div className={`absolute inset-0 bg-gradient-to-b ${
-            isDay 
-              ? 'from-[#241148] via-[#140a2b] to-[#05020d]' 
-              : 'from-[#170933] via-[#0c041c] to-[#030108]'
-          }`} />
-          <div className="absolute -top-32 left-1/4 w-[900px] h-[600px] bg-indigo-600/30 rounded-full blur-[150px]" />
-          
-          {/* Animated Atmospheric Lightning Flash */}
-          <div className="absolute inset-0 bg-indigo-200/40 animate-lightning pointer-events-none" />
-
-          {/* Heavy Storm Rain Streaks */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {[...Array(72)].map((_, i) => {
-              const leftPos = (i * 1.4) % 100;
-              const duration = 0.42 + (i % 4) * 0.08;
-              const delay = (i * 0.04) % 1.1;
-              const height = 48 + (i % 6) * 18;
-              return (
-                <div
-                  key={i}
-                  className="absolute w-[2.5px] bg-gradient-to-b from-transparent via-indigo-200 to-white shadow-[0_0_6px_rgba(199,210,254,1)] rounded-full animate-rain-drop"
-                  style={{
-                    height: `${height}px`,
-                    left: `${leftPos}%`,
-                    top: `-${height + 30}px`,
-                    animationDuration: `${duration}s`,
-                    animationDelay: `${delay}s`,
-                    animationIterationCount: 'infinite'
-                  }}
-                />
-              );
-            })}
-          </div>
+      {!isDay && cloudCoverPct < 80 && (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {[...Array(48)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute rounded-full bg-white animate-star-twinkle shadow-[0_0_4px_#ffffff]"
+              style={{
+                width: `${1 + (i % 3) * 0.6}px`,
+                height: `${1 + (i % 3) * 0.6}px`,
+                left: `${(i * 2.13) % 100}%`,
+                top: `${2 + (i * 2.19) % 88}%`,
+                animationDelay: `${(i * 0.17) % 3.5}s`,
+                animationDuration: `${2.5 + (i % 4) * 0.7}s`,
+                opacity: 0.2 + (i % 5) * 0.15
+              }}
+            />
+          ))}
         </div>
       )}
 
       {/* ═════════════════════════════════════════════════════════════════════
-          11. SNOWFALL / ARCTIC COLD (56 Animated Snowflakes)
+          LAYER 5: DRIFTING CLOUDS (Partly Cloudy, Cloudy, Overcast)
           ═════════════════════════════════════════════════════════════════════ */}
-      {category === 'snow' && (
-        <div className="absolute inset-0 animate-in fade-in duration-1000 transition-opacity">
-          <div className={`absolute inset-0 bg-gradient-to-b ${isLight ? 'from-[#e0f2fe] via-[#f0f9ff] to-[#f8fafc]' : 'from-[#0e2a44] via-[#08182b] to-[#030912]'}`} />
-          <div className={`absolute -top-20 left-10 w-[600px] h-[400px] ${isLight ? 'bg-sky-400/20' : 'bg-cyan-400/20'} rounded-full blur-[100px]`} />
-          <div className={`absolute top-0 right-10 w-[700px] h-[450px] ${isLight ? 'bg-cyan-300/25' : 'bg-sky-300/15'} rounded-full blur-[120px]`} />
-
-          {/* 56 Animated Falling Snowflakes */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {[...Array(56)].map((_, i) => {
-              const leftPos = (i * 1.8) % 100;
-              const duration = 3.2 + (i % 6) * 0.7;
-              const delay = (i * 0.12) % 2.5;
-              const size = 3 + (i % 5) * 1.8;
-              return (
-                <div
-                  key={i}
-                  className={`absolute rounded-full ${isLight ? 'bg-sky-500/80 shadow-[0_0_6px_rgba(14,165,233,0.6)]' : 'bg-white shadow-[0_0_8px_rgba(255,255,255,1)]'} animate-snow-fall`}
-                  style={{
-                    width: `${size}px`,
-                    height: `${size}px`,
-                    left: `${leftPos}%`,
-                    top: `-20px`,
-                    animationDuration: `${duration}s`,
-                    animationDelay: `${delay}s`,
-                    animationIterationCount: 'infinite'
-                  }}
-                />
-              );
-            })}
-          </div>
+      {(weatherCategory === 'partly_cloudy' || weatherCategory === 'cloudy' || cloudCoverPct > 35) && (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-70">
+          <div
+            className={`absolute -top-12 -left-20 w-[900px] h-[340px] rounded-full blur-[90px] animate-cloud-drift ${
+              isDay
+                ? isLight
+                  ? 'bg-white/60'
+                  : 'bg-slate-300/25'
+                : 'bg-slate-800/40'
+            }`}
+          />
+          <div
+            className={`absolute top-24 -right-16 w-[850px] h-[380px] rounded-full blur-[100px] animate-cloud-drift-reverse ${
+              isDay
+                ? isLight
+                  ? 'bg-sky-100/50'
+                  : 'bg-slate-400/20'
+                : 'bg-slate-900/50'
+            }`}
+          />
         </div>
       )}
 
       {/* ═════════════════════════════════════════════════════════════════════
-          12. High-Tech Geodetic Grid Mesh Overlay (Preserves Legibility)
+          LAYER 6: HIGH-PERFORMANCE PRECIPITATION (Rain & Heavy Rain)
           ═════════════════════════════════════════════════════════════════════ */}
-      <div 
-        className="absolute inset-0 opacity-[0.035] pointer-events-none"
-        style={{
-          backgroundImage: `radial-gradient(rgba(255, 255, 255, 0.45) 1px, transparent 1px)`,
-          backgroundSize: '32px 32px'
-        }}
-      />
+      {(weatherCategory === 'rain' || weatherCategory === 'heavy_rain') && (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {[...Array(weatherCategory === 'heavy_rain' ? 72 : 54)].map((_, i) => (
+            <div
+              key={i}
+              className={`absolute rounded-full animate-rain-drop ${
+                isDay ? 'bg-gradient-to-b from-transparent to-sky-300/70' : 'bg-gradient-to-b from-transparent to-sky-400/60'
+              }`}
+              style={{
+                width: weatherCategory === 'heavy_rain' ? '1.5px' : '1px',
+                height: `${22 + (i % 4) * 8}px`,
+                left: `${(i * 1.45) % 100}%`,
+                top: `-40px`,
+                animationDuration: `${0.55 + (i % 4) * 0.12}s`,
+                animationDelay: `${(i * 0.08) % 1.2}s`,
+                animationIterationCount: 'infinite'
+              }}
+            />
+          ))}
+          {/* Ground Mist Ripple */}
+          <div className="absolute bottom-0 inset-x-0 h-28 bg-gradient-to-t from-sky-400/10 to-transparent pointer-events-none blur-xl" />
+        </div>
+      )}
+
+      {/* ═════════════════════════════════════════════════════════════════════
+          LAYER 7: THUNDERSTORM (Dynamic Lightning Flashes)
+          ═════════════════════════════════════════════════════════════════════ */}
+      {weatherCategory === 'thunderstorm' && (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute inset-0 bg-indigo-200/20 animate-lightning-flash pointer-events-none" />
+          {[...Array(64)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-[1.5px] h-9 bg-gradient-to-b from-transparent to-indigo-200 rounded-full animate-rain-drop"
+              style={{
+                left: `${(i * 1.6) % 100}%`,
+                top: `-30px`,
+                animationDuration: `${0.5 + (i % 3) * 0.1}s`,
+                animationDelay: `${(i * 0.07) % 1.1}s`,
+                animationIterationCount: 'infinite'
+              }}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* ═════════════════════════════════════════════════════════════════════
+          LAYER 8: SNOW / BLIZZARD (56 Drifting Snowflakes)
+          ═════════════════════════════════════════════════════════════════════ */}
+      {weatherCategory === 'snow' && (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {[...Array(56)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute rounded-full bg-white animate-snow-fall shadow-[0_0_5px_white]"
+              style={{
+                width: `${2 + (i % 4) * 1.2}px`,
+                height: `${2 + (i % 4) * 1.2}px`,
+                left: `${(i * 1.8) % 100}%`,
+                top: `-20px`,
+                animationDuration: `${3.5 + (i % 4) * 0.9}s`,
+                animationDelay: `${(i * 0.18) % 3}s`,
+                animationIterationCount: 'infinite'
+              }}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* ═════════════════════════════════════════════════════════════════════
+          LAYER 9: FOG / MIST (Oscillating Ambient Haze)
+          ═════════════════════════════════════════════════════════════════════ */}
+      {weatherCategory === 'fog' && (
+        <div className="absolute inset-0 pointer-events-none opacity-60">
+          <div className="absolute inset-0 bg-slate-300/25 blur-3xl animate-pulse" style={{ animationDuration: '6s' }} />
+          <div className="absolute bottom-0 inset-x-0 h-96 bg-gradient-to-t from-slate-400/30 to-transparent blur-2xl" />
+        </div>
+      )}
+
+      {/* ═════════════════════════════════════════════════════════════════════
+          ASTRONOMICAL PROVENANCE BADGE (Bottom Left)
+          Transparently demonstrates real-time connection to:
+          Exact Coordinates, Local Timezone, Solar Altitude, and Live WMO Weather!
+          ═════════════════════════════════════════════════════════════════════ */}
+      <div className="hidden lg:flex absolute bottom-3 left-4 z-10 items-center gap-2 px-3 py-1.5 rounded-xl bg-black/40 border border-white/10 backdrop-blur-md text-[10px] text-neutral-300 font-mono shadow-md pointer-events-none">
+        <div className="flex items-center gap-1 text-emerald-400 font-bold">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <span>ASTRO-ENV</span>
+        </div>
+        <span className="text-neutral-500">•</span>
+        <span className="text-white font-semibold truncate max-w-[140px]">{displayName}</span>
+        <span className="text-neutral-500">•</span>
+        <span className="text-amber-300 font-bold">{localTimeString} {timezoneAbbr}</span>
+        <span className="text-neutral-500">•</span>
+        <span className="flex items-center gap-0.5 text-sky-300">
+          {isDay ? <Sun className="w-3 h-3 text-amber-400" /> : <Moon className="w-3 h-3 text-indigo-300" />}
+          <span>{isDay ? `Sun Alt: ${solarElevation}°` : `Moon Alt: ${moonElevation}°`}</span>
+        </span>
+        <span className="text-neutral-500">•</span>
+        <span className="text-neutral-300 uppercase">{weatherCondition}</span>
+      </div>
     </div>
   );
 };

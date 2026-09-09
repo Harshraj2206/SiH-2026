@@ -51,7 +51,7 @@ const WMO_DESCRIPTIONS = {
  * @returns {Promise<Object>} Normalized weather payload
  */
 async function fetchDirectOpenMeteo(lat, lon) {
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,rain,weather_code,wind_speed_10m,is_day&daily=precipitation_sum&timezone=auto`;
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,rain,weather_code,wind_speed_10m,is_day,cloud_cover&daily=sunrise,sunset,precipitation_sum&timezone=auto`;
   
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 8000);
@@ -72,6 +72,9 @@ async function fetchDirectOpenMeteo(lat, lon) {
     const code = typeof current.weather_code === 'number' ? current.weather_code : 0;
     const condition = WMO_DESCRIPTIONS[code] || 'Clear';
 
+    const sunrises = Array.isArray(daily.sunrise) ? daily.sunrise : [];
+    const sunsets = Array.isArray(daily.sunset) ? daily.sunset : [];
+
     return {
       status: 'success',
       latitude: lat,
@@ -82,9 +85,15 @@ async function fetchDirectOpenMeteo(lat, lon) {
       precipitation_mm: Number(current.precipitation ?? 0),
       rainfall_24h: Math.round(rain24h * 100) / 100,
       weather_code: code,
+      cloud_cover_pct: Number(current.cloud_cover ?? (code === 0 ? 5 : code <= 2 ? 40 : 90)),
       condition,
       wind_speed_kmh: Number(current.wind_speed_10m ?? 0),
       is_day: Boolean(current.is_day ?? 1),
+      timezone: data.timezone || 'Asia/Kolkata',
+      timezone_abbreviation: data.timezone_abbreviation || 'UTC',
+      utc_offset_seconds: Number(data.utc_offset_seconds ?? 0),
+      sunrise: sunrises[0] || null,
+      sunset: sunsets[0] || null,
       source: 'Open-Meteo Real-Time Telemetry (Direct)',
       observation_time: current.time || new Date().toISOString()
     };
