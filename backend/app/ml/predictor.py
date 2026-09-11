@@ -1,12 +1,12 @@
 """
 LandSafe - AI-Assisted Landslide Early Warning System (SIH26001)
-Genuine ML Inference, Ensemble Confidence & Exact Tree Explainability (XAI)
+Genuine ML Inference, Tree Vote Consensus & Saabas Decision-Tree Path Attribution
 
 Features:
-1. Calibrated Random Forest Inference on Authoritative Ground Truth
-2. Exact Tree-Based Local Feature Attribution (Saabas Tree Path Decomposition / TreeSHAP)
-   Satisfies: sum(contributions) + bias == predicted_probability (difference < 1e-12)
-3. Genuine Model Confidence derived from Ensemble Consensus Variance across Trees
+1. Random Forest Inference on Authoritative Ground Truth (150 Estimators)
+2. Saabas Decision-Tree Path Feature Attribution
+   Satisfies mathematical identity: sum(contributions) + bias == predicted_probability (difference < 1e-12)
+3. Tree Vote Consensus derived from Ensemble Agreement across Trees
 4. Actionable Geotechnical Recommendations directly driven by Primary Contributing Factors
 """
 
@@ -169,9 +169,9 @@ def explain_prediction(
 
     factors = [
         {
-            "name": "Slope Gradient Angle",
+            "name": "Baseline Slope Angle",
             "importance_pct": round((abs_weights["Slope Gradient Angle"] / total_abs) * 100, 1),
-            "rawValue": f"{slope:.1f}°",
+            "rawValue": f"{slope:.1f}° (Copernicus 30m Baseline Profile)",
             "value": f"{slope:.1f}°",
             "net_delta": round(c_slope * 100, 2),
             "color": "bg-red-500"
@@ -185,26 +185,26 @@ def explain_prediction(
             "color": "bg-amber-500"
         },
         {
-            "name": "Soil Moisture Saturation",
+            "name": "Volumetric Soil Moisture",
             "importance_pct": round((abs_weights["Soil Moisture Saturation"] / total_abs) * 100, 1),
-            "rawValue": f"{int(moisture * 100)}%",
-            "value": f"{int(moisture * 100)}%",
+            "rawValue": f"{moisture:.2f} m³/m³ ({int(round(moisture * 100))}% v/v)",
+            "value": f"{moisture:.2f} m³/m³",
             "net_delta": round(c_moisture * 100, 2),
             "color": "bg-sky-500"
         },
         {
             "name": "Vegetation Canopy (NDVI)",
             "importance_pct": round((abs_weights["Vegetation Canopy (NDVI)"] / total_abs) * 100, 1),
-            "rawValue": f"{ndvi:.2f}",
+            "rawValue": f"{ndvi:.2f} (Regional Climatological Estimate)",
             "value": f"{ndvi:.2f}",
             "net_delta": round(c_ndvi * 100, 2),
             "color": "bg-emerald-500"
         },
         {
-            "name": "Historical Landslide Density",
+            "name": "Historical Recorded Incidents",
             "importance_pct": round((abs_weights["Historical Landslide Density"] / total_abs) * 100, 1),
-            "rawValue": f"{history} events",
-            "value": f"{history} events",
+            "rawValue": f"{history} event{'s' if history != 1 else ''} (Disaster Catalog Record)",
+            "value": f"{history} event{'s' if history != 1 else ''}",
             "net_delta": round(c_history * 100, 2),
             "color": "bg-neutral-500"
         }
@@ -245,12 +245,60 @@ def explain_prediction(
 def predict_landslide_risk(input_data: Dict[str, Any]) -> Dict[str, Any]:
     """
     Executes full ML inference pipeline:
-    Real Data -> Feature Engineering -> Random Forest Inference -> Tree Attribution -> XAI & Confidence
+    Real Data -> Validity Gate -> Feature Engineering -> Random Forest Inference -> Tree Attribution -> XAI & Confidence
     """
     model, metadata = get_model()
 
-    rain_24 = float(input_data.get("rainfall_24h", 0.0))
-    rain_72 = float(input_data.get("rainfall_72h", rain_24 * 1.8))
+    raw_r24 = input_data.get("rainfall_24h")
+    # Strict Prediction Validity Gate: Do not silently coerce missing/unavailable precipitation to 0.0
+    if raw_r24 is None or (isinstance(raw_r24, float) and np.isnan(raw_r24)):
+        return {
+            "status": "DATA_INSUFFICIENT",
+            "risk_score": None,
+            "risk_level": "DATA_INSUFFICIENT",
+            "baseline_ml_level": "DATA_INSUFFICIENT",
+            "inference_status": "PAUSED_DATA_UNAVAILABLE",
+            "unavailability_reason": "Precipitation telemetry is unavailable (HTTP 429 / timeout / missing). Inference paused to avoid false safety assessment.",
+            "features": {
+                "rainfall_24h": None,
+                "rainfall_72h": input_data.get("rainfall_72h"),
+                "slope_deg": input_data.get("slope_deg"),
+                "soil_moisture": input_data.get("soil_moisture"),
+                "ndvi": input_data.get("ndvi"),
+                "historical_incidents": input_data.get("historical_incidents"),
+                "elevation_amsl": input_data.get("elevation_amsl")
+            },
+            "xai": {
+                "factors": [],
+                "summary": "Model inference paused: Critical meteorological inputs (24h precipitation) are unavailable. LandSafe refuses to silently substitute 0.0 mm rainfall.",
+                "recommended_action": "AWAIT METEOROLOGICAL TELEMETRY: Inference paused until precipitation data is restored.",
+                "primary_driver": "unavailable precipitation",
+                "base_hazard_bias": None,
+                "raw_tree_contributions": {}
+            },
+            "model_confidence": None,
+            "tree_variance": None,
+            "data_quality": "UNAVAILABLE (Missing Precipitation Telemetry)",
+            "global_feature_importances": metadata.get("feature_importances") if metadata else {},
+            "model_metadata": {
+                "model_type": metadata.get("model_type", "RandomForestClassifier"),
+                "training_dataset": metadata.get("training_dataset"),
+                "f1_score": metadata.get("metrics", {}).get("f1_score"),
+                "precision": metadata.get("metrics", {}).get("precision"),
+                "recall": metadata.get("metrics", {}).get("recall"),
+                "roc_auc": metadata.get("metrics", {}).get("roc_auc"),
+                "false_negative_rate": metadata.get("metrics", {}).get("false_negative_rate")
+            },
+            "precision_context": {
+                "status": "DATA_INSUFFICIENT",
+                "inference_paused": True,
+                "reason": "Missing precipitation telemetry"
+            }
+        }
+
+    rain_24 = float(raw_r24)
+    raw_r72 = input_data.get("rainfall_72h")
+    rain_72 = float(raw_r72) if raw_r72 is not None and not (isinstance(raw_r72, float) and np.isnan(raw_r72)) else rain_24 * 1.8
     slope = float(input_data.get("slope_deg", 18.0))
     moisture = float(input_data.get("soil_moisture", 0.35))
     ndvi = float(input_data.get("ndvi", 0.55))
@@ -282,12 +330,12 @@ def predict_landslide_risk(input_data: Dict[str, Any]) -> Dict[str, Any]:
     ]
     X_df = pd.DataFrame([values_list], columns=feature_order)
 
-    # 1. Calibrated Landslide Probability (0.0 to 100.0%)
+    # 1. Random Forest Predicted Probability (0.0 to 100.0%)
     prob_class1 = float(model.predict_proba(X_df)[0, 1])
     risk_score = round(float(np.clip(prob_class1 * 100.0, 1.0, 99.0)), 1)
     risk_level = categorize_risk_level(risk_score)
 
-    # 2. Exact Tree Attribution (Saabas Tree Path Decomposition / TreeSHAP) & Confidence
+    # 2. Saabas Decision Tree Path Attribution & Tree Vote Consensus
     bias, raw_contribs, tree_var, model_confidence = compute_tree_attribution_and_confidence(
         model, X_df.values, feature_order
     )
@@ -374,6 +422,7 @@ def predict_landslide_risk(input_data: Dict[str, Any]) -> Dict[str, Any]:
         effective_risk_level = risk_level
 
     return {
+        "status": "SUCCESS",
         "risk_score": risk_score,
         "risk_level": effective_risk_level,
         "baseline_ml_level": risk_level,

@@ -85,10 +85,10 @@ class PasswordResetConfirmRequest(BaseModel):
 # ---------------- Risk Prediction Schemas ----------------
 class PredictionInput(BaseModel):
     zone_id: Optional[str] = "NER-CUSTOM"
-    rainfall_24h: float = Field(..., ge=0.0, le=500.0, description="24-hour rainfall in mm")
+    rainfall_24h: Optional[float] = Field(None, ge=0.0, le=500.0, description="24-hour rainfall in mm (None if unavailable)")
     rainfall_72h: Optional[float] = Field(None, ge=0.0, le=1000.0, description="72-hour rainfall in mm")
-    slope_deg: float = Field(..., ge=0.0, le=90.0, description="Slope gradient in degrees")
-    soil_moisture: float = Field(..., ge=0.0, le=1.0, description="Volumetric soil moisture (0.0 to 1.0)")
+    slope_deg: Optional[float] = Field(18.0, ge=0.0, le=90.0, description="Slope gradient in degrees")
+    soil_moisture: Optional[float] = Field(0.35, ge=0.0, le=1.0, description="Volumetric soil moisture (0.0 to 1.0)")
     ndvi: Optional[float] = Field(0.55, ge=0.0, le=1.0, description="Vegetation index (0.0 to 1.0)")
     historical_incidents: Optional[int] = Field(1, ge=0, le=50, description="Past landslide incidents")
 
@@ -105,16 +105,19 @@ class XAIFactor(BaseModel):
 class XAIExplanation(BaseModel):
     factors: List[XAIFactor]
     summary: str
-    recommended_action: str
-    primary_driver: str
+    recommended_action: Optional[str] = None
+    primary_driver: Optional[str] = None
     base_hazard_bias: Optional[float] = None
     raw_tree_contributions: Optional[Dict[str, float]] = None
 
 
 class PredictionResponse(BaseModel):
     zone_id: str
-    risk_score: float
+    risk_score: Optional[float] = None
     risk_level: str
+    status: Optional[str] = "SUCCESS"
+    inference_status: Optional[str] = None
+    unavailability_reason: Optional[str] = None
     features: Dict[str, Any]
     xai: XAIExplanation
     global_feature_importances: Dict[str, float]

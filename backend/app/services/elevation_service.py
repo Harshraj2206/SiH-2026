@@ -29,16 +29,19 @@ def get_terrain_elevation_and_slope(latitude: float, longitude: float) -> Dict[s
 
     elevation = None
     slope_deg = None
+    is_dynamic = False
+    slope_status = "BASELINE_PROFILE"
 
     try:
+
         req = urllib.request.Request(
             url,
-            headers={"User-Agent": "LandslideGuard-GlobalDEM/2.0 (SIH26001-DisasterManagement)"}
+            headers={"User-Agent": "LandSafe-GlobalDEM/2.0 (SIH26001-DisasterManagement)"}
         )
         with urllib.request.urlopen(req, timeout=4.0) as resp:
             data = json.loads(resp.read().decode("utf-8"))
             elevations = data.get("elevation", [])
-            if len(elevations) >= 3:
+            if len(elevations) >= 3 and all(e is not None for e in elevations[:3]):
                 z0 = float(elevations[0])
                 z_lat = float(elevations[1])
                 z_lng = float(elevations[2])
@@ -54,26 +57,39 @@ def get_terrain_elevation_and_slope(latitude: float, longitude: float) -> Dict[s
                 slope_rad = math.atan(math.sqrt(dz_dx ** 2 + dz_dy ** 2))
                 slope_deg = round(math.degrees(slope_rad), 1)
                 elevation = round(z0, 1)
+                is_dynamic = True
+                slope_status = "DYNAMIC_DEM"
 
     except Exception:
         pass
 
-    # Safety fallback if internet connection interrupted
+    # Explicit Baseline Profile fallback if internet/API unavailable
     if elevation is None or slope_deg is None:
         elevation = 500.0
         slope_deg = 15.0
+        is_dynamic = False
+        slope_status = "BASELINE_PROFILE"
+        source_label = "Regional Geomorphic Baseline Profile"
+        freshness_label = "BASELINE FALLBACK"
+    else:
+        source_label = "Copernicus 90m / Open-Meteo Elevation Grid"
+        freshness_label = "DYNAMIC DEM GRADIENT"
 
     result = {
         "latitude": latitude,
         "longitude": longitude,
         "elevation_meters_amsl": elevation,
+        "elevation_amsl": elevation,  # Canonical alias for compatibility
         "slope_deg": slope_deg,
-        "source": "Copernicus DEM 90m / SRTM 30m Global Elevation Dataset",
-        "spatial_resolution": "30-90 meters (WGS84 EGM96 Geoid)",
+        "is_dynamic": is_dynamic,
+        "slope_status": slope_status,
+        "source": source_label,
+        "spatial_resolution": "30-90 meters (WGS84 EGM96 Geoid)" if is_dynamic else "Regional Baseline",
         "vertical_datum": "EGM96 Mean Sea Level",
-        "freshness_status": "AUTHENTIC GLOBAL DEM",
+        "freshness_status": freshness_label,
         "is_demo": False
     }
 
     _DEM_CACHE[cache_key] = result
     return result
+

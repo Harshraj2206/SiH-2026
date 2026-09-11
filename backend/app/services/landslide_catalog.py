@@ -105,11 +105,53 @@ def get_historical_landslides(district: Optional[str] = None, state: Optional[st
     return results
 
 
-def get_historical_density_score(latitude: float, longitude: float) -> int:
-    """Calculate historical landslide count within 25km radius."""
+def _haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    import math
+    R = 6371.0
+    dlat = math.radians(lat2 - lat1)
+    dlon = math.radians(lon2 - lon1)
+    a = math.sin(dlat / 2)**2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlon / 2)**2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    return R * c
+
+
+def get_historical_density_score(latitude: float, longitude: float, radius_km: float = 35.0) -> int:
+    """Calculate actual catalogued landslide count within spatial radius (returns true count, never coercing 0 to 1)."""
     count = 0
     for h in GSI_HISTORICAL_LANDSLIDES:
-        dist_sq = (latitude - h["latitude"]) ** 2 + (longitude - h["longitude"]) ** 2
-        if dist_sq <= 0.08:  # ~25-30 km radius
+        dist = _haversine_km(latitude, longitude, h["latitude"], h["longitude"])
+        if dist <= radius_km:
             count += 1
-    return max(1, count)
+    return count
+
+
+def get_nearest_catalogued_landslide(latitude: float, longitude: float) -> Optional[Dict[str, Any]]:
+    """Identifies the closest verified catalogued landslide event and computes spatial proximity in km."""
+    if not GSI_HISTORICAL_LANDSLIDES:
+        return None
+
+    closest_event = None
+    min_dist = float("inf")
+
+    for h in GSI_HISTORICAL_LANDSLIDES:
+        dist = _haversine_km(latitude, longitude, h["latitude"], h["longitude"])
+        if dist < min_dist:
+            min_dist = dist
+            closest_event = h
+
+    if closest_event is None:
+        return None
+
+    return {
+        "incident_id": closest_event["incident_id"],
+        "location_name": closest_event["location_name"],
+        "district": closest_event["district"],
+        "state": closest_event["state"],
+        "distance_km": round(min_dist, 1),
+        "event_date": closest_event.get("event_date"),
+        "event_type": closest_event.get("event_type"),
+        "trigger": closest_event.get("trigger"),
+        "source": closest_event.get("source"),
+        "source_type": "GSI_NLSM_NASA_CATALOG_RECORD"
+    }
+

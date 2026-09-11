@@ -18,12 +18,12 @@ def resolve_weather_provider(country_code: Optional[str] = None) -> Dict[str, An
     cc = (country_code or "").upper().strip()
     if cc == "IN":
         return {
-            "provider_name": "India Meteorological Department (IMD) / Open-Meteo WMO Reanalysis",
-            "agency": "IMD / MoES Government of India",
-            "tier": "TIER 1 (National Meteorological Agency)",
+            "provider_name": "Open-Meteo WMO Reanalysis Grid (ECMWF IFS)",
+            "agency": "Open-Meteo Numerical Weather Prediction Service",
+            "tier": "Global NWP Reanalysis Grid (0.1° / ~10 km)",
             "spatial_resolution": "0.1° (~10 km)",
             "update_interval": "Hourly",
-            "is_official": True
+            "is_official": False
         }
     elif cc == "US":
         return {
@@ -132,19 +132,23 @@ def get_global_live_weather(latitude: float, longitude: float, country_code: Opt
             # Compute actual 1h, 24h, and 72h precipitation accumulation
             current_idx = min(72, len(times) - 1) if times else 0
             
-            p_1h = round(float(current.get("precipitation", 0.0)), 1)
-            rain_now = round(float(current.get("rain", 0.0)), 1)
-            p_24h = 0.0
-            p_72h = 0.0
+            raw_p1 = current.get("precipitation")
+            p_1h = round(float(raw_p1), 1) if raw_p1 is not None else None
+            rain_now = round(float(current.get("rain")), 1) if current.get("rain") is not None else None
+            
+            # Strict rolling precipitation over preceding 24h and 72h
+            p_24h = None
+            p_72h = None
 
-            if precip and len(precip) >= 72:
-                # 24h past sum
-                p_24h = round(sum([float(x or 0.0) for x in precip[max(0, current_idx - 24):current_idx + 1]]), 1)
-                # 72h past sum
-                p_72h = round(sum([float(x or 0.0) for x in precip[max(0, current_idx - 72):current_idx + 1]]), 1)
-            else:
-                p_24h = p_1h * 5.0
-                p_72h = p_24h * 2.2
+            if precip and len(precip) >= 24 and current_idx >= 24:
+                window_24 = [float(x) for x in precip[current_idx - 24 : current_idx] if x is not None]
+                if len(window_24) == 24:
+                    p_24h = round(sum(window_24), 1)
+            
+            if precip and len(precip) >= 72 and current_idx >= 72:
+                window_72 = [float(x) for x in precip[current_idx - 72 : current_idx] if x is not None]
+                if len(window_72) == 72:
+                    p_72h = round(sum(window_72), 1)
 
             # Volumetric Soil Moisture (0-7cm)
             current_soil = None

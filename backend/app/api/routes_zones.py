@@ -21,6 +21,10 @@ def _enrich_single_zone(z: dict) -> dict:
     if center.get("lat") and center.get("lng"):
         try:
             weather = fetch_live_meteorology(center["lat"], center["lng"])
+            z["weather_source"] = weather.get("source", "Open-Meteo WMO Reanalysis Grid")
+            z["is_weather_fallback"] = weather.get("is_fallback", False)
+            z["weather_status"] = weather.get("freshness_status", "LIVE")
+
             if weather.get("rainfall_24h_mm") is not None:
                 z["rainfall_24h"] = weather["rainfall_24h_mm"]
                 z["rainfall_72h"] = weather["rainfall_72h_mm"]
@@ -53,19 +57,30 @@ def _enrich_single_zone(z: dict) -> dict:
                 "historical_incidents": z.get("historical_incidents", 0)
             })
 
-            z["ml_base_score"] = pred["risk_score"]
-            boost = z.get("community_boost", 0.0)
-            final_score = round(min(100.0, z["ml_base_score"] + boost), 1)
-            z["risk_score"] = final_score
-            z["risk_level"] = categorize_risk_level(final_score)
+            if pred.get("status") == "DATA_INSUFFICIENT":
+                z["ml_base_score"] = None
+                z["risk_score"] = None
+                z["risk_level"] = "DATA_INSUFFICIENT"
+                z["inference_status"] = "PAUSED_DATA_UNAVAILABLE"
+                z["unavailability_reason"] = pred.get("unavailability_reason")
+            else:
+                z["ml_base_score"] = pred["risk_score"]
+                boost = z.get("community_boost", 0.0)
+                final_score = round(min(100.0, z["ml_base_score"] + boost), 1)
+                z["risk_score"] = final_score
+                z["risk_level"] = categorize_risk_level(final_score)
+
             z["recommended_action"] = pred.get("xai", {}).get("recommended_action") or get_recommended_action(z["risk_level"], "live meteorological telemetry")
-            z["xai"] = pred.get("xai", {})
             z["model_confidence"] = pred.get("model_confidence", 85.0)
             z["tree_variance"] = pred.get("tree_variance", 0.05)
-            z["data_quality"] = pred.get("data_quality", "HIGH (WMO / Copernicus DEM Calibrated)")
+            z["data_quality"] = pred.get("data_quality", "HIGH")
+            z["precision_context"] = pred.get("precision_context")
+            z["weather_observation_time"] = weather.get("observation_time")
             z["last_updated"] = datetime.now(timezone.utc).isoformat()
         except Exception:
-            pass
+            z["weather_status"] = "UNAVAILABLE"
+            z["is_weather_fallback"] = True
+
     return z
 
 
@@ -101,6 +116,10 @@ async def get_risk_zone_detail(zone_id: str):
     if center.get("lat") and center.get("lng"):
         try:
             weather = fetch_live_meteorology(center["lat"], center["lng"])
+            zone["weather_source"] = weather.get("source", "Open-Meteo WMO Reanalysis Grid")
+            zone["is_weather_fallback"] = weather.get("is_fallback", False)
+            zone["weather_status"] = weather.get("freshness_status", "LIVE")
+
             if weather.get("rainfall_24h_mm") is not None:
                 zone["rainfall_24h"] = weather["rainfall_24h_mm"]
                 zone["rainfall_72h"] = weather["rainfall_72h_mm"]
@@ -132,10 +151,18 @@ async def get_risk_zone_detail(zone_id: str):
                 "historical_incidents": zone.get("historical_incidents", 0)
             })
 
-            zone["ml_base_score"] = pred["risk_score"]
-            final_score = round(min(100.0, zone["ml_base_score"] + zone.get("community_boost", 0.0)), 1)
-            zone["risk_score"] = final_score
-            zone["risk_level"] = categorize_risk_level(final_score)
+            if pred.get("status") == "DATA_INSUFFICIENT":
+                zone["ml_base_score"] = None
+                zone["risk_score"] = None
+                zone["risk_level"] = "DATA_INSUFFICIENT"
+                zone["inference_status"] = "PAUSED_DATA_UNAVAILABLE"
+                zone["unavailability_reason"] = pred.get("unavailability_reason")
+            else:
+                zone["ml_base_score"] = pred["risk_score"]
+                final_score = round(min(100.0, zone["ml_base_score"] + zone.get("community_boost", 0.0)), 1)
+                zone["risk_score"] = final_score
+                zone["risk_level"] = categorize_risk_level(final_score)
+
             zone["xai"] = pred.get("xai", {})
             zone["model_confidence"] = pred.get("model_confidence", 85.0)
             zone["tree_variance"] = pred.get("tree_variance", 0.05)

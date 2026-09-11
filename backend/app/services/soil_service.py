@@ -1,45 +1,56 @@
 """
-LANDSLIDEGUARD SIH26001 - Soil Moisture Saturation Data Ingestion Service
-Integrates NASA SMAP (Soil Moisture Active Passive) & ERA5-Land reanalysis products for surface and root-zone water content.
+LANDSAFE - Volumetric Soil Moisture Data Service
+Ingests volumetric soil water content (0-7 cm layer) from ECMWF IFS Land Surface Model via Open-Meteo.
+Accurately reports volumetric units (m³/m³) without claiming synthetic saturation or unverified NASA SMAP radiometer telemetry.
 """
 
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from datetime import datetime, timezone
 from backend.app.services.weather_service import fetch_live_meteorology
 
 
 def get_soil_moisture_telemetry(latitude: float, longitude: float) -> Dict[str, Any]:
     """
-    Fetch volumetric soil water content (m3/m3) for topsoil (0-7 cm) and root zone (7-28 cm).
-    Combines satellite microwave radiometer and soil hydraulic properties.
+    Fetch volumetric soil water content (m3/m3) for topsoil (0-7 cm).
+    Derived from ECMWF IFS numerical land surface reanalysis.
     """
-    # Query live atmospheric and soil moisture reanalysis grid
     meteo = fetch_live_meteorology(latitude, longitude)
-    moisture_val = meteo.get("soil_moisture_m3m3", 0.35)
-
-    # Classify soil saturation status
-    if moisture_val > 0.48:
-        saturation_level = "CRITICAL_SATURATION"
-        description = "Pore water pressure high • Soil shear strength severely depleted"
-    elif moisture_val > 0.38:
-        saturation_level = "ELEVATED_MOISTURE"
-        description = "High moisture retention • Moderate infiltration capacity"
+    raw_sm = meteo.get("soil_moisture_m3m3")
+    
+    if raw_sm is not None:
+        moisture_val = float(raw_sm)
+        volumetric_pct = round(moisture_val * 100.0, 1)
+        
+        # Hydrological classification based on volumetric moisture thresholds for mountain soils
+        if moisture_val > 0.48:
+            moisture_tier = "CRITICAL_MOISTURE"
+            description = "Volumetric water content high • Potential elevated pore-water pressure"
+        elif moisture_val > 0.38:
+            moisture_tier = "ELEVATED_MOISTURE"
+            description = "Elevated volumetric water content • Reduced capillary suction"
+        else:
+            moisture_tier = "NOMINAL"
+            description = "Nominal volumetric soil moisture for mountain colluvium"
     else:
-        saturation_level = "NORMAL"
-        description = "Standard geotechnical water retention"
+        moisture_val = None
+        volumetric_pct = None
+        moisture_tier = "UNAVAILABLE"
+        description = "Soil moisture telemetry currently unavailable from meteorological grid"
 
     return {
         "latitude": latitude,
         "longitude": longitude,
         "volumetric_soil_moisture_m3m3": moisture_val,
-        "saturation_percentage": round(min(100.0, (moisture_val / 0.55) * 100.0), 1),
-        "saturation_status": saturation_level,
+        "volumetric_percentage_vv": volumetric_pct,
+        "moisture_tier": moisture_tier,
         "geotechnical_description": description,
-        "source": "NASA SMAP (L3 Radiometer) / Open-Meteo Land Soil Grid",
-        "spatial_resolution": "9 km (~0.08° Grid)",
-        "sensor_type": "L-band Microwave Radiometer (1.41 GHz)",
+        "source": "Open-Meteo Land Surface Grid (ECMWF IFS)",
+        "spatial_resolution": "0.1° (~10 km Grid)",
+        "layer_depth": "0-7 cm (Topsoil Layer 1)",
+        "unit": "m³/m³ (volumetric fraction)",
         "observation_time": meteo.get("observation_time"),
         "retrieved_at": datetime.now(timezone.utc).isoformat(),
         "freshness_status": meteo.get("freshness_status", "LIVE"),
         "is_demo": False
     }
+

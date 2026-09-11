@@ -138,3 +138,23 @@ def test_predict_landslide_risk_backward_compatibility():
     assert "data_quality" in res["precision_context"]
     assert "geotechnical" in res["precision_context"]
     assert "risk_fusion" in res["precision_context"]
+
+
+def test_xai_factor_labels_and_units():
+    """Confirms that factors are properly labelled with physical units and no fake TreeSHAP or saturation claims."""
+    res = predict_landslide_risk({
+        "rainfall_24h": 40.0,
+        "rainfall_72h": 80.0,
+        "slope_deg": 25.0,
+        "soil_moisture": 0.35,
+        "ndvi": 0.65,
+        "historical_incidents": 2
+    })
+    factor_names = [f["name"] for f in res["xai"]["factors"]]
+    # Must use accurate terminology: Volumetric Soil Moisture and Historical Recorded Incidents
+    assert "Volumetric Soil Moisture" in factor_names
+    assert "Historical Recorded Incidents" in factor_names
+    # Check that soil moisture rawValue specifies m³/m³
+    sm_factor = next(f for f in res["xai"]["factors"] if f["name"] == "Volumetric Soil Moisture")
+    assert "m³/m³" in sm_factor["rawValue"]
+

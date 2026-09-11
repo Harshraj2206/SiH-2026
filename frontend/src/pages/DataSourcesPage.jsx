@@ -100,9 +100,10 @@ export const DataSourcesPage = () => {
           </div>
 
           <div>
-            <h3 className="text-sm font-bold text-white">India Meteorological Department (IMD) / WMO Grid</h3>
+            <h3 className="text-sm font-bold text-white">Open-Meteo NWP Grid (ECMWF & Multi-Model Assimilation)</h3>
             <p className="text-xs text-cyan-300 font-mono mt-0.5">Precipitation & Atmospheric Telemetry</p>
           </div>
+
 
           <div className="space-y-1.5 text-xs text-slate-300 bg-slate-950/60 p-3 rounded-2xl border border-slate-800/80">
             <div className="flex justify-between">
@@ -120,7 +121,7 @@ export const DataSourcesPage = () => {
           </div>
         </div>
 
-        {/* 2. NASA SMAP Soil Moisture */}
+        {/* 2. ECMWF IFS Land Surface Model (Soil Moisture) */}
         <div className="bg-slate-900/90 border border-slate-800 hover:border-slate-700 p-5 rounded-3xl shadow-lg space-y-3.5 transition-all">
           <div className="flex items-start justify-between gap-2">
             <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400">
@@ -128,13 +129,13 @@ export const DataSourcesPage = () => {
             </div>
             <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              LIVE CONNECTED
+              NWP GRID SYNCED
             </span>
           </div>
 
           <div>
-            <h3 className="text-sm font-bold text-white">NASA SMAP (Soil Moisture Active Passive)</h3>
-            <p className="text-xs text-blue-300 font-mono mt-0.5">Topsoil & Root-Zone Water Saturation</p>
+            <h3 className="text-sm font-bold text-white">ECMWF IFS (Land Surface Model)</h3>
+            <p className="text-xs text-blue-300 font-mono mt-0.5">Topsoil Layer 1 (0-7 cm) Volumetric Content</p>
           </div>
 
           <div className="space-y-1.5 text-xs text-slate-300 bg-slate-950/60 p-3 rounded-2xl border border-slate-800/80">
@@ -143,12 +144,12 @@ export const DataSourcesPage = () => {
               <span className="font-medium text-slate-200">Volumetric Soil Water (m³/m³)</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">Sensor:</span>
-              <span className="font-mono text-slate-200">L-band Microwave (1.41 GHz)</span>
+              <span className="text-slate-400">Provider:</span>
+              <span className="font-mono text-slate-200">Open-Meteo / ECMWF IFS</span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-400">Spatial Resolution:</span>
-              <span className="font-mono text-slate-200 font-bold">9 km Satellite Raster</span>
+              <span className="font-mono text-slate-200 font-bold">0.1° (~10 km Grid)</span>
             </div>
           </div>
         </div>
@@ -295,8 +296,9 @@ export const DataSourcesPage = () => {
             <span>Interactive Live Coordinate Telemetry Inspector</span>
           </h2>
           <p className="text-xs text-slate-300 mt-1">
-            Query real-time meteorological, DEM elevation, slope, and SMAP soil moisture data for any GPS coordinate across the North Eastern Region:
+            Query real-time meteorological, DEM elevation, slope, and ECMWF IFS topsoil moisture data for any GPS coordinate:
           </p>
+
         </div>
 
         <form onSubmit={handleInspect} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -370,7 +372,7 @@ export const DataSourcesPage = () => {
               <div className="p-2.5 bg-slate-900 rounded-xl border border-slate-800">
                 <span className="text-[10px] text-slate-400 block">REAL SOIL MOISTURE</span>
                 <span className="text-sm font-bold text-blue-400 font-mono">{inspectResult.soil_moisture ?? inspectResult.soil_moisture_m3m3 ?? 0.35} m³/m³</span>
-                <span className="text-[10px] text-slate-400 block mt-0.5">Source: NASA SMAP / ERA5</span>
+                <span className="text-[10px] text-slate-400 block mt-0.5">Source: ECMWF IFS (Open-Meteo)</span>
               </div>
 
               <div className="p-2.5 bg-slate-900 rounded-xl border border-slate-800">

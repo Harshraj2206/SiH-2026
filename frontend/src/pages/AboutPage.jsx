@@ -171,33 +171,33 @@ export const AboutPage = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           <div className="p-3 bg-slate-950 rounded-2xl border border-slate-800">
-            <span className="font-bold text-slate-200 block">IMD Rainfall API</span>
-            <p className="text-[11px] text-slate-400 mt-0.5">Automated Weather Stations (AWS) 24h/72h rainfall data for North East India.</p>
+            <span className="font-bold text-slate-200 block">Open-Meteo WMO Meteorological Grid</span>
+            <p className="text-[11px] text-slate-400 mt-0.5">High-resolution Numerical Weather Prediction (NWP) 24h/72h rainfall accumulations.</p>
           </div>
 
           <div className="p-3 bg-slate-950 rounded-2xl border border-slate-800">
-            <span className="font-bold text-slate-200 block">ISRO Bhuvan / CartoDEM</span>
-            <p className="text-[11px] text-slate-400 mt-0.5">High-resolution Digital Elevation Models (DEM) for slope gradient & curvature extraction.</p>
+            <span className="font-bold text-slate-200 block">Copernicus / SRTM 30m Global DEM</span>
+            <p className="text-[11px] text-slate-400 mt-0.5">Digital Elevation Models (DEM) for baseline slope gradient & elevation profiles.</p>
           </div>
 
           <div className="p-3 bg-slate-950 rounded-2xl border border-slate-800">
-            <span className="font-bold text-slate-200 block">NASA SMAP / Sentinel-1</span>
-            <p className="text-[11px] text-slate-400 mt-0.5">Active volumetric soil moisture and SAR pore-water saturation telemetry.</p>
+            <span className="font-bold text-slate-200 block">ECMWF IFS Land Surface Model</span>
+            <p className="text-[11px] text-slate-400 mt-0.5">Volumetric soil water content (0-7 cm topsoil layer) via Open-Meteo grid reanalysis.</p>
           </div>
 
           <div className="p-3 bg-slate-950 rounded-2xl border border-slate-800">
-            <span className="font-bold text-slate-200 block">GSI Landslide Inventory</span>
-            <p className="text-[11px] text-slate-400 mt-0.5">Geological Survey of India historical landslide database and structural shear planes.</p>
+            <span className="font-bold text-slate-200 block">GSI Landslide Inventory & Reports</span>
+            <p className="text-[11px] text-slate-400 mt-0.5">Geological Survey of India historical landslide records and regional lithology estimates.</p>
           </div>
 
           <div className="p-3 bg-slate-950 rounded-2xl border border-slate-800">
-            <span className="font-bold text-slate-200 block">Sentinel-2 Optical (ESA)</span>
-            <p className="text-[11px] text-slate-400 mt-0.5">Normalized Difference Vegetation Index (NDVI) and highway cut deforestation proxies.</p>
+            <span className="font-bold text-slate-200 block">Regional Climatological NDVI Baselines</span>
+            <p className="text-[11px] text-slate-400 mt-0.5">Normalized Difference Vegetation Index (NDVI) estimates for slope vegetative cohesion.</p>
           </div>
 
           <div className="p-3 bg-slate-950 rounded-2xl border border-slate-800">
-            <span className="font-bold text-slate-200 block">OpenStreetMap Roads</span>
-            <p className="text-[11px] text-slate-400 mt-0.5">Inter-state highway topologies and rural alternate hill bypass corridors.</p>
+            <span className="font-bold text-slate-200 block">OpenStreetMap Road Network</span>
+            <p className="text-[11px] text-slate-400 mt-0.5">Highway topologies (NH-3, NH-5) and mountain bypass corridors for evacuation routing.</p>
           </div>
         </div>
       </div>

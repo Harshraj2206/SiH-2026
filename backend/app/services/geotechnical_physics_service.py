@@ -159,7 +159,8 @@ def calculate_factor_of_safety(
         "stability_state": stability_state,
         "is_shear_failure_predicted": fs_central < 1.0,
         "plausible_range": [fs_low, fs_high],
-        "uncertainty_label": f"Central: {fs_central:.2f} (Plausible range: {fs_low:.2f}–{fs_high:.2f})",
+        "uncertainty_label": f"FS Central: {fs_central:.2f} (Formation range: {fs_low:.2f}–{fs_high:.2f} across plausible bounds)",
+        "geotechnical_note": "Geotechnical parameters are engineering estimates from regional stratigraphic formations where in-situ borehole core logs are unavailable.",
         "parameters": {
             "slope_angle_deg": round(beta, 1),
             "effective_cohesion_kpa": c_prime,
@@ -171,3 +172,4 @@ def calculate_factor_of_safety(
             "lithology_formation": litho["formation_name"]
         }
     }
+
