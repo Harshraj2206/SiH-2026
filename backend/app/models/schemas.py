@@ -122,6 +122,8 @@ class PredictionResponse(BaseModel):
     tree_variance: Optional[float] = None
     data_quality: Optional[str] = None
     model_metadata: Optional[Dict[str, Any]] = None
+    baseline_ml_level: Optional[str] = None
+    precision_context: Optional[Dict[str, Any]] = None
 
 
 # ---------------- Risk Zone Schemas ----------------

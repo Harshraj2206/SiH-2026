@@ -119,6 +119,9 @@ export const CommunityPollPage = () => {
               <span className="text-[11px] font-semibold text-emerald-400 uppercase tracking-wider">
                 Community Intelligence & AI Verification
               </span>
+              <span className="text-[9px] px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-400 font-mono border border-neutral-700">
+                PROTOTYPE DEMONSTRATION
+              </span>
             </div>
             <h1 className="text-lg font-bold text-white mt-0.5">
               Community Poll & Ground Hazard Reports

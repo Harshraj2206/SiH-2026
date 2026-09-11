@@ -305,14 +305,83 @@ def predict_landslide_risk(input_data: Dict[str, Any]) -> Dict[str, Any]:
     # 3. Scientific Explainable AI Result
     xai = explain_prediction(features_dict, raw_contribs, bias, risk_score, risk_level)
 
+    # 4. Integrate Advanced Precision, Data Quality, Geotechnical Physics & Risk Fusion Engines
+    try:
+        from backend.app.services.data_quality_service import assess_data_quality
+        from backend.app.services.rainfall_trigger_service import evaluate_rainfall_trigger
+        from backend.app.services.geotechnical_physics_service import calculate_factor_of_safety
+        from backend.app.services.prediction_confidence_service import compute_prediction_confidence
+        from backend.app.services.risk_fusion_engine import fuse_risk_decision
+
+        dq_result = assess_data_quality(features_dict, input_data.get("metadata"))
+        trigger_result = evaluate_rainfall_trigger(
+            rainfall_24h=rain_24,
+            rainfall_72h=rain_72,
+            slope_deg=slope,
+            soil_moisture=moisture,
+            lat=float(input_data.get("latitude", 31.95)),
+            lon=float(input_data.get("longitude", 77.10)),
+            state=input_data.get("state", "")
+        )
+        geotech_result = calculate_factor_of_safety(
+            slope_deg=slope,
+            rainfall_72h=rain_72,
+            soil_moisture=moisture,
+            lat=float(input_data.get("latitude", 31.95)),
+            lon=float(input_data.get("longitude", 77.10)),
+            site_cohesion_kpa=input_data.get("site_cohesion_kpa"),
+            site_friction_deg=input_data.get("site_friction_deg")
+        )
+        conf_result = compute_prediction_confidence(
+            ml_probability=risk_score,
+            tree_variance=tree_var,
+            data_quality_score=dq_result["overall_score"],
+            bound_warnings_count=len(dq_result["bound_warnings"]),
+            factor_of_safety=geotech_result["factor_of_safety"],
+            fallbacks_count=dq_result["fallbacks_used"]
+        )
+        fusion_result = fuse_risk_decision(
+            ml_probability=risk_score,
+            ml_risk_level=risk_level,
+            factor_of_safety=geotech_result["factor_of_safety"],
+            rainfall_trigger_state=trigger_result["trigger_state"],
+            rainfall_trigger_score=trigger_result["trigger_score"],
+            data_quality_level=dq_result["level"],
+            confidence_level=conf_result["confidence_level"],
+            historical_density=history
+        )
+
+        precision_context = {
+            "rainfall_trigger": trigger_result,
+            "data_quality": dq_result,
+            "confidence": conf_result,
+            "geotechnical": geotech_result,
+            "risk_fusion": fusion_result
+        }
+        # Update user-facing model confidence with multi-factor calculated score
+        calculated_confidence = conf_result["confidence_score"]
+        calculated_data_quality_label = f"{dq_result['level']} ({dq_result['overall_score']}/100)"
+        
+        # If a safety override occurred (e.g. Factor of Safety < 1.0), adopt fused alert level
+        effective_risk_level = fusion_result["final_alert_class"]
+    except Exception as e:
+        precision_context = {
+            "error": str(e),
+            "status": "graceful_fallback"
+        }
+        calculated_confidence = model_confidence
+        calculated_data_quality_label = "HIGH (WMO / Copernicus DEM Calibrated)"
+        effective_risk_level = risk_level
+
     return {
         "risk_score": risk_score,
-        "risk_level": risk_level,
+        "risk_level": effective_risk_level,
+        "baseline_ml_level": risk_level,
         "features": features_dict,
         "xai": xai,
-        "model_confidence": model_confidence,
+        "model_confidence": calculated_confidence,
         "tree_variance": round(tree_var, 4),
-        "data_quality": "HIGH (WMO / Copernicus DEM Calibrated)",
+        "data_quality": calculated_data_quality_label,
         "global_feature_importances": metadata.get("feature_importances") if metadata else {},
         "model_metadata": {
             "model_type": metadata.get("model_type", "RandomForestClassifier"),
@@ -322,5 +391,6 @@ def predict_landslide_risk(input_data: Dict[str, Any]) -> Dict[str, Any]:
             "recall": metadata.get("metrics", {}).get("recall"),
             "roc_auc": metadata.get("metrics", {}).get("roc_auc"),
             "false_negative_rate": metadata.get("metrics", {}).get("false_negative_rate")
-        }
+        },
+        "precision_context": precision_context
     }

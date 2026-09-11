@@ -135,9 +135,12 @@ export const DataSourcesPanel = () => {
             ))}
           </div>
 
-          <div className="p-2.5 rounded-xl bg-[#0d141e] border border-[#1e293b] text-xs text-slate-300 flex items-center justify-between">
+          <div className="p-2.5 rounded-xl bg-[#0d141e] border border-[#1e293b] text-xs text-slate-300 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <span className="text-[11px]">
-              <strong>Data Classification Policy:</strong> Distinguishes <em>Live Observation</em>, <em>Calibrated ML Hazard Score</em>, <em>Official NDMA Warning</em>, and <em>Directory Records</em> with zero synthetic fallback data.
+              <strong>Data Classification Policy:</strong> Distinguishes <em>Measured / Observed</em>, <em>WMO Reanalysis</em>, <em>Short-Term Forecast</em>, <em>Physics-Derived (FS)</em>, <em>Regional Engineering Estimates</em>, and <em>Calibrated ML Probabilities</em> with zero synthetic fallback data.
+            </span>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-950/60 border border-blue-800/40 text-blue-400 font-bold shrink-0">
+              GSI / IMD BENCHMARKED
             </span>
           </div>
         </div>

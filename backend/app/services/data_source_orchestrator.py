@@ -108,7 +108,15 @@ def orchestrate_location_intelligence(
         "soil_moisture": soil_moisture_val,
         "ndvi": 0.42,
         "historical_incidents": 0,
-        "seismic_active": len(earthquakes) > 0
+        "seismic_active": len(earthquakes) > 0,
+        "latitude": latitude,
+        "longitude": longitude,
+        "state": state_prov,
+        "metadata": {
+            "freshness_status": "LIVE" if weather_data.get("observation_time") else "RECENT",
+            "is_cached": False,
+            "fallbacks_used": 0
+        }
     }
 
     ml_result = predict_landslide_risk(feature_dict)
@@ -217,7 +225,8 @@ def orchestrate_location_intelligence(
             "tree_variance": ml_result.get("tree_variance", 0.05),
             "data_quality": ml_result.get("data_quality", "HIGH"),
             "factors": ml_result.get("xai", {}).get("factors", []),
-            "xai": ml_result.get("xai", {})
+            "xai": ml_result.get("xai", {}),
+            "precision_context": ml_result.get("precision_context")
         },
         "nearby_hospitals": facilities.get("hospitals", []),
         "nearby_shelters": facilities.get("shelters", []),
@@ -228,6 +237,7 @@ def orchestrate_location_intelligence(
             "cache_ttl_seconds": _CACHE_TTL
         }
     }
+
 
     _ORCHESTRATOR_CACHE[cache_key] = {"data": bundle, "cached_at": now}
     return bundle

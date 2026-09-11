@@ -35,7 +35,9 @@ async def predict_risk(input_data: PredictionInput):
         model_confidence=result.get("model_confidence"),
         tree_variance=result.get("tree_variance"),
         data_quality=result.get("data_quality"),
-        model_metadata=result.get("model_metadata")
+        model_metadata=result.get("model_metadata"),
+        baseline_ml_level=result.get("baseline_ml_level"),
+        precision_context=result.get("precision_context")
     )
 
 
@@ -125,14 +127,17 @@ async def get_historical_replay_scenarios() -> List[Dict[str, Any]]:
             "model_prediction": {
                 "probability_score": predicted_prob,
                 "risk_level": predicted_level,
+                "baseline_ml_level": inference.get("baseline_ml_level"),
                 "model_confidence": inference["model_confidence"],
                 "primary_driver": inference["xai"]["primary_driver"],
-                "factors": inference["xai"]["factors"]
+                "factors": inference["xai"]["factors"],
+                "precision_context": inference.get("precision_context")
             },
             "ground_truth": {
                 "landslide_occurred": actual_occurred,
                 "outcome_classification": outcome,
-                "official_source": anchor["source_reference"]
+                "official_source": anchor["source_reference"],
+                "event_type": anchor.get("event_type", "Rainfall-induced shallow landslide / debris flow")
             }
         })
 
