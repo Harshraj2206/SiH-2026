@@ -35,7 +35,8 @@ async def get_analytics_overview():
     blocked_roads = sum(1 for rd in roads if rd.get("status") == "BLOCKED")
     deployed_teams = sum(1 for tm in teams if tm.get("status") in ["DISPATCHED", "ON_SITE"])
 
-    avg_risk = round(sum(z["risk_score"] for z in zones) / max(1, len(zones)), 1)
+    valid_risks = [z["risk_score"] for z in zones if z.get("risk_score") is not None]
+    avg_risk = round(sum(valid_risks) / max(1, len(valid_risks)), 1) if valid_risks else 0.0
 
     # Risk distribution
     risk_distribution = [
@@ -45,18 +46,18 @@ async def get_analytics_overview():
         {"level": "LOW (0-30)", "count": low_cnt, "color": "#22c55e"}
     ]
 
-    # Rainfall vs Risk
+    # Rainfall vs Risk (Safe handling of missing/None observations)
     rainfall_vs_risk = [
         {
             "zone_id": z["zone_id"],
             "name": z["name"].split(" ")[0],
-            "rainfall_24h": z["rainfall_24h"],
+            "rainfall_24h": z["rainfall_24h"] if z.get("rainfall_24h") is not None else 0.0,
             "slope_deg": z["slope_deg"],
-            "soil_moisture": round(z["soil_moisture"] * 100),
-            "risk_score": z["risk_score"],
+            "soil_moisture": round(z["soil_moisture"] * 100) if z.get("soil_moisture") is not None else 0,
+            "risk_score": z["risk_score"] if z.get("risk_score") is not None else 0.0,
             "level": z["risk_level"]
         }
-        for z in sorted(zones, key=lambda x: x["rainfall_24h"])
+        for z in sorted(zones, key=lambda x: (x.get("rainfall_24h") is None, x.get("rainfall_24h") or 0.0))
     ]
 
     # Reports timeline
@@ -69,21 +70,21 @@ async def get_analytics_overview():
         {"time": "Current", "reports": len(reports), "verified": ver_reports}
     ]
 
-    # Top critical zones
+    # Top critical zones (Safe sorting on optional risk scores)
     top_critical_zones = [
         {
             "zone_id": z["zone_id"],
             "name": z["name"],
             "state": z["state"],
-            "risk_score": z["risk_score"],
-            "ml_base": z["ml_base_score"],
-            "community_boost": z["community_boost"],
-            "rainfall_24h": z["rainfall_24h"],
+            "risk_score": z["risk_score"] if z.get("risk_score") is not None else 0.0,
+            "ml_base": z.get("ml_base_score"),
+            "community_boost": z.get("community_boost", 0.0),
+            "rainfall_24h": z.get("rainfall_24h"),
             "slope_deg": z["slope_deg"],
-            "soil_moisture": z["soil_moisture"],
-            "verified_reports": z["verified_report_count"]
+            "soil_moisture": z.get("soil_moisture"),
+            "verified_reports": z.get("verified_report_count", 0)
         }
-        for z in sorted(zones, key=lambda x: x["risk_score"], reverse=True)[:5]
+        for z in sorted(zones, key=lambda x: (x.get("risk_score") is not None, x.get("risk_score") or 0.0), reverse=True)[:5]
     ]
 
     # Feature importance

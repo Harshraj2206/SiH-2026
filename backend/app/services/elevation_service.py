@@ -33,12 +33,11 @@ def get_terrain_elevation_and_slope(latitude: float, longitude: float) -> Dict[s
     slope_status = "BASELINE_PROFILE"
 
     try:
-
         req = urllib.request.Request(
             url,
             headers={"User-Agent": "LandSafe-GlobalDEM/2.0 (SIH26001-DisasterManagement)"}
         )
-        with urllib.request.urlopen(req, timeout=4.0) as resp:
+        with urllib.request.urlopen(req, timeout=3.0) as resp:
             data = json.loads(resp.read().decode("utf-8"))
             elevations = data.get("elevation", [])
             if len(elevations) >= 3 and all(e is not None for e in elevations[:3]):
@@ -59,20 +58,36 @@ def get_terrain_elevation_and_slope(latitude: float, longitude: float) -> Dict[s
                 elevation = round(z0, 1)
                 is_dynamic = True
                 slope_status = "DYNAMIC_DEM"
+                source_label = "Copernicus 90m / Open-Meteo Elevation Grid"
 
     except Exception:
-        pass
+        # Secondary live DEM failover via Open-Elevation if primary is 429/offline
+        try:
+            sec_locs = f"{latitude:.5f},{longitude:.5f}|{latitude+delta:.5f},{longitude:.5f}|{latitude:.5f},{longitude+delta:.5f}"
+            sec_url = f"https://api.open-elevation.com/api/v1/lookup?locations={sec_locs}"
+            sec_req = urllib.request.Request(sec_url, headers={"User-Agent": "LandSafe-GlobalDEM/2.0"})
+            with urllib.request.urlopen(sec_req, timeout=3.0) as sec_resp:
+                sec_data = json.loads(sec_resp.read().decode("utf-8"))
+                sec_res = sec_data.get("results", [])
+                if len(sec_res) >= 3 and all(r.get("elevation") is not None for r in sec_res[:3]):
+                    z0 = float(sec_res[0]["elevation"])
+                    z_lat = float(sec_res[1]["elevation"])
+                    z_lng = float(sec_res[2]["elevation"])
 
-    # Explicit Baseline Profile fallback if internet/API unavailable
-    if elevation is None or slope_deg is None:
-        elevation = 500.0
-        slope_deg = 15.0
-        is_dynamic = False
-        slope_status = "BASELINE_PROFILE"
-        source_label = "Regional Geomorphic Baseline Profile"
-        freshness_label = "BASELINE FALLBACK"
-    else:
-        source_label = "Copernicus 90m / Open-Meteo Elevation Grid"
+                    d_lat = delta * 111320.0
+                    d_lng = delta * 111320.0 * max(0.1, math.cos(math.radians(latitude)))
+
+                    dz_dy = (z_lat - z0) / max(1.0, d_lat)
+                    dz_dx = (z_lng - z0) / max(1.0, d_lng)
+
+                    slope_rad = math.atan(math.sqrt(dz_dx ** 2 + dz_dy ** 2))
+                    slope_deg = round(math.degrees(slope_rad), 1)
+                    elevation = round(z0, 1)
+                    is_dynamic = True
+                    slope_status = "DYNAMIC_DEM"
+                    source_label = "SRTM / Open-Elevation Global Grid"
+        except Exception:
+            pass
         freshness_label = "DYNAMIC DEM GRADIENT"
 
     result = {

@@ -100,8 +100,8 @@ async def list_risk_zones(
     if state:
         zones = [z for z in zones if z["state"].lower() == state.lower()]
 
-    # Sort with highest risk first
-    zones.sort(key=lambda x: x["risk_score"], reverse=True)
+    # Sort with highest risk first (safe handling of DATA_INSUFFICIENT / None scores)
+    zones.sort(key=lambda x: (x.get("risk_score") is not None, x.get("risk_score") or 0.0), reverse=True)
     return zones
 
 

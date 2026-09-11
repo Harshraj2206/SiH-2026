@@ -118,7 +118,14 @@ export const SafeRoutePage = () => {
 
       // 1. Resolve Origin Coordinates
       const oTrimmed = oQuery.trim();
-      if (oTrimmed.toLowerCase().includes('current') || oTrimmed.toLowerCase().includes('gps') || oTrimmed.toLowerCase().includes('my location')) {
+      const oCoordMatch = oTrimmed.match(/^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?)[,\s]+[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/);
+      if (oCoordMatch) {
+        const parts = oTrimmed.split(/[,\s]+/).filter(Boolean);
+        const lat = parseFloat(parts[0]);
+        const lng = parseFloat(parts[1]);
+        resolvedOrigin = { lat, lng, name: `${lat.toFixed(4)}, ${lng.toFixed(4)}` };
+        setOriginCoords(resolvedOrigin);
+      } else if (oTrimmed.toLowerCase().includes('current') || oTrimmed.toLowerCase().includes('gps') || oTrimmed.toLowerCase().includes('my location')) {
         if (selectedLocation?.latitude) {
           resolvedOrigin = {
             lat: selectedLocation.latitude,
@@ -127,64 +134,73 @@ export const SafeRoutePage = () => {
           };
         }
       } else {
+        let geoO = null;
         try {
-          const geoO = await safeRouteApi.geocodePlace(oTrimmed);
-          if (geoO) {
-            resolvedOrigin = geoO;
-            setOriginCoords(geoO);
-          }
+          geoO = await safeRouteApi.geocodePlace(oTrimmed);
         } catch {
-          // Fallback to Nominatim if backend geocode encounters error
+          // Fallback to client-side Nominatim if backend geocode encounters error
           try {
             const nomO = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(oTrimmed)}&limit=1`, {
-              headers: { 'User-Agent': 'LandSafe-GlobalRouting/2.0' }
+              headers: { 'Accept': 'application/json' }
             });
             const nomOData = await nomO.json();
             if (nomOData && nomOData.length > 0) {
-              const geoO = {
+              geoO = {
                 lat: parseFloat(nomOData[0].lat),
                 lng: parseFloat(nomOData[0].lon),
                 name: nomOData[0].display_name
               };
-              resolvedOrigin = geoO;
-              setOriginCoords(geoO);
             }
           } catch {
-            // Keep existing originCoords
+            // Unresolved
           }
+        }
+
+        if (geoO && typeof geoO.lat === 'number' && typeof geoO.lng === 'number') {
+          resolvedOrigin = geoO;
+          setOriginCoords(geoO);
+        } else {
+          throw new Error(`Start location "${oTrimmed}" could not be resolved. Please enter a valid city, town, or coordinates.`);
         }
       }
 
       // 2. Resolve Destination Coordinates
       const dTrimmed = dQuery.trim();
-      if (dTrimmed) {
+      const dCoordMatch = dTrimmed.match(/^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?)[,\s]+[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/);
+      if (dCoordMatch) {
+        const parts = dTrimmed.split(/[,\s]+/).filter(Boolean);
+        const lat = parseFloat(parts[0]);
+        const lng = parseFloat(parts[1]);
+        resolvedDest = { lat, lng, name: `${lat.toFixed(4)}, ${lng.toFixed(4)}` };
+        setDestCoords(resolvedDest);
+      } else if (dTrimmed) {
+        let geoD = null;
         try {
-          const geoD = await safeRouteApi.geocodePlace(dTrimmed);
-          if (geoD) {
-            resolvedDest = geoD;
-            setDestCoords(geoD);
-          }
+          geoD = await safeRouteApi.geocodePlace(dTrimmed);
         } catch {
           // Graceful fallback to client-side Nominatim geocoding if backend is unreachable
           try {
             const nomResp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(dTrimmed)}&limit=1`, {
-              headers: { 'User-Agent': 'LandSafe-GlobalRouting/2.0' }
+              headers: { 'Accept': 'application/json' }
             });
             const nomData = await nomResp.json();
             if (nomData && nomData.length > 0) {
-              const geoD = {
+              geoD = {
                 lat: parseFloat(nomData[0].lat),
                 lng: parseFloat(nomData[0].lon),
                 name: nomData[0].display_name
               };
-              resolvedDest = geoD;
-              setDestCoords(geoD);
-            } else {
-              throw new Error(`Destination "${dTrimmed}" could not be resolved. Please enter a valid city, town, or hospital name.`);
             }
           } catch {
-            throw new Error(`Destination "${dTrimmed}" could not be resolved. Please enter a valid city, town, or hospital name.`);
+            // Unresolved
           }
+        }
+
+        if (geoD && typeof geoD.lat === 'number' && typeof geoD.lng === 'number') {
+          resolvedDest = geoD;
+          setDestCoords(geoD);
+        } else {
+          throw new Error(`Destination "${dTrimmed}" could not be resolved. Please enter a valid city, town, or hospital name.`);
         }
       }
 

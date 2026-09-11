@@ -129,9 +129,9 @@ export async function getLiveWeather(lat, lon, forceRefresh = false) {
   try {
     const res = await apiClient.get('/weather', {
       params: { lat, lon },
-      timeout: 6000
+      timeout: 8000
     });
-    if (res.data && res.data.status === 'success') {
+    if (res.data && (res.data.status === 'LIVE' || res.data.status === 'success' || typeof res.data.temperature_c === 'number')) {
       weatherCache.set(cacheKey, { timestamp: now, data: res.data });
       return res.data;
     }

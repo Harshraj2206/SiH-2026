@@ -357,17 +357,70 @@ export const LeafletRiskMap = ({
   };
 
   // Location Search Handler - searches zones, Nominatim, and enriches with real weather
+  // Location Search Handler - searches zones, coordinates, Nominatim, and enriches with real weather
   const handleSearchSubmit = async (e) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
     const q = searchQuery.toLowerCase().trim();
     const reqId = ++latestInspectionRef.current;
 
-    // 1. Check existing known zones
+    // 0. Check if query is coordinates format (e.g. "31.1048, 77.1734")
+    const coordMatch = q.match(/^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?)[,\s]+[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/);
+    if (coordMatch) {
+      const parts = q.split(/[,\s]+/).filter(Boolean);
+      const parsedLat = parseFloat(parts[0]);
+      const parsedLng = parseFloat(parts[1]);
+      if (!isNaN(parsedLat) && !isNaN(parsedLng)) {
+        setActiveCenter([parsedLat, parsedLng]);
+        setActiveZoom(13);
+        const fallbackName = formatCoordinateFallback(parsedLat, parsedLng);
+        setActiveLocationPin({
+          lat: parsedLat,
+          lng: parsedLng,
+          type: 'manual',
+          name: fallbackName
+        });
+        setContextManualLocation(parsedLat, parsedLng, fallbackName);
+
+        try {
+          const [freshWeather, backendData] = await Promise.all([
+            getLiveWeather(parsedLat, parsedLng).catch(() => null),
+            api.inspectTelemetry(parsedLat, parsedLng).catch(() => null)
+          ]);
+          if (reqId !== latestInspectionRef.current) return;
+          if (onSelectZone) {
+            onSelectZone({
+              ...(backendData || {}),
+              latitude: parsedLat,
+              longitude: parsedLng,
+              center: { lat: parsedLat, lng: parsedLng },
+              name: fallbackName,
+              temperature_c: freshWeather?.temperature_c ?? backendData?.temperature_c ?? null,
+              humidity_pct: freshWeather?.humidity_pct ?? backendData?.humidity_pct ?? null,
+              weather_code: freshWeather?.weather_code ?? backendData?.weather_code ?? null,
+              condition: freshWeather?.condition || backendData?.condition || 'Clear',
+              is_day: freshWeather?.is_day ?? backendData?.is_day ?? true,
+              rainfall_24h: freshWeather?.rainfall_24h ?? backendData?.rainfall_24h ?? 0,
+              rainfall_1h: freshWeather?.precipitation_mm ?? backendData?.rainfall_1h ?? 0,
+              weather_source: freshWeather?.source || backendData?.weather_source || 'Open-Meteo High-Resolution Real-Time Telemetry',
+              is_weather_loading: false,
+              is_live_inspected: true,
+              risk_score: backendData?.risk_score || 15.0,
+              risk_level: backendData?.risk_level || 'LOW'
+            });
+          }
+        } catch {
+          // Keep pin
+        }
+        return;
+      }
+    }
+
+    // 1. Check existing known zones (exact name, district, or ID)
     const matchedZone = zones.find(z => 
-      z.name.toLowerCase().includes(q) || 
-      z.district?.toLowerCase().includes(q) ||
-      z.zone_id.toLowerCase().includes(q)
+      z.name.toLowerCase() === q || 
+      (z.district && z.district.toLowerCase() === q) ||
+      z.zone_id.toLowerCase() === q
     );
 
     if (matchedZone) {
@@ -384,12 +437,12 @@ export const LeafletRiskMap = ({
       return;
     }
 
-    // 2. Search via unified service
+    // 2. Search via unified location service
     try {
       const searchRes = await searchContextLocation(searchQuery);
       if (reqId !== latestInspectionRef.current) return;
 
-      if (searchRes) {
+      if (searchRes && typeof searchRes.latitude === 'number' && typeof searchRes.longitude === 'number') {
         setActiveCenter([searchRes.latitude, searchRes.longitude]);
         setActiveZoom(12);
         setActiveLocationPin({
@@ -399,18 +452,15 @@ export const LeafletRiskMap = ({
           name: searchRes.displayName
         });
 
-        // Concurrently query backend telemetry if possible
-        let backendData = null;
-        try {
-          backendData = await api.inspectTelemetry(searchRes.latitude, searchRes.longitude);
-        } catch {
-          // Backend optional
-        }
+        // Fetch fresh live weather and telemetry specifically for this newly searched location
+        const [freshWeather, backendData] = await Promise.all([
+          getLiveWeather(searchRes.latitude, searchRes.longitude).catch(() => null),
+          api.inspectTelemetry(searchRes.latitude, searchRes.longitude).catch(() => null)
+        ]);
 
         if (reqId !== latestInspectionRef.current) return;
 
         if (onSelectZone) {
-          const liveW = userWeather?.loading ? await getLiveWeather(searchRes.latitude, searchRes.longitude).catch(() => null) : userWeather;
           onSelectZone({
             ...(backendData || {}),
             latitude: searchRes.latitude,
@@ -419,14 +469,14 @@ export const LeafletRiskMap = ({
             name: searchRes.displayName,
             state: searchRes.state || '',
             district: searchRes.city || '',
-            temperature_c: liveW?.temperature_c ?? backendData?.temperature_c ?? null,
-            humidity_pct: liveW?.humidity_pct ?? backendData?.humidity_pct ?? null,
-            weather_code: liveW?.weather_code ?? backendData?.weather_code ?? null,
-            condition: liveW?.condition || backendData?.condition || 'Clear',
-            is_day: liveW?.is_day ?? backendData?.is_day ?? true,
-            rainfall_24h: liveW?.rainfall_24h ?? backendData?.rainfall_24h ?? 0,
-            rainfall_1h: liveW?.precipitation_mm ?? backendData?.rainfall_1h ?? 0,
-            weather_source: liveW?.source || backendData?.weather_source || 'Open-Meteo High-Resolution Real-Time Telemetry',
+            temperature_c: freshWeather?.temperature_c ?? backendData?.temperature_c ?? null,
+            humidity_pct: freshWeather?.humidity_pct ?? backendData?.humidity_pct ?? null,
+            weather_code: freshWeather?.weather_code ?? backendData?.weather_code ?? null,
+            condition: freshWeather?.condition || backendData?.condition || 'Clear',
+            is_day: freshWeather?.is_day ?? backendData?.is_day ?? true,
+            rainfall_24h: freshWeather?.rainfall_24h ?? backendData?.rainfall_24h ?? 0,
+            rainfall_1h: freshWeather?.precipitation_mm ?? backendData?.rainfall_1h ?? 0,
+            weather_source: freshWeather?.source || backendData?.weather_source || 'Open-Meteo High-Resolution Real-Time Telemetry',
             is_weather_loading: false,
             is_live_inspected: true,
             risk_score: backendData?.risk_score || 15.0,
@@ -536,16 +586,32 @@ export const LeafletRiskMap = ({
     <div className="relative isolate z-0 w-full h-full min-h-[480px] rounded-2xl overflow-hidden border border-[#262626] bg-[#0B0B0B] flex flex-col" style={{ height: height || '100%' }}>
       
       {/* Top Search & Locate Bar - Fully Responsive with Glassmorphic Rounded-Full Radius */}
-      <div className="absolute top-3 left-3 right-3 z-[1000] flex items-center justify-between gap-2 pointer-events-none">
+      <div 
+        className="absolute top-3 left-3 right-3 z-[1000] flex items-center justify-between gap-2 pointer-events-none"
+        onMouseDown={(e) => e.stopPropagation()}
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
+        onDoubleClick={(e) => e.stopPropagation()}
+      >
         {/* Left Search + Locate Group */}
         <div className="flex items-center gap-2 max-w-[calc(100%-80px)] sm:max-w-md w-full pointer-events-auto">
-          <form onSubmit={handleSearchSubmit} className="flex items-center bg-[#121212]/95 backdrop-blur-md border border-[#303030] rounded-full px-3.5 py-1.5 sm:py-2 shadow-xl flex-1 min-w-[120px] focus-within:border-emerald-500/70 focus-within:ring-1 focus-within:ring-emerald-500/50 transition-all">
-            <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-neutral-400 mr-2 flex-shrink-0" />
+          <form 
+            onSubmit={handleSearchSubmit} 
+            className="flex items-center bg-[#121212]/95 backdrop-blur-md border border-[#303030] rounded-full px-3.5 py-1.5 sm:py-2 shadow-xl flex-1 min-w-[120px] focus-within:border-emerald-500/70 focus-within:ring-1 focus-within:ring-emerald-500/50 transition-all"
+            onKeyDown={(e) => e.stopPropagation()}
+          >
+            <button 
+              type="submit" 
+              className="text-neutral-400 hover:text-emerald-400 mr-2 flex-shrink-0 focus:outline-none transition-colors"
+              title="Search place or coordinates"
+            >
+              <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            </button>
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={t('search_place_placeholder') || 'Search place or coordinates...'}
+              placeholder={t('search_place_placeholder') || 'Search place, district, or coordinates...'}
               className="bg-transparent text-[11px] sm:text-xs text-neutral-100 placeholder-neutral-500 focus:outline-none w-full font-medium"
             />
           </form>
@@ -768,39 +834,72 @@ export const LeafletRiskMap = ({
           </>
         )}
 
-        {/* 1. Risk Zone Polygons Layer */}
+        {/* 1. Risk Zone Polygons & Visible Corridor Beacons Layer */}
         {layers.zones && zones.map((zone) => {
           const isSelected = selectedZone?.zone_id === zone.zone_id;
           const riskColor = getRiskScoreColor(zone.risk_score);
-          if (!zone.coordinates || !Array.isArray(zone.coordinates)) return null;
-          const polygonPositions = zone.coordinates.map(c => [c.lat, c.lng]);
+          const hasCoords = zone.coordinates && Array.isArray(zone.coordinates) && zone.coordinates.length > 0;
+          const polygonPositions = hasCoords ? zone.coordinates.map(c => [c.lat, c.lng]) : null;
+          const centerPos = zone.center && typeof zone.center.lat === 'number' && typeof zone.center.lng === 'number' 
+            ? [zone.center.lat, zone.center.lng] 
+            : (hasCoords ? [zone.coordinates[0].lat, zone.coordinates[0].lng] : null);
 
           return (
-            <Polygon
-              key={zone.zone_id}
-              positions={polygonPositions}
-              pathOptions={{
-                color: isSelected ? '#ffffff' : riskColor.hex,
-                weight: isSelected ? 3 : 1.5,
-                fillColor: riskColor.hex,
-                fillOpacity: isSelected ? 0.5 : 0.3,
-                dashArray: isSelected ? '4, 4' : null
-              }}
-              eventHandlers={{
-                click: () => {
-                  if (onSelectZone) onSelectZone(zone);
-                }
-              }}
-            >
-              <Tooltip direction="top" offset={[0, -8]} opacity={0.95}>
-                <div className="text-xs p-1">
-                  <div className="font-bold text-slate-100">{zone.zone_id}: {zone.name}</div>
-                  <div className="text-[11px] text-slate-300 mt-0.5">
-                    Risk: <span className="font-mono font-bold" style={{ color: riskColor.hex }}>{zone.risk_score}/100 ({zone.risk_level})</span>
-                  </div>
-                </div>
-              </Tooltip>
-            </Polygon>
+            <React.Fragment key={zone.zone_id}>
+              {polygonPositions && (
+                <Polygon
+                  positions={polygonPositions}
+                  pathOptions={{
+                    color: isSelected ? '#ffffff' : riskColor.hex,
+                    weight: isSelected ? 3 : 1.5,
+                    fillColor: riskColor.hex,
+                    fillOpacity: isSelected ? 0.5 : 0.3,
+                    dashArray: isSelected ? '4, 4' : null
+                  }}
+                  eventHandlers={{
+                    click: () => {
+                      if (onSelectZone) onSelectZone(zone);
+                    }
+                  }}
+                >
+                  <Tooltip direction="top" offset={[0, -8]} opacity={0.95}>
+                    <div className="text-xs p-1">
+                      <div className="font-bold text-slate-100">{zone.zone_id}: {zone.name}</div>
+                      <div className="text-[11px] text-slate-300 mt-0.5">
+                        Risk: <span className="font-mono font-bold" style={{ color: riskColor.hex }}>{zone.risk_score}/100 ({zone.risk_level})</span>
+                      </div>
+                    </div>
+                  </Tooltip>
+                </Polygon>
+              )}
+
+              {centerPos && (
+                <CircleMarker
+                  center={centerPos}
+                  radius={isSelected ? 10 : 7}
+                  pathOptions={{
+                    color: isSelected ? '#ffffff' : riskColor.hex,
+                    fillColor: riskColor.hex,
+                    fillOpacity: 0.85,
+                    weight: isSelected ? 3 : 1.5
+                  }}
+                  eventHandlers={{
+                    click: () => {
+                      if (onSelectZone) onSelectZone(zone);
+                    }
+                  }}
+                >
+                  <Tooltip direction="top" offset={[0, -6]} opacity={0.95}>
+                    <div className="text-xs p-1">
+                      <div className="font-bold text-white">{zone.name}</div>
+                      <div className="text-[10px] text-slate-300 font-mono">
+                        Corridor {zone.zone_id} • <span style={{ color: riskColor.hex }} className="font-bold">{zone.risk_score}/100</span>
+                      </div>
+                    </div>
+                  </Tooltip>
+                </CircleMarker>
+              )}
+            </React.Fragment>
           );
         })}
 

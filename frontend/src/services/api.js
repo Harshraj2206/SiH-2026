@@ -133,7 +133,7 @@ export const safeRouteApi = {
       start_node: startNode,
       destination_node: destNode,
       avoid_blocked_roads: avoidBlockedRoads
-    });
+    }, { timeout: 30000 });
     return res.data;
   },
   calculateGlobalRoute: async (startLat, startLng, destLat, destLng, startName = 'Origin', destName = 'Destination') => {
@@ -144,11 +144,11 @@ export const safeRouteApi = {
       dest_lng: destLng,
       start_name: startName,
       dest_name: destName
-    });
+    }, { timeout: 30000 });
     return res.data;
   },
   geocodePlace: async (query) => {
-    const res = await apiClient.post('/safe-route/geocode', { query });
+    const res = await apiClient.post('/safe-route/geocode', { query }, { timeout: 10000 });
     return res.data;
   },
 };

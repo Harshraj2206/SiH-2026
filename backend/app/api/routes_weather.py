@@ -33,6 +33,15 @@ async def get_live_weather(
             condition = _map_wmo_code(weather_code)
         if not condition:
             condition = "Clear Sky" if weather_code == 0 else "Partly Cloudy"
+        raw_p1 = raw_weather.get("precipitation_1h_mm")
+        raw_rain = raw_weather.get("rain_current_mm")
+        raw_p24 = raw_weather.get("precipitation_24h_mm")
+        raw_p72 = raw_weather.get("precipitation_72h_mm")
+
+        p_1h = float(raw_p1) if raw_p1 is not None else None
+        rain_now = float(raw_rain) if raw_rain is not None else None
+        p_24h = float(raw_p24) if raw_p24 is not None else None
+        p_72h = float(raw_p72) if raw_p72 is not None else None
 
         return {
             "latitude": lat,
@@ -45,11 +54,15 @@ async def get_live_weather(
             "wind_direction_deg": raw_weather.get("wind_direction_deg"),
             "is_day": raw_weather.get("is_day", 1),
             "cloud_cover_pct": raw_weather.get("cloud_cover_pct", 0),
-            "snowfall_cm": float(raw_weather.get("snowfall_cm") or 0.0),
-            "precipitation_1h_mm": float(raw_weather.get("precipitation_1h_mm") or 0.0),
-            "rain_current_mm": float(raw_weather.get("rain_current_mm") or 0.0),
-            "precipitation_24h_mm": float(raw_weather.get("precipitation_24h_mm") or 0.0),
-            "precipitation_72h_mm": float(raw_weather.get("precipitation_72h_mm") or 0.0),
+            "snowfall_cm": float(raw_weather.get("snowfall_cm")) if raw_weather.get("snowfall_cm") is not None else 0.0,
+            "precipitation_1h_mm": p_1h,
+            "rain_current_mm": rain_now,
+            "precipitation_24h_mm": p_24h,
+            "precipitation_72h_mm": p_72h,
+            "rainfall_1h": p_1h,
+            "rainfall_24h": p_24h,
+            "rainfall_72h": p_72h,
+            "precipitation_mm": p_1h if p_1h is not None else rain_now,
             "soil_moisture_m3m3": raw_weather.get("soil_moisture_m3m3"),
             "weather_code": weather_code if weather_code is not None else 0,
             "condition": condition,
@@ -63,7 +76,7 @@ async def get_live_weather(
             "agency": raw_weather.get("agency", "WMO / ECMWF Reanalysis"),
             "observation_time": raw_weather.get("observation_time"),
             "retrieval_time": raw_weather.get("retrieval_time"),
-            "status": "LIVE" if temp is not None else "FALLBACK"
+            "status": "LIVE" if (temp is not None and raw_weather.get("status") != "UNAVAILABLE") else "UNAVAILABLE"
         }
     except Exception as exc:
         raise HTTPException(

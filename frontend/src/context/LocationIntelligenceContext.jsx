@@ -227,8 +227,8 @@ export const LocationIntelligenceProvider = ({ children }) => {
           icon: '⚠️',
           temp: null,
           tempFormatted: '—',
-          rain24h: 0,
-          currentRain: 0,
+          rain24h: null,
+          currentRain: null,
           humidity: null,
           isDay: true,
           theme: 'neutral',
@@ -469,6 +469,7 @@ export const LocationIntelligenceProvider = ({ children }) => {
    */
   const searchLocation = useCallback(async (query) => {
     if (!query || !query.trim()) return null;
+    const cleanQuery = query.trim();
 
     // Explicit user action: user searched for a specific place
     locationModeRef.current = 'selected';
@@ -478,26 +479,71 @@ export const LocationIntelligenceProvider = ({ children }) => {
     setLocation(prev => ({ ...prev, loading: true, error: null }));
 
     try {
-      const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1&addressdetails=1`;
-      const res = await fetch(url, {
-        headers: {
-          'Accept': 'application/json',
-          'User-Agent': 'LandSafe-Emergency-Risk-Platform/1.0'
+      let lat = null;
+      let lon = null;
+      let displayName = '';
+      let locality = '';
+      let state = '';
+      let country = '';
+
+      // Check if query is coordinates format (e.g. "31.1048, 77.1734")
+      const coordMatch = cleanQuery.match(/^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?)[,\s]+[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/);
+      if (coordMatch) {
+        const parts = cleanQuery.split(/[,\s]+/).filter(Boolean);
+        lat = parseFloat(parts[0]);
+        lon = parseFloat(parts[1]);
+        const rev = await reverseGeocode(lat, lon).catch(() => null);
+        displayName = rev?.displayName || formatCoordinateFallback(lat, lon);
+        locality = rev?.city || '';
+        state = rev?.state || '';
+        country = rev?.country || '';
+      } else {
+        // Try backend geocode endpoint first (avoids browser CORS and custom header limitations)
+        let resolved = null;
+        try {
+          const geoRes = await apiClient.post('/safe-route/geocode', { query: cleanQuery }, { timeout: 8000 });
+          if (geoRes.data && typeof geoRes.data.lat === 'number' && typeof geoRes.data.lng === 'number') {
+            resolved = {
+              lat: geoRes.data.lat,
+              lon: geoRes.data.lng,
+              displayName: geoRes.data.full_name || geoRes.data.name
+            };
+          }
+        } catch {
+          // Backend geocode fallback
         }
-      });
-      const data = await res.json();
-      if (!data || data.length === 0) {
-        throw new Error(`Location "${query}" could not be resolved.`);
+
+        if (resolved) {
+          lat = resolved.lat;
+          lon = resolved.lon;
+          displayName = resolved.displayName;
+        } else {
+          // Fallback to client-side Nominatim search
+          const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cleanQuery)}&format=json&limit=1&addressdetails=1`;
+          const res = await fetch(url, {
+            headers: {
+              'Accept': 'application/json'
+            }
+          });
+          const data = await res.json();
+          if (!data || data.length === 0) {
+            throw new Error(`Location "${cleanQuery}" could not be resolved. Please enter a valid city, town, or district.`);
+          }
+
+          const item = data[0];
+          lat = parseFloat(item.lat);
+          lon = parseFloat(item.lon);
+          const addr = item.address || {};
+          locality = addr.suburb || addr.neighbourhood || addr.village || addr.town || addr.city || '';
+          state = addr.state || '';
+          country = addr.country || '';
+          displayName = [locality, state, country].filter(Boolean).join(', ') || item.display_name.split(',').slice(0, 2).join(', ');
+        }
       }
 
-      const item = data[0];
-      const lat = parseFloat(item.lat);
-      const lon = parseFloat(item.lon);
-      const addr = item.address || {};
-      const locality = addr.suburb || addr.neighbourhood || addr.village || addr.town || addr.city || '';
-      const state = addr.state || '';
-      const country = addr.country || '';
-      const displayName = [locality, state, country].filter(Boolean).join(', ') || item.display_name.split(',').slice(0, 2).join(', ');
+      if (typeof lat !== 'number' || typeof lon !== 'number' || isNaN(lat) || isNaN(lon)) {
+        throw new Error(`Location "${cleanQuery}" could not be resolved.`);
+      }
 
       if (reqId !== activeReqRef.current) return null;
 
@@ -515,14 +561,14 @@ export const LocationIntelligenceProvider = ({ children }) => {
         state,
         country,
         isGps: false,
-        source: `Search: ${query}`,
+        source: `Search: ${cleanQuery}`,
         permissionStatus: locationRef.current ? locationRef.current.permissionStatus : 'prompt',
         loading: false,
         error: null
       };
 
       setLocation(newLoc);
-      updateDeepIntelligence(lat, lon, `Search: ${query}`);
+      updateDeepIntelligence(lat, lon, `Search: ${cleanQuery}`);
       return newLoc;
     } catch (err) {
       if (reqId !== activeReqRef.current) return null;

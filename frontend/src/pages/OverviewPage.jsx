@@ -255,7 +255,7 @@ export const OverviewPage = () => {
               <div>
                 <span className="text-[10px] text-neutral-400 block uppercase font-medium">24h Precipitation</span>
                 <span className={`font-mono font-bold ${weather.rain24h > 20 ? 'text-amber-400' : 'text-white'}`}>
-                  {weather.rain24h.toFixed(1)} mm
+                  {weather.rain24h !== null && weather.rain24h !== undefined ? `${weather.rain24h.toFixed(1)} mm` : '—'}
                 </span>
               </div>
               <div className="w-[1px] h-6 bg-white/10" />
@@ -268,9 +268,15 @@ export const OverviewPage = () => {
               <div className="w-[1px] h-6 bg-white/10" />
               <div>
                 <span className="text-[10px] text-neutral-400 block uppercase font-medium">Satellite Grid</span>
-                <span className="font-mono font-bold text-emerald-400 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> LIVE
-                </span>
+                {weather.type === 'UNKNOWN' ? (
+                  <span className="font-mono font-bold text-amber-400/90 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400" /> OFFLINE
+                  </span>
+                ) : (
+                  <span className="font-mono font-bold text-emerald-400 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> LIVE
+                  </span>
+                )}
               </div>
             </div>
           </div>

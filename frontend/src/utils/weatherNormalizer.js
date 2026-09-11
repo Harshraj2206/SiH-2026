@@ -37,8 +37,8 @@ export function normalizeWeather(raw) {
       icon: '🌐',
       temp: null,
       tempFormatted: '—',
-      rain24h: 0,
-      currentRain: 0,
+      rain24h: null,
+      currentRain: null,
       humidity: null,
       isDay: true,
       theme: 'neutral',
@@ -55,8 +55,8 @@ export function normalizeWeather(raw) {
       icon: '⏳',
       temp: null,
       tempFormatted: '...',
-      rain24h: 0,
-      currentRain: 0,
+      rain24h: null,
+      currentRain: null,
       humidity: null,
       isDay: true,
       theme: 'loading',
@@ -67,8 +67,10 @@ export function normalizeWeather(raw) {
 
   const temp = typeof raw.temperature_c === 'number' ? raw.temperature_c : (typeof raw.temp === 'number' ? raw.temp : null);
   const tempFormatted = temp !== null ? `${Math.round(temp)}°C` : '—';
-  const rain24h = Number(raw.rainfall_24h || raw.precipitation_24h_mm || 0);
-  const currentRain = Number(raw.rain_current_mm || raw.precipitation_1h_mm || raw.rainfall_1h || 0);
+  const rawR24 = raw.rainfall_24h !== undefined ? raw.rainfall_24h : raw.precipitation_24h_mm;
+  const rain24h = (rawR24 !== null && rawR24 !== undefined && !isNaN(rawR24)) ? Number(rawR24) : null;
+  const rawRCur = raw.rain_current_mm !== undefined ? raw.rain_current_mm : (raw.precipitation_1h_mm !== undefined ? raw.precipitation_1h_mm : raw.rainfall_1h);
+  const currentRain = (rawRCur !== null && rawRCur !== undefined && !isNaN(rawRCur)) ? Number(rawRCur) : null;
   const humidity = typeof raw.humidity_pct === 'number' ? raw.humidity_pct : (typeof raw.relative_humidity_pct === 'number' ? raw.relative_humidity_pct : null);
   const weatherCode = typeof raw.weather_code === 'number' ? raw.weather_code : (typeof raw.code === 'number' ? raw.code : null);
   const conditionStr = String(raw.condition || '').toLowerCase().trim();

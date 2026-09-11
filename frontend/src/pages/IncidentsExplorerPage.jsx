@@ -157,6 +157,7 @@ export const IncidentsExplorerPage = () => {
   const [intelData, setIntelData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [fetchError, setFetchError] = useState(null);
   const [activeTab, setActiveTab] = useState('confirmed'); // 'confirmed', 'forecast', 'all', 'simulation'
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [expandWhyRisk, setExpandWhyRisk] = useState(true);
@@ -209,6 +210,7 @@ export const IncidentsExplorerPage = () => {
     try {
       if (forceRefresh) setRefreshing(true);
       else setLoading(true);
+      setFetchError(null);
 
       const data = await incidentsApi.getIntelligence(forceRefresh);
       setIntelData(data);
@@ -227,6 +229,7 @@ export const IncidentsExplorerPage = () => {
       }
     } catch (err) {
       console.error('Failed to load landslide intelligence:', err);
+      setFetchError(err?.message || 'Unable to connect to incident intelligence feed');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -339,6 +342,23 @@ export const IncidentsExplorerPage = () => {
     }
     return Object.keys(intelData.coverage_summary.states_breakdown).sort();
   }, [intelData]);
+
+  if (fetchError && !intelData) {
+    return (
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 max-w-xl mx-auto text-center space-y-4 my-12">
+        <AlertTriangle className="w-10 h-10 text-rose-500 mx-auto" />
+        <h2 className="text-lg font-bold text-white">Incident Intelligence Feed Offline</h2>
+        <p className="text-sm text-slate-400">{fetchError}</p>
+        <button
+          onClick={() => fetchIntelligence(true)}
+          className="inline-flex items-center gap-2 px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold rounded-xl transition"
+        >
+          <RefreshCw className="w-4 h-4" />
+          Retry Connection
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
