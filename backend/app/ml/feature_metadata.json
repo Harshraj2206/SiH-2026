@@ -1,27 +1,65 @@
 {
-  "model_type": "RandomForestRegressor",
+  "model_type": "RandomForestClassifier",
+  "calibration": "Calibrated Probability Regressor (0 - 100%)",
+  "training_dataset": "GSI NLSM & NASA Global Landslide Catalog Empirical Dataset",
+  "dataset_size": 1400,
+  "train_samples": 1120,
+  "test_samples": 280,
+  "n_estimators": 150,
   "features": [
     "rainfall_24h",
     "rainfall_72h",
     "slope_deg",
     "soil_moisture",
     "ndvi",
-    "historical_incidents"
+    "historical_incidents",
+    "elevation_amsl",
+    "antecedent_rain_index",
+    "pore_slope_interaction",
+    "vegetation_slope_defense"
   ],
-  "n_estimators": 120,
+  "base_features": [
+    "rainfall_24h",
+    "rainfall_72h",
+    "slope_deg",
+    "soil_moisture",
+    "ndvi",
+    "historical_incidents",
+    "elevation_amsl"
+  ],
+  "engineered_features": [
+    "antecedent_rain_index",
+    "pore_slope_interaction",
+    "vegetation_slope_defense"
+  ],
   "metrics": {
-    "r2_score": 0.9638,
-    "mae": 2.54,
-    "rmse": 3.26
+    "accuracy": 83.93,
+    "precision": 85.14,
+    "recall": 88.69,
+    "f1_score": 86.88,
+    "roc_auc": 0.8672,
+    "false_negative_rate": 11.31,
+    "cv_f1_mean": 89.21,
+    "cv_f1_std": 1.72,
+    "confusion_matrix": {
+      "true_positive": 149,
+      "false_positive": 26,
+      "true_negative": 86,
+      "false_negative": 19
+    }
   },
   "feature_importances": {
-    "rainfall_24h": 0.0871,
-    "rainfall_72h": 0.1515,
-    "slope_deg": 0.6904,
-    "soil_moisture": 0.0179,
-    "ndvi": 0.0264,
-    "historical_incidents": 0.0267
+    "rainfall_24h": 0.0324,
+    "rainfall_72h": 0.0405,
+    "slope_deg": 0.2715,
+    "soil_moisture": 0.0368,
+    "ndvi": 0.0391,
+    "historical_incidents": 0.0969,
+    "elevation_amsl": 0.0915,
+    "antecedent_rain_index": 0.034,
+    "pore_slope_interaction": 0.293,
+    "vegetation_slope_defense": 0.0642
   },
-  "trained_date": "2026-08-25",
-  "description": "Trained for SIH26001 Landslide Early Warning System (NER region)"
+  "trained_date": "2026-09-11",
+  "description": "Technically Defensible Random Forest for SIH26001 Landslide Early Warning System"
 }

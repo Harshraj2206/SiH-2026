@@ -103,6 +103,14 @@ export const riskZonesApi = {
     const res = await apiClient.post('/predict', payload);
     return res.data;
   },
+  getModelMetrics: async () => {
+    const res = await apiClient.get('/predict/metrics');
+    return res.data;
+  },
+  getHistoricalReplay: async () => {
+    const res = await apiClient.get('/predict/historical-replay');
+    return res.data;
+  },
 };
 
 // ---------------- Safe Route Engine ----------------
@@ -305,6 +313,8 @@ export const api = {
   getZones: riskZonesApi.getZones,
   getZoneDetail: riskZonesApi.getZoneDetail,
   predictRisk: riskZonesApi.predictRisk,
+  getModelMetrics: riskZonesApi.getModelMetrics,
+  getHistoricalReplay: riskZonesApi.getHistoricalReplay,
 
   getWaypoints: safeRouteApi.getWaypoints,
   calculateSafeRoute: safeRouteApi.calculateSafeRoute,

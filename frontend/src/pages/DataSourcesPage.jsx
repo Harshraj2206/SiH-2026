@@ -357,7 +357,7 @@ export const DataSourcesPage = () => {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
               <div className="p-2.5 bg-slate-900 rounded-xl border border-slate-800">
                 <span className="text-[10px] text-slate-400 block">REAL 24H RAIN</span>
-                <span className="text-sm font-bold text-cyan-400 font-mono">{inspectResult.rainfall_24h_mm} mm</span>
+                <span className="text-sm font-bold text-cyan-400 font-mono">{inspectResult.rainfall_24h ?? inspectResult.rainfall_24h_mm ?? 0} mm</span>
                 <span className="text-[10px] text-slate-400 block mt-0.5">Source: IMD/WMO Grid</span>
               </div>
 
@@ -369,19 +369,26 @@ export const DataSourcesPage = () => {
 
               <div className="p-2.5 bg-slate-900 rounded-xl border border-slate-800">
                 <span className="text-[10px] text-slate-400 block">REAL SOIL MOISTURE</span>
-                <span className="text-sm font-bold text-blue-400 font-mono">{inspectResult.soil_moisture_m3m3} m³/m³</span>
+                <span className="text-sm font-bold text-blue-400 font-mono">{inspectResult.soil_moisture ?? inspectResult.soil_moisture_m3m3 ?? 0.35} m³/m³</span>
                 <span className="text-[10px] text-slate-400 block mt-0.5">Source: NASA SMAP / ERA5</span>
               </div>
 
               <div className="p-2.5 bg-slate-900 rounded-xl border border-slate-800">
                 <span className="text-[10px] text-slate-400 block">GSI HISTORY DENSITY</span>
-                <span className="text-sm font-bold text-amber-400 font-mono">{inspectResult.historical_landslides_nearby} Events</span>
+                <span className="text-sm font-bold text-amber-400 font-mono">{inspectResult.historical_landslides_nearby ?? inspectResult.historical_incidents ?? 0} Events</span>
                 <span className="text-[10px] text-slate-400 block mt-0.5">Within 25 km radius</span>
               </div>
             </div>
 
             <div className="p-3 bg-slate-900/60 rounded-xl border border-slate-800 text-xs space-y-1">
-              <span className="font-bold text-white block">Explainable AI Primary Driver: {inspectResult.primary_driver}</span>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="font-bold text-white block">Explainable AI Primary Driver: {inspectResult.primary_driver}</span>
+                {inspectResult.model_confidence && (
+                  <span className="text-[11px] font-mono text-emerald-400">
+                    Model Confidence: <strong>{inspectResult.model_confidence}%</strong>
+                  </span>
+                )}
+              </div>
               <p className="text-slate-300">{inspectResult.recommended_action}</p>
             </div>
           </div>

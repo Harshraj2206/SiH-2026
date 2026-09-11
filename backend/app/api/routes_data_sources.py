@@ -127,13 +127,16 @@ async def inspect_coordinate_telemetry(payload: CoordinateInspectRequest) -> Dic
     slope_deg = float(dem.get("slope_deg") or 10.0)
     moisture = float(soil.get("volumetric_soil_moisture_m3m3") or 0.35)
 
+    elev_m = float(dem.get("elevation_meters_amsl") or 800.0)
+
     prediction = predict_landslide_risk({
         "rainfall_24h": rain_24h,
         "rainfall_72h": rain_72h,
         "slope_deg": slope_deg,
         "soil_moisture": moisture,
         "ndvi": 0.55,
-        "historical_incidents": hist_count
+        "historical_incidents": hist_count,
+        "elevation_amsl": elev_m
     })
 
     ml_score = float(prediction.get("risk_score") or 15.0)
@@ -185,6 +188,9 @@ async def inspect_coordinate_telemetry(payload: CoordinateInspectRequest) -> Dic
         "primary_driver": prediction.get("xai", {}).get("primary_driver"),
         "recommended_action": prediction.get("xai", {}).get("recommended_action"),
         "xai": prediction.get("xai", {}),
+        "model_confidence": prediction.get("model_confidence"),
+        "tree_variance": prediction.get("tree_variance"),
+        "data_quality": prediction.get("data_quality"),
         "forecast_trend": forecast_trend,
         "alert_status": "CRITICAL WARNING" if ml_score > 80 else ("HIGH ADVISORY" if ml_score > 60 else None),
         "last_updated": datetime.now(timezone.utc).isoformat(),

@@ -91,11 +91,15 @@ async def get_analytics_overview():
     if metadata and "feature_importances" in metadata:
         feat_names = {
             "slope_deg": "Slope Angle (°)",
+            "pore_slope_interaction": "Pore-Saturation Shear Proxy",
+            "historical_incidents": "Historical Incident Frequency",
+            "elevation_amsl": "Elevation AMSL (m)",
+            "vegetation_slope_defense": "Vegetation Root Reinforcement",
             "rainfall_72h": "72h Antecedent Rainfall (mm)",
             "rainfall_24h": "24h Intense Precipitation (mm)",
-            "soil_moisture": "Volumetric Soil Moisture (%)",
-            "historical_incidents": "Historical Incident Frequency",
-            "ndvi": "Vegetation Cover (NDVI Proxy)"
+            "antecedent_rain_index": "Antecedent Precipitation Index",
+            "ndvi": "Vegetation Canopy Cover (NDVI)",
+            "soil_moisture": "Volumetric Soil Moisture (%)"
         }
         for k, v in metadata["feature_importances"].items():
             feature_importance_list.append({

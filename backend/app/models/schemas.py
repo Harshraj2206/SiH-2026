@@ -97,6 +97,9 @@ class XAIFactor(BaseModel):
     name: str
     importance_pct: float
     value: str
+    rawValue: Optional[str] = None
+    net_delta: Optional[float] = None
+    color: Optional[str] = None
 
 
 class XAIExplanation(BaseModel):
@@ -104,6 +107,8 @@ class XAIExplanation(BaseModel):
     summary: str
     recommended_action: str
     primary_driver: str
+    base_hazard_bias: Optional[float] = None
+    raw_tree_contributions: Optional[Dict[str, float]] = None
 
 
 class PredictionResponse(BaseModel):
@@ -113,6 +118,10 @@ class PredictionResponse(BaseModel):
     features: Dict[str, Any]
     xai: XAIExplanation
     global_feature_importances: Dict[str, float]
+    model_confidence: Optional[float] = None
+    tree_variance: Optional[float] = None
+    data_quality: Optional[str] = None
+    model_metadata: Optional[Dict[str, Any]] = None
 
 
 # ---------------- Risk Zone Schemas ----------------
@@ -161,6 +170,10 @@ class RiskZoneSummary(BaseModel):
     cloud_cover_pct: Optional[int] = 0
     snowfall_cm: Optional[float] = 0.0
     rainfall_1h: Optional[float] = 0.0
+    model_confidence: Optional[float] = None
+    tree_variance: Optional[float] = None
+    data_quality: Optional[str] = None
+    xai: Optional[Any] = None
 
 
 # ---------------- Routing Schemas ----------------

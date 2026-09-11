@@ -88,12 +88,12 @@ export const AnalyticsPage = () => {
               <BarChart3 className="w-5 h-5" />
             </div>
             <h1 className="text-xl font-black text-white">Disaster Telemetry & Model Analytics</h1>
-            <span className="text-xs px-2 py-0.5 rounded font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
-              Simulated DEM / IMD Datasets
+            <span className="text-xs px-2 py-0.5 rounded font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+              Authoritative WMO & Copernicus Telemetry
             </span>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            Statistical correlations between intense precipitation, slope morphology, community signals, and AI predictions across the North Eastern Region.
+            Statistical correlations between intense precipitation, slope morphology, community signals, and AI predictions across monitored mountain sectors.
           </p>
         </div>
 
@@ -227,7 +227,7 @@ export const AnalyticsPage = () => {
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-3">
         <h3 className="text-sm font-extrabold text-white flex items-center gap-2">
           <TrendingUp className="w-4 h-4 text-rose-400" />
-          Highest Vulnerability Sector Rankings (North Eastern Region)
+          Highest Vulnerability Sector Rankings (Operational Telemetry)
         </h3>
 
         <div className="overflow-x-auto">

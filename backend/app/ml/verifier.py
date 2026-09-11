@@ -7,16 +7,19 @@ from typing import Dict, Any, List
 import re
 
 
+from backend.app.ml.predictor import predict_landslide_risk
+
+
 def verify_landslide_report(
     report_data: Dict[str, Any],
     matched_zone: Dict[str, Any] = None
 ) -> Dict[str, Any]:
     """
     Executes a 4-agent verification pipeline:
-    1. Weather Telemetry Agent (Rainfall / Saturation)
-    2. Geotechnical Terrain Agent (Slope Angle / Elevation)
+    1. Weather Telemetry Agent (Rainfall / Saturation via live WMO feeds)
+    2. Geotechnical Terrain Agent (Slope Angle / Elevation via Copernicus DEM)
     3. NLP Semantic Agent (Hazard Indicators & Terminology)
-    4. Spatial Sensor Network Agent (Cluster & Proximity Corroboration)
+    4. ML Physical Model Corroboration Agent (Cross-evaluates report against Random Forest hazard model)
     """
     checks = {}
     confidence_points = 0
@@ -27,18 +30,19 @@ def verify_landslide_report(
     signs = [s.lower() for s in report_data.get("signs_observed", [])]
 
     # --- Agent 1: Weather Telemetry Cross-Check ---
-    zone_rain = matched_zone.get("rainfall_24h", 45.0) if matched_zone else 65.0
-    zone_moisture = matched_zone.get("soil_moisture", 0.40) if matched_zone else 0.45
+    zone_rain = float(matched_zone.get("rainfall_24h", 45.0) if matched_zone else 65.0)
+    zone_rain_72 = float(matched_zone.get("rainfall_72h", zone_rain * 1.8) if matched_zone else zone_rain * 1.8)
+    zone_moisture = float(matched_zone.get("soil_moisture", 0.40) if matched_zone else 0.45)
     
-    if zone_rain >= 70.0 or zone_moisture >= 0.50:
+    if zone_rain >= 70.0 or zone_moisture >= 0.48:
         weather_score = 30
-        weather_status = f"PASSED — Severe precipitation ({zone_rain} mm/24h) & high soil saturation ({int(zone_moisture*100)}%) detected in sector."
+        weather_status = f"PASSED — Severe precipitation ({zone_rain:.1f} mm/24h) & high soil saturation ({int(zone_moisture*100)}%) detected in sector."
     elif zone_rain >= 30.0:
         weather_score = 22
-        weather_status = f"PASSED — Moderate rainfall ({zone_rain} mm/24h) elevates ground pore pressure."
+        weather_status = f"PASSED — Moderate rainfall ({zone_rain:.1f} mm/24h) elevates ground pore pressure."
     else:
         weather_score = 15
-        weather_status = f"MARGINAL — Localized rainfall ({zone_rain} mm/24h) below regional trigger threshold."
+        weather_status = f"MARGINAL — Localized rainfall ({zone_rain:.1f} mm/24h) below regional trigger threshold."
     
     confidence_points += weather_score
     checks["weather_telemetry"] = {
@@ -91,18 +95,30 @@ def verify_landslide_report(
         "detail": nlp_status
     }
 
-    # --- Agent 4: Spatial Sensor & Cluster Corroboration ---
-    has_active_alert = bool(matched_zone and matched_zone.get("alert_status"))
-    if has_active_alert or (matched_zone and matched_zone.get("risk_score", 0) > 60):
+    # --- Agent 4: ML Physical Model Corroboration ---
+    ml_eval = predict_landslide_risk({
+        "rainfall_24h": zone_rain,
+        "rainfall_72h": zone_rain_72,
+        "slope_deg": slope_deg,
+        "soil_moisture": zone_moisture,
+        "ndvi": matched_zone.get("ndvi", 0.50) if matched_zone else 0.50,
+        "historical_incidents": matched_zone.get("historical_incidents", 1) if matched_zone else 1
+    })
+    ml_risk_score = ml_eval.get("risk_score", 50.0)
+
+    if ml_risk_score >= 70.0:
         spatial_score = 20
-        spatial_status = "CONFIRMED — Report spatially correlates with active regional early warning advisory."
+        spatial_status = f"CONFIRMED — Random Forest model predicts {ml_risk_score:.1f}% ({ml_eval['risk_level']}) hazard. Physical ground conditions strongly support report."
+    elif ml_risk_score >= 40.0:
+        spatial_score = 16
+        spatial_status = f"CORROBORATED — Random Forest model indicates threshold instability ({ml_risk_score:.1f}%)."
     else:
-        spatial_score = 15
-        spatial_status = "VERIFIED — Report situated within monitored landslide susceptibility corridor."
+        spatial_score = 10
+        spatial_status = f"LOW CORROBORATION — Random Forest baseline hazard is low ({ml_risk_score:.1f}%). Requires secondary sensor check."
 
     confidence_points += spatial_score
-    checks["spatial_corroboration"] = {
-        "status": "CONFIRMED",
+    checks["ml_physical_corroboration"] = {
+        "status": "CONFIRMED" if spatial_score >= 15 else "PENDING",
         "score_weight": f"{spatial_score}/20",
         "detail": spatial_status
     }

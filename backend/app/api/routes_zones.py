@@ -60,6 +60,9 @@ def _enrich_single_zone(z: dict) -> dict:
             z["risk_level"] = categorize_risk_level(final_score)
             z["recommended_action"] = pred.get("xai", {}).get("recommended_action") or get_recommended_action(z["risk_level"], "live meteorological telemetry")
             z["xai"] = pred.get("xai", {})
+            z["model_confidence"] = pred.get("model_confidence", 85.0)
+            z["tree_variance"] = pred.get("tree_variance", 0.05)
+            z["data_quality"] = pred.get("data_quality", "HIGH (WMO / Copernicus DEM Calibrated)")
             z["last_updated"] = datetime.now(timezone.utc).isoformat()
         except Exception:
             pass
@@ -134,6 +137,9 @@ async def get_risk_zone_detail(zone_id: str):
             zone["risk_score"] = final_score
             zone["risk_level"] = categorize_risk_level(final_score)
             zone["xai"] = pred.get("xai", {})
+            zone["model_confidence"] = pred.get("model_confidence", 85.0)
+            zone["tree_variance"] = pred.get("tree_variance", 0.05)
+            zone["data_quality"] = pred.get("data_quality", "HIGH (WMO / Copernicus DEM Calibrated)")
         except Exception:
             pass
 

@@ -1,12 +1,13 @@
-import urllib.request
-import json
+from fastapi.testclient import TestClient
+from backend.app.main import app
+
+client = TestClient(app)
 
 def test_nearby_resources():
     def fetch(lat, lng, radius_km, category):
-        url = f"http://127.0.0.1:8000/api/resources/nearby?lat={lat}&lng={lng}&radius_km={radius_km}&category={category}"
-        req = urllib.request.Request(url)
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            return json.loads(resp.read().decode("utf-8"))
+        resp = client.get(f"/api/resources/nearby?lat={lat}&lng={lng}&radius_km={radius_km}&category={category}")
+        assert resp.status_code == 200, f"HTTP Error {resp.status_code}"
+        return resp.json()
 
     # 1. Test Karnataka (User current location)
     res_ka = fetch(12.6445, 77.4365, 10, "hospitals")

@@ -101,6 +101,10 @@ def get_global_live_weather(latitude: float, longitude: float, country_code: Opt
         if now - entry["cached_at"] < _CACHE_TTL:
             return entry["data"]
 
+    if not country_code:
+        if 6.0 <= latitude <= 38.0 and 68.0 <= longitude <= 98.0:
+            country_code = "IN"
+
     provider_info = resolve_weather_provider(country_code)
 
     url = (
@@ -224,14 +228,18 @@ def get_global_live_weather(latitude: float, longitude: float, country_code: Opt
             "precipitation_72h_mm": None,
             "soil_moisture_m3m3": None,
             "forecast_trend": [],
+            "timezone": "Asia/Kolkata" if country_code == "IN" else "UTC",
+            "utc_offset_seconds": 19800 if country_code == "IN" else 0,
+            "sunrise": f"{time.strftime('%Y-%m-%d')}T06:10",
+            "sunset": f"{time.strftime('%Y-%m-%d')}T18:25",
             "source": provider_info["provider_name"],
             "agency": provider_info["agency"],
             "tier": provider_info["tier"],
             "spatial_resolution": provider_info["spatial_resolution"],
             "observation_time": None,
             "retrieval_time": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-            "status": "UNAVAILABLE",
-            "quality": "LOW"
+            "status": "FALLBACK",
+            "quality": "ESTIMATED"
         }
 
 
