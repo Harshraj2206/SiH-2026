@@ -383,23 +383,43 @@ export const IncidentsExplorerPage = () => {
           <div className="bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl text-center">
             <span className="text-[10px] text-slate-400 block font-mono">CONFIRMED INCIDENTS</span>
             <span className="text-sm font-mono font-bold text-rose-400">
-              {intelData?.coverage_summary?.total_confirmed_incidents ?? '...'}
+              {fetchError ? '—' : (intelData?.coverage_summary?.total_confirmed_incidents ?? '...')}
             </span>
           </div>
           <div className="bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl text-center">
             <span className="text-[10px] text-amber-400 block font-mono">FORECAST RISK ZONES</span>
             <span className="text-sm font-mono font-bold text-amber-300">
-              {intelData?.coverage_summary?.total_forecast_zones ?? '...'}
+              {fetchError ? '—' : (intelData?.coverage_summary?.total_forecast_zones ?? '...')}
             </span>
           </div>
           <div className="bg-cyan-950/40 border border-cyan-800/40 px-3 py-1.5 rounded-xl text-center">
             <span className="text-[10px] text-cyan-400 block font-mono">MONITORED STATES</span>
             <span className="text-sm font-mono font-bold text-cyan-300">
-              {intelData?.coverage_summary?.monitored_states_count ?? '...'}
+              {fetchError ? '—' : (intelData?.coverage_summary?.monitored_states_count ?? '...')}
             </span>
           </div>
         </div>
       </div>
+
+      {/* API Error Notification */}
+      {fetchError && (
+        <div className="bg-rose-950/40 border border-rose-800/60 p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-rose-200">
+          <div className="flex items-center gap-2.5">
+            <AlertTriangle className="w-5 h-5 text-rose-400 shrink-0" />
+            <div>
+              <span className="font-bold block">Incident Geointelligence Service Unavailable</span>
+              <span className="text-slate-300 text-[11px]">{fetchError}</span>
+            </div>
+          </div>
+          <button
+            onClick={() => fetchIntelligence(true)}
+            className="px-3.5 py-1.5 bg-rose-900/60 hover:bg-rose-800 border border-rose-600 rounded-xl font-bold text-white text-xs transition shrink-0 self-start sm:self-auto flex items-center gap-1.5"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            Retry Feed
+          </button>
+        </div>
+      )}
 
       {/* Freshness & User Proximity Banner */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
@@ -472,7 +492,7 @@ export const IncidentsExplorerPage = () => {
           }`}
         >
           <span className="w-2 h-2 rounded-full bg-rose-500"></span>
-          Confirmed Landslides ({intelData?.confirmed_incidents?.length ?? 0})
+          Confirmed Landslides ({fetchError ? '—' : (intelData?.confirmed_incidents?.length ?? 0)})
         </button>
 
         <button
@@ -484,7 +504,7 @@ export const IncidentsExplorerPage = () => {
           }`}
         >
           <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-          Landslide Risk & Forecast ({intelData?.forecast_risks?.length ?? 0})
+          Landslide Risk & Forecast ({fetchError ? '—' : (intelData?.forecast_risks?.length ?? 0)})
         </button>
 
         <button
@@ -509,7 +529,7 @@ export const IncidentsExplorerPage = () => {
           title="Synthetic drill benchmarks for training and calibration"
         >
           <span className="w-2 h-2 rounded-full bg-purple-500"></span>
-          Simulation Drills ({intelData?.demo_simulations?.length ?? 0})
+          Simulation Drills ({fetchError ? '—' : (intelData?.demo_simulations?.length ?? 0)})
         </button>
       </div>
 

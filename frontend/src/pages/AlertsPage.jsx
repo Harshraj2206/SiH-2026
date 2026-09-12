@@ -3,11 +3,13 @@ import { useEmergency } from '../context/EmergencyContext';
 import { formatDate } from '../utils/formatters';
 import { 
   Bell, 
-  MapPin
+  MapPin,
+  AlertTriangle,
+  RefreshCw
 } from 'lucide-react';
 
 export const AlertsPage = () => {
-  const { alerts, zones } = useEmergency();
+  const { alerts, alertsError, zones, refreshAllData } = useEmergency();
   const [categoryFilter, setCategoryFilter] = useState('ALL');
 
   const getLocationName = (alert) => {
@@ -61,6 +63,26 @@ export const AlertsPage = () => {
         </div>
       </div>
 
+      {/* Advisory Error Banner */}
+      {alertsError && (
+        <div className="bg-red-950/40 border border-red-800/60 p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-red-200">
+          <div className="flex items-center gap-2.5">
+            <AlertTriangle className="w-5 h-5 text-red-400 shrink-0" />
+            <div>
+              <span className="font-bold block">Advisory Telemetry Service Unavailable</span>
+              <span className="text-neutral-300 text-[11px]">{alertsError}</span>
+            </div>
+          </div>
+          <button
+            onClick={() => refreshAllData()}
+            className="px-3.5 py-1.5 bg-red-900/60 hover:bg-red-800 border border-red-600 rounded-xl font-bold text-white text-xs transition shrink-0 self-start sm:self-auto flex items-center gap-1.5"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            Retry
+          </button>
+        </div>
+      )}
+
       {/* Alerts List - Full Width */}
       <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-2xl divide-y divide-[#181818] overflow-hidden shadow-sm">
         {filteredAlerts.map((alert) => {
@@ -102,7 +124,7 @@ export const AlertsPage = () => {
 
         {filteredAlerts.length === 0 && (
           <div className="p-12 text-center text-xs text-neutral-400">
-            No active alerts found for this category.
+            {alertsError ? 'Unable to verify active alerts due to API unavailability.' : 'No active alerts found for this category.'}
           </div>
         )}
       </div>

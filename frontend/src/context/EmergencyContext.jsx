@@ -10,6 +10,7 @@ export const EmergencyProvider = ({ children }) => {
   const [selectedZone, setSelectedZone] = useState(null);
   const [reports, setReports] = useState([]);
   const [alerts, setAlerts] = useState([]);
+  const [alertsError, setAlertsError] = useState(null);
   const [analytics, setAnalytics] = useState(null);
   const [systemHealth, setSystemHealth] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -25,7 +26,8 @@ export const EmergencyProvider = ({ children }) => {
 
   const refreshAllData = useCallback(async () => {
     try {
-      const [zonesData, reportsData, alertsData, analyticsData, healthData] = await Promise.all([
+      setAlertsError(null);
+      const [zonesData, reportsData, alertsRes, analyticsData, healthData] = await Promise.allSettled([
         api.getRiskZones(),
         api.getCommunityReports(),
         api.getAlerts(),
@@ -33,11 +35,16 @@ export const EmergencyProvider = ({ children }) => {
         api.checkHealth()
       ]);
 
-      setZones(zonesData || []);
-      setReports(reportsData || []);
-      setAlerts(alertsData || []);
-      setAnalytics(analyticsData || null);
-      setSystemHealth(healthData || null);
+      if (zonesData.status === 'fulfilled') setZones(zonesData.value || []);
+      if (reportsData.status === 'fulfilled') setReports(reportsData.value || []);
+      if (alertsRes.status === 'fulfilled') {
+        setAlerts(alertsRes.value || []);
+        setAlertsError(null);
+      } else {
+        setAlertsError(alertsRes.reason?.message || 'Failed to retrieve active alerts from telemetry API.');
+      }
+      if (analyticsData.status === 'fulfilled') setAnalytics(analyticsData.value || null);
+      if (healthData.status === 'fulfilled') setSystemHealth(healthData.value || null);
 
       // Keep selectedZone in sync if already selected, without overwriting live user location
       setSelectedZone((prevSelected) => {
@@ -160,6 +167,7 @@ export const EmergencyProvider = ({ children }) => {
         selectZoneById,
         reports,
         alerts,
+        alertsError,
         analytics,
         systemHealth,
         loading,
