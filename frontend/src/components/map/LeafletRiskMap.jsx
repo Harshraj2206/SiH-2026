@@ -389,6 +389,12 @@ export const LeafletRiskMap = ({
           ]);
           if (reqId !== latestInspectionRef.current) return;
           if (onSelectZone) {
+            const r24 = freshWeather?.rainfall_24h ?? backendData?.rainfall_24h ?? null;
+            const r1h = freshWeather?.precipitation_mm ?? backendData?.rainfall_1h ?? null;
+            const isInsufficient = r24 === null;
+            const score = isInsufficient ? null : (backendData?.risk_score ?? null);
+            const level = isInsufficient ? 'DATA_INSUFFICIENT' : (backendData?.risk_level ?? 'LOW');
+
             onSelectZone({
               ...(backendData || {}),
               latitude: parsedLat,
@@ -400,13 +406,13 @@ export const LeafletRiskMap = ({
               weather_code: freshWeather?.weather_code ?? backendData?.weather_code ?? null,
               condition: freshWeather?.condition || backendData?.condition || 'Clear',
               is_day: freshWeather?.is_day ?? backendData?.is_day ?? true,
-              rainfall_24h: freshWeather?.rainfall_24h ?? backendData?.rainfall_24h ?? 0,
-              rainfall_1h: freshWeather?.precipitation_mm ?? backendData?.rainfall_1h ?? 0,
+              rainfall_24h: r24,
+              rainfall_1h: r1h,
               weather_source: freshWeather?.source || backendData?.weather_source || 'Open-Meteo High-Resolution Real-Time Telemetry',
               is_weather_loading: false,
               is_live_inspected: true,
-              risk_score: backendData?.risk_score || 15.0,
-              risk_level: backendData?.risk_level || 'LOW'
+              risk_score: score,
+              risk_level: level
             });
           }
         } catch {
@@ -461,6 +467,12 @@ export const LeafletRiskMap = ({
         if (reqId !== latestInspectionRef.current) return;
 
         if (onSelectZone) {
+          const r24 = freshWeather?.rainfall_24h ?? backendData?.rainfall_24h ?? null;
+          const r1h = freshWeather?.precipitation_mm ?? backendData?.rainfall_1h ?? null;
+          const isInsufficient = r24 === null;
+          const score = isInsufficient ? null : (backendData?.risk_score ?? null);
+          const level = isInsufficient ? 'DATA_INSUFFICIENT' : (backendData?.risk_level ?? 'LOW');
+
           onSelectZone({
             ...(backendData || {}),
             latitude: searchRes.latitude,
@@ -474,13 +486,13 @@ export const LeafletRiskMap = ({
             weather_code: freshWeather?.weather_code ?? backendData?.weather_code ?? null,
             condition: freshWeather?.condition || backendData?.condition || 'Clear',
             is_day: freshWeather?.is_day ?? backendData?.is_day ?? true,
-            rainfall_24h: freshWeather?.rainfall_24h ?? backendData?.rainfall_24h ?? 0,
-            rainfall_1h: freshWeather?.precipitation_mm ?? backendData?.rainfall_1h ?? 0,
+            rainfall_24h: r24,
+            rainfall_1h: r1h,
             weather_source: freshWeather?.source || backendData?.weather_source || 'Open-Meteo High-Resolution Real-Time Telemetry',
             is_weather_loading: false,
             is_live_inspected: true,
-            risk_score: backendData?.risk_score || 15.0,
-            risk_level: backendData?.risk_level || 'LOW'
+            risk_score: score,
+            risk_level: level
           });
         }
       } else {
@@ -553,6 +565,12 @@ export const LeafletRiskMap = ({
       if (reqId !== latestInspectionRef.current) return;
 
       if (onSelectZone) {
+        const r24 = weatherData?.rainfall_24h ?? backendData?.rainfall_24h ?? null;
+        const r1h = weatherData?.precipitation_mm ?? backendData?.rainfall_1h ?? null;
+        const isInsufficient = r24 === null;
+        const score = isInsufficient ? null : (backendData?.risk_score ?? null);
+        const level = isInsufficient ? 'DATA_INSUFFICIENT' : (backendData?.risk_level ?? 'LOW');
+
         onSelectZone({
           ...(backendData || {}),
           latitude: latlng.lat,
@@ -566,14 +584,14 @@ export const LeafletRiskMap = ({
           weather_code: weatherData?.weather_code ?? backendData?.weather_code ?? null,
           condition: weatherData?.condition || backendData?.condition || 'Clear',
           is_day: weatherData?.is_day ?? backendData?.is_day ?? true,
-          rainfall_24h: weatherData?.rainfall_24h ?? backendData?.rainfall_24h ?? 0,
-          rainfall_1h: weatherData?.precipitation_mm ?? backendData?.rainfall_1h ?? 0,
+          rainfall_24h: r24,
+          rainfall_1h: r1h,
           weather_source: weatherData?.source || backendData?.weather_source || 'Open-Meteo High-Resolution Real-Time Telemetry',
           observation_time: weatherData?.observation_time || backendData?.observation_time || new Date().toISOString(),
           is_weather_loading: false,
           is_live_inspected: true,
-          risk_score: backendData?.risk_score || 15.0,
-          risk_level: backendData?.risk_level || 'LOW'
+          risk_score: score,
+          risk_level: level
         });
       }
     } catch (err) {

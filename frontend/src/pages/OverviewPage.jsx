@@ -262,13 +262,17 @@ export const OverviewPage = () => {
               <div>
                 <span className="text-[10px] text-neutral-400 block uppercase font-medium">Humidity</span>
                 <span className="font-mono font-bold text-white">
-                  {weather.humidity !== null ? `${weather.humidity}%` : '—'}
+                  {weather.humidity !== null && weather.humidity !== undefined ? `${weather.humidity}%` : '—'}
                 </span>
               </div>
               <div className="w-[1px] h-6 bg-white/10" />
               <div>
                 <span className="text-[10px] text-neutral-400 block uppercase font-medium">Satellite Grid</span>
-                {weather.type === 'UNKNOWN' ? (
+                {weather.status === 'CACHED' ? (
+                  <span className="font-mono font-bold text-amber-300 flex items-center gap-1" title="Serving cached reanalysis observations">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400" /> CACHED {weather.dataAgeMinutes ? `(${weather.dataAgeMinutes}m)` : ''}
+                  </span>
+                ) : weather.type === 'UNKNOWN' || weather.status === 'UNAVAILABLE' ? (
                   <span className="font-mono font-bold text-amber-400/90 flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-400" /> OFFLINE
                   </span>
@@ -411,28 +415,40 @@ export const OverviewPage = () => {
           {(() => {
             const currentZone = selectedZone || (zones && zones[0]) || {
               name: 'Selected Sector',
-              risk_score: 15.0,
+              risk_score: null,
               risk_level: 'Low Risk',
-              rainfall_24h: 0.0,
+              rainfall_24h: null,
               slope_deg: 5.0
             };
 
+            const isDataInsufficient = currentZone.risk_level === 'DATA_INSUFFICIENT' || currentZone.status === 'DATA_INSUFFICIENT' || currentZone.rainfall_24h === null || currentZone.rainfall_24h === undefined;
+
             const score = typeof currentZone.risk_score === 'number' 
               ? currentZone.risk_score 
-              : (typeof currentZone.ml_base_score === 'number' ? currentZone.ml_base_score : 15.0);
+              : (typeof currentZone.ml_base_score === 'number' ? currentZone.ml_base_score : null);
             
-            const isCrit = score >= 80;
-            const isHigh = score >= 60 && score < 80;
-            const isMod = score >= 35 && score < 60;
+            const isCrit = !isDataInsufficient && score !== null && score >= 80;
+            const isHigh = !isDataInsufficient && score !== null && score >= 60 && score < 80;
+            const isMod = !isDataInsufficient && score !== null && score >= 35 && score < 60;
             
-            const riskText = currentZone.risk_level || (isCrit ? 'Critical Risk' : isHigh ? 'High Risk' : isMod ? 'Moderate Risk' : 'Low Risk');
-            const textColor = isCrit ? 'text-red-400' : isHigh ? 'text-orange-400' : isMod ? 'text-amber-400' : 'text-emerald-400';
-            const bgColor = isCrit ? 'bg-red-500' : isHigh ? 'bg-orange-500' : isMod ? 'bg-amber-500' : 'bg-emerald-500';
-            const pingBorder = isCrit ? 'bg-red-500/10 border-red-500/20' : isHigh ? 'bg-orange-500/10 border-orange-500/20' : isMod ? 'bg-amber-500/10 border-amber-500/20' : 'bg-emerald-500/10 border-emerald-500/20';
-            const circleBorder = isCrit ? 'bg-red-500/20 border-red-500/40' : isHigh ? 'bg-orange-500/20 border-orange-500/40' : isMod ? 'bg-amber-500/20 border-amber-500/40' : 'bg-emerald-500/20 border-emerald-500/40';
+            const riskText = isDataInsufficient 
+              ? 'DATA INSUFFICIENT' 
+              : (currentZone.risk_level || (isCrit ? 'Critical Risk' : isHigh ? 'High Risk' : isMod ? 'Moderate Risk' : 'Low Risk'));
+            const textColor = isDataInsufficient 
+              ? 'text-amber-400' 
+              : (isCrit ? 'text-red-400' : isHigh ? 'text-orange-400' : isMod ? 'text-amber-400' : 'text-emerald-400');
+            const bgColor = isDataInsufficient 
+              ? 'bg-amber-500' 
+              : (isCrit ? 'bg-red-500' : isHigh ? 'bg-orange-500' : isMod ? 'bg-amber-500' : 'bg-emerald-500');
+            const pingBorder = isDataInsufficient 
+              ? 'bg-amber-500/10 border-amber-500/20' 
+              : (isCrit ? 'bg-red-500/10 border-red-500/20' : isHigh ? 'bg-orange-500/10 border-orange-500/20' : isMod ? 'bg-amber-500/10 border-amber-500/20' : 'bg-emerald-500/10 border-emerald-500/20');
+            const circleBorder = isDataInsufficient 
+              ? 'bg-amber-500/20 border-amber-500/40' 
+              : (isCrit ? 'bg-red-500/20 border-red-500/40' : isHigh ? 'bg-orange-500/20 border-orange-500/40' : isMod ? 'bg-amber-500/20 border-amber-500/40' : 'bg-emerald-500/20 border-emerald-500/40');
 
             const locName = currentZone.name || currentZone.formatted_address || currentZone.district || 'Selected Location';
-            const rainVal = typeof currentZone.rainfall_24h === 'number' ? `${currentZone.rainfall_24h.toFixed(1)} mm` : '0.0 mm';
+            const rainVal = typeof currentZone.rainfall_24h === 'number' ? `${currentZone.rainfall_24h.toFixed(1)} mm` : '—';
             const slopeVal = typeof currentZone.slope_deg === 'number' ? `${currentZone.slope_deg.toFixed(1)}°` : '0.0°';
 
             return (
@@ -442,9 +458,15 @@ export const OverviewPage = () => {
                     <h2 className="text-sm font-bold text-white font-sans">
                       ML Risk Assessment
                     </h2>
-                    <span className="text-[10px] text-emerald-400 font-mono font-semibold bg-emerald-950/40 border border-emerald-800/40 px-2 py-0.5 rounded" title="Machine Learning Inference from Random Forest Regressor">
-                      ML Model Prediction
-                    </span>
+                    {isDataInsufficient ? (
+                      <span className="text-[10px] text-amber-400 font-mono font-semibold bg-amber-950/40 border border-amber-800/40 px-2 py-0.5 rounded" title="Inference Paused — Missing Telemetry">
+                        INFERENCE PAUSED
+                      </span>
+                    ) : (
+                      <span className="text-[10px] text-emerald-400 font-mono font-semibold bg-emerald-950/40 border border-emerald-800/40 px-2 py-0.5 rounded" title="Machine Learning Inference from Random Forest Regressor">
+                        ML Model Prediction
+                      </span>
+                    )}
                   </div>
 
                   <div className="mt-3 flex items-center justify-between">
@@ -455,9 +477,20 @@ export const OverviewPage = () => {
                       <span className="text-[10px] text-neutral-400 block uppercase tracking-tight mt-0.5 font-medium">
                         System Landslide Risk Score
                       </span>
-                      <span className="text-3xl font-black text-white font-sans mt-0.5 block font-mono">
-                        {score.toFixed(1)} <span className="text-sm text-neutral-400 font-normal">/ 100</span>
-                      </span>
+                      {isDataInsufficient ? (
+                        <div>
+                          <span className="text-3xl font-black text-amber-400 font-sans mt-0.5 block font-mono">
+                            PAUSED
+                          </span>
+                          <span className="text-[10px] text-amber-400/80 block mt-0.5 font-sans">
+                            Precipitation Telemetry Unavailable
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-3xl font-black text-white font-sans mt-0.5 block font-mono">
+                          {score !== null ? score.toFixed(1) : '—'} <span className="text-sm text-neutral-400 font-normal">/ 100</span>
+                        </span>
+                      )}
                     </div>
 
                     {/* Radar / Pulse Graphic */}
@@ -478,7 +511,7 @@ export const OverviewPage = () => {
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-neutral-400">Rainfall (24h)</span>
-                      <span className={`font-semibold font-mono ${currentZone.rainfall_24h > 30 ? 'text-amber-400' : 'text-neutral-200'}`}>{rainVal}</span>
+                      <span className={`font-semibold font-mono ${currentZone.rainfall_24h === null || currentZone.rainfall_24h === undefined ? 'text-amber-400' : (currentZone.rainfall_24h > 30 ? 'text-amber-400' : 'text-neutral-200')}`}>{rainVal}</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-neutral-400">Slope Gradient</span>

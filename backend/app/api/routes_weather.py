@@ -76,7 +76,8 @@ async def get_live_weather(
             "agency": raw_weather.get("agency", "WMO / ECMWF Reanalysis"),
             "observation_time": raw_weather.get("observation_time"),
             "retrieval_time": raw_weather.get("retrieval_time"),
-            "status": "LIVE" if (temp is not None and raw_weather.get("status") != "UNAVAILABLE") else "UNAVAILABLE"
+            "data_age_minutes": raw_weather.get("data_age_minutes", 0),
+            "status": raw_weather.get("status") if raw_weather.get("status") in ["LIVE", "CACHED", "UNAVAILABLE"] else ("LIVE" if temp is not None else "UNAVAILABLE")
         }
     except Exception as exc:
         raise HTTPException(

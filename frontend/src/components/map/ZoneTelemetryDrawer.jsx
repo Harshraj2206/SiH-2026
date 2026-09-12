@@ -19,8 +19,8 @@ export const ZoneTelemetryDrawer = ({ zone, onClose }) => {
   // Local factor contributions
   const factors = zone.xai?.factors || [
     { name: 'Slope Gradient Angle', importance_pct: 44.0, value: `${zone.slope_deg || 34}°` },
-    { name: '24h Cumulative Rainfall', importance_pct: 34.0, value: `${zone.rainfall_24h || 85} mm` },
-    { name: 'Soil Moisture Saturation', importance_pct: 12.0, value: `${typeof zone.soil_moisture === 'number' ? (zone.soil_moisture <= 1 ? Math.round(zone.soil_moisture * 100) : zone.soil_moisture) : 42}%` },
+    { name: '24h Cumulative Rainfall', importance_pct: 34.0, value: (zone.rainfall_24h !== null && zone.rainfall_24h !== undefined) ? `${zone.rainfall_24h} mm` : 'Unavailable' },
+    { name: 'Soil Moisture Saturation', importance_pct: 12.0, value: `${typeof zone.soil_moisture === 'number' ? (zone.soil_moisture <= 1 ? Math.round(zone.soil_moisture * 100) : zone.soil_moisture) : 'Unavailable'}` },
     { name: 'Vegetation Canopy (NDVI)', importance_pct: 7.0, value: `${zone.ndvi || 0.40}` },
     { name: 'Historical Incidents', importance_pct: 3.0, value: `${zone.historical_incidents || 2} events` }
   ];

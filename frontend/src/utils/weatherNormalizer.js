@@ -61,6 +61,28 @@ export function normalizeWeather(raw) {
       isDay: true,
       theme: 'loading',
       source: 'Querying Satellite Telemetry',
+      status: 'LOADING',
+      dataAgeMinutes: null,
+      observationTime: null
+    };
+  }
+
+  if (raw.status === 'UNAVAILABLE' || (raw.temperature_c === null && raw.weather_code === null && !raw.is_weather_loading)) {
+    return {
+      type: WEATHER_TYPES.UNKNOWN,
+      category: 'unknown',
+      label: 'Weather Data Unavailable',
+      icon: '⚠️',
+      temp: null,
+      tempFormatted: '—',
+      rain24h: null,
+      currentRain: null,
+      humidity: null,
+      isDay: true,
+      theme: 'neutral',
+      source: raw.source || 'Telemetry Offline',
+      status: 'UNAVAILABLE',
+      dataAgeMinutes: null,
       observationTime: null
     };
   }

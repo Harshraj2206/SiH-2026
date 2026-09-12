@@ -31,6 +31,8 @@ def get_terrain_elevation_and_slope(latitude: float, longitude: float) -> Dict[s
     slope_deg = None
     is_dynamic = False
     slope_status = "BASELINE_PROFILE"
+    source_label = "Copernicus 90m / Open-Meteo Elevation Grid"
+    freshness_label = "STATIC GEOTECHNICAL BASELINE"
 
     try:
         req = urllib.request.Request(
@@ -88,7 +90,8 @@ def get_terrain_elevation_and_slope(latitude: float, longitude: float) -> Dict[s
                     source_label = "SRTM / Open-Elevation Global Grid"
         except Exception:
             pass
-        freshness_label = "DYNAMIC DEM GRADIENT"
+
+    freshness_label = "DYNAMIC DEM GRADIENT" if is_dynamic else "STATIC GEOTECHNICAL BASELINE"
 
     result = {
         "latitude": latitude,

@@ -60,24 +60,16 @@ export const SafeRoutePage = () => {
   const [calculating, setCalculating] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
 
-  // Active Evacuation Mode State
   const [isEvacuating, setIsEvacuating] = useState(false);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
   const routeLocation = useLocation();
+  const routeReqSeqRef = React.useRef(0);
 
-  // Initialize with active GPS / Canonical Location
+  // Load preset corridor resources once on component mount
   useEffect(() => {
-    if (selectedLocation?.latitude && selectedLocation?.longitude) {
-      setOriginCoords({
-        lat: selectedLocation.latitude,
-        lng: selectedLocation.longitude,
-        name: selectedLocation.displayName || 'My Current Location'
-      });
-      setOriginQuery(selectedLocation.displayName || 'My Current GPS Location');
-    }
     loadPresetResources();
-  }, [selectedLocation]);
+  }, []);
 
   // Synchronize destination when navigated from Resources or other pages
   useEffect(() => {
@@ -109,6 +101,7 @@ export const SafeRoutePage = () => {
 
   // Unified Google Maps-Style Route Calculation
   const handleExecuteGlobalRoute = async (oQuery = originQuery, dQuery = destQuery) => {
+    const seq = ++routeReqSeqRef.current;
     setCalculating(true);
     setErrorMsg(null);
 
@@ -220,15 +213,19 @@ export const SafeRoutePage = () => {
         resolvedOrigin.name || 'Origin',
         resolvedDest.name || 'Destination'
       );
-
+ 
+      if (seq !== routeReqSeqRef.current) return;
       setRouteResult(res);
       setCurrentStepIndex(0);
       setIsEvacuating(false);
     } catch (err) {
+      if (seq !== routeReqSeqRef.current) return;
       console.error('Global routing error:', err);
       setErrorMsg(err?.response?.data?.detail || err.message || 'Unable to compute road route. Please verify place names.');
     } finally {
-      setCalculating(false);
+      if (seq === routeReqSeqRef.current) {
+        setCalculating(false);
+      }
     }
   };
 

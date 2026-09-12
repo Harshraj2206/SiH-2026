@@ -359,8 +359,14 @@ export const DataSourcesPage = () => {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
               <div className="p-2.5 bg-slate-900 rounded-xl border border-slate-800">
                 <span className="text-[10px] text-slate-400 block">REAL 24H RAIN</span>
-                <span className="text-sm font-bold text-cyan-400 font-mono">{inspectResult.rainfall_24h ?? inspectResult.rainfall_24h_mm ?? 0} mm</span>
-                <span className="text-[10px] text-slate-400 block mt-0.5">Source: IMD/WMO Grid</span>
+                <span className="text-sm font-bold text-cyan-400 font-mono">
+                  {(inspectResult.rainfall_24h !== null && inspectResult.rainfall_24h !== undefined) 
+                    ? `${Number(inspectResult.rainfall_24h).toFixed(1)} mm` 
+                    : (inspectResult.rainfall_24h_mm !== null && inspectResult.rainfall_24h_mm !== undefined 
+                      ? `${Number(inspectResult.rainfall_24h_mm).toFixed(1)} mm` 
+                      : '—')}
+                </span>
+                <span className="text-[10px] text-slate-400 block mt-0.5">Source: Open-Meteo NWP Grid</span>
               </div>
 
               <div className="p-2.5 bg-slate-900 rounded-xl border border-slate-800">

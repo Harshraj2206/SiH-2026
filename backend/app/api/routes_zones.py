@@ -91,8 +91,8 @@ async def list_risk_zones(
 ):
     zones = db_store.get_all_zones()
 
-    # Ingest real-time meteorology concurrently for monitored zones
-    with concurrent.futures.ThreadPoolExecutor(max_workers=6) as executor:
+    # Ingest real-time meteorology concurrently for monitored zones (bounded workers to prevent rate-limiting)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
         zones = list(executor.map(_enrich_single_zone, zones))
 
     if level:

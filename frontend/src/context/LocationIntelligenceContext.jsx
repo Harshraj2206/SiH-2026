@@ -75,8 +75,8 @@ export const LocationIntelligenceProvider = ({ children }) => {
     temperature_c: null,
     apparent_temperature_c: null,
     humidity_pct: null,
-    precipitation_mm: 0,
-    rainfall_24h: 0,
+    precipitation_mm: null,
+    rainfall_24h: null,
     weather_code: null,
     condition: 'Updating...',
     wind_speed_kmh: null,
@@ -158,19 +158,27 @@ export const LocationIntelligenceProvider = ({ children }) => {
     });
   }, [weather]);
 
+  const weatherReqSeqRef = useRef(0);
+
   /**
    * Fetch weather and update state with normalized attributes and environment state.
    */
   const updateWeatherForCoords = useCallback(async (lat, lon, forceRefresh = false, locationName = null) => {
+    const reqSeq = ++weatherReqSeqRef.current;
+
     setWeather(prev => ({
       ...prev,
       loading: true,
       error: null,
-      normalized: normalizeWeather({ is_weather_loading: true })
+      normalized: prev.normalized && prev.normalized.type !== 'LOADING' 
+        ? prev.normalized 
+        : normalizeWeather({ is_weather_loading: true })
     }));
 
     try {
       const rawWeather = await getLiveWeather(lat, lon, forceRefresh);
+      if (reqSeq !== weatherReqSeqRef.current) return null;
+
       const normalized = normalizeWeather(rawWeather);
 
       const targetTz = rawWeather.timezone || 'Asia/Kolkata';
@@ -195,6 +203,8 @@ export const LocationIntelligenceProvider = ({ children }) => {
         sunset: rawWeather.sunset,
         source: rawWeather.source,
         observation_time: rawWeather.observation_time,
+        status: rawWeather.status || 'LIVE',
+        data_age_minutes: rawWeather.data_age_minutes || 0,
         loading: false,
         error: null,
         normalized
@@ -216,25 +226,14 @@ export const LocationIntelligenceProvider = ({ children }) => {
 
       return rawWeather;
     } catch (err) {
+      if (reqSeq !== weatherReqSeqRef.current) return null;
       console.error('[LocationIntelligence] Weather update error:', err);
+      const unavailableNormalized = normalizeWeather({ status: 'UNAVAILABLE' });
       setWeather(prev => ({
         ...prev,
         loading: false,
         error: err.message || 'Live weather temporarily unavailable',
-        normalized: {
-          type: 'UNKNOWN',
-          label: 'Live weather temporarily unavailable',
-          icon: '⚠️',
-          temp: null,
-          tempFormatted: '—',
-          rain24h: null,
-          currentRain: null,
-          humidity: null,
-          isDay: true,
-          theme: 'neutral',
-          source: 'Telemetry Offline',
-          observationTime: null
-        }
+        normalized: unavailableNormalized
       }));
 
       // Recompute environment with fallback

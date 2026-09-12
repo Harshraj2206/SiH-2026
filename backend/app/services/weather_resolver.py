@@ -173,16 +173,29 @@ def _fetch_secondary_live_weather(latitude: float, longitude: float, country_cod
         return None
 
 
+_WEATHER_CACHE: Dict[str, Dict[str, Any]] = {}
+_CACHE_TTL = 900  # 15 minutes fresh cache
+_STALE_CACHE_TTL = 3600  # 60 minutes acceptable stale cache if upstream is offline
+_FAIL_CACHE_TTL = 10  # Only suppress hammering for 10 seconds on complete failure
+
+
 def get_global_live_weather(latitude: float, longitude: float, country_code: Optional[str] = None) -> Dict[str, Any]:
     """
     Retrieve real-time meteorological observations and short-term forecast for any coordinate worldwide.
+    Implements multi-tier failover, bounded retry, and stale cache serving.
     """
     cache_key = f"{round(latitude, 2)}_{round(longitude, 2)}"
     now = time.time()
-    if cache_key in _WEATHER_CACHE:
-        entry = _WEATHER_CACHE[cache_key]
-        if now - entry["cached_at"] < _CACHE_TTL:
-            return entry["data"]
+    existing_entry = _WEATHER_CACHE.get(cache_key)
+
+    # 1. Return fresh live cache if within 15 minutes
+    if existing_entry and existing_entry.get("data", {}).get("status") in ["LIVE", "CACHED"]:
+        age = now - existing_entry["cached_at"]
+        if age < _CACHE_TTL:
+            entry_data = dict(existing_entry["data"])
+            entry_data["status"] = "LIVE"
+            entry_data["data_age_minutes"] = max(0, int(age / 60))
+            return entry_data
 
     if not country_code:
         if 6.0 <= latitude <= 38.0 and 68.0 <= longitude <= 98.0:
@@ -199,11 +212,22 @@ def get_global_live_weather(latitude: float, longitude: float, country_code: Opt
         f"&timezone=auto&past_days=3&forecast_days=3"
     )
 
-    try:
-        req = urllib.request.Request(url, headers={"User-Agent": "LandSafe-GlobalWeather/2.0"})
-        with urllib.request.urlopen(req, timeout=5.0) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
+    # 2. Query Primary: Open-Meteo with bounded retry (max 2 attempts)
+    primary_success = False
+    data = {}
+    for attempt in range(2):
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "LandSafe-GlobalWeather/2.0"})
+            with urllib.request.urlopen(req, timeout=3.5) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                primary_success = True
+                break
+        except Exception as err:
+            if attempt == 0:
+                time.sleep(0.3)  # Brief backoff before 1 retry
 
+    if primary_success:
+        try:
             current = data.get("current", {})
             daily = data.get("daily", {})
             hourly = data.get("hourly", {})
@@ -212,14 +236,12 @@ def get_global_live_weather(latitude: float, longitude: float, country_code: Opt
             soil = hourly.get("soil_moisture_0_to_7cm", [])
             temps = hourly.get("temperature_2m", [])
 
-            # Compute actual 1h, 24h, and 72h precipitation accumulation
             current_idx = min(72, len(times) - 1) if times else 0
             
             raw_p1 = current.get("precipitation")
             p_1h = round(float(raw_p1), 1) if raw_p1 is not None else None
             rain_now = round(float(current.get("rain")), 1) if current.get("rain") is not None else None
             
-            # Strict rolling precipitation over preceding 24h and 72h
             p_24h = None
             p_72h = None
 
@@ -233,12 +255,10 @@ def get_global_live_weather(latitude: float, longitude: float, country_code: Opt
                 if len(window_72) == 72:
                     p_72h = round(sum(window_72), 1)
 
-            # Volumetric Soil Moisture (0-7cm)
             current_soil = None
             if soil and len(soil) > current_idx and soil[current_idx] is not None:
                 current_soil = round(float(soil[current_idx]), 3)
 
-            # Build forecast trend points
             forecast_trend = []
             if times and temps and precip:
                 offsets = [("Current", 0), ("+6h", 6), ("+12h", 12), ("+24h", 24), ("+48h", 48)]
@@ -288,53 +308,70 @@ def get_global_live_weather(latitude: float, longitude: float, country_code: Opt
                 "observation_time": current.get("time") or time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
                 "retrieval_time": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
                 "status": "LIVE",
+                "data_age_minutes": 0,
                 "quality": "HIGH"
             }
 
             _WEATHER_CACHE[cache_key] = {"data": result, "cached_at": now}
             return result
+        except Exception as e:
+            print(f"Error parsing primary weather payload: {e}")
 
-    except Exception as e:
-        print(f"Primary weather fetch error: {e}. Attempting secondary live failover...")
-        secondary = _fetch_secondary_live_weather(latitude, longitude, country_code)
-        if secondary:
-            _WEATHER_CACHE[cache_key] = {"data": secondary, "cached_at": now}
-            return secondary
+    # 3. Query Secondary Failover (wttr.in)
+    print("Attempting secondary live meteorological failover...")
+    secondary = _fetch_secondary_live_weather(latitude, longitude, country_code)
+    if secondary:
+        secondary["status"] = "LIVE"
+        secondary["data_age_minutes"] = 0
+        _WEATHER_CACHE[cache_key] = {"data": secondary, "cached_at": now}
+        return secondary
 
-        # Return fallback with explicit unavailable markers (None must NOT become 0.0)
-        fallback = {
-            "temperature_c": None,
-            "feels_like_c": None,
-            "relative_humidity_pct": None,
-            "surface_pressure_hpa": None,
-            "wind_speed_kmh": None,
-            "wind_direction_deg": None,
-            "is_day": 1,
-            "cloud_cover_pct": 0,
-            "snowfall_cm": 0.0,
-            "condition": "DATA UNAVAILABLE",
-            "weather_code": None,
-            "precipitation_1h_mm": None,
-            "rain_current_mm": None,
-            "precipitation_24h_mm": None,
-            "precipitation_72h_mm": None,
-            "soil_moisture_m3m3": None,
-            "forecast_trend": [],
-            "timezone": "Asia/Kolkata" if country_code == "IN" else "UTC",
-            "utc_offset_seconds": 19800 if country_code == "IN" else 0,
-            "sunrise": f"{time.strftime('%Y-%m-%d')}T06:10",
-            "sunset": f"{time.strftime('%Y-%m-%d')}T18:25",
-            "source": provider_info["provider_name"],
-            "agency": provider_info["agency"],
-            "tier": provider_info["tier"],
-            "spatial_resolution": provider_info["spatial_resolution"],
-            "observation_time": None,
-            "retrieval_time": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-            "status": "UNAVAILABLE",
-            "quality": "ESTIMATED"
-        }
-        _WEATHER_CACHE[cache_key] = {"data": fallback, "cached_at": now}
-        return fallback
+    # 4. Graceful Stale Cache Fallback (Up to 60 minutes)
+    if existing_entry and existing_entry.get("data", {}).get("temperature_c") is not None:
+        age_seconds = now - existing_entry["cached_at"]
+        if age_seconds < _STALE_CACHE_TTL:
+            cached_data = dict(existing_entry["data"])
+            cached_data["status"] = "CACHED"
+            cached_data["data_age_minutes"] = max(1, int(age_seconds / 60))
+            cached_data["source"] = f"{cached_data.get('source', 'Open-Meteo')} (Cached {cached_data['data_age_minutes']}m ago)"
+            return cached_data
+
+    # 5. Scientific Fallback with explicit null markers (UNKNOWN != ZERO)
+    fallback = {
+        "temperature_c": None,
+        "feels_like_c": None,
+        "relative_humidity_pct": None,
+        "surface_pressure_hpa": None,
+        "wind_speed_kmh": None,
+        "wind_direction_deg": None,
+        "is_day": 1,
+        "cloud_cover_pct": 0,
+        "snowfall_cm": 0.0,
+        "condition": "DATA UNAVAILABLE",
+        "weather_code": None,
+        "precipitation_1h_mm": None,
+        "rain_current_mm": None,
+        "precipitation_24h_mm": None,
+        "precipitation_72h_mm": None,
+        "soil_moisture_m3m3": None,
+        "forecast_trend": [],
+        "timezone": "Asia/Kolkata" if country_code == "IN" else "UTC",
+        "utc_offset_seconds": 19800 if country_code == "IN" else 0,
+        "sunrise": f"{time.strftime('%Y-%m-%d')}T06:10",
+        "sunset": f"{time.strftime('%Y-%m-%d')}T18:25",
+        "source": provider_info["provider_name"],
+        "agency": provider_info["agency"],
+        "tier": provider_info["tier"],
+        "spatial_resolution": provider_info["spatial_resolution"],
+        "observation_time": None,
+        "retrieval_time": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "status": "UNAVAILABLE",
+        "data_age_minutes": None,
+        "quality": "ESTIMATED"
+    }
+    # Only cache failure for 10 seconds to prevent hammering, never poison cache for 15 minutes!
+    _WEATHER_CACHE[cache_key] = {"data": fallback, "cached_at": now - (_CACHE_TTL - _FAIL_CACHE_TTL)}
+    return fallback
 
 
 def _map_wmo_code(code: Optional[int]) -> str:

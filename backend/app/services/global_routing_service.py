@@ -16,6 +16,7 @@ from backend.app.services.geocode_service import reverse_geocode_location
 OSRM_API_URL = "https://router.project-osrm.org/route/v1/driving"
 _ROUTE_CACHE: Dict[str, Dict[str, Any]] = {}
 _ROUTE_CACHE_TTL = 900  # 15 minutes
+_GEOCODE_QUERY_CACHE: Dict[str, Dict[str, Any]] = {}
 
 
 def get_coordinates_from_query(query: str) -> Optional[Dict[str, Any]]:
@@ -23,6 +24,9 @@ def get_coordinates_from_query(query: str) -> Optional[Dict[str, Any]]:
     if not query or not query.strip():
         return None
     q = query.strip()
+    cache_key = q.lower()
+    if cache_key in _GEOCODE_QUERY_CACHE:
+        return _GEOCODE_QUERY_CACHE[cache_key]
     
     # Check for direct coordinates format (e.g. "31.1048, 77.1734")
     coord_match = re.match(r"^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?)[,\s]+[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$", q)
@@ -31,29 +35,61 @@ def get_coordinates_from_query(query: str) -> Optional[Dict[str, Any]]:
             parts = re.split(r"[,\s]+", q)
             lat = float(parts[0])
             lng = float(parts[1])
-            return {
+            res = {
                 "name": f"{lat:.4f}, {lng:.4f}",
                 "full_name": f"{lat:.4f}, {lng:.4f}",
                 "lat": lat,
                 "lng": lng
             }
+            _GEOCODE_QUERY_CACHE[cache_key] = res
+            return res
         except Exception:
             pass
 
+    # Tier 1: Primary Nominatim geocoding
     try:
         url = f"https://nominatim.openstreetmap.org/search?format=json&q={urllib.parse.quote(q)}&limit=1"
         req = urllib.request.Request(url, headers={"User-Agent": "LandSafe-GlobalRouter/2.0"})
         with urllib.request.urlopen(req, timeout=3.5) as response:
             data = json.loads(response.read().decode("utf-8"))
             if data and len(data) > 0:
-                return {
+                res = {
                     "name": data[0].get("display_name", q).split(",")[0],
                     "full_name": data[0].get("display_name", q),
                     "lat": float(data[0]["lat"]),
                     "lng": float(data[0]["lon"])
                 }
+                _GEOCODE_QUERY_CACHE[cache_key] = res
+                return res
     except Exception as e:
-        print(f"Geocoding error for '{q}': {e}")
+        print(f"Nominatim geocoding error for '{q}': {e}. Trying Open-Meteo failover...")
+
+    # Tier 2: Secondary Open-Meteo Geocoding API failover (instantaneous, rate-limit resilient)
+    try:
+        # Strip trailing country / state qualifiers for Open-Meteo search if comma separated
+        search_term = q.split(",")[0].strip() if "," in q else q
+        om_url = f"https://geocoding-api.open-meteo.com/v1/search?name={urllib.parse.quote(search_term)}&count=1&language=en&format=json"
+        om_req = urllib.request.Request(om_url, headers={"User-Agent": "LandSafe-GlobalRouter/2.0"})
+        with urllib.request.urlopen(om_req, timeout=3.5) as om_resp:
+            om_data = json.loads(om_resp.read().decode("utf-8"))
+            results = om_data.get("results", [])
+            if results and len(results) > 0:
+                item = results[0]
+                place_name = item.get("name", search_term)
+                admin1 = item.get("admin1", "")
+                country = item.get("country", "")
+                full_display = ", ".join([p for p in [place_name, admin1, country] if p])
+                res = {
+                    "name": place_name,
+                    "full_name": full_display,
+                    "lat": float(item["latitude"]),
+                    "lng": float(item["longitude"])
+                }
+                _GEOCODE_QUERY_CACHE[cache_key] = res
+                return res
+    except Exception as om_err:
+        print(f"Open-Meteo geocoding error for '{q}': {om_err}")
+
     return None
 
 

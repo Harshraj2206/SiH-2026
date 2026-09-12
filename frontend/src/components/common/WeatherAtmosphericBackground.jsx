@@ -541,7 +541,7 @@ export const WeatherAtmosphericBackground = () => {
           Transparently demonstrates real-time connection to:
           Exact Coordinates, Local Timezone, Solar Altitude, and Live WMO Weather!
           ═════════════════════════════════════════════════════════════════════ */}
-      <div className="hidden lg:block absolute bottom-3 left-4 z-20 pointer-events-auto">
+      <div className="hidden lg:block absolute bottom-3 left-4 lg:left-[calc(16rem+1rem)] z-20 pointer-events-auto">
         {/* Time Simulator Panel */}
         {showTimeMenu && (
           <div className="mb-2 p-3 rounded-2xl bg-black/85 border border-white/15 backdrop-blur-xl shadow-2xl text-xs text-neutral-200 w-80 animate-in fade-in slide-in-from-bottom-2">
