@@ -13,6 +13,7 @@ from backend.app.services.soil_service import get_soil_moisture_telemetry
 from backend.app.services.landslide_catalog import get_historical_landslides, get_historical_density_score
 from backend.app.services.geocode_service import reverse_geocode_location
 from backend.app.ml.predictor import predict_landslide_risk, categorize_risk_level
+from backend.app.services.feature_builder import build_features, score_features, provenance
 
 router = APIRouter(prefix="/api", tags=["Real Data Ingestion & Sources"])
 
@@ -109,57 +110,18 @@ def inspect_coordinate_telemetry(payload: CoordinateInspectRequest) -> Dict[str,
     # 1. Reverse Geocoding for Real Place Name
     geo = reverse_geocode_location(lat, lng)
 
-    # 2. Real Weather & Rain
-    weather = fetch_live_meteorology(lat, lng)
-
-    # 3. Real Elevation & Slope
-    dem = get_terrain_elevation_and_slope(lat, lng)
-
-    # 4. Real Soil Moisture
-    soil = get_soil_moisture_telemetry(lat, lng)
-
-    # 5. Real Historical Landslide Density
-    hist_count = get_historical_density_score(lat, lng)
-
-    # 6. Run ML Model with Real Inputs
-    # Missing live data stays None (UNKNOWN != ZERO); never substitute "safe" defaults.
-    rain_24h = weather.get("rainfall_24h_mm")
-    rain_72h = weather.get("rainfall_72h_mm")
-    slope_deg = dem.get("slope_deg")
-    moisture = soil.get("volumetric_soil_moisture_m3m3")
-    elev_m = dem.get("elevation_meters_amsl")
-
-    missing = [name for name, val in (("rainfall", rain_24h), ("slope", slope_deg), ("soil moisture", moisture)) if val is None]
-    if missing:
-        prediction = {
-            "status": "DATA_INSUFFICIENT",
-            "risk_score": None,
-            "risk_level": "DATA_INSUFFICIENT",
-            "unavailability_reason": f"Live data unavailable: {', '.join(missing)}. Risk not computed."
-        }
-    else:
-        features = {
-            "rainfall_24h": float(rain_24h),
-            "rainfall_72h": float(rain_72h if rain_72h is not None else rain_24h),
-            "slope_deg": float(slope_deg),
-            "soil_moisture": float(moisture),
-            "ndvi": 0.55,
-            "historical_incidents": hist_count
-        }
-        if elev_m is not None:
-            features["elevation_amsl"] = float(elev_m)
-        prediction = predict_landslide_risk(features)
+    # 2-6. Shared live features, model score and real hourly-forecast trend
+    # (same path as risk zones and location intelligence, so a point scores the same everywhere)
+    built = build_features(lat, lng)
+    f = built["features"]
+    weather, dem = built["weather"], built["dem"]
+    rain_24h, rain_72h = f["rainfall_24h"], f["rainfall_72h"]
+    slope_deg, moisture = f["slope_deg"], f["soil_moisture"]
+    hist_count = f["historical_incidents"]
+    prediction, forecast_trend = score_features(built)
 
     ml_score = prediction.get("risk_score")
     risk_level = prediction.get("risk_level", "DATA_INSUFFICIENT")
-
-    # Construct dynamic 6h/12h/24h forecast trend
-    forecast_trend = [] if ml_score is None else [
-        {"timeframe": "Current", "hour_offset": 0, "predicted_rainfall_mm": rain_24h, "predicted_risk_score": ml_score, "risk_level": risk_level},
-        {"timeframe": "+6h", "hour_offset": 6, "predicted_rainfall_mm": round(rain_24h * 1.15, 1), "predicted_risk_score": round(min(100.0, ml_score * 1.10), 1), "risk_level": categorize_risk_level(min(100.0, ml_score * 1.10))},
-        {"timeframe": "+12h", "hour_offset": 12, "predicted_rainfall_mm": round(rain_24h * 1.30, 1), "predicted_risk_score": round(min(100.0, ml_score * 1.20), 1), "risk_level": categorize_risk_level(min(100.0, ml_score * 1.20))},
-        {"timeframe": "+24h", "hour_offset": 24, "predicted_rainfall_mm": round(rain_24h * 1.50, 1), "predicted_risk_score": round(min(100.0, ml_score * 1.30), 1), "risk_level": categorize_risk_level(min(100.0, ml_score * 1.30))}
-    ]
 
     zone_id = f"GPS-{round(lat, 2)}-{round(lng, 2)}"
 
@@ -187,7 +149,7 @@ def inspect_coordinate_telemetry(payload: CoordinateInspectRequest) -> Dict[str,
         "rainfall_24h": rain_24h,
         "rainfall_72h": rain_72h,
         "soil_moisture": moisture,
-        "ndvi": 0.55,
+        "ndvi": f["ndvi"],
         "historical_incidents": hist_count,
         "historical_landslides_nearby": hist_count,
         "ml_base_score": ml_score,
@@ -208,11 +170,7 @@ def inspect_coordinate_telemetry(payload: CoordinateInspectRequest) -> Dict[str,
         "last_updated": datetime.now(timezone.utc).isoformat(),
         "is_live_inspected": True,
         "provenance": {
-            "rainfall_source": "IMD / Open-Meteo WMO High-Res Grid (0.1°)",
-            "weather_observed_at": weather.get("observation_time"),
-            "dem_source": "SRTM 30m Global Digital Elevation Model",
-            "soil_source": "NASA SMAP (L3 Radiometer) / Open-Meteo Land Soil Grid (9 km)",
-            "landslide_source": "Geological Survey of India (GSI) NLSM",
+            **provenance(built),
             "freshness_status": weather.get("freshness_status", "LIVE"),
             "is_demo": False
         },

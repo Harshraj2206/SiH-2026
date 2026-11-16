@@ -151,6 +151,32 @@ async def health_check():
     }
 
 
+# Background live refresh of monitored zones (rain, forecast, soil, slope, NDVI) and alerts.
+ZONE_REFRESH_SECONDS = int(os.environ.get("ZONE_REFRESH_SECONDS", "1800"))
+
+
+async def _zone_refresh_loop():
+    import asyncio
+    from starlette.concurrency import run_in_threadpool
+    from backend.app.services.zone_refresh import refresh_all_zones
+    await asyncio.sleep(5)  # let the server finish starting
+    while True:
+        try:
+            await run_in_threadpool(refresh_all_zones)
+            logger.info("Live zone refresh complete.")
+        except Exception as e:
+            logger.error("Live zone refresh failed: %s", e)
+        await asyncio.sleep(ZONE_REFRESH_SECONDS)
+
+
+@app.on_event("startup")
+async def start_zone_refresh():
+    if os.environ.get("DISABLE_ZONE_REFRESH") == "1":
+        return
+    import asyncio
+    app.state.zone_refresh_task = asyncio.create_task(_zone_refresh_loop())
+
+
 if __name__ == "__main__":
     import uvicorn
     host = os.environ.get("HOST", "127.0.0.1")

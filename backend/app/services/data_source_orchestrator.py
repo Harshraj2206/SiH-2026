@@ -13,6 +13,7 @@ from backend.app.services.elevation_service import get_terrain_elevation_and_slo
 from backend.app.services.usgs_earthquake_service import get_nearby_earthquakes
 from backend.app.services.osm_places_service import get_nearby_real_facilities
 from backend.app.ml.predictor import predict_landslide_risk
+from backend.app.services.feature_builder import build_features, score_features, provenance
 
 _ORCHESTRATOR_CACHE: Dict[str, Dict[str, Any]] = {}
 _CACHE_TTL = 300  # 5 minutes
@@ -79,15 +80,15 @@ def orchestrate_location_intelligence(
     # 2. Live Weather & Open-Meteo NWP Grid Ingestion
     weather_data = get_global_live_weather(latitude, longitude, country_code)
 
-    # 3. Copernicus DEM & Slope Gradient Calculation
-    terrain_data = get_terrain_elevation_and_slope(latitude, longitude)
-    elev_m = terrain_data.get("elevation_amsl") or terrain_data.get("elevation_meters_amsl") or 150.0
-    slope_deg = terrain_data.get("slope_deg") if terrain_data.get("slope_deg") is not None else 18.0
-
-    # 4. Volumetric Soil Moisture (ECMWF IFS Land-Surface Model 0-7cm)
-    soil_moisture_raw = weather_data.get("soil_moisture_m3m3")
-    soil_is_fallback = soil_moisture_raw is None
-    soil_moisture_val = soil_moisture_raw if soil_moisture_raw is not None else 0.280
+    # 3-4, 7. Shared live features + model (same path as risk zones and the map inspector,
+    # so a coordinate gets the same score on every page). Missing inputs stay None.
+    built = build_features(latitude, longitude, state=state_prov)
+    feats = built["features"]
+    terrain_data = built["dem"]
+    elev_m = feats["elevation_amsl"]
+    slope_deg = feats["slope_deg"]
+    soil_moisture_val = feats["soil_moisture"]
+    soil_is_fallback = soil_moisture_val is None
 
     # 5. Real-Time USGS Seismic Events (within 500 km)
     earthquakes = get_nearby_earthquakes(latitude, longitude, max_radius_km=500.0)
@@ -95,34 +96,10 @@ def orchestrate_location_intelligence(
     # 6. Real OpenStreetMap Overpass Infrastructure (Hospitals & Shelters)
     facilities = get_nearby_real_facilities(latitude, longitude, radius_km=30.0)
 
-    # 7. Physics-Informed Geotechnical Hazard Evaluation
-    # STRICT RULE: Preserve None for missing rainfall so validity gate pauses inference
-    rain_24h = weather_data.get("precipitation_24h_mm")
-    rain_72h = weather_data.get("precipitation_72h_mm")
+    rain_24h = feats["rainfall_24h"]
+    rain_72h = feats["rainfall_72h"]
 
-    # ML Feature Vector evaluation
-    feature_dict = {
-        "rainfall_24h": rain_24h,
-        "rainfall_72h": rain_72h,
-        "slope_deg": slope_deg,
-        "elevation_amsl": elev_m,
-        "soil_moisture": soil_moisture_val,
-        "ndvi": 0.42,
-        "historical_incidents": 0,
-        "seismic_active": len(earthquakes) > 0,
-        "latitude": latitude,
-        "longitude": longitude,
-        "state": state_prov,
-        "metadata": {
-            "freshness_status": "LIVE" if weather_data.get("observation_time") else "RECENT",
-            "is_cached": False,
-            "soil_is_fallback": soil_is_fallback,
-            "dem_is_fallback": not terrain_data.get("is_dynamic", True),
-            "fallbacks_used": (1 if soil_is_fallback else 0) + (1 if not terrain_data.get("is_dynamic", True) else 0)
-        }
-    }
-
-    ml_result = predict_landslide_risk(feature_dict)
+    ml_result, live_forecast_trend = score_features(built)
     is_paused = ml_result.get("status") == "DATA_INSUFFICIENT"
     risk_score = ml_result.get("risk_score")
     risk_level = ml_result.get("risk_level", "LOW")
@@ -206,7 +183,7 @@ def orchestrate_location_intelligence(
         },
         "soil_moisture": {
             "volumetric_m3m3": soil_moisture_val,
-            "saturation_pct": round(soil_moisture_val * 100, 1) if soil_moisture_val <= 1.0 else soil_moisture_val,
+            "saturation_pct": None if soil_moisture_val is None else (round(soil_moisture_val * 100, 1) if soil_moisture_val <= 1.0 else soil_moisture_val),
             "depth_layer": "0-7 cm topsoil",
             "source": "ECMWF IFS Land-Surface Grid",
             "spatial_resolution": "0.1° (~10 km)",
@@ -232,7 +209,10 @@ def orchestrate_location_intelligence(
             "data_quality": ml_result.get("data_quality", "HIGH"),
             "factors": ml_result.get("xai", {}).get("factors", []),
             "xai": ml_result.get("xai", {}),
-            "precision_context": ml_result.get("precision_context")
+            "precision_context": ml_result.get("precision_context"),
+            "forecast_trend": live_forecast_trend,
+            "unavailability_reason": ml_result.get("unavailability_reason"),
+            "provenance": provenance(built)
         },
         "nearby_hospitals": facilities.get("hospitals", []),
         "nearby_shelters": facilities.get("shelters", []),

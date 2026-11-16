@@ -6,6 +6,8 @@ PREDICT -> PREPARE -> DETECT -> CONNECT -> PRIORITIZE -> RESCUE -> EVACUATE -> T
 """
 
 import copy
+import functools
+import logging
 import math
 import threading
 import uuid
@@ -13,6 +15,22 @@ from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any
 from backend.app.ml.predictor import predict_landslide_risk, categorize_risk_level, get_recommended_action
 from backend.app.ml.verifier import verify_landslide_report
+from backend.app.database.persistence import RecordStore
+
+logger = logging.getLogger("landslideguard")
+
+# Collections that change at runtime and must survive restarts.
+PERSISTED_COLLECTIONS = ("reports", "incidents", "sos_requests", "rescue_teams", "roads", "subscriptions")
+
+
+def persists(method):
+    """Save runtime state after a mutating StateStore method returns."""
+    @functools.wraps(method)
+    def wrapper(self, *args, **kwargs):
+        result = method(self, *args, **kwargs)
+        self._persist()
+        return result
+    return wrapper
 
 
 class StateStore:
@@ -43,6 +61,39 @@ class StateStore:
         self.poll_voters: Dict[str, str] = {}  # user_id -> date (YYYY-MM-DD) of last vote
         self.simulation_step: int = 1
         self._init_data()
+        self._records = RecordStore()
+        self._load_or_seed()
+
+    # ---------------- Persistence ----------------
+    def _persist(self):
+        """Write runtime collections to durable storage. Failures are logged, never raised,
+        so a storage problem cannot break a live request (data stays in memory)."""
+        with self.lock:
+            try:
+                for name in PERSISTED_COLLECTIONS:
+                    self._records.replace(name, getattr(self, name))
+                self._records.replace("meta", {
+                    "poll_data": self.poll_data,
+                    "poll_voters": self.poll_voters,
+                    "simulation_step": self.simulation_step,
+                })
+            except Exception as e:
+                logger.error("State persistence failed: %s", e)
+
+    def _load_or_seed(self):
+        """Load saved state if any exists; otherwise save the seeded demo state."""
+        with self.lock:
+            if self._records.is_empty():
+                self._persist()
+                return
+            for name in PERSISTED_COLLECTIONS:
+                setattr(self, name, self._records.load(name))
+            meta = self._records.load("meta")
+            self.poll_data = meta.get("poll_data", self.poll_data)
+            self.poll_voters = meta.get("poll_voters", self.poll_voters)
+            self.simulation_step = meta.get("simulation_step", self.simulation_step)
+            self._recalculate_all_fusion_internal()
+            self._regenerate_alerts_internal()
 
     def _init_data(self):
         # 1. User Accounts (RBAC Metadata)
@@ -366,12 +417,10 @@ class StateStore:
 
             ml_score = pred_result["risk_score"]
 
-            # Forecast Trend for 6h, 12h, 24h
+            # Only the current point: a real +6/12/24h outlook is added by the live refresh
+            # (Open-Meteo hourly forecast); seed data has no forecast.
             forecast_trend = [
-                {"timeframe": "Current", "hour_offset": 0, "predicted_rainfall_mm": z["rainfall_24h"], "predicted_risk_score": ml_score, "risk_level": categorize_risk_level(ml_score)},
-                {"timeframe": "+6h", "hour_offset": 6, "predicted_rainfall_mm": round(z["rainfall_24h"] * 1.15, 1), "predicted_risk_score": round(min(100.0, ml_score * 1.12), 1), "risk_level": categorize_risk_level(min(100.0, ml_score * 1.12))},
-                {"timeframe": "+12h", "hour_offset": 12, "predicted_rainfall_mm": round(z["rainfall_24h"] * 1.35, 1), "predicted_risk_score": round(min(100.0, ml_score * 1.25), 1), "risk_level": categorize_risk_level(min(100.0, ml_score * 1.25))},
-                {"timeframe": "+24h", "hour_offset": 24, "predicted_rainfall_mm": round(z["rainfall_24h"] * 1.55, 1), "predicted_risk_score": round(min(100.0, ml_score * 1.38), 1), "risk_level": categorize_risk_level(min(100.0, ml_score * 1.38))}
+                {"timeframe": "Current", "hour_offset": 0, "predicted_rainfall_mm": z["rainfall_24h"], "predicted_risk_score": ml_score, "risk_level": categorize_risk_level(ml_score)}
             ]
 
             z_entry = {
@@ -1209,6 +1258,12 @@ class StateStore:
         with self.lock:
             return list(self.zones.values())
 
+    def refresh_fusion_and_alerts(self):
+        """Recompute community fusion and alerts after zone scores change (e.g. live refresh)."""
+        with self.lock:
+            self._recalculate_all_fusion_internal()
+            self._regenerate_alerts_internal()
+
     def get_zone_by_id(self, zone_id: str) -> Optional[Dict[str, Any]]:
         with self.lock:
             return copy.deepcopy(self.zones.get(zone_id))
@@ -1225,6 +1280,7 @@ class StateStore:
             reports_list.sort(key=lambda x: x["created_at"], reverse=True)
             return reports_list
 
+    @persists
     def add_community_report(self, report_data: Dict[str, Any], user: dict) -> Dict[str, Any]:
         with self.lock:
             rep_id = f"rep-{uuid.uuid4().hex[:6]}"
@@ -1311,6 +1367,7 @@ class StateStore:
                 ]
             }
 
+    @persists
     def vote_community_poll(self, option_id: str, user_id: str) -> Optional[Dict[str, Any]]:
         """Returns updated poll, or None if this user already voted today."""
         with self.lock:
@@ -1323,6 +1380,7 @@ class StateStore:
                 self.poll_voters[user_id] = today
             return self.get_community_poll()
 
+    @persists
     def verify_community_report(
         self,
         report_id: str,
@@ -1372,6 +1430,7 @@ class StateStore:
         with self.lock:
             return copy.deepcopy(self.incidents.get(incident_id))
 
+    @persists
     def create_incident(self, data: Dict[str, Any]) -> Dict[str, Any]:
         with self.lock:
             inc_id = f"LS-2026-NE-{uuid.uuid4().hex[:4].upper()}"
@@ -1404,6 +1463,7 @@ class StateStore:
             self.incidents[inc_id] = new_inc
             return new_inc
 
+    @persists
     def update_incident(self, incident_id: str, update_data: Dict[str, Any]) -> Dict[str, Any]:
         with self.lock:
             if incident_id not in self.incidents:
@@ -1433,6 +1493,7 @@ class StateStore:
             sos_list.sort(key=lambda x: x["priority_score"], reverse=True)
             return sos_list
 
+    @persists
     def add_sos_request(self, data: Dict[str, Any], user: Optional[dict] = None) -> Dict[str, Any]:
         with self.lock:
             sos_id = f"SOS-2026-{uuid.uuid4().hex[:5].upper()}"
@@ -1515,6 +1576,7 @@ class StateStore:
             self.sos_requests[sos_id] = new_sos
             return new_sos
 
+    @persists
     def triage_sos_request(self, sos_id: str, update_data: Dict[str, Any]) -> Dict[str, Any]:
         with self.lock:
             if sos_id not in self.sos_requests:
@@ -1540,6 +1602,7 @@ class StateStore:
         with self.lock:
             return list(self.rescue_teams.values())
 
+    @persists
     def update_rescue_team(self, team_id: str, update_data: Dict[str, Any]) -> Dict[str, Any]:
         with self.lock:
             if team_id not in self.rescue_teams:
@@ -1555,6 +1618,7 @@ class StateStore:
         with self.lock:
             return list(self.roads.values())
 
+    @persists
     def update_road_status(self, road_id: str, status: str, reason: Optional[str] = None) -> Dict[str, Any]:
         with self.lock:
             if road_id not in self.roads:
@@ -1600,6 +1664,7 @@ class StateStore:
         with self.lock:
             return self.subscriptions.get(f"sub-{user_id}", self.subscriptions["sub-default"])
 
+    @persists
     def set_subscription(self, data: Dict[str, Any]) -> Dict[str, Any]:
         with self.lock:
             uid = data.get("user_id", "usr-citizen-default")
@@ -1629,6 +1694,7 @@ class StateStore:
             return copy.deepcopy(self.users.get(user_id))
 
     # ---------------- 12-Step Demo Scenario Stepper ----------------
+    @persists
     def run_simulation_step(self, target_step: int) -> Dict[str, Any]:
         with self.lock:
             self.simulation_step = target_step
@@ -1685,6 +1751,7 @@ class StateStore:
                 "active_alerts_count": len(self.alerts)
             }
 
+    @persists
     def reset_demo_scenario(self):
         with self.lock:
             self._init_data()
