@@ -84,3 +84,69 @@ def get_live_weather(
             status_code=502,
             detail=f"Unable to retrieve meteorological telemetry from provider: {str(exc)}"
         )
+
+
+# ---- Scheduled weather relay -------------------------------------------------
+# Render's shared outbound IP hits Open-Meteo's free daily limit (HTTP 429), so a
+# scheduled GitHub Actions job fetches Open-Meteo for the monitored zones and pushes
+# the raw responses here. Pushes need the WEATHER_RELAY_TOKEN secret.
+
+import hmac
+import os
+from typing import List
+from fastapi import BackgroundTasks, Header
+from pydantic import BaseModel, Field
+from backend.app.services.weather_resolver import open_meteo_url, ingest_open_meteo, _cache_key
+
+
+def _relay_targets() -> List[Dict[str, float]]:
+    from backend.app.database.store import db_store
+    targets = {}
+    for z in db_store.get_all_zones():
+        c = z.get("center") or {}
+        if c.get("lat") is not None and c.get("lng") is not None:
+            targets[_cache_key(c["lat"], c["lng"])] = {"latitude": c["lat"], "longitude": c["lng"]}
+    return list(targets.values())
+
+
+@router.get("/relay-targets")
+def get_relay_targets() -> Dict[str, Any]:
+    """Coordinates (and the exact Open-Meteo URL) the relay should fetch."""
+    return {"targets": [{**t, "url": open_meteo_url(t["latitude"], t["longitude"])} for t in _relay_targets()]}
+
+
+class RelayItem(BaseModel):
+    latitude: float = Field(..., ge=-90.0, le=90.0)
+    longitude: float = Field(..., ge=-180.0, le=180.0)
+    payload: Dict[str, Any]
+
+
+class RelayBatch(BaseModel):
+    items: List[RelayItem] = Field(..., max_length=100)
+
+
+@router.post("/relay")
+def post_weather_relay(batch: RelayBatch, background: BackgroundTasks,
+                       x_relay_token: str = Header(default="")) -> Dict[str, Any]:
+    expected = os.environ.get("WEATHER_RELAY_TOKEN", "")
+    if not expected:
+        raise HTTPException(status_code=503, detail="Weather relay is not configured")
+    if not hmac.compare_digest(x_relay_token.encode(), expected.encode()):
+        raise HTTPException(status_code=401, detail="Invalid relay token")
+
+    allowed = {_cache_key(t["latitude"], t["longitude"]) for t in _relay_targets()}
+    accepted, rejected = 0, []
+    for item in batch.items:
+        if _cache_key(item.latitude, item.longitude) not in allowed:
+            rejected.append({"latitude": item.latitude, "longitude": item.longitude, "reason": "not a relay target"})
+            continue
+        try:
+            ingest_open_meteo(item.latitude, item.longitude, item.payload)
+            accepted += 1
+        except Exception as e:
+            rejected.append({"latitude": item.latitude, "longitude": item.longitude, "reason": str(e)[:200]})
+
+    if accepted:
+        from backend.app.services.zone_refresh import refresh_all_zones
+        background.add_task(refresh_all_zones)
+    return {"accepted": accepted, "rejected": rejected}

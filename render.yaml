@@ -40,3 +40,5 @@ services:
       # Postgres connection string (e.g. Neon/Supabase). Without it, data is lost when Render restarts.
       - key: DATABASE_URL
         sync: false
+      - key: WEATHER_RELAY_TOKEN
+        sync: false
