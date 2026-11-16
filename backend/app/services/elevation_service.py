@@ -4,12 +4,51 @@ Queries Global Digital Elevation Models (Copernicus 90m / SRTM 30m) and computes
 """
 
 import math
+import os
 import time
 import urllib.request
 import json
-from typing import Dict, Any
+from typing import Dict, Any, Optional
+
+from backend.app.services.weather_resolver import describe_http_error
 
 _DEM_CACHE: Dict[str, Dict[str, Any]] = {}
+
+# Pre-computed DEM results for the monitored zones and route waypoints (same Copernicus DEM,
+# fetched once by backend/scripts/build_terrain_cache.py), so they never depend on a live call.
+TERRAIN_CACHE_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "data", "terrain_cache.json")
+_STATIC_POINTS: Optional[list] = None
+
+
+def _static_terrain(latitude: float, longitude: float) -> Optional[Dict[str, Any]]:
+    global _STATIC_POINTS
+    if os.environ.get("TERRAIN_CACHE_DISABLED") == "1":
+        return None
+    if _STATIC_POINTS is None:
+        try:
+            with open(TERRAIN_CACHE_PATH, encoding="utf-8") as f:
+                cache = json.load(f)
+            _STATIC_POINTS = [dict(p, generated_at=cache.get("generated_at")) for p in cache.get("points", [])]
+        except (OSError, ValueError):
+            _STATIC_POINTS = []
+    for p in _STATIC_POINTS:
+        if abs(p["lat"] - latitude) < 0.002 and abs(p["lng"] - longitude) < 0.002:  # ~200 m
+            return {
+                "latitude": latitude,
+                "longitude": longitude,
+                "elevation_meters_amsl": p["elevation_amsl"],
+                "elevation_amsl": p["elevation_amsl"],
+                "slope_deg": p["slope_deg"],
+                "is_dynamic": True,
+                "slope_status": "DYNAMIC_DEM",
+                "dem_origin": "PRECOMPUTED",
+                "source": f"Copernicus 90m DEM via Open-Meteo (pre-computed {p.get('generated_at', '')[:10]})",
+                "spatial_resolution": "30-90 meters (WGS84 EGM96 Geoid)",
+                "vertical_datum": "EGM96 Mean Sea Level",
+                "freshness_status": "STATIC DEM (TERRAIN DOES NOT CHANGE)",
+                "is_demo": False,
+            }
+    return None
 
 
 def get_terrain_elevation_and_slope(latitude: float, longitude: float) -> Dict[str, Any]:
@@ -20,6 +59,10 @@ def get_terrain_elevation_and_slope(latitude: float, longitude: float) -> Dict[s
     cache_key = f"{round(latitude, 4)}_{round(longitude, 4)}"
     if cache_key in _DEM_CACHE:
         return _DEM_CACHE[cache_key]
+
+    static = _static_terrain(latitude, longitude)
+    if static is not None:
+        return static
 
     delta = 0.001  # ~110 meters spatial displacement
     # Query point, north offset, and east offset for directional gradient vectors
@@ -62,7 +105,8 @@ def get_terrain_elevation_and_slope(latitude: float, longitude: float) -> Dict[s
                 slope_status = "DYNAMIC_DEM"
                 source_label = "Copernicus 90m / Open-Meteo Elevation Grid"
 
-    except Exception:
+    except Exception as primary_err:
+        print(f"Open-Meteo elevation request failed: {describe_http_error(primary_err)}")
         # Secondary live DEM failover via Open-Elevation if primary is 429/offline
         try:
             sec_locs = f"{latitude:.5f},{longitude:.5f}|{latitude+delta:.5f},{longitude:.5f}|{latitude:.5f},{longitude+delta:.5f}"

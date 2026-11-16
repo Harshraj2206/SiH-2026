@@ -7,7 +7,19 @@ with explicit source attribution, spatial resolution, and observation timestamps
 import json
 import time
 import urllib.request
+import urllib.error
 from typing import Dict, Any, Optional
+
+
+def describe_http_error(err: Exception) -> str:
+    """Short, loggable description of a failed HTTP call (status code + start of body)."""
+    if isinstance(err, urllib.error.HTTPError):
+        try:
+            body = err.read().decode("utf-8", "replace")[:200]
+        except Exception:
+            body = ""
+        return f"HTTP {err.code} {err.reason}: {body}"
+    return f"{type(err).__name__}: {err}"
 
 _WEATHER_CACHE: Dict[str, Dict[str, Any]] = {}
 _CACHE_TTL = 900  # 15 minutes cache to prevent rate-limit exhaustion
@@ -215,6 +227,7 @@ def get_global_live_weather(latitude: float, longitude: float, country_code: Opt
     # 2. Query Primary: Open-Meteo with bounded retry (max 2 attempts)
     primary_success = False
     data = {}
+    last_error = ""
     for attempt in range(2):
         try:
             req = urllib.request.Request(url, headers={"User-Agent": "LandSafe-GlobalWeather/2.0"})
@@ -223,8 +236,12 @@ def get_global_live_weather(latitude: float, longitude: float, country_code: Opt
                 primary_success = True
                 break
         except Exception as err:
+            last_error = describe_http_error(err)
             if attempt == 0:
                 time.sleep(0.3)  # Brief backoff before 1 retry
+
+    if not primary_success:
+        print(f"Open-Meteo forecast request failed: {last_error}")
 
     if primary_success:
         try:

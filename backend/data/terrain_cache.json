@@ -1,0 +1,328 @@
+{
+ "generated_at": "2026-11-16T21:51:51.242800+00:00",
+ "source": "Open-Meteo elevation API (Copernicus GLO-90 DEM); slope from 3-point ~110 m gradient",
+ "points": [
+  {
+   "name": "HP-01",
+   "lat": 31.9579,
+   "lng": 77.1095,
+   "elevation_amsl": 1229.0,
+   "slope_deg": 1.3
+  },
+  {
+   "name": "HP-02",
+   "lat": 32.2432,
+   "lng": 77.1892,
+   "elevation_amsl": 1878.0,
+   "slope_deg": 12.6
+  },
+  {
+   "name": "HP-03",
+   "lat": 31.1048,
+   "lng": 77.1734,
+   "elevation_amsl": 2195.0,
+   "slope_deg": 21.1
+  },
+  {
+   "name": "HP-04",
+   "lat": 32.219,
+   "lng": 76.3234,
+   "elevation_amsl": 1316.0,
+   "slope_deg": 21.7
+  },
+  {
+   "name": "HP-05",
+   "lat": 31.5892,
+   "lng": 76.9182,
+   "elevation_amsl": 812.0,
+   "slope_deg": 10.2
+  },
+  {
+   "name": "HP-06",
+   "lat": 31.5376,
+   "lng": 78.2562,
+   "elevation_amsl": 2728.0,
+   "slope_deg": 9.0
+  },
+  {
+   "name": "HP-07",
+   "lat": 30.9045,
+   "lng": 77.0967,
+   "elevation_amsl": 1460.0,
+   "slope_deg": 14.7
+  },
+  {
+   "name": "HP-08",
+   "lat": 31.326,
+   "lng": 76.76,
+   "elevation_amsl": 543.0,
+   "slope_deg": 4.0
+  },
+  {
+   "name": "HP-09",
+   "lat": 32.5534,
+   "lng": 76.1258,
+   "elevation_amsl": 924.0,
+   "slope_deg": 12.0
+  },
+  {
+   "name": "HP-10",
+   "lat": 32.0998,
+   "lng": 76.2691,
+   "elevation_amsl": 791.0,
+   "slope_deg": 18.2
+  },
+  {
+   "name": "HP-11",
+   "lat": 30.55,
+   "lng": 77.3,
+   "elevation_amsl": 694.0,
+   "slope_deg": 17.6
+  },
+  {
+   "name": "HP-12",
+   "lat": 32.48,
+   "lng": 77.12,
+   "elevation_amsl": 3105.0,
+   "slope_deg": 11.7
+  },
+  {
+   "name": "NER-042",
+   "lat": 25.83,
+   "lng": 91.89,
+   "elevation_amsl": 695.0,
+   "slope_deg": 12.0
+  },
+  {
+   "name": "NER-024",
+   "lat": 25.62,
+   "lng": 91.9,
+   "elevation_amsl": 1330.0,
+   "slope_deg": 14.8
+  },
+  {
+   "name": "NER-045",
+   "lat": 25.82,
+   "lng": 92.03,
+   "elevation_amsl": 814.0,
+   "slope_deg": 14.2
+  },
+  {
+   "name": "NER-018",
+   "lat": 25.27,
+   "lng": 91.73,
+   "elevation_amsl": 1304.0,
+   "slope_deg": 2.1
+  },
+  {
+   "name": "NER-063",
+   "lat": 25.45,
+   "lng": 92.2,
+   "elevation_amsl": 1387.0,
+   "slope_deg": 3.8
+  },
+  {
+   "name": "NER-011",
+   "lat": 27.25,
+   "lng": 88.55,
+   "elevation_amsl": 787.0,
+   "slope_deg": 25.0
+  },
+  {
+   "name": "NER-012",
+   "lat": 27.38,
+   "lng": 88.52,
+   "elevation_amsl": 1389.0,
+   "slope_deg": 19.4
+  },
+  {
+   "name": "NER-055",
+   "lat": 27.51,
+   "lng": 88.53,
+   "elevation_amsl": 779.0,
+   "slope_deg": 21.9
+  },
+  {
+   "name": "NER-077",
+   "lat": 25.72,
+   "lng": 93.99,
+   "elevation_amsl": 1372.0,
+   "slope_deg": 22.4
+  },
+  {
+   "name": "NER-078",
+   "lat": 25.62,
+   "lng": 94.19,
+   "elevation_amsl": 989.0,
+   "slope_deg": 24.4
+  },
+  {
+   "name": "NER-033",
+   "lat": 23.73,
+   "lng": 92.72,
+   "elevation_amsl": 973.0,
+   "slope_deg": 23.3
+  },
+  {
+   "name": "NER-034",
+   "lat": 23.84,
+   "lng": 92.63,
+   "elevation_amsl": 429.0,
+   "slope_deg": 4.6
+  },
+  {
+   "name": "GHY_HUB",
+   "lat": 26.1264,
+   "lng": 91.8082,
+   "elevation_amsl": 59.0,
+   "slope_deg": 0.8
+  },
+  {
+   "name": "BYR_JUNCT",
+   "lat": 26.0482,
+   "lng": 91.859,
+   "elevation_amsl": 109.0,
+   "slope_deg": 9.2
+  },
+  {
+   "name": "NONGPOH_MID",
+   "lat": 25.9032,
+   "lng": 91.8795,
+   "elevation_amsl": 563.0,
+   "slope_deg": 20.3
+  },
+  {
+   "name": "UMSNING_CUT",
+   "lat": 25.751,
+   "lng": 91.898,
+   "elevation_amsl": 769.0,
+   "slope_deg": 6.2
+  },
+  {
+   "name": "UMIAM_LAKE",
+   "lat": 25.662,
+   "lng": 91.916,
+   "elevation_amsl": 917.0,
+   "slope_deg": 13.8
+  },
+  {
+   "name": "SHL_CENTER",
+   "lat": 25.5788,
+   "lng": 91.8933,
+   "elevation_amsl": 1436.0,
+   "slope_deg": 9.8
+  },
+  {
+   "name": "MAWHATI_VALLEY",
+   "lat": 25.942,
+   "lng": 92.052,
+   "elevation_amsl": 683.0,
+   "slope_deg": 5.8
+  },
+  {
+   "name": "BHOIRYMBONG_BYPASS",
+   "lat": 25.705,
+   "lng": 92.01,
+   "elevation_amsl": 872.0,
+   "slope_deg": 0.6
+  },
+  {
+   "name": "CHERRA_CLIFF",
+   "lat": 25.2702,
+   "lng": 91.7323,
+   "elevation_amsl": 1303.0,
+   "slope_deg": 3.1
+  },
+  {
+   "name": "JOWAI_RIDGE",
+   "lat": 25.451,
+   "lng": 92.204,
+   "elevation_amsl": 1376.0,
+   "slope_deg": 4.3
+  },
+  {
+   "name": "SILIGURI_HUB",
+   "lat": 26.883,
+   "lng": 88.471,
+   "elevation_amsl": 244.0,
+   "slope_deg": 4.2
+  },
+  {
+   "name": "RANGPO_CHECKPOST",
+   "lat": 27.1764,
+   "lng": 88.5312,
+   "elevation_amsl": 379.0,
+   "slope_deg": 10.4
+  },
+  {
+   "name": "SINGTAM_JUNCT",
+   "lat": 27.2345,
+   "lng": 88.498,
+   "elevation_amsl": 524.0,
+   "slope_deg": 22.9
+  },
+  {
+   "name": "GANGTOK_RIDGE",
+   "lat": 27.3389,
+   "lng": 88.6065,
+   "elevation_amsl": 1487.0,
+   "slope_deg": 17.4
+  },
+  {
+   "name": "MANGAN_PASS",
+   "lat": 27.512,
+   "lng": 88.532,
+   "elevation_amsl": 872.0,
+   "slope_deg": 21.3
+  },
+  {
+   "name": "DIKCHU_BYPASS",
+   "lat": 27.382,
+   "lng": 88.521,
+   "elevation_amsl": 1374.0,
+   "slope_deg": 15.8
+  },
+  {
+   "name": "DIMAPUR_PLAINS",
+   "lat": 25.906,
+   "lng": 93.727,
+   "elevation_amsl": 155.0,
+   "slope_deg": 1.8
+  },
+  {
+   "name": "MEDZIPHEMA_FOOTHILLS",
+   "lat": 25.756,
+   "lng": 93.874,
+   "elevation_amsl": 461.0,
+   "slope_deg": 1.6
+  },
+  {
+   "name": "KOHIMA_CITY",
+   "lat": 25.674,
+   "lng": 94.1086,
+   "elevation_amsl": 1445.0,
+   "slope_deg": 7.7
+  },
+  {
+   "name": "DZUKOU_BYPASS",
+   "lat": 25.568,
+   "lng": 94.28,
+   "elevation_amsl": 1762.0,
+   "slope_deg": 23.8
+  },
+  {
+   "name": "AIZAWL_CITY",
+   "lat": 23.7271,
+   "lng": 92.7176,
+   "elevation_amsl": 1069.0,
+   "slope_deg": 8.7
+  },
+  {
+   "name": "LENGPUI_AIRPORT",
+   "lat": 23.839,
+   "lng": 92.628,
+   "elevation_amsl": 432.0,
+   "slope_deg": 5.9
+  }
+ ]
+}
