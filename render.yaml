@@ -37,3 +37,6 @@ services:
         sync: false
       - key: RESIDENT_SEED_PASSWORD
         sync: false
+      # Postgres connection string (e.g. Neon/Supabase). Without it, data is lost when Render restarts.
+      - key: DATABASE_URL
+        sync: false

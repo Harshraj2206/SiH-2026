@@ -108,6 +108,7 @@ def get_terrain_elevation_and_slope(latitude: float, longitude: float) -> Dict[s
         "is_demo": False
     }
 
-    _DEM_CACHE[cache_key] = result
+    if is_dynamic:  # cache only real DEM results so a temporary outage is retried later
+        _DEM_CACHE[cache_key] = result
     return result
 

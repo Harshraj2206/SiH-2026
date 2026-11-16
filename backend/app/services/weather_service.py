@@ -43,6 +43,7 @@ def fetch_live_meteorology(latitude: float, longitude: float) -> Dict[str, Any]:
         "rainfall_24h_mm": float(raw_p24) if raw_p24 is not None else None,
         "rainfall_72h_mm": float(raw_p72) if raw_p72 is not None else None,
         "soil_moisture_m3m3": float(raw_sm) if raw_sm is not None else None,
+        "rainfall_outlook": data.get("rainfall_outlook") or [],
         "wind_speed_kmh": data.get("wind_speed_kmh"),
         "wind_direction_deg": data.get("wind_direction_deg"),
         "is_day": data.get("is_day", 1),

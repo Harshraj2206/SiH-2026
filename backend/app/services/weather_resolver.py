@@ -236,28 +236,43 @@ def get_global_live_weather(latitude: float, longitude: float, country_code: Opt
             soil = hourly.get("soil_moisture_0_to_7cm", [])
             temps = hourly.get("temperature_2m", [])
 
-            current_idx = min(72, len(times) - 1) if times else 0
-            
+            # Index just after the current hour: hourly times and current.time share the
+            # same local timezone and ISO format, so string comparison is chronological.
+            now_str = current.get("time")
+            if times and now_str:
+                current_idx = sum(1 for t in times if t <= now_str)
+            else:
+                current_idx = min(72, len(times) - 1) if times else 0
+
             raw_p1 = current.get("precipitation")
             p_1h = round(float(raw_p1), 1) if raw_p1 is not None else None
             rain_now = round(float(current.get("rain")), 1) if current.get("rain") is not None else None
-            
-            p_24h = None
-            p_72h = None
 
-            if precip and len(precip) >= 24 and current_idx >= 24:
-                window_24 = [float(x) for x in precip[current_idx - 24 : current_idx] if x is not None]
-                if len(window_24) == 24:
-                    p_24h = round(sum(window_24), 1)
-            
-            if precip and len(precip) >= 72 and current_idx >= 72:
-                window_72 = [float(x) for x in precip[current_idx - 72 : current_idx] if x is not None]
-                if len(window_72) == 72:
-                    p_72h = round(sum(window_72), 1)
+            def rain_window(end: int, hours: int) -> Optional[float]:
+                """Rain total over `hours` hourly values ending at index `end` (exclusive)."""
+                start = end - hours
+                if not precip or start < 0 or end > len(precip):
+                    return None
+                values = precip[start:end]
+                if any(v is None for v in values):
+                    return None
+                return round(sum(float(v) for v in values), 1)
+
+            p_24h = rain_window(current_idx, 24)
+            p_72h = rain_window(current_idx, 72)
+
+            # Real outlook from the hourly forecast: rolling 24h/72h rain totals at +6/+12/+24h
+            rainfall_outlook = [
+                {"hour_offset": h,
+                 "rainfall_24h_mm": rain_window(current_idx + h, 24),
+                 "rainfall_72h_mm": rain_window(current_idx + h, 72)}
+                for h in (6, 12, 24)
+            ]
 
             current_soil = None
-            if soil and len(soil) > current_idx and soil[current_idx] is not None:
-                current_soil = round(float(soil[current_idx]), 3)
+            soil_idx = max(0, current_idx - 1)
+            if soil and len(soil) > soil_idx and soil[soil_idx] is not None:
+                current_soil = round(float(soil[soil_idx]), 3)
 
             forecast_trend = []
             if times and temps and precip:
@@ -296,6 +311,7 @@ def get_global_live_weather(latitude: float, longitude: float, country_code: Opt
                 "precipitation_72h_mm": p_72h,
                 "soil_moisture_m3m3": current_soil,
                 "forecast_trend": forecast_trend,
+                "rainfall_outlook": rainfall_outlook,
                 "timezone": data.get("timezone", "Asia/Kolkata"),
                 "timezone_abbreviation": data.get("timezone_abbreviation", "UTC"),
                 "utc_offset_seconds": data.get("utc_offset_seconds", 19800),

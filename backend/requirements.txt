@@ -12,3 +12,4 @@ passlib>=1.7.4
 bcrypt>=4.0.0
 python-multipart>=0.0.18
 requests>=2.31.0
+psycopg[binary]>=3.2,<4  # only used when DATABASE_URL (Postgres) is set
