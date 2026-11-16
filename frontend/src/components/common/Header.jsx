@@ -13,22 +13,13 @@ import { normalizeWeather } from '../../utils/weatherNormalizer';
 import { useLocationIntelligence } from '../../context/LocationIntelligenceContext';
 
 export const Header = ({ onToggleSidebar }) => {
-  const { currentUser, logout, login, PRESET_DEMO_ACCOUNTS } = useAuth();
+  const { currentUser, logout } = useAuth();
   const { alerts, selectedZone, zones } = useEmergency();
   const { location, weather: intelWeather } = useLocationIntelligence();
   const navigate = useNavigate();
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
   const criticalAlertsCount = (alerts || []).filter(a => a.category === 'CRITICAL' || a.category === 'HIGH').length;
-
-  const handleQuickSwitch = async (account) => {
-    try {
-      await login(account.identifier, account.password);
-      setUserDropdownOpen(false);
-    } catch (e) {
-      console.warn('Switch failed:', e);
-    }
-  };
 
   return (
     <header className="h-16 bg-[#050505] border-b border-[#1a1a1a] px-3.5 sm:px-4 lg:px-8 flex items-center justify-between sticky top-0 z-30 select-none">
@@ -126,28 +117,6 @@ export const Header = ({ onToggleSidebar }) => {
                   <User className="w-3.5 h-3.5 text-emerald-400" />
                   <span>Profile & Contacts</span>
                 </Link>
-              </div>
-
-              {/* Quick Role Switcher */}
-              <div className="p-1 border-b border-[#1c1c1c]">
-                <span className="text-[10px] uppercase font-semibold text-neutral-400 block mb-1">
-                  Switch Account:
-                </span>
-                <div className="space-y-0.5">
-                  {PRESET_DEMO_ACCOUNTS.map((acc) => (
-                    <button
-                      key={acc.role}
-                      onClick={() => handleQuickSwitch(acc)}
-                      className={`w-full text-left px-2 py-1 rounded text-xs flex items-center justify-between ${
-                        currentUser?.role === acc.role
-                          ? 'bg-[#181818] text-emerald-400 font-semibold'
-                          : 'text-neutral-400 hover:bg-[#141414] hover:text-neutral-200'
-                      }`}
-                    >
-                      <span>{acc.role}</span>
-                    </button>
-                  ))}
-                </div>
               </div>
 
               <div className="pt-1">

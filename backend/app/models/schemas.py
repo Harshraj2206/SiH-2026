@@ -144,6 +144,7 @@ class ForecastPoint(BaseModel):
 
 
 class RiskZoneSummary(BaseModel):
+    is_demo: Optional[bool] = None
     zone_id: str
     name: str
     state: str
@@ -264,6 +265,7 @@ class CommunityReportVerification(BaseModel):
 
 
 class CommunityReportResponse(BaseModel):
+    is_demo: Optional[bool] = None
     id: str
     user_id: str
     user_name: str
@@ -340,6 +342,7 @@ class IncidentUpdate(BaseModel):
 
 
 class IncidentResponse(BaseModel):
+    is_demo: Optional[bool] = None
     incident_id: str
     title: str
     district: str
@@ -477,6 +480,7 @@ class RescueTeamUpdate(BaseModel):
 
 
 class RescueTeamResponse(BaseModel):
+    is_demo: Optional[bool] = None
     team_id: str
     name: str
     team_type: str = Field(..., description="NDRF, SDRF, Police, Fire & Rescue, Medical, Volunteers")
@@ -516,6 +520,7 @@ class RoadResponse(BaseModel):
 
 # ---------------- Hospitals & Shelters Schemas ----------------
 class HospitalResponse(BaseModel):
+    is_demo: Optional[bool] = None
     hospital_id: str
     name: str
     type: str = "Civil / District Hospital"
@@ -536,6 +541,7 @@ class HospitalResponse(BaseModel):
 
 
 class ShelterResponse(BaseModel):
+    is_demo: Optional[bool] = None
     shelter_id: str
     name: str
     type: str = "Relief Camp / Community Hall"
@@ -558,6 +564,7 @@ class ShelterResponse(BaseModel):
 
 # ---------------- Post-Disaster Analysis Schemas ----------------
 class PostDisasterEventResponse(BaseModel):
+    is_demo: Optional[bool] = None
     record_id: str
     incident_id: str
     event_name: str

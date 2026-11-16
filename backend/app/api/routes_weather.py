@@ -12,7 +12,7 @@ router = APIRouter(prefix="/api/weather", tags=["Real-Time Weather"])
 
 
 @router.get("")
-async def get_live_weather(
+def get_live_weather(
     lat: float = Query(..., ge=-90.0, le=90.0, description="Latitude coordinate (-90 to 90)"),
     lon: float = Query(..., ge=-180.0, le=180.0, description="Longitude coordinate (-180 to 180)")
 ) -> Dict[str, Any]:

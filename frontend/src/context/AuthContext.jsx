@@ -9,7 +9,6 @@ export const PRESET_DEMO_ACCOUNTS = [
     title: 'Dr. Anamika Sharma (SDMA Regional Officer)',
     identifier: 'officer@sdim.ner.gov.in',
     username: 'officer_sdma',
-    password: 'Officer@2026!',
     targetRoute: '/explore-incidents',
     agency: 'State Disaster Management Authority (NER)'
   },
@@ -18,7 +17,6 @@ export const PRESET_DEMO_ACCOUNTS = [
     title: 'SI Wanbah Khonglah (SDRF Field Commander)',
     identifier: 'rescue@sdrf.ner.gov.in',
     username: 'sdrf_commander',
-    password: 'Rescue@2026!',
     targetRoute: '/rescue',
     agency: 'SDRF Ri-Bhoi Fast Response Unit'
   },
@@ -27,7 +25,6 @@ export const PRESET_DEMO_ACCOUNTS = [
     title: 'Dr. Prabal Das (Civil Hospital Trauma Head)',
     identifier: 'medical@civilhosp.ner.gov.in',
     username: 'civil_hospital',
-    password: 'Medical@2026!',
     targetRoute: '/hospitals-shelters',
     agency: 'Civil Hospital Nongpoh Emergency Cell'
   },
@@ -36,7 +33,6 @@ export const PRESET_DEMO_ACCOUNTS = [
     title: 'Col. Rajesh Barua (NDMA HQ Commander)',
     identifier: 'admin@landslideguard.gov.in',
     username: 'admin_ndma',
-    password: 'Admin@2026!',
     targetRoute: '/analytics',
     agency: 'National Disaster Management Authority'
   },
@@ -45,7 +41,6 @@ export const PRESET_DEMO_ACCOUNTS = [
     title: 'Tariang Lyngdoh (Hill Citizen & Resident)',
     identifier: 'resident@landslideguard.gov.in',
     username: 'resident_nongpoh',
-    password: 'Resident@2026!',
     targetRoute: '/overview',
     agency: 'Ri-Bhoi Community Watch'
   }

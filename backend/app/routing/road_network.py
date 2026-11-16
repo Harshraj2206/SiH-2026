@@ -299,6 +299,12 @@ def build_road_graph() -> nx.Graph:
 
 
 def get_available_waypoints() -> List[Dict[str, Any]]:
+    # The preset graph is four separate regional networks; tag each node with its
+    # network so the UI only offers destinations that are reachable.
+    network_of = {}
+    for i, comp in enumerate(nx.connected_components(build_road_graph())):
+        for n in comp:
+            network_of[n] = i
     return [
         {
             "id": node_id,
@@ -307,7 +313,8 @@ def get_available_waypoints() -> List[Dict[str, Any]]:
             "lng": data["lng"],
             "region": data.get("region", "NER"),
             "type": data.get("type", "waypoint"),
-            "zone_id": data.get("zone_id")
+            "zone_id": data.get("zone_id"),
+            "network": network_of.get(node_id)
         }
         for node_id, data in NODES_DATA.items()
     ]

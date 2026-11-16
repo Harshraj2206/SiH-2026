@@ -286,9 +286,7 @@ async def forgot_password(payload: ForgotPasswordRequest, request: Request):
     return {
         "status": "info",
         "email": payload.email,
-        "message": "If that email address is registered, password reset instructions have been queued.",
-        # Expose token for local demo/testing if in development environment
-        "reset_token": token if os.environ.get("ENVIRONMENT", "development").lower() != "production" else None
+        "message": "If that email address is registered, password reset instructions have been queued."
     }
 
 

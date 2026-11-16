@@ -783,6 +783,8 @@ export const IncidentsExplorerPage = () => {
             <option value="OFFICIAL">Official Government Record</option>
             <option value="VERIFIED">Satellite / Ground Verified</option>
             <option value="DEMO / SIMULATION">Simulation Drills</option>
+            <option value="MODEL FORECAST">LandSafe Model Forecast</option>
+            <option value="DEMO SEED">Demo Seed Records</option>
           </select>
         </div>
       </div>

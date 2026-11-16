@@ -19,7 +19,7 @@ DATABASE_PATH = os.environ.get("DATABASE_PATH") or os.environ.get("SQLITE_DB_PAT
 _RAW_JWT_SECRET = os.environ.get("JWT_SECRET") or os.environ.get("SECRET_KEY")
 
 if IS_PRODUCTION:
-    if not _RAW_JWT_SECRET or len(_RAW_JWT_SECRET.strip()) < 32 or "placeholder" in _RAW_JWT_SECRET.lower() or "change_this" in _RAW_JWT_SECRET.lower():
+    if not _RAW_JWT_SECRET or len(_RAW_JWT_SECRET.strip()) < 32 or "placeholder" in _RAW_JWT_SECRET.lower() or "change" in _RAW_JWT_SECRET.lower():
         raise RuntimeError(
             "FATAL SECURITY ERROR: In production mode (ENVIRONMENT=production), "
             "a cryptographically secure JWT_SECRET (minimum 32 characters) must be explicitly configured."

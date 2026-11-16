@@ -12,6 +12,9 @@ import threading
 from datetime import datetime, timezone, timedelta
 from typing import Optional, Dict, Any, List
 import bcrypt
+import logging
+
+from backend.app.core.config import IS_PRODUCTION
 
 DB_DIR = os.environ.get("DATA_DIR") or os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data")
 DB_PATH = os.environ.get("DATABASE_PATH") or os.environ.get("SQLITE_DB_PATH") or os.path.join(DB_DIR, "landslideguard_users.db")
@@ -24,31 +27,11 @@ def hash_pw(password: str) -> str:
 
 
 def check_pw(password: str, hashed: str) -> bool:
-    """Verify password against bcrypt hash, with development alias support."""
+    """Verify password against bcrypt hash."""
     try:
-        if bcrypt.checkpw(password.encode("utf-8"), hashed.encode("utf-8")):
-            return True
+        return bcrypt.checkpw(password.encode("utf-8"), hashed.encode("utf-8"))
     except Exception:
-        pass
-
-    # Development fallback for README quick-demo credentials
-    env = os.environ.get("ENVIRONMENT", "development").lower()
-    if env not in ["production", "prod"]:
-        legacy_aliases = {
-            "admin123": ["Admin@2026!", "admin123"],
-            "authority123": ["Officer@2026!", "authority123"],
-            "rescue123": ["Rescue@2026!", "rescue123"],
-            "medical123": ["Medical@2026!", "medical123"],
-            "resident123": ["Resident@2026!", "resident123"],
-        }
-        if password in legacy_aliases:
-            for canonical in legacy_aliases[password]:
-                try:
-                    if bcrypt.checkpw(canonical.encode("utf-8"), hashed.encode("utf-8")):
-                        return True
-                except Exception:
-                    pass
-    return False
+        return False
 
 
 class UserDatabase:
@@ -111,11 +94,22 @@ class UserDatabase:
     def _seed_default_users(self, conn: sqlite3.Connection):
         """Seed default pre-created privileged and resident accounts with env-configurable passwords."""
         now = datetime.now(timezone.utc).isoformat()
-        admin_pw = os.environ.get("ADMIN_SEED_PASSWORD", "Admin@2026!")
-        officer_pw = os.environ.get("OFFICER_SEED_PASSWORD", "Officer@2026!")
-        rescue_pw = os.environ.get("RESCUE_SEED_PASSWORD", "Rescue@2026!")
-        med_pw = os.environ.get("MEDICAL_SEED_PASSWORD", "Medical@2026!")
-        resident_pw = os.environ.get("RESIDENT_SEED_PASSWORD", "Resident@2026!")
+        def seed_pw(env_name: str, dev_default: str) -> str:
+            # In production the known demo passwords are never used: set the env var,
+            # otherwise the account gets an unguessable random password.
+            value = os.environ.get(env_name)
+            if value:
+                return value
+            if IS_PRODUCTION:
+                logging.getLogger("landslideguard").warning("%s not set; seeded account gets a random password.", env_name)
+                return secrets.token_urlsafe(24)
+            return dev_default
+
+        admin_pw = seed_pw("ADMIN_SEED_PASSWORD", "Admin@2026!")
+        officer_pw = seed_pw("OFFICER_SEED_PASSWORD", "Officer@2026!")
+        rescue_pw = seed_pw("RESCUE_SEED_PASSWORD", "Rescue@2026!")
+        med_pw = seed_pw("MEDICAL_SEED_PASSWORD", "Medical@2026!")
+        resident_pw = seed_pw("RESIDENT_SEED_PASSWORD", "Resident@2026!")
 
         default_users = [
             (

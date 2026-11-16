@@ -28,15 +28,16 @@ export const CommunityPollPage = () => {
     id: 'poll-landslide-signs-today',
     question: 'Have you noticed any signs of active landslide or ground movement near your district today?',
     description: 'Daily community crowd-sourced situational monitoring across active mountain sectors.',
-    total_votes: 328,
+    total_votes: 0,
     options: [
-      { id: 'yes', label: 'Yes (Observed Rockfall / Tension Cracks)', votes: 224, percentage: 68.3 },
-      { id: 'no', label: 'No (Terrain Appears Stable)', votes: 72, percentage: 22.0 },
-      { id: 'unsure', label: 'Not Sure / Low Visibility', votes: 32, percentage: 9.7 }
+      { id: 'yes', label: 'Yes (Observed Rockfall / Tension Cracks)', votes: 0, percentage: 0 },
+      { id: 'no', label: 'No (Terrain Appears Stable)', votes: 0, percentage: 0 },
+      { id: 'unsure', label: 'Not Sure / Low Visibility', votes: 0, percentage: 0 }
     ]
   });
   const [userVoted, setUserVoted] = useState(null);
   const [voting, setVoting] = useState(false);
+  const [voteError, setVoteError] = useState('');
 
   useEffect(() => {
     loadPoll();
@@ -56,28 +57,16 @@ export const CommunityPollPage = () => {
   const handleVotePoll = async (optionId) => {
     if (userVoted || voting) return;
     setVoting(true);
-    setUserVoted(optionId);
+    setVoteError('');
     try {
       const updated = await reportsApi.votePoll(optionId);
       if (updated && updated.options) {
         setPoll(updated);
       }
+      setUserVoted(optionId);
     } catch (e) {
-      // Local optimistic update
-      setPoll(prev => {
-        const newOptions = prev.options.map(opt => 
-          opt.id === optionId ? { ...opt, votes: opt.votes + 1 } : opt
-        );
-        const newTotal = prev.total_votes + 1;
-        return {
-          ...prev,
-          total_votes: newTotal,
-          options: newOptions.map(opt => ({
-            ...opt,
-            percentage: Number(((opt.votes / newTotal) * 100).toFixed(1))
-          }))
-        };
-      });
+      const status = e.response?.status;
+      setVoteError(status === 401 ? 'Please log in to vote.' : (e.response?.data?.detail || 'Could not record your vote. Please try again.'));
     } finally {
       setVoting(false);
     }
@@ -208,6 +197,10 @@ export const CommunityPollPage = () => {
             );
           })}
         </div>
+
+        {voteError && (
+          <div className="text-xs text-red-400 pt-1">{voteError}</div>
+        )}
 
         {userVoted && (
           <div className="text-xs text-emerald-400 flex items-center gap-1.5 pt-1">

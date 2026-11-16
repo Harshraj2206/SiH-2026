@@ -1,7 +1,7 @@
 fastapi>=0.116.0
 uvicorn>=0.34.0
 pydantic>=2.10.0
-scikit-learn>=1.6.0
+scikit-learn==1.7.1  # must match the version model.joblib was saved with
 pandas>=2.2.0
 numpy>=2.0.0
 joblib>=1.4.0

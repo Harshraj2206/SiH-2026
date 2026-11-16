@@ -26,3 +26,14 @@ services:
         value: data
       - key: CORS_ORIGINS
         value: "https://si-h-2026.vercel.app,http://localhost:5173,http://127.0.0.1:5173"
+      # Set these in the Render dashboard (never in code). Unset = random password.
+      - key: ADMIN_SEED_PASSWORD
+        sync: false
+      - key: OFFICER_SEED_PASSWORD
+        sync: false
+      - key: RESCUE_SEED_PASSWORD
+        sync: false
+      - key: MEDICAL_SEED_PASSWORD
+        sync: false
+      - key: RESIDENT_SEED_PASSWORD
+        sync: false

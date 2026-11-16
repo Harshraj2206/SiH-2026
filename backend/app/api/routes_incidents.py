@@ -20,7 +20,7 @@ router = APIRouter(prefix="/api/incidents", tags=["Incidents & Events"])
 
 
 @router.get("/intelligence", response_model=IndiaWideIntelligenceResponse)
-async def get_india_wide_intelligence(
+def get_india_wide_intelligence(
     force_refresh: bool = Query(False, description="Bypass cache and poll live authoritative sources")
 ):
     """
@@ -32,7 +32,7 @@ async def get_india_wide_intelligence(
 
 
 @router.get("/proximity")
-async def get_user_proximity_advisory(
+def get_user_proximity_advisory(
     lat: float = Query(..., ge=-90.0, le=90.0, description="User latitude"),
     lon: float = Query(..., ge=-180.0, le=180.0, description="User longitude")
 ):
@@ -44,7 +44,7 @@ async def get_user_proximity_advisory(
 
 
 @router.post("/refresh")
-async def refresh_intelligence_pipeline(
+def refresh_intelligence_pipeline(
     current_user: Optional[dict] = Depends(get_current_user_optional)
 ):
     """
@@ -54,7 +54,7 @@ async def refresh_intelligence_pipeline(
 
 
 @router.get("", response_model=List[IncidentResponse])
-async def list_incidents(
+def list_incidents(
     status: Optional[str] = Query(None, description="Filter by status: DETECTED, VERIFIED, RESPONDING, EVACUATING, RESOLVED"),
     severity: Optional[str] = Query(None, description="Filter by severity: CRITICAL, HIGH, MODERATE, LOW"),
     category: Optional[str] = Query(None, description="Filter by category: CONFIRMED_INCIDENT, FORECAST_RISK, DEMO_SIMULATION"),
@@ -109,7 +109,7 @@ async def list_incidents(
 
 
 @router.get("/{incident_id}", response_model=IncidentResponse)
-async def get_incident(incident_id: str):
+def get_incident(incident_id: str):
     # Check in stored
     inc = db_store.get_incident_by_id(incident_id)
     if not inc:

@@ -65,10 +65,6 @@ def test_auth_login_all_seeded_roles():
         ("rescue@sdrf.ner.gov.in", "Rescue@2026!", "RESCUE_TEAM"),
         ("medical@civilhosp.ner.gov.in", "Medical@2026!", "MEDICAL_CENTER"),
         ("resident@landslideguard.gov.in", "Resident@2026!", "USER"),
-        # Test alias credentials
-        ("admin@ndma.gov.in", "admin123", "ADMIN"),
-        ("officer@sdim.ner.gov.in", "authority123", "AUTHORITY"),
-        ("resident@landslideguard.gov.in", "resident123", "USER"),
     ]
 
     for identifier, password, expected_role in roles_credentials:
@@ -77,6 +73,11 @@ def test_auth_login_all_seeded_roles():
         data = res.json()
         assert "access_token" in data
         assert data["user"]["role"] == expected_role
+
+    # Legacy short aliases (admin123 etc.) must no longer work
+    for identifier, alias in [("admin@landslideguard.gov.in", "admin123"), ("officer@sdim.ner.gov.in", "authority123")]:
+        res = client.post("/api/auth/login", json={"identifier": identifier, "password": alias})
+        assert res.status_code == 401
 
 
 def test_auth_login_failure_invalid_credentials():
@@ -311,9 +312,17 @@ def test_community_poll():
     assert "total_votes" in data
     assert "options" in data
 
-    res_vote = client.post("/api/reports/poll/vote", json={"option_id": "yes"})
+    # Voting requires login
+    assert client.post("/api/reports/poll/vote", json={"option_id": "yes"}).status_code == 401
+
+    login = client.post("/api/auth/login", json={"identifier": "resident@landslideguard.gov.in", "password": "Resident@2026!"})
+    headers = {"Authorization": f"Bearer {login.json()['access_token']}"}
+    res_vote = client.post("/api/reports/poll/vote", json={"option_id": "yes"}, headers=headers)
     assert res_vote.status_code == 200
     assert "total_votes" in res_vote.json()
+
+    # One vote per user per day
+    assert client.post("/api/reports/poll/vote", json={"option_id": "no"}, headers=headers).status_code == 409
 
 
 # ---------------- 6. Emergency SOS & Triage ----------------

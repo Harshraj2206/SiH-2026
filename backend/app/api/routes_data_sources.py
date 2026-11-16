@@ -30,7 +30,7 @@ async def get_data_sources_status() -> Dict[str, Any]:
     now = datetime.now(timezone.utc).isoformat()
     return {
         "system_mode": "PRODUCTION_DATA_INGESTION",
-        "demo_mode_active": False,
+        "demo_mode_active": True,  # zones, facilities and catalog records are still demo seed data
         "retrieved_at": now,
         "sources": [
             {
@@ -93,7 +93,7 @@ async def get_data_sources_status() -> Dict[str, Any]:
 
 
 @router.post("/telemetry/inspect")
-async def inspect_coordinate_telemetry(payload: CoordinateInspectRequest) -> Dict[str, Any]:
+def inspect_coordinate_telemetry(payload: CoordinateInspectRequest) -> Dict[str, Any]:
     """
     Live Coordinate Inspector:
     Given any latitude/longitude clicked on the map or user GPS position:
@@ -122,28 +122,39 @@ async def inspect_coordinate_telemetry(payload: CoordinateInspectRequest) -> Dic
     hist_count = get_historical_density_score(lat, lng)
 
     # 6. Run ML Model with Real Inputs
-    rain_24h = float(weather.get("rainfall_24h_mm") or 0.0)
-    rain_72h = float(weather.get("rainfall_72h_mm") or 0.0)
-    slope_deg = float(dem.get("slope_deg") or 10.0)
-    moisture = float(soil.get("volumetric_soil_moisture_m3m3") or 0.35)
+    # Missing live data stays None (UNKNOWN != ZERO); never substitute "safe" defaults.
+    rain_24h = weather.get("rainfall_24h_mm")
+    rain_72h = weather.get("rainfall_72h_mm")
+    slope_deg = dem.get("slope_deg")
+    moisture = soil.get("volumetric_soil_moisture_m3m3")
+    elev_m = dem.get("elevation_meters_amsl")
 
-    elev_m = float(dem.get("elevation_meters_amsl") or 800.0)
+    missing = [name for name, val in (("rainfall", rain_24h), ("slope", slope_deg), ("soil moisture", moisture)) if val is None]
+    if missing:
+        prediction = {
+            "status": "DATA_INSUFFICIENT",
+            "risk_score": None,
+            "risk_level": "DATA_INSUFFICIENT",
+            "unavailability_reason": f"Live data unavailable: {', '.join(missing)}. Risk not computed."
+        }
+    else:
+        features = {
+            "rainfall_24h": float(rain_24h),
+            "rainfall_72h": float(rain_72h if rain_72h is not None else rain_24h),
+            "slope_deg": float(slope_deg),
+            "soil_moisture": float(moisture),
+            "ndvi": 0.55,
+            "historical_incidents": hist_count
+        }
+        if elev_m is not None:
+            features["elevation_amsl"] = float(elev_m)
+        prediction = predict_landslide_risk(features)
 
-    prediction = predict_landslide_risk({
-        "rainfall_24h": rain_24h,
-        "rainfall_72h": rain_72h,
-        "slope_deg": slope_deg,
-        "soil_moisture": moisture,
-        "ndvi": 0.55,
-        "historical_incidents": hist_count,
-        "elevation_amsl": elev_m
-    })
-
-    ml_score = float(prediction.get("risk_score") or 15.0)
-    risk_level = prediction.get("risk_level", "LOW")
+    ml_score = prediction.get("risk_score")
+    risk_level = prediction.get("risk_level", "DATA_INSUFFICIENT")
 
     # Construct dynamic 6h/12h/24h forecast trend
-    forecast_trend = [
+    forecast_trend = [] if ml_score is None else [
         {"timeframe": "Current", "hour_offset": 0, "predicted_rainfall_mm": rain_24h, "predicted_risk_score": ml_score, "risk_level": risk_level},
         {"timeframe": "+6h", "hour_offset": 6, "predicted_rainfall_mm": round(rain_24h * 1.15, 1), "predicted_risk_score": round(min(100.0, ml_score * 1.10), 1), "risk_level": categorize_risk_level(min(100.0, ml_score * 1.10))},
         {"timeframe": "+12h", "hour_offset": 12, "predicted_rainfall_mm": round(rain_24h * 1.30, 1), "predicted_risk_score": round(min(100.0, ml_score * 1.20), 1), "risk_level": categorize_risk_level(min(100.0, ml_score * 1.20))},
@@ -192,7 +203,8 @@ async def inspect_coordinate_telemetry(payload: CoordinateInspectRequest) -> Dic
         "tree_variance": prediction.get("tree_variance"),
         "data_quality": prediction.get("data_quality"),
         "forecast_trend": forecast_trend,
-        "alert_status": "CRITICAL WARNING" if ml_score > 80 else ("HIGH ADVISORY" if ml_score > 60 else None),
+        "alert_status": None if ml_score is None else ("CRITICAL WARNING" if ml_score > 80 else ("HIGH ADVISORY" if ml_score > 60 else None)),
+        "unavailability_reason": prediction.get("unavailability_reason"),
         "last_updated": datetime.now(timezone.utc).isoformat(),
         "is_live_inspected": True,
         "provenance": {

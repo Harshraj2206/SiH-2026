@@ -28,6 +28,7 @@ def _enrich_single_zone(z: dict) -> dict:
             if weather.get("rainfall_24h_mm") is not None:
                 z["rainfall_24h"] = weather["rainfall_24h_mm"]
                 z["rainfall_72h"] = weather["rainfall_72h_mm"]
+                z["provenance"] = {**z.get("provenance", {}), "rainfall_status": "LIVE"}
             if weather.get("soil_moisture_m3m3") is not None:
                 z["soil_moisture"] = weather["soil_moisture_m3m3"]
             if weather.get("temperature_c") is not None:
@@ -85,14 +86,14 @@ def _enrich_single_zone(z: dict) -> dict:
 
 
 @router.get("", response_model=List[RiskZoneSummary])
-async def list_risk_zones(
+def list_risk_zones(
     level: Optional[str] = Query(None, description="Filter by level: LOW, MODERATE, HIGH, CRITICAL"),
     state: Optional[str] = Query(None, description="Filter by state: Meghalaya, Sikkim, Nagaland, etc.")
 ):
     zones = db_store.get_all_zones()
 
     # Ingest real-time meteorology concurrently for monitored zones (bounded workers to prevent rate-limiting)
-    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=6) as executor:
         zones = list(executor.map(_enrich_single_zone, zones))
 
     if level:
@@ -106,7 +107,7 @@ async def list_risk_zones(
 
 
 @router.get("/{zone_id}")
-async def get_risk_zone_detail(zone_id: str):
+def get_risk_zone_detail(zone_id: str):
     zone = db_store.get_zone_by_id(zone_id)
     if not zone:
         raise HTTPException(status_code=404, detail=f"Risk zone '{zone_id}' not found.")
@@ -123,6 +124,7 @@ async def get_risk_zone_detail(zone_id: str):
             if weather.get("rainfall_24h_mm") is not None:
                 zone["rainfall_24h"] = weather["rainfall_24h_mm"]
                 zone["rainfall_72h"] = weather["rainfall_72h_mm"]
+                zone["provenance"] = {**zone.get("provenance", {}), "rainfall_status": "LIVE"}
             if weather.get("soil_moisture_m3m3") is not None:
                 zone["soil_moisture"] = weather["soil_moisture_m3m3"]
             if weather.get("temperature_c") is not None:
