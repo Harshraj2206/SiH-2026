@@ -35,11 +35,12 @@ class StateStore:
             "question": "Have you noticed any signs of active landslide or ground movement near your district today?",
             "description": "Daily citizen situational monitoring across Himachal Pradesh mountain sectors.",
             "votes": {
-                "yes": 224,
-                "no": 72,
-                "unsure": 32
+                "yes": 0,
+                "no": 0,
+                "unsure": 0
             }
         }
+        self.poll_voters: Dict[str, str] = {}  # user_id -> date (YYYY-MM-DD) of last vote
         self.simulation_step: int = 1
         self._init_data()
 
@@ -319,8 +320,41 @@ class StateStore:
             }
         ]
 
+        # North-East zones referenced by the road network and community reports.
+        # Seed values only (DEMO_SEED) until live refresh replaces them.
+        ner_seed = [
+            # zone_id, name, state, district, lat, lng, rain24, rain72, slope, soil, ndvi, incidents, land_cover
+            ("NER-042", "Nongpoh - Umsning Hill Cut (NH-6)", "Meghalaya", "Ri Bhoi", 25.83, 91.89, 70.0, 140.0, 32.0, 0.45, 0.55, 4, "NH-6 hill cuts"),
+            ("NER-024", "Umiam - Shillong Ascent", "Meghalaya", "East Khasi Hills", 25.62, 91.90, 55.0, 110.0, 26.0, 0.40, 0.60, 2, "Hill road and urban slopes"),
+            ("NER-045", "Mawhati - Bhoirymbong Valley", "Meghalaya", "Ri Bhoi", 25.82, 92.03, 40.0, 80.0, 12.0, 0.30, 0.70, 0, "Valley floor"),
+            ("NER-018", "Sohra (Cherrapunji) Escarpment", "Meghalaya", "East Khasi Hills", 25.27, 91.73, 120.0, 260.0, 30.0, 0.55, 0.50, 3, "Plateau escarpment"),
+            ("NER-063", "Jowai Plateau Corridor", "Meghalaya", "West Jaintia Hills", 25.45, 92.20, 45.0, 90.0, 18.0, 0.33, 0.62, 1, "Plateau highway"),
+            ("NER-011", "Gangtok - Ranipool Canyon (NH-10)", "Sikkim", "East Sikkim", 27.25, 88.55, 75.0, 150.0, 35.0, 0.48, 0.50, 5, "Teesta valley ghat road"),
+            ("NER-012", "Dikchu Low-Slope Route", "Sikkim", "East Sikkim", 27.38, 88.52, 50.0, 100.0, 16.0, 0.35, 0.68, 1, "River terrace road"),
+            ("NER-055", "Mangan North Sikkim Corridor", "Sikkim", "Mangan", 27.51, 88.53, 80.0, 170.0, 40.0, 0.50, 0.40, 6, "High-altitude road cuts"),
+            ("NER-077", "Kohima - Paglapahar Sinking Zone (NH-29)", "Nagaland", "Kohima", 25.72, 93.99, 65.0, 130.0, 33.0, 0.46, 0.52, 4, "NH-29 ghat section"),
+            ("NER-078", "Pfutsero - Dzukou Valley Link", "Nagaland", "Kohima", 25.62, 94.19, 40.0, 85.0, 15.0, 0.30, 0.72, 0, "Valley state road"),
+            ("NER-033", "Aizawl Ridge", "Mizoram", "Aizawl", 23.73, 92.72, 60.0, 120.0, 30.0, 0.44, 0.55, 3, "Ridge-top town slopes"),
+            ("NER-034", "Lengpui Valley", "Mizoram", "Mamit", 23.84, 92.63, 45.0, 90.0, 18.0, 0.34, 0.66, 1, "Valley hub"),
+        ]
+        for zid, name, state, district, lat, lng, r24, r72, slope, soil, ndvi, hist, cover in ner_seed:
+            raw_zones.append({
+                "zone_id": zid, "name": name, "state": state, "district": district,
+                "rainfall_24h": r24, "rainfall_72h": r72, "slope_deg": slope,
+                "soil_moisture": soil, "ndvi": ndvi, "land_cover": cover,
+                "historical_incidents": hist,
+                "center": {"lat": lat, "lng": lng},
+                "coordinates": [
+                    {"lat": lat + 0.06, "lng": lng - 0.06},
+                    {"lat": lat + 0.06, "lng": lng + 0.06},
+                    {"lat": lat - 0.06, "lng": lng + 0.06},
+                    {"lat": lat - 0.06, "lng": lng - 0.06}
+                ]
+            })
+
         self.zones = {}
         for z in raw_zones:
+            z["is_demo"] = True
             pred_result = predict_landslide_risk({
                 "rainfall_24h": z["rainfall_24h"],
                 "rainfall_72h": z["rainfall_72h"],
@@ -361,8 +395,9 @@ class StateStore:
                     "dem_source": "SRTM 30m Global Digital Elevation Model",
                     "soil_source": "NASA SMAP / ERA5-Land (9 km Grid)",
                     "landslide_source": "Geological Survey of India (GSI) NLSM",
-                    "freshness_status": "LIVE",
-                    "is_demo": False
+                    "freshness_status": "DEMO_SEED",
+                    "rainfall_status": "DEMO_SEED",
+                    "is_demo": True
                 }
             }
             self.zones[z["zone_id"]] = z_entry
@@ -862,13 +897,11 @@ class StateStore:
                 "state": "Meghalaya",
                 "latitude": 25.9050,
                 "longitude": 91.8810,
-                "total_beds": 120,
-                "available_beds": 34,
-                "icu_available": 6,
+                "source": "Demo seed (name and location only)",
+                "is_demo": True,
                 "trauma_center": True,
                 "blood_bank": True,
-                "contact_phone": "+91 3638-232222",
-                "emergency_ambulance_count": 4
+                "contact_phone": "108",
             },
             "hosp-neigrihms-shl": {
                 "hospital_id": "hosp-neigrihms-shl",
@@ -878,13 +911,11 @@ class StateStore:
                 "state": "Meghalaya",
                 "latitude": 25.5920,
                 "longitude": 91.9380,
-                "total_beds": 500,
-                "available_beds": 142,
-                "icu_available": 28,
+                "source": "Demo seed (name and location only)",
+                "is_demo": True,
                 "trauma_center": True,
                 "blood_bank": True,
-                "contact_phone": "+91 364-2538025",
-                "emergency_ambulance_count": 12
+                "contact_phone": "108",
             },
             "hosp-stnm-gangtok": {
                 "hospital_id": "hosp-stnm-gangtok",
@@ -894,13 +925,11 @@ class StateStore:
                 "state": "Sikkim",
                 "latitude": 27.3210,
                 "longitude": 88.5980,
-                "total_beds": 600,
-                "available_beds": 185,
-                "icu_available": 32,
+                "source": "Demo seed (name and location only)",
+                "is_demo": True,
                 "trauma_center": True,
                 "blood_bank": True,
-                "contact_phone": "+91 3592-202944",
-                "emergency_ambulance_count": 8
+                "contact_phone": "108",
             },
             "hosp-naga-kohima": {
                 "hospital_id": "hosp-naga-kohima",
@@ -910,13 +939,11 @@ class StateStore:
                 "state": "Nagaland",
                 "latitude": 25.6680,
                 "longitude": 94.1020,
-                "total_beds": 350,
-                "available_beds": 78,
-                "icu_available": 14,
+                "source": "Demo seed (name and location only)",
+                "is_demo": True,
                 "trauma_center": True,
                 "blood_bank": True,
-                "contact_phone": "+91 370-2222916",
-                "emergency_ambulance_count": 6
+                "contact_phone": "108",
             }
         }
 
@@ -930,13 +957,11 @@ class StateStore:
                 "state": "Meghalaya",
                 "latitude": 25.9080,
                 "longitude": 91.8750,
-                "capacity": 450,
-                "current_occupancy": 140,
-                "facilities": ["Clean Drinking Water", "Kitchen & Rations", "Diesel Generator", "First Aid Post", "Separate Women/Child Dorms"],
-                "food_supply_days": 14,
+                "facilities": [],
+                "source": "Demo seed (name and location only)",
+                "is_demo": True,
                 "medical_station": True,
-                "contact_person": "E. Marwein (Relief Incharge)",
-                "contact_phone": "+91 94361-00219",
+                "contact_phone": "1070",
                 "accessibility": "Direct Valley Access via Mawhati Route"
             },
             "shelter-shillong-stadium": {
@@ -947,13 +972,11 @@ class StateStore:
                 "state": "Meghalaya",
                 "latitude": 25.5860,
                 "longitude": 91.8890,
-                "capacity": 1200,
-                "current_occupancy": 210,
-                "facilities": ["Mass Kitchen", "Field Hospital", "Wi-Fi Satellite Link", "Counseling Cell", "Helipad Vicinity"],
-                "food_supply_days": 21,
+                "facilities": [],
+                "source": "Demo seed (name and location only)",
+                "is_demo": True,
                 "medical_station": True,
-                "contact_person": "Major P. Lyndem (Retd.)",
-                "contact_phone": "+91 364-2224150",
+                "contact_phone": "1070",
                 "accessibility": "High Capacity Highway Link"
             },
             "shelter-singtam-hs": {
@@ -964,13 +987,11 @@ class StateStore:
                 "state": "Sikkim",
                 "latitude": 27.2360,
                 "longitude": 88.5020,
-                "capacity": 350,
-                "current_occupancy": 65,
-                "facilities": ["Covered Auditorium", "Solar Power", "Potable Water Tankers", "Paramedic Unit"],
-                "food_supply_days": 10,
+                "facilities": [],
+                "source": "Demo seed (name and location only)",
+                "is_demo": True,
                 "medical_station": True,
-                "contact_person": "Karma Bhutia",
-                "contact_phone": "+91 97330-14199",
+                "contact_phone": "1070",
                 "accessibility": "Low Slope Elevation"
             },
             "shelter-kohima-hall": {
@@ -981,13 +1002,11 @@ class StateStore:
                 "state": "Nagaland",
                 "latitude": 25.6720,
                 "longitude": 94.1080,
-                "capacity": 600,
-                "current_occupancy": 85,
-                "facilities": ["Emergency Kitchen", "Backup Power", "First Aid Center", "Sanitation Blocks"],
-                "food_supply_days": 15,
+                "facilities": [],
+                "source": "Demo seed (name and location only)",
+                "is_demo": True,
                 "medical_station": True,
-                "contact_person": "T. Jamir (DEOC)",
-                "contact_phone": "+91 370-2241090",
+                "contact_phone": "1070",
                 "accessibility": "Direct NH-29 Bypass Road"
             }
         }
@@ -1049,6 +1068,12 @@ class StateStore:
             }
         }
 
+        # Every seeded record above is demo data; tag it so the UI can label it.
+        for collection in (self.reports, self.incidents, self.rescue_teams, self.hospitals,
+                           self.shelters, self.post_disaster_events):
+            for record in collection.values():
+                record["is_demo"] = True
+
         # Calculate initial fusion and alerts
         self._recalculate_all_fusion_internal()
         self._regenerate_alerts_internal()
@@ -1103,11 +1128,11 @@ class StateStore:
                     "category": "CRITICAL",
                     "risk_score": score,
                     "title": f"CRITICAL LANDSLIDE WARNING: {z['name']}",
-                    "reason": f"Torrential precipitation ({z['rainfall_24h']} mm) + steep terrain ({z['slope_deg']}°) + {z['verified_report_count']} verified ground instability reports.",
+                    "reason": f"Rainfall {z['rainfall_24h']} mm in 24h + steep terrain ({z['slope_deg']}°) + {z['verified_report_count']} verified ground instability reports.",
                     "recommended_action": "Evacuate non-essential personnel and divert all heavy transport through alternate valley bypass.",
                     "timestamp": z["last_updated"],
                     "status": "ACTIVE",
-                    "affected_highway": "NH-6 / NH-10 Critical Mountain Section"
+                    "affected_highway": z["name"]
                 }
                 alert_idx += 1
             elif score >= 60.0:
@@ -1123,7 +1148,7 @@ class StateStore:
                     "recommended_action": "Activate road clearing teams, restrict night convoy movements, monitor inclinometer telemetry.",
                     "timestamp": z["last_updated"],
                     "status": "ACTIVE",
-                    "affected_highway": "Hill Highway Corridor"
+                    "affected_highway": z["name"]
                 }
                 alert_idx += 1
             elif score >= 35.0 and z["verified_report_count"] > 0:
@@ -1139,7 +1164,7 @@ class StateStore:
                     "recommended_action": "Drive with vigilance. Watch for loose debris on sharp turns.",
                     "timestamp": z["last_updated"],
                     "status": "ACTIVE",
-                    "affected_highway": "State Highway"
+                    "affected_highway": z["name"]
                 }
                 alert_idx += 1
 
@@ -1257,12 +1282,13 @@ class StateStore:
     # ---------------- Community Poll API ----------------
     def get_community_poll(self) -> Dict[str, Any]:
         with self.lock:
-            tot = sum(self.poll_data["votes"].values()) or 1
+            total = sum(self.poll_data["votes"].values())
+            tot = total or 1  # avoid division by zero in percentages
             return {
                 "id": self.poll_data["id"],
                 "question": self.poll_data["question"],
                 "description": self.poll_data["description"],
-                "total_votes": tot,
+                "total_votes": total,
                 "options": [
                     {
                         "id": "yes",
@@ -1285,11 +1311,16 @@ class StateStore:
                 ]
             }
 
-    def vote_community_poll(self, option_id: str) -> Dict[str, Any]:
+    def vote_community_poll(self, option_id: str, user_id: str) -> Optional[Dict[str, Any]]:
+        """Returns updated poll, or None if this user already voted today."""
         with self.lock:
+            today = datetime.now(timezone.utc).date().isoformat()
+            if self.poll_voters.get(user_id) == today:
+                return None
             opt = option_id.lower().strip()
             if opt in self.poll_data["votes"]:
                 self.poll_data["votes"][opt] += 1
+                self.poll_voters[user_id] = today
             return self.get_community_poll()
 
     def verify_community_report(

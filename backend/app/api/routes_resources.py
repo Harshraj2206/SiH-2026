@@ -20,7 +20,7 @@ router = APIRouter(prefix="/api/resources", tags=["Emergency Resources"])
 
 # ---------------- Live Location-Aware Emergency Resource Discovery ----------------
 @router.get("/nearby")
-async def get_nearby_emergency_resources(
+def get_nearby_emergency_resources(
     request: Request,
     lat: float = Query(..., ge=-90.0, le=90.0, description="User latitude"),
     lng: float = Query(..., ge=-180.0, le=180.0, description="User longitude"),

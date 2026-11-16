@@ -9,10 +9,10 @@ services:
     restart: unless-stopped
     ports:
       - "8000:8000"
+    env_file:
+      - .env
     environment:
       - ENVIRONMENT=production
-      - JWT_SECRET=change_me_to_a_secure_random_key_in_production
-      - CORS_ORIGINS=*
       - DATABASE_PATH=data/landslideguard_users.db
       - DATA_DIR=data
     volumes:

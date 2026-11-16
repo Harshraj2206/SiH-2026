@@ -53,7 +53,6 @@ export const LoginPage = () => {
 
   const handleQuickFill = (account) => {
     setIdentifier(account.identifier);
-    setPassword(account.password);
     setErrorMessage('');
   };
 
@@ -172,7 +171,8 @@ export const LoginPage = () => {
           </div>
         </div>
 
-        {/* Demo Quick-Fill Accordion */}
+        {/* Demo Quick-Fill Accordion (only when VITE_DEMO_MODE=true; emails only, no passwords) */}
+        {import.meta.env.VITE_DEMO_MODE === 'true' && (
         <div className="bg-[#0d1527] border border-[#1c2b48] rounded-xl overflow-hidden text-xs">
           <button
             type="button"
@@ -181,7 +181,7 @@ export const LoginPage = () => {
           >
             <div className="flex items-center gap-2">
               <KeyRound className="w-3.5 h-3.5 text-amber-400" />
-              <span className="font-mono text-[11px] font-bold text-slate-200">SIH 2026 Test Accounts</span>
+              <span className="font-mono text-[11px] font-bold text-slate-200">Demo accounts (email only)</span>
             </div>
             {showDemoCredentials ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
           </button>
@@ -196,12 +196,13 @@ export const LoginPage = () => {
                   className="w-full p-1.5 rounded-lg bg-[#090f1d] hover:bg-[#121d33] border border-[#1c2b48] text-left flex items-center justify-between transition-colors font-mono text-[11px]"
                 >
                   <span className="text-slate-200 font-semibold">{acc.role}</span>
-                  <span className="text-cyan-400 text-[10px]">Fill Credentials</span>
+                  <span className="text-cyan-400 text-[10px]">{acc.identifier}</span>
                 </button>
               ))}
             </div>
           )}
         </div>
+        )}
 
         {/* Footer */}
         <div className="text-center text-[11px] text-slate-400 font-mono flex items-center justify-center gap-1.5">

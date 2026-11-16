@@ -603,8 +603,8 @@ class LandslideIntelligencePipeline:
                 "official_warning_level": warning_label,
                 "primary_source": corridor["primary_source"],
                 "source_url": corridor["source_url"],
-                "source_type": "OFFICIAL_MET_GEOLOGICAL",
-                "verification_status": "OFFICIAL",
+                "source_type": "LANDSAFE_MODEL_FORECAST",
+                "verification_status": "MODEL FORECAST",
                 "category": "FORECAST_RISK",
                 "reported_causes": causes,
                 "contributing_factors": factors,
@@ -698,7 +698,8 @@ class LandslideIntelligencePipeline:
             for h in GSI_HISTORICAL_LANDSLIDES:
                 h_item = dict(h)
                 h_item["category"] = "HISTORICAL_INCIDENT"
-                h_item["verification_status"] = "OFFICIAL"
+                h_item["verification_status"] = "DEMO SEED"
+                h_item["is_demo"] = True
                 h_item["freshness_label"] = f"Historical Record ({h.get('event_date')})"
                 h_item["why_at_risk"] = f"Historical slope instability triggered by {h.get('trigger')}."
                 historical_records.append(h_item)

@@ -52,7 +52,7 @@ from backend.app.database.store import db_store
 # Configure Structured Server-Side Logging
 logging.basicConfig(
     level=logging.INFO if IS_PRODUCTION else logging.DEBUG,
-    format="%(asctime)s [%(levelname)s] [CorrID: %(correlation_id)s] %(message)s" if IS_PRODUCTION else "%(asctime)s [%(levelname)s] %(message)s"
+    format="%(asctime)s [%(levelname)s] %(message)s"
 )
 logger = logging.getLogger("landslideguard")
 

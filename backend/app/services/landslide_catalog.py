@@ -21,7 +21,7 @@ GSI_HISTORICAL_LANDSLIDES = [
         "injuries": 4,
         "road_blocked": "NH-6 Shillong-Guwahati Corridor (48 hours)",
         "source": "Geological Survey of India (GSI) NLSM Inventory",
-        "source_type": "OFFICIAL_GOVERNMENT_RECORD",
+        "source_type": "DEMO_SEED",
         "landslide_volume_m3": 12500
     },
     {
@@ -38,7 +38,7 @@ GSI_HISTORICAL_LANDSLIDES = [
         "injuries": 2,
         "road_blocked": "NH-6 Single Lane Obstruction",
         "source": "Geological Survey of India (GSI) NLSM Inventory",
-        "source_type": "OFFICIAL_GOVERNMENT_RECORD",
+        "source_type": "DEMO_SEED",
         "landslide_volume_m3": 8400
     },
     {
@@ -55,7 +55,7 @@ GSI_HISTORICAL_LANDSLIDES = [
         "injuries": 6,
         "road_blocked": "Singtam Link Highway",
         "source": "NASA Global Landslide Catalog (GLC) / State Disaster Management",
-        "source_type": "OFFICIAL_GOVERNMENT_RECORD",
+        "source_type": "DEMO_SEED",
         "landslide_volume_m3": 24000
     },
     {
@@ -72,7 +72,7 @@ GSI_HISTORICAL_LANDSLIDES = [
         "injuries": 3,
         "road_blocked": "NH-29 Dimapur-Kohima Ghats",
         "source": "Geological Survey of India (GSI) NLSM Inventory",
-        "source_type": "OFFICIAL_GOVERNMENT_RECORD",
+        "source_type": "DEMO_SEED",
         "landslide_volume_m3": 19500
     },
     {
@@ -89,7 +89,7 @@ GSI_HISTORICAL_LANDSLIDES = [
         "injuries": 0,
         "road_blocked": "Byrnihat-Killing Road",
         "source": "Geological Survey of India (GSI) NLSM Inventory",
-        "source_type": "OFFICIAL_GOVERNMENT_RECORD",
+        "source_type": "DEMO_SEED",
         "landslide_volume_m3": 4500
     }
 ]

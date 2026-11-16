@@ -9,7 +9,7 @@ from backend.app.models.schemas import (
     CommunityReportResponse,
     CommunityReportVerification
 )
-from backend.app.core.security import get_current_user_optional, require_roles
+from backend.app.core.security import get_current_user, get_current_user_optional, require_roles
 from backend.app.core.rate_limiter import check_auth_rate_limit
 from backend.app.database.store import db_store
 
@@ -87,10 +87,13 @@ async def get_community_poll():
 
 
 @router.post("/poll/vote", response_model=dict)
-async def vote_community_poll(payload: dict):
+async def vote_community_poll(payload: dict, current_user: dict = Depends(get_current_user)):
     """
-    Vote on active community poll ('yes', 'no', 'unsure').
+    Vote on active community poll ('yes', 'no', 'unsure'). Login required; one vote per user per day.
     """
     option_id = payload.get("option_id", "yes")
-    return db_store.vote_community_poll(option_id)
+    result = db_store.vote_community_poll(option_id, current_user["id"])
+    if result is None:
+        raise HTTPException(status_code=409, detail="You have already voted today.")
+    return result
 

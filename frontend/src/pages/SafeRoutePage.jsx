@@ -431,7 +431,16 @@ export const SafeRoutePage = () => {
               <span className="text-slate-400 text-[10px]">ORIGIN:</span>
               <select
                 value={startNode}
-                onChange={(e) => setStartNode(e.target.value)}
+                onChange={(e) => {
+                  const start = e.target.value;
+                  setStartNode(start);
+                  const net = waypoints.find((w) => w.id === start)?.network;
+                  const dest = waypoints.find((w) => w.id === destNode);
+                  if (dest && dest.network !== net) {
+                    const first = waypoints.find((w) => w.network === net && w.id !== start);
+                    if (first) setDestNode(first.id);
+                  }
+                }}
                 className="bg-transparent text-white font-semibold focus:outline-none"
               >
                 {waypoints.map((wp) => (
@@ -451,7 +460,9 @@ export const SafeRoutePage = () => {
                 onChange={(e) => setDestNode(e.target.value)}
                 className="bg-transparent text-white font-semibold focus:outline-none"
               >
-                {waypoints.map((wp) => (
+                {waypoints
+                  .filter((wp) => wp.network === waypoints.find((w) => w.id === startNode)?.network)
+                  .map((wp) => (
                   <option key={wp.id} value={wp.id} className="bg-[#0d1527]">
                     {wp.name} ({wp.region})
                   </option>
