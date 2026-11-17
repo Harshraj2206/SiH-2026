@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getRiskScoreColor } from '../../utils/formatters';
+import { getRiskScoreColor, toLabel } from '../../utils/formatters';
 import { 
   CloudRain, 
   Mountain, 
@@ -26,14 +26,14 @@ export const ZoneTelemetryDrawer = ({ zone, onClose }) => {
   ];
 
   return (
-    <div className="bg-surface border border-line rounded-card p-5 flex flex-col justify-between space-y-4 select-none h-full shadow-sm">
+    <div className="bg-surface rounded-card p-5 flex flex-col justify-between space-y-4 select-none h-full">
       <div>
         {/* Header */}
         <div className="flex items-start justify-between gap-2 border-b border-line pb-3">
           <div>
             <div className="flex items-center gap-1.5 flex-wrap">
               <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${riskColor.badge}`}>
-                {zone.risk_level} Risk
+                {toLabel(zone.risk_level)} Risk
               </span>
             </div>
             <h3 className="font-semibold text-sm text-label mt-1 leading-snug">{zone.name}</h3>
@@ -53,7 +53,7 @@ export const ZoneTelemetryDrawer = ({ zone, onClose }) => {
         </div>
 
         {/* Hazard Score Summary */}
-        <div className="mt-3 bg-surface border border-line rounded-tile p-3.5 space-y-1">
+        <div className="mt-3 bg-surface-2 rounded-tile p-3.5 space-y-1">
           <span className="text-xs text-label-2 block font-medium">Risk Score</span>
           <div className="flex items-baseline gap-2">
             <span className="text-3xl font-semibold text-label font-sans">
@@ -74,7 +74,7 @@ export const ZoneTelemetryDrawer = ({ zone, onClose }) => {
 
           <div className="space-y-2">
             {factors.map((factor, idx) => (
-              <div key={idx} className="bg-surface border border-line p-2.5 rounded-tile text-xs space-y-1">
+              <div key={idx} className="bg-surface-2 p-2.5 rounded-tile text-xs space-y-1">
                 <div className="flex justify-between text-label">
                   <span className="font-medium">{factor.name}</span>
                   <span className="tabular-nums text-label-2">{factor.value}</span>
@@ -95,7 +95,7 @@ export const ZoneTelemetryDrawer = ({ zone, onClose }) => {
       <div className="pt-2 border-t border-line">
         <button
           onClick={() => navigate('/safe-route')}
-          className="w-full py-2.5 bg-accent hover:opacity-90 text-white rounded-full text-xs font-semibold flex items-center justify-center gap-1.5 transition-all "
+          className="w-full py-2.5 bg-accent hover:opacity-90 text-white rounded-full text-xs font-semibold flex items-center justify-center gap-1.5 transition-all"
         >
           <Navigation className="w-3.5 h-3.5" />
           <span>Get Safe Evacuation Route</span>

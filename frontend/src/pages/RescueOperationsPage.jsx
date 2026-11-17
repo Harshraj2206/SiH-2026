@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toLabel } from '../utils/formatters';
 import { rescueApi } from '../services/api';
 import { useLanguage } from '../context/LanguageContext';
 import { 
@@ -64,9 +65,9 @@ export const RescueOperationsPage = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-line pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-surface-2 text-label-2 border border-line flex items-center gap-1">
+            <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-surface-2 text-label-2 flex items-center gap-1">
               <Shield className="w-3 h-3" />
-              MULTI-AGENCY RESCUE COMMAND
+              Multi-agency rescue command
             </span>
             <span className="text-xs text-label-2 tabular-nums">SIH26001</span>
           </div>
@@ -77,12 +78,12 @@ export const RescueOperationsPage = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="bg-surface border border-line px-3.5 py-1.5 rounded-tile text-center">
-            <span className="text-xs text-label-2 block tabular-nums">TOTAL UNITS</span>
+          <div className="bg-surface-2 px-3.5 py-1.5 rounded-tile text-center">
+            <span className="text-xs text-label-2 block tabular-nums">Total units</span>
             <span className="text-sm tabular-nums font-semibold text-label">{teams.length}</span>
           </div>
-          <div className="bg-risk-low/[0.12] border border-risk-low/30 px-3.5 py-1.5 rounded-tile text-center">
-            <span className="text-xs text-risk-low block tabular-nums">STANDBY READY</span>
+          <div className="bg-risk-low/[0.12] border-risk-low/30 px-3.5 py-1.5 rounded-tile text-center">
+            <span className="text-xs text-risk-low block tabular-nums">Standby ready</span>
             <span className="text-sm tabular-nums font-semibold text-risk-low">
               {teams.filter(t => t.status === 'AVAILABLE').length}
             </span>
@@ -95,16 +96,16 @@ export const RescueOperationsPage = () => {
         {teams.map((team) => (
           <div
             key={team.team_id}
-            className="bg-surface border border-line rounded-card p-5 space-y-4 hover:border-line transition-all"
+            className="bg-surface rounded-card p-5 space-y-4 transition-all"
           >
             <div className="flex items-start justify-between gap-3 border-b border-line pb-3">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="tabular-nums text-xs font-semibold text-label-2 bg-surface-2 px-2 py-0.5 rounded-full border border-line">
+                  <span className="tabular-nums text-xs font-semibold text-label-2 bg-surface-2 px-2 py-0.5 rounded-full">
                     {team.team_id}
                   </span>
-                  <span className={`text-xs px-2 py-0.5 rounded-full font-semibold border ${getStatusColor(team.status)}`}>
-                    {team.status}
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${getStatusColor(team.status)}`}>
+                    {toLabel(team.status)}
                   </span>
                 </div>
                 <h3 className="font-semibold text-base text-label mt-1.5">{team.name}</h3>
@@ -112,14 +113,14 @@ export const RescueOperationsPage = () => {
               </div>
 
               <div className="text-right">
-                <span className="text-xs text-label-3 tabular-nums block">PERSONNEL</span>
+                <span className="text-xs text-label-3 tabular-nums block">Personnel</span>
                 <span className="text-sm tabular-nums font-semibold text-label">{team.members_count} Members</span>
               </div>
             </div>
 
             {/* Current Assignment */}
             {team.current_assignment_title && (
-              <div className="bg-page p-3 rounded-tile border border-line space-y-1 text-xs">
+              <div className="bg-surface-2 p-3 rounded-tile space-y-1 text-xs">
                 <span className="text-xs font-semibold text-label-2 block">Current Assignment</span>
                 <div className="font-semibold text-label flex items-center gap-1.5">
                   <Radio className="w-3.5 h-3.5 text-risk-critical " />
@@ -133,7 +134,7 @@ export const RescueOperationsPage = () => {
 
             {/* Vehicle & Equipment */}
             <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="bg-page p-2.5 rounded-tile border border-line">
+              <div className="bg-surface-2 p-2.5 rounded-tile">
                 <div className="flex items-center gap-1 text-label-2 text-xs mb-0.5">
                   <Truck className="w-3 h-3 text-label-2" />
                   <span>Deployment Vehicle</span>
@@ -141,7 +142,7 @@ export const RescueOperationsPage = () => {
                 <span className="text-label font-medium text-xs block truncate">{team.vehicle}</span>
               </div>
 
-              <div className="bg-page p-2.5 rounded-tile border border-line">
+              <div className="bg-surface-2 p-2.5 rounded-tile">
                 <div className="flex items-center gap-1 text-label-2 text-xs mb-0.5">
                   <PhoneCall className="w-3 h-3 text-risk-low" />
                   <span>Command Contact</span>
@@ -155,7 +156,7 @@ export const RescueOperationsPage = () => {
               <span className="text-xs font-semibold text-label-3 block">Specialized Gear</span>
               <div className="flex flex-wrap gap-1.5">
                 {team.equipment.map((eq, i) => (
-                  <span key={i} className="text-xs px-2 py-0.5 bg-page border border-line rounded-full text-label-2">
+                  <span key={i} className="text-xs px-2 py-0.5 bg-surface-2 rounded-full text-label-2">
                     {eq}
                   </span>
                 ))}
@@ -167,7 +168,7 @@ export const RescueOperationsPage = () => {
               {team.status !== 'AVAILABLE' && (
                 <button
                   onClick={() => handleUpdateStatus(team.team_id, 'AVAILABLE')}
-                  className="w-full py-1.5 bg-risk-low/[0.12] hover:bg-risk-low/[0.12] text-risk-low border border-risk-low/30 rounded-full text-xs font-semibold transition-colors"
+                  className="w-full py-1.5 bg-risk-low/[0.12] hover:bg-risk-low/20 text-risk-low border-risk-low/30 rounded-full text-xs font-semibold transition-colors"
                 >
                   Mark Standby Ready
                 </button>
@@ -175,7 +176,7 @@ export const RescueOperationsPage = () => {
               {team.status !== 'DISPATCHED' && (
                 <button
                   onClick={() => handleUpdateStatus(team.team_id, 'DISPATCHED')}
-                  className="w-full py-1.5 bg-risk-moderate/[0.12] hover:bg-risk-moderate/[0.12] text-risk-moderate border border-risk-moderate/30 rounded-full text-xs font-semibold transition-colors"
+                  className="w-full py-1.5 bg-risk-moderate/[0.12] hover:bg-risk-moderate/20 text-risk-moderate border-risk-moderate/30 rounded-full text-xs font-semibold transition-colors"
                 >
                   Dispatch to Sector
                 </button>

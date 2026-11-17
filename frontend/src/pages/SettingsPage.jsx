@@ -45,7 +45,7 @@ export const SettingsPage = () => {
     <div className="space-y-6 w-full select-none pb-10">
       
       {/* Header */}
-      <div className="bg-surface border border-line p-5 rounded-card shadow-sm">
+      <div className="bg-surface p-5 rounded-card">
         <h1 className="text-lg font-semibold text-label">Platform Settings</h1>
         <p className="text-xs text-label-2 mt-0.5">
           Manage appearance, preferred language, and emergency alert notification preferences.
@@ -55,7 +55,7 @@ export const SettingsPage = () => {
       <form onSubmit={handleSave} className="space-y-5">
         
         {/* 1. Appearance (Light / Dark / System) - Full Width */}
-        <div className="bg-surface border border-line rounded-card p-6 space-y-3.5 shadow-sm">
+        <div className="bg-surface rounded-card p-6 space-y-3.5">
           <div className="flex items-center justify-between">
             <h2 className="text-xs font-semibold text-label flex items-center gap-2">
               <Sun className="w-4 h-4 text-risk-moderate" />
@@ -82,8 +82,8 @@ export const SettingsPage = () => {
                   }}
                   className={`p-4 rounded-tile border text-left transition-all ${
                     isSelected
-                      ? 'bg-surface-2 border-risk-low/30 text-label font-semibold shadow-sm'
-                      : 'bg-surface border-line text-label-2 hover:border-line'
+                      ? 'bg-surface-2 border-accent/60 text-label font-semibold'
+                      : 'bg-surface-2 border-transparent text-label-2 '
                   }`}
                 >
                   <div className="flex items-center gap-2 text-xs font-semibold text-label">
@@ -98,7 +98,7 @@ export const SettingsPage = () => {
         </div>
 
         {/* 2. Language Selector - Full Width */}
-        <div className="bg-surface border border-line rounded-card p-6 space-y-3.5 shadow-sm">
+        <div className="bg-surface rounded-card p-6 space-y-3.5">
           <h2 className="text-xs font-semibold text-label flex items-center gap-2">
             <Globe className="w-4 h-4 text-risk-low" />
             <span>Preferred Language</span>
@@ -117,8 +117,8 @@ export const SettingsPage = () => {
                   }}
                   className={`p-4 rounded-tile border text-left transition-all ${
                     isSelected
-                      ? 'bg-surface-2 border-risk-low/30 text-label font-semibold shadow-sm'
-                      : 'bg-surface border-line text-label-2 hover:border-line'
+                      ? 'bg-surface-2 border-accent/60 text-label font-semibold'
+                      : 'bg-surface-2 border-transparent text-label-2 '
                   }`}
                 >
                   <span className="font-semibold text-xs text-label block">{lang.native}</span>
@@ -130,7 +130,7 @@ export const SettingsPage = () => {
         </div>
 
         {/* 3. Notification Preferences - Full Width */}
-        <div className="bg-surface border border-line rounded-card p-6 space-y-3.5 shadow-sm">
+        <div className="bg-surface rounded-card p-6 space-y-3.5">
           <h2 className="text-xs font-semibold text-label flex items-center gap-2">
             <Bell className="w-4 h-4 text-label-2" />
             <span>Emergency Notification Channels</span>
@@ -150,7 +150,7 @@ export const SettingsPage = () => {
                   className={`flex items-center gap-3 p-4 rounded-tile border cursor-pointer transition-colors text-xs ${
                     isChecked
                       ? 'bg-surface-2 border-risk-low/30 text-label font-semibold'
-                      : 'bg-surface border-line text-label-2 hover:border-line'
+                      : 'bg-surface-2 border-transparent text-label-2 '
                   }`}
                 >
                   <input
@@ -181,7 +181,7 @@ export const SettingsPage = () => {
 
           <button
             type="submit"
-            className="px-6 py-3 bg-accent hover:opacity-90 text-white rounded-full text-xs font-semibold flex items-center gap-2 transition-all active:scale-[0.99]"
+            className="px-6 py-3 bg-accent hover:opacity-90 text-white rounded-full whitespace-nowrap text-xs font-semibold flex items-center gap-2 transition-all active:scale-[0.99]"
           >
             <Save className="w-3.5 h-3.5" />
             <span>Save Preferences</span>

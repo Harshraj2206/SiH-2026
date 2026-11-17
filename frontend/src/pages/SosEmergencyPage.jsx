@@ -126,9 +126,9 @@ export const SosEmergencyPage = () => {
     <div className="space-y-5 w-full select-none pb-10">
       
       {/* Header & Tab Selector */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-surface p-5 rounded-card border border-line shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-surface p-5 rounded-card">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-tile bg-risk-critical/[0.12] border border-risk-critical/30 flex items-center justify-center text-risk-critical">
+          <div className="w-10 h-10 rounded-tile bg-risk-critical/[0.12] border-risk-critical/30 flex items-center justify-center text-risk-critical">
             <Radio className="w-5 h-5" />
           </div>
           <div>
@@ -137,18 +137,18 @@ export const SosEmergencyPage = () => {
           </div>
         </div>
 
-        <div className="flex items-center bg-surface border border-line rounded-tile p-1 text-xs self-start sm:self-center">
+        <div className="flex items-center bg-surface-2 rounded-tile p-1 text-xs self-start sm:self-center">
           <button
             onClick={() => setActiveTab('citizen')}
-            className={`px-3.5 py-1.5 rounded-full transition-colors font-medium ${
-              activeTab === 'citizen' ? 'bg-risk-critical text-label font-semibold' : 'text-label-2 hover:text-label'
+            className={`px-3.5 py-1.5 rounded-full whitespace-nowrap transition-colors font-medium ${
+              activeTab === 'citizen' ? 'bg-risk-critical text-white font-semibold' : 'text-label-2 hover:text-label'
             }`}
           >
             Citizen Distress
           </button>
           <button
             onClick={() => setActiveTab('authority')}
-            className={`px-3.5 py-1.5 rounded-full transition-colors font-medium ${
+            className={`px-3.5 py-1.5 rounded-full whitespace-nowrap transition-colors font-medium ${
               activeTab === 'authority' ? 'bg-surface-2 text-label font-semibold' : 'text-label-2 hover:text-label'
             }`}
           >
@@ -160,17 +160,17 @@ export const SosEmergencyPage = () => {
       {activeTab === 'citizen' ? (
         /* Section 12: Focused Emergency SOS Request Experience */
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-          <div className="lg:col-span-8 bg-surface border border-line rounded-card p-6 shadow-sm space-y-4">
+          <div className="lg:col-span-8 bg-surface rounded-card p-6 space-y-4">
             
             {/* Status Telemetry Strip */}
-            <div className="grid grid-cols-3 gap-2 bg-surface p-3 rounded-tile border border-line text-xs">
+            <div className="grid grid-cols-3 gap-2 bg-surface-2 p-3 rounded-tile text-xs">
               <div className="flex items-center gap-1.5 text-label-2">
                 <MapPin className="w-3.5 h-3.5 text-risk-low shrink-0" />
                 <span className="truncate">GPS: {(gpsLocation?.lat ?? 31.958).toFixed(3)}°, {(gpsLocation?.lng ?? 77.110).toFixed(3)}°</span>
               </div>
               <div className="flex items-center gap-1.5 text-label-2">
                 {isOnline ? <Wifi className="w-3.5 h-3.5 text-risk-low shrink-0" /> : <WifiOff className="w-3.5 h-3.5 text-risk-moderate shrink-0" />}
-                <span>{isOnline ? 'ONLINE' : 'OFFLINE (QUEUED)'}</span>
+                <span>{isOnline ? 'Online' : 'Offline (queued)'}</span>
               </div>
               <div className="flex items-center gap-1.5 text-label-2">
                 <Clock className="w-3.5 h-3.5 text-label-2 shrink-0" />
@@ -180,16 +180,16 @@ export const SosEmergencyPage = () => {
 
             {submittedSOS ? (
               /* Post-Dispatch Status Pipeline (Section 12) */
-              <div className="bg-surface-2 border border-line p-5 rounded-tile space-y-4">
+              <div className="bg-surface-2 p-5 rounded-tile space-y-4">
                 <div className="flex items-center justify-between border-b border-line pb-3">
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="w-5 h-5 text-risk-low" />
                     <div>
-                      <h3 className="tabular-nums font-semibold text-sm text-label">SOS BEACON ACTIVE</h3>
+                      <h3 className="tabular-nums font-semibold text-sm text-label">SOS beacon active</h3>
                       <span className="tabular-nums text-xs text-label-2">Incident #{submittedSOS.sos_id}</span>
                     </div>
                   </div>
-                  <span className="text-xs px-2 py-0.5 rounded-full tabular-nums font-semibold bg-risk-critical/[0.12] text-risk-critical border border-risk-critical/30">
+                  <span className="text-xs px-2 py-0.5 rounded-full tabular-nums font-semibold bg-risk-critical/[0.12] text-risk-critical border-risk-critical/30">
                     {submittedSOS.triage_priority}
                   </span>
                 </div>
@@ -198,22 +198,22 @@ export const SosEmergencyPage = () => {
                 <div className="space-y-1.5 tabular-nums text-xs">
                   <span className="text-label-2 block font-semibold text-xs">Dispatch Pipeline</span>
                   <div className="grid grid-cols-5 gap-1 text-center">
-                    <div className="p-1.5 rounded-tile bg-risk-low/[0.12] border border-risk-low/30 text-risk-low font-semibold">1. SENT</div>
-                    <div className="p-1.5 rounded-tile bg-risk-low/[0.12] border border-risk-low/30 text-risk-low font-semibold">2. ACKNOWLEDGED</div>
-                    <div className="p-1.5 rounded-tile bg-surface-2 border border-line text-label-2 font-semibold">3. ASSIGNED</div>
-                    <div className="p-1.5 rounded-tile bg-surface-2 text-label-2">4. EN ROUTE</div>
-                    <div className="p-1.5 rounded-tile bg-surface-2 text-label-2">5. RESCUED</div>
+                    <div className="p-1.5 rounded-tile bg-risk-low/[0.12] border-risk-low/30 text-risk-low font-semibold">1. Sent</div>
+                    <div className="p-1.5 rounded-tile bg-risk-low/[0.12] border-risk-low/30 text-risk-low font-semibold">2. Acknowledged</div>
+                    <div className="p-1.5 rounded-tile bg-surface-2 text-label-2 font-semibold">3. Assigned</div>
+                    <div className="p-1.5 rounded-tile bg-surface-2 text-label-2">4. En route</div>
+                    <div className="p-1.5 rounded-tile bg-surface-2 text-label-2">5. Rescued</div>
                   </div>
                 </div>
 
-                <div className="bg-surface-2 p-3 rounded-tile border border-line text-xs tabular-nums space-y-1 text-label-2">
+                <div className="bg-surface-2 p-3 rounded-tile text-xs tabular-nums space-y-1 text-label-2">
                   <div>Assigned Response Team: <strong className="text-label">{submittedSOS.assigned_team_name || 'NDRF 1st Bn (Dispatched)'}</strong></div>
                   <div>Trauma Center: <strong className="text-label">{submittedSOS.destination_hospital_name || 'Designated District Civil Hospital'}</strong></div>
                 </div>
 
                 <button
                   onClick={() => setSubmittedSOS(null)}
-                  className="w-full py-2 bg-surface-2 hover:bg-[#182744] text-label rounded-full text-xs tabular-nums transition-colors"
+                  className="w-full py-2 bg-surface-2 hover:opacity-90 text-label rounded-full text-xs tabular-nums transition-colors"
                 >
                   Send Follow-up Emergency Note
                 </button>
@@ -228,10 +228,10 @@ export const SosEmergencyPage = () => {
                   </label>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {[
-                      { id: 'CRITICAL', label: 'CRITICAL', desc: 'Trapped / Danger', border: 'border-risk-critical/30', text: 'text-risk-critical' },
-                      { id: 'INJURED', label: 'INJURED', desc: 'Severe trauma', border: 'border-risk-moderate/30', text: 'text-risk-moderate' },
-                      { id: 'MINOR', label: 'MINOR', desc: 'Cuts / Mobility ok', border: 'border-line', text: 'text-label-2' },
-                      { id: 'NO INJURY', label: 'NO INJURY', desc: 'Stranded / Evac', border: 'border-risk-low/30', text: 'text-risk-low' }
+                      { id: 'CRITICAL', label: 'Critical', desc: 'Trapped / Danger', border: 'border-risk-critical/60', text: 'text-risk-critical' },
+                      { id: 'INJURED', label: 'Injured', desc: 'Severe trauma', border: 'border-risk-moderate/60', text: 'text-risk-moderate' },
+                      { id: 'MINOR', label: 'Minor', desc: 'Cuts / Mobility ok', border: 'border-accent/60', text: 'text-label-2' },
+                      { id: 'NO INJURY', label: 'No injury', desc: 'Stranded / Evac', border: 'border-risk-low/60', text: 'text-risk-low' }
                     ].map((opt) => (
                       <button
                         key={opt.id}
@@ -240,7 +240,7 @@ export const SosEmergencyPage = () => {
                         className={`p-2.5 rounded-tile border text-left tabular-nums transition-colors ${
                           severityOption === opt.id 
                             ? `bg-surface-2 ${opt.border} ` 
-                            : 'bg-surface-2 border-line hover:bg-surface-2'
+                            : 'bg-surface-2 border-transparent hover:opacity-90'
                         }`}
                       >
                         <span className={`block font-semibold text-xs ${opt.text}`}>{opt.label}</span>
@@ -260,7 +260,7 @@ export const SosEmergencyPage = () => {
                       max="100"
                       value={peopleCount}
                       onChange={(e) => setPeopleCount(e.target.value)}
-                      className="w-full bg-surface-2 border border-line rounded-field px-3 py-2 text-xs text-label focus:outline-none focus:border-line tabular-nums"
+                      className="w-full bg-surface-2 rounded-field px-3 py-2 text-xs text-label focus:outline-none tabular-nums focus:ring-2 focus:ring-accent/40"
                       required
                     />
                   </div>
@@ -272,7 +272,7 @@ export const SosEmergencyPage = () => {
                       value={userName}
                       onChange={(e) => setUserName(e.target.value)}
                       placeholder="Name"
-                      className="w-full bg-surface-2 border border-line rounded-field px-3 py-2 text-xs text-label placeholder-label-3 focus:outline-none focus:border-line tabular-nums"
+                      className="w-full bg-surface-2 rounded-field px-3 py-2 text-xs text-label placeholder-label-3 focus:outline-none tabular-nums focus:ring-2 focus:ring-accent/40"
                       required
                     />
                   </div>
@@ -284,7 +284,7 @@ export const SosEmergencyPage = () => {
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder="+91 98000-XXXXX"
-                      className="w-full bg-surface-2 border border-line rounded-field px-3 py-2 text-xs text-label placeholder-label-3 focus:outline-none focus:border-line tabular-nums"
+                      className="w-full bg-surface-2 rounded-field px-3 py-2 text-xs text-label placeholder-label-3 focus:outline-none tabular-nums focus:ring-2 focus:ring-accent/40"
                       required
                     />
                   </div>
@@ -300,7 +300,7 @@ export const SosEmergencyPage = () => {
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder="e.g. Near milestone 42 on NH-6, white SUV, mud covering road..."
-                    className="w-full bg-surface-2 border border-line rounded-field p-2.5 text-xs text-label placeholder-label-3 focus:outline-none focus:border-line tabular-nums"
+                    className="w-full bg-surface-2 rounded-field p-2.5 text-xs text-label placeholder-label-3 focus:outline-none tabular-nums focus:ring-2 focus:ring-accent/40"
                   />
                 </div>
 
@@ -308,10 +308,10 @@ export const SosEmergencyPage = () => {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-full py-3.5 bg-risk-critical hover:bg-risk-critical text-label rounded-full text-sm tabular-nums font-semibold flex items-center justify-center gap-2 border border-risk-critical/30 transition-colors disabled:opacity-50"
+                  className="w-full py-3.5 bg-risk-critical hover:opacity-90 text-white rounded-full text-sm tabular-nums font-semibold flex items-center justify-center gap-2 border-risk-critical/30 transition-colors disabled:opacity-50"
                 >
                   <Radio className="w-4 h-4 text-label" />
-                  <span>{submitting ? 'TRANSMITTING BEACON...' : 'SEND SOS'}</span>
+                  <span>{submitting ? 'Sending…' : 'Send SOS'}</span>
                 </button>
               </form>
             )}
@@ -319,28 +319,28 @@ export const SosEmergencyPage = () => {
 
           {/* Right: Emergency Helplines & Self Protection */}
           <div className="lg:col-span-4 space-y-3 tabular-nums">
-            <div className="bg-surface-2 border border-line rounded-tile p-4 space-y-2.5">
+            <div className="bg-surface-2 rounded-tile p-4 space-y-2.5">
               <h3 className="font-semibold text-xs text-label flex items-center gap-1.5 ">
                 <PhoneCall className="w-3.5 h-3.5 text-risk-low" />
                 Direct Helplines
               </h3>
               <div className="space-y-1.5 text-xs">
-                <div className="bg-surface-2 p-2 rounded-tile border border-line flex justify-between items-center">
+                <div className="bg-surface-2 p-2 rounded-tile flex justify-between items-center">
                   <span className="text-label-2">National Emergency</span>
                   <strong className="text-risk-low text-sm">112</strong>
                 </div>
-                <div className="bg-surface-2 p-2 rounded-tile border border-line flex justify-between items-center">
+                <div className="bg-surface-2 p-2 rounded-tile flex justify-between items-center">
                   <span className="text-label-2">Disaster Management</span>
                   <strong className="text-label-2 text-sm">1070 / 1077</strong>
                 </div>
-                <div className="bg-surface-2 p-2 rounded-tile border border-line flex justify-between items-center">
+                <div className="bg-surface-2 p-2 rounded-tile flex justify-between items-center">
                   <span className="text-label-2">Ambulance Service</span>
                   <strong className="text-risk-moderate text-sm">108</strong>
                 </div>
               </div>
             </div>
 
-            <div className="bg-surface-2 border border-line rounded-tile p-4 space-y-2 text-xs text-label-2">
+            <div className="bg-surface-2 rounded-tile p-4 space-y-2 text-xs text-label-2">
               <h4 className="font-semibold text-label text-xs flex items-center gap-1.5 ">
                 <Shield className="w-3.5 h-3.5 text-label-2" />
                 Self-Protection Rules
@@ -357,26 +357,26 @@ export const SosEmergencyPage = () => {
         /* Section 23: Clean Authority Rescue Priority Queue */
         <div className="space-y-3 tabular-nums">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-            <div className="bg-surface-2 border border-line p-2.5 rounded-tile">
-              <span className="text-xs text-risk-critical block font-semibold">P1 — CRITICAL</span>
+            <div className="bg-surface-2 p-2.5 rounded-tile">
+              <span className="text-xs text-risk-critical block font-semibold">P1 — critical</span>
               <span className="text-lg font-semibold text-label">
                 {sosList.filter(s => s.triage_priority === 'CRITICAL').length}
               </span>
             </div>
-            <div className="bg-surface-2 border border-line p-2.5 rounded-tile">
-              <span className="text-xs text-risk-moderate block font-semibold">P2 — URGENT</span>
+            <div className="bg-surface-2 p-2.5 rounded-tile">
+              <span className="text-xs text-risk-moderate block font-semibold">P2 — urgent</span>
               <span className="text-lg font-semibold text-label">
                 {sosList.filter(s => s.triage_priority === 'URGENT').length}
               </span>
             </div>
-            <div className="bg-surface-2 border border-line p-2.5 rounded-tile">
-              <span className="text-xs text-label-2 block font-semibold">P3 — EVACUATION</span>
+            <div className="bg-surface-2 p-2.5 rounded-tile">
+              <span className="text-xs text-label-2 block font-semibold">P3 — evacuation</span>
               <span className="text-lg font-semibold text-label">
                 {sosList.filter(s => s.triage_priority === 'EVACUATION').length}
               </span>
             </div>
-            <div className="bg-surface-2 border border-line p-2.5 rounded-tile">
-              <span className="text-xs text-risk-low block font-semibold">P4 — SAFE</span>
+            <div className="bg-surface-2 p-2.5 rounded-tile">
+              <span className="text-xs text-risk-low block font-semibold">P4 — safe</span>
               <span className="text-lg font-semibold text-label">
                 {sosList.filter(s => s.status === 'RESCUED' || s.triage_priority === 'ROUTINE').length}
               </span>
@@ -387,11 +387,11 @@ export const SosEmergencyPage = () => {
             {sosList.map((sos) => (
               <div
                 key={sos.sos_id}
-                className="bg-surface-2 border border-line rounded-tile p-3.5 space-y-2"
+                className="bg-surface-2 rounded-tile p-3.5 space-y-2"
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-line pb-2">
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold text-xs text-risk-critical bg-risk-critical/[0.12] px-1.5 py-0.5 rounded-full border border-risk-critical/30">
+                    <span className="font-semibold text-xs text-risk-critical bg-risk-critical/[0.12] px-1.5 py-0.5 rounded-full border-risk-critical/30">
                       {sos.sos_id}
                     </span>
                     <span className="text-xs font-semibold text-label">{sos.user_name} ({sos.people_count} victims)</span>
@@ -401,17 +401,17 @@ export const SosEmergencyPage = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 text-xs">
-                  <div className="bg-surface-2 p-2 rounded-tile border border-line">
+                  <div className="bg-surface-2 p-2 rounded-tile">
                     <span className="text-xs text-label-3 block ">Location</span>
                     <span className="text-label-2 font-semibold">{sos.location_name}</span>
                   </div>
 
-                  <div className="bg-surface-2 p-2 rounded-tile border border-line">
+                  <div className="bg-surface-2 p-2 rounded-tile">
                     <span className="text-xs text-label-3 block ">Notes</span>
                     <span className="text-label-2 italic">"{sos.message || 'Assistance requested'}"</span>
                   </div>
 
-                  <div className="bg-surface-2 p-2 rounded-tile border border-line flex items-center justify-between">
+                  <div className="bg-surface-2 p-2 rounded-tile flex items-center justify-between">
                     <div>
                       <span className="text-xs text-label-3 block ">Status</span>
                       <span className="text-risk-low font-semibold">{sos.assigned_team_name || 'Unassigned'}</span>
@@ -420,7 +420,7 @@ export const SosEmergencyPage = () => {
                       <select
                         onChange={(e) => e.target.value && handleAssignTeam(sos.sos_id, e.target.value)}
                         defaultValue=""
-                        className="bg-surface-2 border border-line rounded-field px-2 py-1 text-xs text-label"
+                        className="bg-surface-2 rounded-field px-2 py-1 text-xs text-label focus:ring-2 focus:ring-accent/40"
                       >
                         <option value="" disabled>Assign Team...</option>
                         {rescueTeams.map((t) => (

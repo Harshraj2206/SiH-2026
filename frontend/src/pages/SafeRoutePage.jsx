@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toLabel } from '../utils/formatters';
 import { useLocation } from 'react-router-dom';
 import { safeRouteApi, resourcesApi } from '../services/api';
 import { useEmergency } from '../context/EmergencyContext';
@@ -302,12 +303,12 @@ export const SafeRoutePage = () => {
     <div className="space-y-4">
       
       {/* Top Header & Search Console */}
-      <div className="bg-surface border border-line p-3.5 rounded-tile space-y-3">
+      <div className="bg-surface-2 p-3.5 rounded-tile space-y-3">
         
         {/* Header Bar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-line pb-2.5">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-tile bg-risk-low/[0.12] border border-risk-low/30 flex items-center justify-center text-risk-low">
+            <div className="w-8 h-8 rounded-tile bg-risk-low/[0.12] border-risk-low/30 flex items-center justify-center text-risk-low">
               <Navigation className="w-4 h-4" />
             </div>
             <div>
@@ -321,19 +322,19 @@ export const SafeRoutePage = () => {
           </div>
 
           {/* Mode Switcher */}
-          <div className="flex items-center bg-surface-2 p-0.5 rounded-tile border border-line text-xs">
+          <div className="flex items-center bg-surface-2 p-0.5 rounded-full text-xs">
             <button
               onClick={() => { setRoutingMode('global'); setIsEvacuating(false); }}
-              className={`px-3 py-1 rounded-full transition-colors ${
-                routingMode === 'global' ? 'bg-surface-2 text-label font-semibold' : 'text-label-2 hover:text-label'
+              className={`px-3 py-1 rounded-full whitespace-nowrap transition-colors ${
+                routingMode === 'global' ? 'bg-label/[0.12] text-label font-semibold' : 'text-label-2 hover:text-label'
               }`}
             >
               {t('mode_worldwide') || 'Worldwide Search'}
             </button>
             <button
               onClick={() => { setRoutingMode('preset'); setIsEvacuating(false); }}
-              className={`px-3 py-1 rounded-full transition-colors ${
-                routingMode === 'preset' ? 'bg-surface-2 text-label font-semibold' : 'text-label-2 hover:text-label'
+              className={`px-3 py-1 rounded-full whitespace-nowrap transition-colors ${
+                routingMode === 'preset' ? 'bg-label/[0.12] text-label font-semibold' : 'text-label-2 hover:text-label'
               }`}
             >
               {t('mode_corridors') || 'Disaster Corridors'}
@@ -347,7 +348,7 @@ export const SafeRoutePage = () => {
             <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-center">
               
               {/* Origin Input */}
-              <div className="md:col-span-5 flex items-center bg-surface-2 border border-line focus-within:border-line rounded-tile px-2.5 py-1.5">
+              <div className="md:col-span-5 flex items-center bg-surface-2 focus-within:border-line rounded-tile px-2.5 py-1.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-accent mr-2 shrink-0" />
                 <input
                   type="text"
@@ -371,7 +372,7 @@ export const SafeRoutePage = () => {
               </div>
 
               {/* Destination Input */}
-              <div className="md:col-span-4 flex items-center bg-surface-2 border border-line focus-within:border-risk-low/30 rounded-tile px-2.5 py-1.5">
+              <div className="md:col-span-4 flex items-center bg-surface-2 focus-within:border-risk-low/30 rounded-tile px-2.5 py-1.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-risk-low mr-2 shrink-0" />
                 <input
                   type="text"
@@ -387,7 +388,7 @@ export const SafeRoutePage = () => {
                 <button
                   type="submit"
                   disabled={calculating}
-                  className="w-full py-1.5 px-3 bg-accent hover:bg-accent disabled:opacity-50 text-label rounded-full text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+                  className="w-full py-1.5 px-3 bg-accent hover:opacity-90 disabled:opacity-50 text-white rounded-full text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
                 >
                   <Navigation className={`w-3.5 h-3.5 ${calculating ? 'animate-spin' : ''}`} />
                   <span>{calculating ? (t('routing_in_progress') || 'Calculating...') : (t('route_calculate_btn') || 'Route')}</span>
@@ -417,7 +418,7 @@ export const SafeRoutePage = () => {
                     setDestQuery(c.d);
                     handleExecuteGlobalRoute(c.o, c.d);
                   }}
-                  className="px-2 py-0.5 rounded-full bg-surface-2 hover:bg-surface-2 text-label-2 hover:text-label shrink-0 transition-colors"
+                  className="px-2 py-0.5 rounded-full whitespace-nowrap bg-surface-2 hover:bg-surface-2 text-label-2 hover:text-label shrink-0 transition-colors"
                 >
                   {c.label}
                 </button>
@@ -427,8 +428,8 @@ export const SafeRoutePage = () => {
         ) : (
           /* Preset Corridor Dropdowns */
           <div className="flex flex-wrap items-center gap-3 text-xs">
-            <div className="flex items-center gap-1.5 bg-surface-2 px-2.5 py-1.5 rounded-tile border border-line">
-              <span className="text-label-2 text-xs">ORIGIN:</span>
+            <div className="flex items-center gap-1.5 bg-surface-2 px-2.5 py-1.5 rounded-tile">
+              <span className="text-label-2 text-xs">Origin:</span>
               <select
                 value={startNode}
                 onChange={(e) => {
@@ -453,8 +454,8 @@ export const SafeRoutePage = () => {
 
             <ArrowRight className="w-3.5 h-3.5 text-label-3 hidden sm:block" />
 
-            <div className="flex items-center gap-1.5 bg-surface-2 px-2.5 py-1.5 rounded-tile border border-line">
-              <span className="text-label-2 text-xs">DESTINATION:</span>
+            <div className="flex items-center gap-1.5 bg-surface-2 px-2.5 py-1.5 rounded-tile">
+              <span className="text-label-2 text-xs">Destination:</span>
               <select
                 value={destNode}
                 onChange={(e) => setDestNode(e.target.value)}
@@ -473,7 +474,7 @@ export const SafeRoutePage = () => {
             <button
               onClick={handleCalculatePresetRoute}
               disabled={calculating}
-              className="px-4 py-1.5 bg-surface-2 hover:bg-[#1f3254] text-label rounded-full text-xs font-semibold transition-colors"
+              className="px-4 py-1.5 bg-surface-2 hover:opacity-90 text-label rounded-full whitespace-nowrap text-xs font-semibold transition-colors"
             >
               {calculating ? 'Analyzing...' : 'Recalculate'}
             </button>
@@ -482,7 +483,7 @@ export const SafeRoutePage = () => {
       </div>
 
       {errorMsg && (
-        <div className="p-2.5 rounded-tile bg-risk-critical/[0.12] border border-risk-critical/30 text-risk-critical text-xs tabular-nums flex items-center gap-2">
+        <div className="p-2.5 rounded-tile bg-risk-critical/[0.12] border-risk-critical/30 text-risk-critical text-xs tabular-nums flex items-center gap-2">
           <AlertTriangle className="w-4 h-4 text-risk-critical shrink-0" />
           <span>{errorMsg}</span>
         </div>
@@ -493,7 +494,7 @@ export const SafeRoutePage = () => {
         <div className="bg-surface-2 border-2 border-risk-low/30 p-4 rounded-tile animate-in fade-in space-y-3">
           <div className="flex items-center justify-between border-b border-line pb-2">
             <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-risk-low " />
+              <span className="w-3 h-3 rounded-full bg-risk-low" />
               <div>
                 <span className="text-xs font-semibold text-risk-low block">
                   MOVE TOWARD SAFE ZONE • TURN-BY-TURN ROAD GUIDANCE
@@ -505,12 +506,12 @@ export const SafeRoutePage = () => {
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="text-xs px-2 py-0.5 rounded-full font-semibold bg-risk-low/[0.12] text-risk-low border border-risk-low/30">
+              <span className="text-xs px-2 py-0.5 rounded-full font-semibold bg-risk-low/[0.12] text-risk-low border-risk-low/30">
                 {routeResult.safe_route.distance_km} KM • ~{routeResult.safe_route.travel_time_min} MIN
               </span>
               <button
                 onClick={() => setIsEvacuating(false)}
-                className="p-1 text-label-2 hover:text-label rounded-full bg-surface-2 "
+                className="p-1 text-label-2 hover:text-label rounded-full bg-surface-2"
                 title="Exit Evacuation Mode"
               >
                 <X className="w-4 h-4" />
@@ -519,10 +520,10 @@ export const SafeRoutePage = () => {
           </div>
 
           {currentSegment && (
-            <div className="bg-surface-2 p-3 rounded-tile border border-risk-low/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="bg-surface-2 p-3 rounded-tile border-risk-low/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs px-1.5 py-0.2 rounded-full font-semibold bg-surface-2 text-label-2 border border-line">
+                  <span className="text-xs px-1.5 py-0.5 rounded-full font-semibold bg-surface-2 text-label-2">
                     STEP {currentStepIndex + 1} OF {totalSegments}
                   </span>
                   <span className="text-risk-low font-semibold text-xs">
@@ -541,16 +542,16 @@ export const SafeRoutePage = () => {
                 <button
                   onClick={() => setCurrentStepIndex(Math.max(0, currentStepIndex - 1))}
                   disabled={currentStepIndex === 0}
-                  className="px-2.5 py-1.5 bg-surface-2 hover:bg-[#182744] text-label-2 rounded-full text-xs font-semibold disabled:opacity-40"
+                  className="px-2.5 py-1.5 bg-surface-2 hover:opacity-90 text-label-2 rounded-full whitespace-nowrap text-xs font-semibold disabled:opacity-40"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setCurrentStepIndex(Math.min(totalSegments - 1, currentStepIndex + 1))}
                   disabled={currentStepIndex === totalSegments - 1}
-                  className="px-3 py-1.5 bg-risk-low hover:bg-risk-low text-label rounded-full border border-risk-low/30 text-xs font-semibold flex items-center gap-1 disabled:opacity-40"
+                  className="px-3 py-1.5 bg-risk-low hover:opacity-90 text-white rounded-full whitespace-nowrap border-risk-low/30 text-xs font-semibold flex items-center gap-1 disabled:opacity-40"
                 >
-                  <span>NEXT STEP</span>
+                  <span>Next step</span>
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
@@ -564,7 +565,7 @@ export const SafeRoutePage = () => {
         
         {/* Map (65%) */}
         <div className="lg:col-span-8 flex flex-col">
-          <div className="bg-surface border border-line rounded-card p-3.5 shadow-sm flex flex-col h-full">
+          <div className="bg-surface rounded-card p-3.5 flex flex-col h-full">
             <div className="flex items-center justify-between mb-2 text-xs">
               <span className="text-label font-semibold flex items-center gap-1.5">
                 <Compass className="w-3.5 h-3.5 text-risk-low" />
@@ -578,7 +579,7 @@ export const SafeRoutePage = () => {
               </div>
             </div>
 
-            <div className="w-full h-[460px] lg:h-[500px] xl:h-[540px] rounded-tile overflow-hidden border border-line">
+            <div className="w-full h-[460px] lg:h-[500px] xl:h-[540px] rounded-tile overflow-hidden">
               <LeafletRiskMap
                 zones={zones}
                 reports={reports}
@@ -597,28 +598,28 @@ export const SafeRoutePage = () => {
           {routeResult ? (
             <>
               {/* Route Summary Card */}
-              <div className="bg-surface border border-line rounded-card p-4 shadow-sm space-y-2.5">
+              <div className="bg-surface rounded-card p-4 space-y-2.5">
                 <div className="flex items-center justify-between border-b border-line pb-2">
                   <div className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-risk-low" />
-                    <span className="text-xs font-semibold text-label ">ROUTE SUMMARY</span>
+                    <span className="text-xs font-semibold text-label ">Route summary</span>
                   </div>
-                  <span className="text-xs px-2 py-0.5 rounded-full font-semibold bg-risk-low/[0.12] text-risk-low border border-risk-low/30">
-                    {routeResult.safe_route.safety_level}
+                  <span className="text-xs px-2 py-0.5 rounded-full font-semibold bg-risk-low/[0.12] text-risk-low border-risk-low/30">
+                    {toLabel(routeResult.safe_route.safety_level)}
                   </span>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2 bg-surface p-2 rounded-tile border border-line text-center">
+                <div className="grid grid-cols-3 gap-2 bg-surface-2 p-2 rounded-tile text-center">
                   <div>
-                    <span className="text-xs sm:text-xs text-label-2 block">TOTAL DIST</span>
+                    <span className="text-xs sm:text-xs text-label-2 block">Total dist</span>
                     <strong className="text-xs sm:text-sm text-label">{routeResult.safe_route.distance_km} km</strong>
                   </div>
                   <div>
-                    <span className="text-xs sm:text-xs text-label-2 block">EST. TIME</span>
+                    <span className="text-xs sm:text-xs text-label-2 block">Est. time</span>
                     <strong className="text-xs sm:text-sm text-label">{routeResult.safe_route.travel_time_min} min</strong>
                   </div>
                   <div>
-                    <span className="text-xs sm:text-xs text-label-2 block">MAX SLOPE</span>
+                    <span className="text-xs sm:text-xs text-label-2 block">Max slope</span>
                     <strong className="text-xs sm:text-sm text-risk-low">{routeResult.safe_route.max_slope_deg || 3.5}°</strong>
                   </div>
                 </div>
@@ -632,20 +633,20 @@ export const SafeRoutePage = () => {
                   onClick={() => setIsEvacuating(true)}
                   className={`w-full py-2 rounded-full text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors ${
                     isEvacuating
-                      ? 'bg-surface-2 text-risk-low border border-risk-low/30'
-                      : 'bg-accent hover:opacity-90 text-white  '
+                      ? 'bg-surface-2 text-risk-low border border-accent/60'
+                      : 'bg-accent hover:opacity-90 text-white '
                   }`}
                 >
                   <Navigation className="w-3.5 h-3.5" />
-                  <span>{isEvacuating ? 'EVACUATION GUIDANCE ACTIVE' : 'START EVACUATION'}</span>
+                  <span>{isEvacuating ? 'Evacuation guidance active' : 'Start evacuation'}</span>
                 </button>
               </div>
 
               {/* Turn Steps List */}
-              <div className="bg-surface border border-line rounded-card p-3.5 shadow-sm space-y-2 flex-1 flex flex-col min-h-0">
+              <div className="bg-surface rounded-card p-3.5 space-y-2 flex-1 flex flex-col min-h-0">
                 <div className="flex items-center justify-between text-xs text-label-2 font-semibold ">
                   <span>Turn-by-Turn Maneuvers</span>
-                  <span>{routeResult.safe_route.segments.length} STEPS</span>
+                  <span>{routeResult.safe_route.segments.length} steps</span>
                 </div>
 
                 <div className="space-y-1.5 max-h-[220px] lg:max-h-[260px] overflow-y-auto pr-1">
@@ -656,7 +657,7 @@ export const SafeRoutePage = () => {
                       className={`p-2 rounded-tile border text-xs flex items-center justify-between cursor-pointer transition-colors ${
                         isEvacuating && currentStepIndex === idx
                           ? 'bg-surface-2 border-risk-low/30 text-label'
-                          : 'bg-surface border-line hover:bg-surface-2'
+                          : 'bg-surface-2 border-transparent hover:bg-surface-2'
                       }`}
                     >
                       <div className="space-y-0.5 min-w-0">
@@ -677,8 +678,8 @@ export const SafeRoutePage = () => {
               </div>
             </>
           ) : (
-            <div className="bg-surface border border-line rounded-card p-6 h-full min-h-[460px] flex flex-col justify-center items-center text-center space-y-3 text-label-2 shadow-sm">
-              <div className="w-12 h-12 rounded-full bg-surface border border-line flex items-center justify-center text-risk-low">
+            <div className="bg-surface rounded-card p-6 h-full min-h-[460px] flex flex-col justify-center items-center text-center space-y-3 text-label-2">
+              <div className="w-12 h-12 rounded-full bg-surface-2 flex items-center justify-center text-risk-low">
                 <Navigation className="w-6 h-6" />
               </div>
               <h3 className="text-sm font-semibold text-label">Safe Route Planner Ready</h3>

@@ -18,20 +18,20 @@ export const LandingPage = () => {
   const { t } = useLanguage();
 
   return (
-    <div className="min-h-screen relative text-label flex flex-col bg-surface-2 selection:bg-risk-critical selection:text-label">
+    <div className="min-h-screen relative isolate text-label flex flex-col selection:bg-accent/30">
       {/* 3D Subtle Topographic Elevation Contour Background */}
       <Terrain3DBackground />
 
       {/* Top Navbar */}
-      <nav className="h-14 border-b border-line px-6 lg:px-12 flex items-center justify-between sticky top-0 bg-surface-2 backdrop-blur-md z-30">
+      <nav className="h-14 border-b border-line px-6 lg:px-12 flex items-center justify-between sticky top-0 bg-page/75 backdrop-blur-xl backdrop-saturate-150 z-30">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-tile bg-risk-critical/[0.12] border border-risk-critical/30 flex items-center justify-center text-risk-critical">
+          <div className="w-8 h-8 rounded-field bg-surface-2 flex items-center justify-center text-label">
             <Shield className="w-4 h-4" />
           </div>
           <div>
             <div className="flex items-center gap-1.5 leading-none">
-              <span className="font-semibold text-sm text-label">LANDSAFE</span>
-              <span className="text-xs px-1.5 py-0.2 rounded-full tabular-nums font-semibold bg-surface-2 text-label-2 border border-line">
+              <span className="font-semibold text-sm text-label">LandSafe</span>
+              <span className="text-xs px-1.5 py-0.5 rounded-full tabular-nums font-semibold bg-surface-2 text-label-2">
                 SIH26001
               </span>
             </div>
@@ -41,7 +41,7 @@ export const LandingPage = () => {
         <div className="flex items-center gap-3">
           <Link
             to="/sos"
-            className="px-3 py-1 bg-risk-critical/[0.12] hover:bg-risk-critical/[0.12] text-risk-critical border border-risk-critical/30 rounded-full text-xs font-semibold tabular-nums flex items-center gap-1.5 transition-colors"
+            className="px-3 py-1 bg-risk-critical/[0.12] hover:bg-risk-critical/20 text-risk-critical rounded-full whitespace-nowrap text-xs font-semibold tabular-nums flex items-center gap-1.5 transition-colors"
           >
             <Radio className="w-3.5 h-3.5 text-risk-critical" />
             <span>SOS</span>
@@ -49,7 +49,7 @@ export const LandingPage = () => {
 
           <Link
             to="/overview"
-            className="px-3.5 py-1.5 bg-surface-2 hover:bg-[#182744] text-label hover:text-label rounded-full text-xs tabular-nums font-semibold flex items-center gap-1.5 transition-colors"
+            className="px-3.5 py-1.5 bg-surface-2 hover:opacity-90 text-label hover:text-label rounded-full whitespace-nowrap text-xs tabular-nums font-semibold flex items-center gap-1.5 transition-colors"
           >
             <span>Command Center</span>
             <ChevronRight className="w-3.5 h-3.5 text-label-2" />
@@ -61,9 +61,9 @@ export const LandingPage = () => {
       <section className="relative px-6 lg:px-12 pt-20 pb-20 max-w-5xl mx-auto flex flex-col items-center text-center">
         
         {/* Category Pill */}
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-2 border border-line text-xs tabular-nums font-semibold text-label-2 mb-6">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-2 text-xs tabular-nums font-semibold text-label-2 mb-6">
           <span className="w-1.5 h-1.5 rounded-full bg-risk-critical" />
-          <span>PREDICT • PREPARE • RESCUE</span>
+          <span>Predict · Prepare · Rescue</span>
         </div>
 
         {/* Main Heading */}
@@ -80,24 +80,24 @@ export const LandingPage = () => {
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3.5">
           <Link
             to="/overview"
-            className="px-6 py-2.5 bg-surface-2 hover:bg-[#1f3254] text-label rounded-full text-sm tabular-nums font-semibold flex items-center gap-2 transition-colors"
+            className="px-6 py-2.5 bg-accent hover:opacity-90 text-white rounded-full whitespace-nowrap text-sm tabular-nums font-semibold flex items-center gap-2 transition-colors"
           >
-            <span>GET STARTED</span>
-            <ArrowRight className="w-4 h-4 text-label-2" />
+            <span>Get started</span>
+            <ArrowRight className="w-4 h-4" />
           </Link>
 
           <Link
             to="/sos"
-            className="px-6 py-2.5 bg-risk-critical/[0.12] hover:bg-risk-critical/[0.12] text-risk-critical hover:text-label border border-risk-critical/30 rounded-full text-sm tabular-nums font-semibold flex items-center gap-2 transition-colors"
+            className="px-6 py-2.5 bg-risk-critical/[0.12] hover:bg-risk-critical/20 text-risk-critical rounded-full whitespace-nowrap text-sm tabular-nums font-semibold flex items-center gap-2 transition-colors"
           >
             <Radio className="w-4 h-4 text-risk-critical" />
-            <span>EMERGENCY SOS</span>
+            <span>Emergency SOS</span>
           </Link>
         </div>
       </section>
 
       {/* 3 Spacious Pillars (Clean, Restrained) */}
-      <section className="px-6 lg:px-12 py-16 bg-surface-2 border-t border-line">
+      <section className="px-6 lg:px-12 py-16">
         <div className="max-w-5xl mx-auto space-y-10">
           <div className="text-center space-y-1">
             <span className="text-xs tabular-nums font-semibold text-label-2">
@@ -110,8 +110,8 @@ export const LandingPage = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {/* 1. Predict */}
-            <div className="bg-surface-2 border border-line p-5 rounded-tile space-y-2.5">
-              <div className="w-9 h-9 rounded-tile bg-surface-2 border border-line flex items-center justify-center text-label-2">
+            <div className="bg-surface p-5 rounded-card space-y-2.5">
+              <div className="w-9 h-9 rounded-field bg-surface-2 flex items-center justify-center text-label-2">
                 <Cpu className="w-4 h-4" />
               </div>
               <h3 className="text-sm font-semibold text-label">AI Hazard Prediction</h3>
@@ -121,8 +121,8 @@ export const LandingPage = () => {
             </div>
 
             {/* 2. Route */}
-            <div className="bg-surface-2 border border-line p-5 rounded-tile space-y-2.5">
-              <div className="w-9 h-9 rounded-tile bg-surface-2 border border-line flex items-center justify-center text-risk-low">
+            <div className="bg-surface p-5 rounded-card space-y-2.5">
+              <div className="w-9 h-9 rounded-field bg-surface-2 flex items-center justify-center text-label-2">
                 <Navigation className="w-4 h-4" />
               </div>
               <h3 className="text-sm font-semibold text-label">Safe Route Planner</h3>
@@ -132,8 +132,8 @@ export const LandingPage = () => {
             </div>
 
             {/* 3. Rescue */}
-            <div className="bg-surface-2 border border-line p-5 rounded-tile space-y-2.5">
-              <div className="w-9 h-9 rounded-tile bg-surface-2 border border-line flex items-center justify-center text-risk-critical">
+            <div className="bg-surface p-5 rounded-card space-y-2.5">
+              <div className="w-9 h-9 rounded-field bg-surface-2 flex items-center justify-center text-label-2">
                 <Users className="w-4 h-4" />
               </div>
               <h3 className="text-sm font-semibold text-label">Emergency Coordination</h3>

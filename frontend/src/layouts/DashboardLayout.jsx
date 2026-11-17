@@ -37,7 +37,7 @@ export const DashboardLayout = () => {
   }, []);
 
   return (
-    <div className="min-h-screen relative text-label flex flex-col selection:bg-accent/30">
+    <div className="min-h-screen relative isolate text-label flex flex-col selection:bg-accent/30">
       {/* Live weather sky for the selected location */}
       <WeatherAtmosphericBackground />
 

@@ -10,7 +10,7 @@ import {
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { incidentsApi } from '../services/api';
-import { formatDate } from '../utils/formatters';
+import { formatDate, toLabel } from '../utils/formatters';
 import { useLanguage } from '../context/LanguageContext';
 import { useLocationIntelligence } from '../context/LocationIntelligenceContext';
 import { 
@@ -62,7 +62,7 @@ const createCustomIcon = (color, label = '') => {
         border-radius: 50%;
         background: ${color};
         border: 2px solid #ffffff;
-        box-shadow: 0 0 12px ${color}88, 0 2px 6px rgba(0,0,0,0.5);
+        box-shadow: 0 2px 6px rgba(0,0,0,0.4);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -84,9 +84,9 @@ const userLocationIcon = L.divIcon({
       width: 20px;
       height: 20px;
       border-radius: 50%;
-      background: #0284c7;
+      background: #4A86E8;
       border: 3px solid #ffffff;
-      box-shadow: 0 0 16px #38bdf8;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
     ">
       <div style="
         position: absolute;
@@ -95,7 +95,7 @@ const userLocationIcon = L.divIcon({
         width: 26px;
         height: 26px;
         border-radius: 50%;
-        background: rgba(56, 189, 248, 0.35);
+        background: rgba(74, 134, 232, 0.3);
         animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
       "></div>
     </div>
@@ -345,13 +345,13 @@ export const IncidentsExplorerPage = () => {
 
   if (fetchError && !intelData) {
     return (
-      <div className="bg-surface border border-line rounded-card p-8 max-w-xl mx-auto text-center space-y-4 my-12">
+      <div className="bg-surface rounded-card p-8 max-w-xl mx-auto text-center space-y-4 my-12">
         <AlertTriangle className="w-10 h-10 text-risk-critical mx-auto" />
         <h2 className="text-lg font-semibold text-label">Incident Intelligence Feed Offline</h2>
         <p className="text-sm text-label-2">{fetchError}</p>
         <button
           onClick={() => fetchIntelligence(true)}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-accent hover:bg-accent text-label text-xs font-semibold rounded-full transition"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-accent hover:opacity-90 text-white text-xs font-semibold rounded-full whitespace-nowrap transition"
         >
           <RefreshCw className="w-4 h-4" />
           Retry Connection
@@ -366,9 +366,9 @@ export const IncidentsExplorerPage = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-line pb-4">
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-surface-2 text-label-2 border border-line flex items-center gap-1">
+            <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-surface-2 text-label-2 flex items-center gap-1">
               <Radio className="w-3 h-3 text-label-2 " />
-              AUTHORITATIVE INDIA-WIDE LANDSLIDE INTELLIGENCE
+              Authoritative India-wide landslide intelligence
             </span>
             <span className="text-xs text-label-2 tabular-nums">GSI • ISRO • IMD • NDMA</span>
           </div>
@@ -380,20 +380,20 @@ export const IncidentsExplorerPage = () => {
 
         {/* Global KPI Pills */}
         <div className="flex flex-wrap items-center gap-2">
-          <div className="bg-surface border border-line px-3 py-1.5 rounded-tile text-center">
-            <span className="text-xs text-label-2 block tabular-nums">CONFIRMED INCIDENTS</span>
+          <div className="bg-surface-2 px-3 py-1.5 rounded-tile text-center">
+            <span className="text-xs text-label-2 block tabular-nums">Confirmed incidents</span>
             <span className="text-sm tabular-nums font-semibold text-risk-critical">
               {fetchError ? '—' : (intelData?.coverage_summary?.total_confirmed_incidents ?? '...')}
             </span>
           </div>
-          <div className="bg-surface border border-line px-3 py-1.5 rounded-tile text-center">
-            <span className="text-xs text-risk-moderate block tabular-nums">FORECAST RISK ZONES</span>
+          <div className="bg-surface-2 px-3 py-1.5 rounded-tile text-center">
+            <span className="text-xs text-risk-moderate block tabular-nums">Forecast risk zones</span>
             <span className="text-sm tabular-nums font-semibold text-risk-moderate">
               {fetchError ? '—' : (intelData?.coverage_summary?.total_forecast_zones ?? '...')}
             </span>
           </div>
-          <div className="bg-surface-2 border border-line px-3 py-1.5 rounded-tile text-center">
-            <span className="text-xs text-label-2 block tabular-nums">MONITORED STATES</span>
+          <div className="bg-surface-2 px-3 py-1.5 rounded-tile text-center">
+            <span className="text-xs text-label-2 block tabular-nums">Monitored states</span>
             <span className="text-sm tabular-nums font-semibold text-label-2">
               {fetchError ? '—' : (intelData?.coverage_summary?.monitored_states_count ?? '...')}
             </span>
@@ -403,7 +403,7 @@ export const IncidentsExplorerPage = () => {
 
       {/* API Error Notification */}
       {fetchError && (
-        <div className="bg-risk-critical/[0.12] border border-risk-critical/30 p-4 rounded-card flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-risk-critical">
+        <div className="bg-risk-critical/[0.12] border-risk-critical/30 p-4 rounded-card flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-risk-critical">
           <div className="flex items-center gap-2.5">
             <AlertTriangle className="w-5 h-5 text-risk-critical shrink-0" />
             <div>
@@ -413,7 +413,7 @@ export const IncidentsExplorerPage = () => {
           </div>
           <button
             onClick={() => fetchIntelligence(true)}
-            className="px-3.5 py-1.5 bg-risk-critical/[0.12] hover:bg-risk-critical/[0.12] border border-risk-critical/30 rounded-full font-semibold text-label text-xs transition shrink-0 self-start sm:self-auto flex items-center gap-1.5"
+            className="px-3.5 py-1.5 bg-risk-critical/[0.12] hover:bg-risk-critical/20 border-risk-critical/30 rounded-full whitespace-nowrap font-semibold text-label text-xs transition shrink-0 self-start sm:self-auto flex items-center gap-1.5"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             Retry Feed
@@ -424,13 +424,13 @@ export const IncidentsExplorerPage = () => {
       {/* Freshness & User Proximity Banner */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
         {/* User Proximity Statement */}
-        <div className={`md:col-span-8 p-3 rounded-card border flex items-center justify-between gap-3 text-xs ${
-          proximityAdvisory?.advisory_type === 'WARNING'
-            ? 'bg-risk-critical/[0.12] border-risk-critical/30 text-risk-critical'
-            : proximityAdvisory?.advisory_type === 'NOTICE'
-            ? 'bg-risk-moderate/[0.12] border-risk-moderate/30 text-risk-moderate'
-            : 'bg-risk-low/[0.12] border-risk-low/30 text-risk-low'
-        }`}>
+        <div className={`md:col-span-8 p-3 rounded-card flex items-center justify-between gap-3 text-xs ${
+ proximityAdvisory?.advisory_type === 'WARNING'
+ ? 'bg-risk-critical/[0.12] text-risk-critical'
+ : proximityAdvisory?.advisory_type === 'NOTICE'
+ ? 'bg-risk-moderate/[0.12] text-risk-moderate'
+ : 'bg-risk-low/[0.12] text-risk-low'
+ }`}>
           <div className="flex items-center gap-2.5">
             {proximityAdvisory?.advisory_type === 'WARNING' ? (
               <AlertTriangle className="w-5 h-5 text-risk-critical flex-shrink-0" />
@@ -452,7 +452,7 @@ export const IncidentsExplorerPage = () => {
           <button
             onClick={detectUserLocation}
             disabled={locatingUser}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface text-xs text-label transition-colors flex-shrink-0"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full whitespace-nowrap bg-surface-2 text-xs text-label transition-colors flex-shrink-0"
             title="Recalculate with device GPS"
           >
             <Crosshair className={`w-3.5 h-3.5 text-label-2 ${locatingUser ? 'animate-spin' : ''}`} />
@@ -461,11 +461,11 @@ export const IncidentsExplorerPage = () => {
         </div>
 
         {/* Freshness Indicator & Manual Refresh */}
-        <div className="md:col-span-4 bg-surface border border-line p-3 rounded-card flex items-center justify-between text-xs">
+        <div className="md:col-span-4 bg-surface p-3 rounded-card flex items-center justify-between text-xs">
           <div>
-            <span className="text-xs text-label-2 block tabular-nums">PIPELINE FRESHNESS</span>
+            <span className="text-xs text-label-2 block tabular-nums">Pipeline freshness</span>
             <div className="flex items-center gap-1.5 text-label font-semibold text-xs">
-              <span className="w-2 h-2 rounded-full bg-risk-low "></span>
+              <span className="w-2 h-2 rounded-full bg-risk-low"></span>
               {intelData?.sync_status === 'ONLINE_SYNCED' ? 'Authoritative Feeds Live' : 'Cached Snapshot Active'}
             </div>
           </div>
@@ -473,7 +473,7 @@ export const IncidentsExplorerPage = () => {
           <button
             onClick={() => fetchIntelligence(true)}
             disabled={refreshing}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-2 hover:bg-surface-2 text-label-2 rounded-full font-semibold text-xs transition-all shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-2 hover:bg-surface-2 text-label-2 rounded-full whitespace-nowrap font-semibold text-xs transition-all"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
             {refreshing ? 'Syncing...' : 'Refresh Now'}
@@ -485,10 +485,10 @@ export const IncidentsExplorerPage = () => {
       <div className="flex flex-wrap items-center gap-2 border-b border-line pb-2">
         <button
           onClick={() => setActiveTab('confirmed')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-full font-semibold text-xs transition-all ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap font-semibold text-xs transition-all ${
             activeTab === 'confirmed'
-              ? 'bg-risk-critical/[0.12] border border-risk-critical/30 text-risk-critical  '
-              : 'bg-surface border border-line text-label-2 hover:text-label hover:border-line'
+              ? 'bg-risk-critical/[0.12] border border-risk-critical/30 text-risk-critical '
+              : 'bg-surface-2 border border-transparent text-label-2 hover:text-label '
           }`}
         >
           <span className="w-2 h-2 rounded-full bg-risk-critical"></span>
@@ -497,10 +497,10 @@ export const IncidentsExplorerPage = () => {
 
         <button
           onClick={() => setActiveTab('forecast')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-full font-semibold text-xs transition-all ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap font-semibold text-xs transition-all ${
             activeTab === 'forecast'
-              ? 'bg-risk-moderate/[0.12] border border-risk-moderate/30 text-risk-moderate  '
-              : 'bg-surface border border-line text-label-2 hover:text-label hover:border-line'
+              ? 'bg-risk-moderate/[0.12] border border-risk-moderate/30 text-risk-moderate '
+              : 'bg-surface-2 border border-transparent text-label-2 hover:text-label '
           }`}
         >
           <span className="w-2 h-2 rounded-full bg-risk-moderate"></span>
@@ -509,10 +509,10 @@ export const IncidentsExplorerPage = () => {
 
         <button
           onClick={() => setActiveTab('all')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-full font-semibold text-xs transition-all ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap font-semibold text-xs transition-all ${
             activeTab === 'all'
               ? 'bg-surface-2 text-label-2 '
-              : 'bg-surface text-label-2 hover:text-label '
+              : 'bg-surface-2 text-label-2 hover:text-label '
           }`}
         >
           <Globe className="w-3.5 h-3.5 text-label-2" />
@@ -521,10 +521,10 @@ export const IncidentsExplorerPage = () => {
 
         <button
           onClick={() => setActiveTab('simulation')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-full font-semibold text-xs transition-all ml-auto ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap font-semibold text-xs transition-all ml-auto ${
             activeTab === 'simulation'
               ? 'bg-surface-2 text-label-2 '
-              : 'bg-surface text-label-2 hover:text-label '
+              : 'bg-surface-2 text-label-2 hover:text-label '
           }`}
           title="Synthetic drill benchmarks for training and calibration"
         >
@@ -534,7 +534,7 @@ export const IncidentsExplorerPage = () => {
       </div>
 
       {/* Interactive Map Section */}
-      <div className="bg-surface border border-line rounded-card p-3.5 relative">
+      <div className="bg-surface rounded-card p-3.5 relative">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
           <div className="flex items-center gap-2 text-xs text-label-2 font-semibold">
             <MapIcon className="w-4 h-4 text-label-2" />
@@ -545,13 +545,13 @@ export const IncidentsExplorerPage = () => {
           </div>
 
           {/* Basemap Switcher */}
-          <div className="flex items-center gap-1.5 bg-page p-1 rounded-full border border-line self-start sm:self-auto">
+          <div className="flex items-center gap-1.5 bg-surface-2 p-1 rounded-full self-start sm:self-auto">
             <span className="text-xs text-label-2 px-2 tabular-nums ">Map Type:</span>
             {MAP_TYPES.map((t) => (
               <button
                 key={t.id}
                 onClick={() => setMapType(t.id)}
-                className={`px-2 py-1 rounded-full text-xs font-semibold transition-all ${
+                className={`px-2 py-1 rounded-full whitespace-nowrap text-xs font-semibold transition-all ${
                   mapType === t.id
                     ? 'bg-surface-2 text-label-2 '
                     : 'text-label-2 hover:text-label'
@@ -564,7 +564,7 @@ export const IncidentsExplorerPage = () => {
         </div>
 
         {/* Leaflet Container */}
-        <div className="w-full h-80 sm:h-96 rounded-tile overflow-hidden border border-line relative z-0">
+        <div className="w-full h-80 sm:h-96 rounded-tile overflow-hidden relative z-0">
           <MapContainer
             center={mapCenter}
             zoom={mapZoom}
@@ -650,7 +650,7 @@ export const IncidentsExplorerPage = () => {
                         <strong className="block text-sm">{fc.title}</strong>
                         <p className="text-label-3">{fc.district}, {fc.state}</p>
                         <span className="text-xs text-risk-moderate block font-semibold">
-                          Risk Level: {fc.risk_level} ({fc.rainfall_trigger_mm}mm rain / {fc.slope_gradient_deg}° slope)
+                          Risk Level: {toLabel(fc.risk_level)} ({fc.rainfall_trigger_mm}mm rain / {fc.slope_gradient_deg}° slope)
                         </span>
                       </div>
                     </Popup>
@@ -685,13 +685,13 @@ export const IncidentsExplorerPage = () => {
       </div>
 
       {/* Horizontal Interactive Timeline Bar */}
-      <div className="bg-surface border border-line rounded-card p-4 ">
+      <div className="bg-surface rounded-card p-4">
         <div className="flex items-center justify-between text-xs text-label-2 mb-3">
           <span className="font-semibold text-label flex items-center gap-1.5">
             <Clock className="w-4 h-4 text-label-2" />
             Chronological Disaster Timeline & Early Warnings
           </span>
-          <span className="text-xs tabular-nums text-label-2">VERIFIED INCIDENT LOGS</span>
+          <span className="text-xs tabular-nums text-label-2">Verified incident logs</span>
         </div>
 
         <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-thin">
@@ -707,13 +707,13 @@ export const IncidentsExplorerPage = () => {
                 className={`flex-shrink-0 p-3 rounded-tile text-left transition-all max-w-[210px] ${
                   isSel 
                     ? 'bg-surface-2 ' 
-                    : 'bg-page '
+                    : 'bg-surface-2 '
                 }`}
               >
                 <div className="flex items-center justify-between text-xs mb-1 gap-1">
                   <span className="tabular-nums font-semibold text-label-2 truncate">{evId}</span>
-                  <span className={`px-1.5 py-0.2 rounded-full font-semibold text-xs border ${getSeverityBadge(ev.severity || ev.risk_level)}`}>
-                    {ev.severity || ev.risk_level}
+                  <span className={`px-1.5 py-0.5 rounded-full font-semibold text-xs ${getSeverityBadge(ev.severity || ev.risk_level)}`}>
+                    {toLabel(ev.severity || ev.risk_level)}
                   </span>
                 </div>
                 <div className="font-semibold text-xs text-label truncate">{ev.title}</div>
@@ -730,7 +730,7 @@ export const IncidentsExplorerPage = () => {
       </div>
 
       {/* Multi-Parameter Filters Bar */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 bg-surface border border-line p-3.5 rounded-card">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 bg-surface p-3.5 rounded-card">
         {/* Search */}
         <div className="relative">
           <Search className="w-4 h-4 text-label-2 absolute left-3 top-3" />
@@ -739,7 +739,7 @@ export const IncidentsExplorerPage = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search district, highway, corridor..."
-            className="w-full pl-9 pr-3 py-2 bg-page border border-line rounded-full text-xs text-label placeholder-label-3 focus:outline-none focus:border-line"
+            className="w-full pl-9 pr-3 py-2 bg-surface-2 rounded-full text-xs text-label placeholder-label-3 focus:outline-none"
           />
         </div>
 
@@ -748,7 +748,7 @@ export const IncidentsExplorerPage = () => {
           <select
             value={stateFilter}
             onChange={(e) => setStateFilter(e.target.value)}
-            className="w-full py-2 px-3 bg-page border border-line rounded-field text-xs text-label focus:outline-none focus:border-line"
+            className="w-full py-2 px-3 bg-surface-2 rounded-full text-xs text-label focus:outline-none focus:ring-2 focus:ring-accent/40"
           >
             <option value="ALL">All Monitored States</option>
             {availableStates.map(st => (
@@ -762,12 +762,12 @@ export const IncidentsExplorerPage = () => {
           <select
             value={severityFilter}
             onChange={(e) => setSeverityFilter(e.target.value)}
-            className="w-full py-2 px-3 bg-page border border-line rounded-field text-xs text-label focus:outline-none focus:border-line"
+            className="w-full py-2 px-3 bg-surface-2 rounded-full text-xs text-label focus:outline-none focus:ring-2 focus:ring-accent/40"
           >
             <option value="ALL">All Risk / Severity Levels</option>
-            <option value="CRITICAL"> CRITICAL</option>
-            <option value="HIGH"> HIGH</option>
-            <option value="MODERATE"> MODERATE</option>
+            <option value="CRITICAL"> Critical</option>
+            <option value="HIGH"> High</option>
+            <option value="MODERATE"> Moderate</option>
             <option value="LOW"> LOW</option>
           </select>
         </div>
@@ -777,7 +777,7 @@ export const IncidentsExplorerPage = () => {
           <select
             value={verificationFilter}
             onChange={(e) => setVerificationFilter(e.target.value)}
-            className="w-full py-2 px-3 bg-page border border-line rounded-field text-xs text-label focus:outline-none focus:border-line"
+            className="w-full py-2 px-3 bg-surface-2 rounded-full text-xs text-label focus:outline-none focus:ring-2 focus:ring-accent/40"
           >
             <option value="ALL">All Provenance Types</option>
             <option value="OFFICIAL">Official Government Record</option>
@@ -796,7 +796,7 @@ export const IncidentsExplorerPage = () => {
           {loading ? (
             <div className="text-center py-12 text-label-2 text-xs">Loading operational intelligence telemetry...</div>
           ) : displayedEvents.length === 0 ? (
-            <div className="bg-surface border border-line rounded-card p-8 text-center text-label-2 text-xs space-y-2">
+            <div className="bg-surface rounded-card p-8 text-center text-label-2 text-xs space-y-2">
               <AlertTriangle className="w-8 h-8 text-risk-moderate mx-auto" />
               <div className="font-semibold text-label">No events found matching your criteria</div>
               <p className="text-label-2">
@@ -814,24 +814,24 @@ export const IncidentsExplorerPage = () => {
                 <div
                   key={evId}
                   onClick={() => handleSelectEvent(ev)}
-                  className={`bg-surface border rounded-card p-4 cursor-pointer transition-all hover:scale-[1.003] ${
-                    isSelected ? 'border-line  bg-surface' : 'border-line hover:border-line'
+                  className={`bg-surface rounded-card p-4 cursor-pointer transition-all hover:scale-[1.003] ${
+                    isSelected ? ' bg-surface' : ' '
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="tabular-nums text-xs font-semibold text-label-2 bg-surface-2 px-2 py-0.5 rounded-full border border-line">
+                      <span className="tabular-nums text-xs font-semibold text-label-2 bg-surface-2 px-2 py-0.5 rounded-full">
                         {evId}
                       </span>
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-semibold border ${getSeverityBadge(ev.severity || ev.risk_level)}`}>
-                        {ev.severity || ev.risk_level}
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${getSeverityBadge(ev.severity || ev.risk_level)}`}>
+                        {toLabel(ev.severity || ev.risk_level)}
                       </span>
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-semibold border ${getVerificationBadge(ev.verification_status)}`}>
-                        {isSim ? 'DEMO / SIMULATION' : ev.verification_status}
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${getVerificationBadge(ev.verification_status)}`}>
+                        {isSim ? 'Demo / simulation' : toLabel(ev.verification_status)}
                       </span>
                       {isForecast && (
-                        <span className="text-xs px-2 py-0.5 rounded-full font-semibold bg-risk-moderate/[0.12] text-risk-moderate border border-risk-moderate/30">
-                          EARLY WARNING
+                        <span className="text-xs px-2 py-0.5 rounded-full font-semibold bg-risk-moderate/[0.12] text-risk-moderate border-risk-moderate/30">
+                          Early warning
                         </span>
                       )}
                     </div>
@@ -876,18 +876,18 @@ export const IncidentsExplorerPage = () => {
         {/* Right Event Inspector Panel */}
         <div className="lg:col-span-5">
           {selectedEvent ? (
-            <div className="bg-surface border border-line rounded-card p-5 space-y-4 sticky top-4">
+            <div className="bg-surface rounded-card p-5 space-y-4 sticky top-4">
               <div className="border-b border-line pb-3">
                 <div className="flex items-center justify-between mb-1">
                   <span className="tabular-nums text-xs font-semibold text-label-2">
                     {selectedEvent.incident_id || selectedEvent.forecast_id}
                   </span>
                   <div className="flex items-center gap-1.5">
-                    <span className={`text-xs px-2.5 py-0.5 rounded-full font-semibold border ${getSeverityBadge(selectedEvent.severity || selectedEvent.risk_level)}`}>
-                      {selectedEvent.severity || selectedEvent.risk_level}
+                    <span className={`text-xs px-2.5 py-0.5 rounded-full font-semibold ${getSeverityBadge(selectedEvent.severity || selectedEvent.risk_level)}`}>
+                      {toLabel(selectedEvent.severity || selectedEvent.risk_level)}
                     </span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-semibold border ${getVerificationBadge(selectedEvent.verification_status)}`}>
-                      {selectedEvent.is_simulation ? 'DEMO / SIMULATION' : selectedEvent.verification_status}
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${getVerificationBadge(selectedEvent.verification_status)}`}>
+                      {selectedEvent.is_simulation ? 'Demo / simulation' : toLabel(selectedEvent.verification_status)}
                     </span>
                   </div>
                 </div>
@@ -898,13 +898,13 @@ export const IncidentsExplorerPage = () => {
               </div>
 
               {/* Data Provenance & Source Block */}
-              <div className="bg-page p-3.5 rounded-tile border border-line space-y-2 text-xs">
+              <div className="bg-surface-2 p-3.5 rounded-tile space-y-2 text-xs">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold text-label-2 block">
                     Authoritative Provenance
                   </span>
                   <span className="text-xs tabular-nums text-label-3">
-                    {selectedEvent.source_type || 'OFFICIAL_GOVERNMENT'}
+                    {toLabel(selectedEvent.source_type || 'OFFICIAL_GOVERNMENT')}
                   </span>
                 </div>
                 <div className="text-label-2 font-semibold">
@@ -929,16 +929,16 @@ export const IncidentsExplorerPage = () => {
                 <span className="text-xs font-semibold text-label-2 block mb-1">
                   {selectedEvent._type === 'forecast' ? 'Scientific Risk Forecast' : 'Incident Briefing'}
                 </span>
-                <p className="text-xs text-label leading-relaxed bg-page p-3 rounded-tile border border-line">
+                <p className="text-xs text-label leading-relaxed bg-surface-2 p-3 rounded-tile">
                   {selectedEvent.description || selectedEvent.scientific_reason}
                 </p>
               </div>
 
               {/* Expandable "Why is this area at risk?" */}
-              <div className="border border-line rounded-tile overflow-hidden bg-page">
+              <div className="rounded-tile overflow-hidden bg-surface-2">
                 <button
                   onClick={() => setExpandWhyRisk(!expandWhyRisk)}
-                  className="w-full p-3 flex items-center justify-between text-left text-xs font-semibold text-label hover:bg-surface transition-colors"
+                  className="w-full p-3 rounded-tile flex items-center justify-between text-left text-xs font-semibold text-label hover:bg-surface-2 transition-colors"
                 >
                   <span className="flex items-center gap-1.5">
                     <Info className="w-4 h-4 text-label-2" />
@@ -950,7 +950,7 @@ export const IncidentsExplorerPage = () => {
                 {expandWhyRisk && (
                   <div className="p-3.5 pt-0 border-t border-line text-xs space-y-2 text-label-2">
                     {selectedEvent.why_at_risk && (
-                      <p className="text-label-2 bg-surface-2 p-2.5 rounded-tile border border-line tabular-nums text-xs">
+                      <p className="text-label-2 bg-surface-2 p-2.5 rounded-tile tabular-nums text-xs">
                         {selectedEvent.why_at_risk}
                       </p>
                     )}
@@ -984,22 +984,22 @@ export const IncidentsExplorerPage = () => {
               {selectedEvent._type !== 'forecast' && (
                 <div className="space-y-2">
                   <div className="grid grid-cols-3 gap-2 text-center text-xs">
-                    <div className="bg-page p-2.5 rounded-tile border border-line">
-                      <span className="text-xs text-label-2 block tabular-nums">INJURED</span>
+                    <div className="bg-surface-2 p-2.5 rounded-tile">
+                      <span className="text-xs text-label-2 block tabular-nums">Injured</span>
                       <span className="text-base tabular-nums font-semibold text-risk-moderate">{selectedEvent.injured_people ?? 0}</span>
                     </div>
-                    <div className="bg-page p-2.5 rounded-tile border border-line">
-                      <span className="text-xs text-label-2 block tabular-nums">EVACUATED</span>
+                    <div className="bg-surface-2 p-2.5 rounded-tile">
+                      <span className="text-xs text-label-2 block tabular-nums">Evacuated</span>
                       <span className="text-base tabular-nums font-semibold text-risk-low">{selectedEvent.evacuated_people ?? 0}</span>
                     </div>
-                    <div className="bg-page p-2.5 rounded-tile border border-line">
-                      <span className="text-xs text-label-2 block tabular-nums">POP. AT RISK</span>
+                    <div className="bg-surface-2 p-2.5 rounded-tile">
+                      <span className="text-xs text-label-2 block tabular-nums">Pop. at risk</span>
                       <span className="text-base tabular-nums font-semibold text-risk-critical">{selectedEvent.estimated_population ?? 0}</span>
                     </div>
                   </div>
 
                   {selectedEvent.casualties_info && (
-                    <div className="text-xs text-label-2 bg-page px-3 py-1.5 rounded-tile border border-line tabular-nums">
+                    <div className="text-xs text-label-2 bg-surface-2 px-3 py-1.5 rounded-tile tabular-nums">
                       {selectedEvent.casualties_info}
                     </div>
                   )}
@@ -1008,7 +1008,7 @@ export const IncidentsExplorerPage = () => {
 
               {/* Blocked Roads */}
               {selectedEvent.blocked_roads?.length > 0 && (
-                <div className="bg-risk-critical/[0.12] border border-risk-critical/30 p-3 rounded-tile space-y-1 text-xs">
+                <div className="bg-risk-critical/[0.12] border-risk-critical/30 p-3 rounded-tile space-y-1 text-xs">
                   <span className="font-semibold text-risk-critical text-xs flex items-center gap-1.5">
                     <AlertTriangle className="w-3.5 h-3.5" />
                     Confirmed Road Blockades
@@ -1023,7 +1023,7 @@ export const IncidentsExplorerPage = () => {
 
               {/* Assigned Response Unit */}
               {selectedEvent.assigned_team_name && (
-                <div className="bg-page p-3 rounded-tile border border-line text-xs space-y-1">
+                <div className="bg-surface-2 p-3 rounded-tile text-xs space-y-1">
                   <span className="text-xs font-semibold text-label-2 block">Assigned Response Force</span>
                   <div className="font-semibold text-label flex items-center gap-1.5 text-sm">
                     <Shield className="w-4 h-4 text-label-2" />
@@ -1033,7 +1033,7 @@ export const IncidentsExplorerPage = () => {
               )}
             </div>
           ) : (
-            <div className="bg-surface border border-line rounded-card p-8 text-center text-label-2 text-xs">
+            <div className="bg-surface rounded-card p-8 text-center text-label-2 text-xs">
               Select an incident or forecast zone from the map or list to view complete telemetry and provenance.
             </div>
           )}

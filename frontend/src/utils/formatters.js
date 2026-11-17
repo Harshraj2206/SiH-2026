@@ -50,3 +50,14 @@ export const getReportTypeIconName = (type) => {
       return 'AlertCircle';
   }
 };
+
+// "OFFICIAL_GOVERNMENT" -> "Official government", "CRITICAL" -> "Critical".
+// Leaves mixed-case text and acronyms (SOS, GPS…) as they are.
+const KEEP_UPPER = new Set(['SOS', 'GPS', 'ML', 'GSI', 'NASA', 'DEM', 'SDRF', 'NDRF', 'NDMA', 'SDMA', 'IMD', 'AI', 'ID', 'NH']);
+export const toLabel = (value) => {
+  if (typeof value !== 'string' || !/^[A-Z0-9_ \-/]+$/.test(value) || !/[A-Z]{3}/.test(value)) return value;
+  const words = value.replace(/_/g, ' ').split(' ').filter(Boolean)
+    .map((w) => (KEEP_UPPER.has(w) ? w : w.toLowerCase()));
+  if (words.length && !KEEP_UPPER.has(words[0])) words[0] = words[0][0].toUpperCase() + words[0].slice(1);
+  return words.join(' ');
+};

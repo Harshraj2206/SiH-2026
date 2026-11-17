@@ -27,35 +27,35 @@ export const ForgotPasswordPage = () => {
   };
 
   return (
-    <div className="min-h-screen relative flex flex-col justify-center items-center px-4 py-12 selection:bg-risk-critical selection:text-label">
+    <div className="min-h-screen relative isolate flex flex-col justify-center items-center px-4 py-12 selection:bg-accent/30">
       <Terrain3DBackground />
 
       <div className="w-full max-w-md space-y-6 z-10 animate-in fade-in zoom-in-95">
         <div className="text-center space-y-2">
           <Link to="/" className="inline-flex items-center gap-2 group">
-            <div className="w-10 h-10 rounded-card bg-risk-critical/[0.12] border border-risk-critical/30 flex items-center justify-center text-risk-critical ">
+            <div className="w-10 h-10 rounded-field bg-surface-2 flex items-center justify-center text-label">
               <Shield className="w-5 h-5" />
             </div>
-            <span className="font-semibold text-lg text-label">LAND<span className="text-risk-critical">GUARD</span></span>
+            <span className="font-semibold text-lg text-label">LandSafe</span>
           </Link>
           <h2 className="text-2xl font-semibold text-label">Password Recovery</h2>
           <p className="text-xs text-label-2">Enter your registered email address to request account recovery instructions</p>
         </div>
 
-        <div className="bg-surface backdrop-blur-xl border border-line rounded-card p-6 sm:p-8 shadow-slate-950 space-y-6">
+        <div className="bg-surface backdrop-blur-xl rounded-card p-6 sm:p-8 space-y-6">
           
           {/* Explicit Delivery Status Notice */}
-          <div className="p-3.5 rounded-card bg-risk-moderate/[0.12] border border-risk-moderate/30 flex items-start gap-3 text-xs text-risk-moderate">
+          <div className="p-3.5 rounded-card bg-risk-moderate/[0.12] border-risk-moderate/30 flex items-start gap-3 text-xs text-risk-moderate">
             <Info className="w-4 h-4 text-risk-moderate shrink-0 mt-0.5" />
             <div>
               <span className="font-semibold block">Prototype Environment Notice:</span>
-              <span>SMTP / External email delivery is <strong>NOT CONFIGURED</strong> in this offline hackathon build. For testing, please use the pre-created jury credentials on the login screen.</span>
+              <span>SMTP / External email delivery is <strong>Not configured</strong> in this offline hackathon build. For testing, please use the pre-created jury credentials on the login screen.</span>
             </div>
           </div>
 
           {result ? (
             <div className="space-y-4 text-center">
-              <div className="w-12 h-12 rounded-full bg-surface-2 border border-line flex items-center justify-center text-label-2 mx-auto">
+              <div className="w-12 h-12 rounded-full bg-surface-2 flex items-center justify-center text-label-2 mx-auto">
                 <CheckCircle2 className="w-6 h-6" />
               </div>
               <p className="text-xs text-label-2 leading-relaxed">
@@ -63,7 +63,7 @@ export const ForgotPasswordPage = () => {
               </p>
               <Link
                 to="/login"
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-surface-2 hover:bg-surface-2 text-xs font-semibold text-label transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full whitespace-nowrap bg-surface-2 hover:bg-surface-2 text-xs font-semibold text-label transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />
                 <span>Return to Sign In</span>
@@ -85,7 +85,7 @@ export const ForgotPasswordPage = () => {
                     placeholder="officer@sdim.ner.gov.in or resident@..."
                     required
                     disabled={loading}
-                    className="w-full pl-10 pr-4 py-3 bg-page border border-line rounded-field text-sm text-label placeholder-label-3 focus:outline-none focus:border-risk-critical/30 tabular-nums"
+                    className="w-full pl-10 pr-4 py-3 bg-surface-2 rounded-field text-sm text-label placeholder-label-3 focus:outline-none tabular-nums focus:ring-2 focus:ring-accent/40"
                   />
                 </div>
               </div>
@@ -93,7 +93,7 @@ export const ForgotPasswordPage = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3.5 px-4 bg-surface-2 text-label rounded-full text-sm font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+                className="w-full py-2.5 px-4 bg-accent hover:opacity-90 text-white rounded-full text-sm font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-50"
               >
                 {loading ? <span>Submitting...</span> : (
                   <>

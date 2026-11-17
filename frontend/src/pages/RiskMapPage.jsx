@@ -110,10 +110,10 @@ export const RiskMapPage = () => {
   return (
     <div className="space-y-4">
       {/* Top Filter Console */}
-      <div className="bg-surface border border-line p-3.5 rounded-tile space-y-3">
+      <div className="bg-surface-2 p-3.5 rounded-tile space-y-3">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-line pb-3">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-tile bg-risk-critical/[0.12] border border-risk-critical/30 flex items-center justify-center text-risk-critical">
+            <div className="w-8 h-8 rounded-tile bg-risk-critical/[0.12] border-risk-critical/30 flex items-center justify-center text-risk-critical">
               <MapIcon className="w-4 h-4" />
             </div>
             <div>
@@ -134,7 +134,7 @@ export const RiskMapPage = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search zone, road, district..."
-              className="bg-surface-2 border border-line rounded-full pl-8 pr-3 py-1.5 text-xs text-label placeholder-label-3 focus:border-line focus:outline-none w-full"
+              className="bg-surface-2 rounded-full pl-8 pr-3 py-1.5 text-xs text-label placeholder-label-3 focus:outline-none w-full"
             />
           </div>
         </div>
@@ -143,7 +143,7 @@ export const RiskMapPage = () => {
         <div className="flex flex-wrap items-center gap-2.5 text-xs">
           
           {/* 1. Country Selector */}
-          <div className="flex items-center gap-1.5 bg-surface-2 px-2.5 py-1.5 rounded-tile border border-line">
+          <div className="flex items-center gap-1.5 bg-surface-2 px-2.5 py-1.5 rounded-tile">
             <Globe className="w-3.5 h-3.5 text-label-2 shrink-0" />
             <span className="text-label-2 text-xs font-medium">Country:</span>
             <select
@@ -162,7 +162,7 @@ export const RiskMapPage = () => {
           <ChevronRight className="w-3.5 h-3.5 text-label-3 hidden sm:block" />
 
           {/* 2. State / Province Selector */}
-          <div className="flex items-center gap-1.5 bg-surface-2 px-2.5 py-1.5 rounded-tile border border-line">
+          <div className="flex items-center gap-1.5 bg-surface-2 px-2.5 py-1.5 rounded-tile">
             <Compass className="w-3.5 h-3.5 text-risk-low shrink-0" />
             <span className="text-label-2 text-xs font-medium">State:</span>
             <select
@@ -181,7 +181,7 @@ export const RiskMapPage = () => {
           <ChevronRight className="w-3.5 h-3.5 text-label-3 hidden sm:block" />
 
           {/* 3. Risk Level Filter */}
-          <div className="flex items-center gap-1.5 bg-surface-2 px-2.5 py-1.5 rounded-tile border border-line">
+          <div className="flex items-center gap-1.5 bg-surface-2 px-2.5 py-1.5 rounded-tile">
             <SlidersHorizontal className="w-3.5 h-3.5 text-risk-moderate shrink-0" />
             <span className="text-label-2 text-xs font-medium">Risk Level:</span>
             <select
@@ -198,7 +198,7 @@ export const RiskMapPage = () => {
           </div>
 
           {/* Active Target Label */}
-          <div className="ml-auto hidden xl:flex items-center gap-1.5 text-xs text-label-2 bg-surface-2 border border-line px-2.5 py-1 rounded-tile">
+          <div className="ml-auto hidden xl:flex items-center gap-1.5 text-xs text-label-2 bg-surface-2 px-2.5 py-1 rounded-tile">
             <span>Target: <strong>{selectedState}, {selectedCountry}</strong></span>
           </div>
         </div>
@@ -209,7 +209,7 @@ export const RiskMapPage = () => {
         
         {/* Main GIS Map (67%) */}
         <div className="lg:col-span-8 flex flex-col">
-          <div className="bg-surface border border-line rounded-card p-3.5 flex flex-col shadow-sm h-full">
+          <div className="bg-surface rounded-card p-3.5 flex flex-col h-full">
             <div className="flex items-center justify-between mb-2 text-xs">
               <span className="text-label font-semibold flex items-center gap-1.5">
                 <Compass className="w-4 h-4 text-label-2" />
@@ -244,7 +244,7 @@ export const RiskMapPage = () => {
               />
             </div>
           ) : (
-            <div className="bg-surface border border-line rounded-card p-6 h-full flex flex-col items-center justify-center text-center space-y-2">
+            <div className="bg-surface rounded-card p-6 h-full flex flex-col items-center justify-center text-center space-y-2">
               <ShieldAlert className="w-8 h-8 text-label-3" />
               <h3 className="text-xs font-semibold text-label">No Sector Selected</h3>
               <p className="text-xs text-label-2 max-w-xs leading-relaxed">
@@ -256,7 +256,7 @@ export const RiskMapPage = () => {
       </div>
 
       {/* Matching Zones Selection Strip */}
-      <div className="bg-surface border border-line rounded-tile p-3 space-y-2">
+      <div className="bg-surface-2 rounded-tile p-3 space-y-2">
         <div className="flex items-center justify-between text-xs text-label-2">
           <span className="font-semibold text-label">
             Monitored Hazard Corridors in {selectedState} ({filteredZones.length})

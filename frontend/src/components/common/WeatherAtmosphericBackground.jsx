@@ -44,7 +44,7 @@ const rand = (i, salt) => {
   return x - Math.floor(x);
 };
 
-export const WeatherAtmosphericBackground = () => {
+export const WeatherAtmosphericBackground = ({ showStatus = true }) => {
   const { environment, timeOffsetHours = 0, setTimeOffsetHours } = useLocationIntelligence();
   const { resolvedTheme } = useTheme();
   const isLight = resolvedTheme === 'light';
@@ -91,7 +91,8 @@ export const WeatherAtmosphericBackground = () => {
   })), []);
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none" aria-hidden="true">
+    <>
+    <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden select-none" aria-hidden="true">
       {/* Sky */}
       {layers.map((l, i) => (
         <div
@@ -178,10 +179,13 @@ export const WeatherAtmosphericBackground = () => {
       {/* Keeps text readable: darken in dark mode, wash out to a pale sky in light mode */}
       <div className="absolute inset-0" style={{ background: isLight ? 'rgba(245,245,247,0.72)' : 'rgba(0,0,0,0.35)' }} />
 
+    </div>
+
       {/* Local time & conditions, with the time-of-day preview */}
-      <div className="hidden lg:block absolute bottom-4 left-[calc(16rem+1.5rem)] z-20 pointer-events-auto">
+      {showStatus && (
+      <div className="hidden lg:block fixed bottom-4 left-[calc(16rem+1.5rem)] z-40 select-none">
         {showTimeMenu && (
-          <div className="mb-2 p-4 rounded-tile bg-surface/90 backdrop-blur-xl border border-line text-[13px] text-label w-80">
+          <div className="mb-2 p-4 rounded-tile bg-surface/90 backdrop-blur-xl text-[13px] text-label w-80">
             <div className="flex items-center justify-between mb-2">
               <span className="font-medium">Preview time of day</span>
               <button onClick={() => setShowTimeMenu(false)} className="text-label-2 hover:text-label text-xs">Close</button>
@@ -206,7 +210,7 @@ export const WeatherAtmosphericBackground = () => {
               />
               <button
                 onClick={() => setTimeOffsetHours(0)}
-                className="px-2.5 py-0.5 rounded-full text-xs bg-surface-2 hover:opacity-80 shrink-0"
+                className="px-2.5 py-0.5 rounded-full whitespace-nowrap text-xs bg-surface-2 hover:opacity-80 shrink-0"
               >
                 {timeOffsetHours === 0 ? 'Live' : 'Reset'}
               </button>
@@ -216,7 +220,7 @@ export const WeatherAtmosphericBackground = () => {
 
         <button
           onClick={() => setShowTimeMenu(prev => !prev)}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface/70 hover:bg-surface/90 backdrop-blur-xl text-xs text-label-2 transition-colors"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-full whitespace-nowrap bg-surface/70 hover:bg-surface/90 backdrop-blur-xl text-xs text-label-2 transition-colors"
           title="Preview time of day"
         >
           {isDay ? <Sun className="w-3.5 h-3.5" strokeWidth={1.75} /> : <Moon className="w-3.5 h-3.5" strokeWidth={1.75} />}
@@ -228,7 +232,8 @@ export const WeatherAtmosphericBackground = () => {
           {timeOffsetHours !== 0 && <span className="text-accent-text">({timeOffsetHours > 0 ? '+' : ''}{timeOffsetHours}h)</span>}
         </button>
       </div>
-    </div>
+      )}
+    </>
   );
 };
 

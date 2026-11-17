@@ -84,9 +84,9 @@ export const SimulatorPage = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-line pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-risk-moderate/[0.12] text-risk-moderate border border-risk-moderate/30 flex items-center gap-1">
+            <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-risk-moderate/[0.12] text-risk-moderate border-risk-moderate/30 flex items-center gap-1">
               <Zap className="w-3 h-3" />
-              SIH 2026 JUDGE DEMONSTRATION RUNNER
+              Sih 2026 judge demonstration runner
             </span>
             <span className="text-xs text-label-2 tabular-nums">SIH26001</span>
           </div>
@@ -101,7 +101,7 @@ export const SimulatorPage = () => {
           <button
             onClick={handleReset}
             disabled={running}
-            className="px-4 py-2 bg-surface-2 hover:bg-surface-2 text-label rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all"
+            className="px-4 py-2 bg-surface-2 hover:bg-surface-2 text-label rounded-full whitespace-nowrap text-xs font-semibold flex items-center gap-1.5 transition-all"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             Reset Demo Baseline
@@ -110,7 +110,7 @@ export const SimulatorPage = () => {
           <button
             onClick={handleNextStep}
             disabled={running || currentStep >= 12}
-            className="px-5 py-2 bg-surface-2 text-label rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all hover:scale-[1.01] disabled:opacity-50"
+            className="px-5 py-2 bg-surface-2 text-label rounded-full whitespace-nowrap text-xs font-semibold flex items-center gap-1.5 transition-all hover:scale-[1.01] disabled:opacity-50"
           >
             <Play className="w-3.5 h-3.5 fill-current" />
             {currentStep >= 12 ? 'Demo Finished' : `Advance to Step ${currentStep + 1}`}
@@ -119,13 +119,13 @@ export const SimulatorPage = () => {
       </div>
 
       {/* Progress Stepper Bar */}
-      <div className="bg-surface border border-line rounded-card p-5 space-y-4">
+      <div className="bg-surface rounded-card p-5 space-y-4">
         <div className="flex items-center justify-between text-xs font-semibold text-label-2">
           <span>Scenario Progression: Step {currentStep} of 12</span>
           <span className="text-label-2 tabular-nums">{Math.round((currentStep / 12) * 100)}% Completed</span>
         </div>
 
-        <div className="w-full h-2.5 bg-page rounded-full overflow-hidden border border-line">
+        <div className="w-full h-2.5 bg-surface-2 rounded-full overflow-hidden">
           <div
             className="h-full bg-surface-2 rounded-full transition-all duration-500"
             style={{ width: `${(currentStep / 12) * 100}%` }}
@@ -143,17 +143,17 @@ export const SimulatorPage = () => {
               <div
                 key={s.step}
                 onClick={() => handleRunStep(s.step)}
-                className={`p-3.5 rounded-card border text-left transition-all cursor-pointer ${
+                className={`p-3.5 rounded-tile text-left transition-all cursor-pointer ${
                   isCurrent
-                    ? 'bg-surface-2 border-line   ring-1 ring-accent/50'
+                    ? 'bg-surface-2 ring-1 ring-accent/50'
                     : isDone
-                    ? 'bg-page border-line opacity-80'
-                    : 'bg-page border-line opacity-50 hover:opacity-100'
+                    ? 'bg-surface-2 opacity-80'
+                    : 'bg-surface-2 opacity-50 hover:opacity-100'
                 }`}
               >
                 <div className="flex items-start justify-between gap-2 mb-1.5">
                   <div className="flex items-center gap-2">
-                    <div className={`p-1.5 rounded-tile bg-surface border border-line ${s.color}`}>
+                    <div className={`p-1.5 rounded-tile bg-surface-2 ${s.color}`}>
                       <Icon className="w-4 h-4" />
                     </div>
                     <span className="font-semibold text-xs text-label leading-tight">{s.title}</span>
@@ -168,12 +168,12 @@ export const SimulatorPage = () => {
       </div>
 
       {/* Live System Execution Log */}
-      <div className="bg-surface border border-line rounded-card p-5 space-y-3">
+      <div className="bg-surface rounded-card p-5 space-y-3">
         <h3 className="font-semibold text-xs text-label-2 flex items-center gap-2">
           <Radio className="w-4 h-4 text-label-2 " />
           Live Operational Simulation Output Log
         </h3>
-        <div className="bg-page p-3.5 rounded-card border border-line tabular-nums text-xs text-label-2 max-h-48 overflow-y-auto space-y-1">
+        <div className="bg-surface-2 p-3.5 rounded-tile tabular-nums text-xs text-label-2 max-h-48 overflow-y-auto space-y-1">
           {statusLog.map((log, idx) => (
             <div key={idx} className="text-label-2">
               {log}

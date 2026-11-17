@@ -20,9 +20,9 @@ export const GisMapPage = () => {
     <div className="space-y-4 w-full select-none">
       
       {/* Header Bar */}
-      <div className="bg-surface border border-line p-4 rounded-card flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+      <div className="bg-surface p-4 rounded-card flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-tile bg-risk-low/[0.12] border border-risk-low/30 flex items-center justify-center text-risk-low shrink-0">
+          <div className="w-10 h-10 rounded-tile bg-risk-low/[0.12] border-risk-low/30 flex items-center justify-center text-risk-low shrink-0">
             <Map className="w-5 h-5" />
           </div>
           <div>
@@ -36,7 +36,7 @@ export const GisMapPage = () => {
         <div className="flex items-center gap-2 self-start sm:self-center">
           <button
             onClick={() => navigate('/safe-route')}
-            className="px-3.5 py-2 bg-accent hover:opacity-90 text-white rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all "
+            className="px-3.5 py-2 bg-accent hover:opacity-90 text-white rounded-full whitespace-nowrap text-xs font-semibold flex items-center gap-1.5 transition-all"
           >
             <Navigation className="w-3.5 h-3.5" />
             <span>Plan Safe Route</span>
@@ -48,7 +48,7 @@ export const GisMapPage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch min-h-[640px]">
         
         {/* Map Viewport (8 Columns on desktop) */}
-        <div className="lg:col-span-8 bg-surface border border-line rounded-card p-3 flex flex-col shadow-sm">
+        <div className="lg:col-span-8 bg-surface rounded-card p-3 flex flex-col">
           <div className="flex-1 w-full rounded-tile overflow-hidden h-[640px] min-h-[580px]">
             <LeafletRiskMap
               zones={zones}
@@ -69,8 +69,8 @@ export const GisMapPage = () => {
               onClose={() => setSelectedZone(null)}
             />
           ) : (
-            <div className="bg-surface border border-line rounded-card p-6 h-full flex flex-col justify-center items-center text-center space-y-3 text-label-2 shadow-sm">
-              <div className="w-14 h-14 rounded-full bg-surface border border-line flex items-center justify-center text-label-3">
+            <div className="bg-surface rounded-card p-6 h-full flex flex-col justify-center items-center text-center space-y-3 text-label-2">
+              <div className="w-14 h-14 rounded-full bg-surface-2 flex items-center justify-center text-label-3">
                 <Compass className="w-7 h-7 text-risk-low" />
               </div>
               <div>

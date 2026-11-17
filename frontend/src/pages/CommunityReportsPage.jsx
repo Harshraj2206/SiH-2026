@@ -49,9 +49,9 @@ export const CommunityReportsPage = () => {
     <div className="space-y-4 max-w-5xl mx-auto">
       
       {/* Top Header */}
-      <div className="bg-surface border border-line p-3.5 rounded-tile flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="bg-surface-2 p-3.5 rounded-tile flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-tile bg-risk-moderate/[0.12] border border-risk-moderate/30 flex items-center justify-center text-risk-moderate">
+          <div className="w-8 h-8 rounded-tile bg-risk-moderate/[0.12] border-risk-moderate/30 flex items-center justify-center text-risk-moderate">
             <Users className="w-4 h-4" />
           </div>
           <div>
@@ -63,7 +63,7 @@ export const CommunityReportsPage = () => {
         {/* Action Button */}
         <button
           onClick={() => setSubmissionModalOpen(true)}
-          className="px-3 py-1.5 bg-risk-moderate hover:bg-risk-moderate text-label rounded-full text-xs font-semibold flex items-center gap-1.5 transition-colors self-start sm:self-auto shadow"
+          className="px-3 py-1.5 bg-risk-moderate hover:opacity-90 text-white rounded-full whitespace-nowrap text-xs font-semibold flex items-center gap-1.5 transition-colors self-start sm:self-auto"
         >
           <PlusCircle className="w-3.5 h-3.5" />
           <span>{t('submit_report_btn') || 'Submit Hazard Report'}</span>
@@ -71,7 +71,7 @@ export const CommunityReportsPage = () => {
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-1 bg-surface-2 p-1 rounded-full border border-line text-xs">
+      <div className="flex items-center gap-1 bg-surface-2 p-1 rounded-full text-xs">
         {[
           { id: 'ALL', label: `${t('filter_all') || 'All'} (${reports.length})` },
           { id: 'PENDING', label: `${t('pending') || 'Pending'} (${pendingCount})` },
@@ -80,7 +80,7 @@ export const CommunityReportsPage = () => {
           <button
             key={tab.id}
             onClick={() => setStatusFilter(tab.id)}
-            className={`px-3 py-1 rounded-full transition-colors ${
+            className={`px-3 py-1 rounded-full whitespace-nowrap transition-colors ${
               statusFilter === tab.id
                 ? 'bg-surface-2 text-label font-semibold '
                 : 'text-label-2 hover:text-label'
@@ -92,20 +92,20 @@ export const CommunityReportsPage = () => {
       </div>
 
       {/* Reports List */}
-      <div className="bg-surface border border-line rounded-tile overflow-hidden divide-y divide-line">
+      <div className="bg-surface-2 rounded-tile overflow-hidden divide-y divide-line">
         {filteredReports.map((report) => (
-          <div key={report.report_id} className="p-4 hover:bg-surface-2 transition-colors space-y-2">
+          <div key={report.report_id} className="p-4 rounded-tile hover:bg-surface-2 transition-colors space-y-2">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="font-semibold text-xs text-label">{report.reporter_name}</span>
-                <span className="text-xs text-label-2 bg-surface-2 px-1.5 py-0.2 rounded-full border border-line tabular-nums">
+                <span className="text-xs text-label-2 bg-surface-2 px-1.5 py-0.5 rounded-full tabular-nums">
                   {report.zone_id}
                 </span>
-                <span className={`text-xs px-1.5 py-0.2 rounded-full font-semibold ${
-                  report.status === 'VERIFIED' ? 'bg-risk-low/[0.12] text-risk-low border border-risk-low/30' :
-                  report.status === 'REJECTED' ? 'bg-risk-critical/[0.12] text-risk-critical border border-risk-critical/30' :
-                  'bg-risk-moderate/[0.12] text-risk-moderate border border-risk-moderate/30'
-                }`}>
+                <span className={`text-xs px-1.5 py-0.5 rounded-full font-semibold ${
+ report.status === 'VERIFIED' ? 'bg-risk-low/[0.12] text-risk-low ' :
+ report.status === 'REJECTED' ? 'bg-risk-critical/[0.12] text-risk-critical ' :
+ 'bg-risk-moderate/[0.12] text-risk-moderate '
+ }`}>
                   {report.status === 'VERIFIED' ? (t('verified') || 'Verified') :
                    report.status === 'REJECTED' ? (t('rejected') || 'Rejected') :
                    (t('pending') || 'Pending Verification')}
@@ -134,7 +134,7 @@ export const CommunityReportsPage = () => {
                   <button
                     onClick={() => handleAction(report.report_id, 'VERIFIED')}
                     disabled={verifyingId === report.report_id}
-                    className="px-2.5 py-1 bg-risk-low hover:bg-risk-low text-label rounded-full text-xs font-semibold flex items-center gap-1 transition-colors"
+                    className="px-2.5 py-1 bg-risk-low hover:opacity-90 text-white rounded-full whitespace-nowrap text-xs font-semibold flex items-center gap-1 transition-colors"
                   >
                     {verifyingId === report.report_id ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />}
                     <span>{t('verified') || 'Verify'}</span>
@@ -142,7 +142,7 @@ export const CommunityReportsPage = () => {
                   <button
                     onClick={() => handleAction(report.report_id, 'REJECTED')}
                     disabled={verifyingId === report.report_id}
-                    className="px-2.5 py-1 bg-risk-critical hover:bg-risk-critical text-label rounded-full text-xs font-semibold flex items-center gap-1 transition-colors"
+                    className="px-2.5 py-1 bg-risk-critical hover:opacity-90 text-white rounded-full whitespace-nowrap text-xs font-semibold flex items-center gap-1 transition-colors"
                   >
                     <XCircle className="w-3 h-3" />
                     <span>{t('rejected') || 'Reject'}</span>

@@ -98,9 +98,9 @@ export const CommunityPollPage = () => {
     <div className="space-y-6 w-full select-none pb-12">
       
       {/* Header Banner */}
-      <div className="bg-surface border border-line p-5 rounded-card flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+      <div className="bg-surface p-5 rounded-card flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
-          <div className="w-11 h-11 rounded-card bg-risk-low/[0.12] border border-risk-low/30 flex items-center justify-center text-risk-low shrink-0">
+          <div className="w-11 h-11 rounded-tile bg-risk-low/[0.12] flex items-center justify-center text-risk-low shrink-0">
             <Vote className="w-5 h-5" />
           </div>
           <div>
@@ -108,8 +108,8 @@ export const CommunityPollPage = () => {
               <span className="text-xs font-semibold text-risk-low ">
                 Community Intelligence & AI Verification
               </span>
-              <span className="text-xs px-1.5 py-0.5 rounded-full bg-surface-2 text-label-2 tabular-nums border border-line">
-                PROTOTYPE DEMONSTRATION
+              <span className="text-xs px-1.5 py-0.5 rounded-full bg-surface-2 text-label-2 tabular-nums">
+                Prototype demonstration
               </span>
             </div>
             <h1 className="text-lg font-semibold text-label mt-0.5">
@@ -123,7 +123,7 @@ export const CommunityPollPage = () => {
 
         <button
           onClick={() => setSubmissionModalOpen(true)}
-          className="px-4 py-2.5 bg-accent hover:opacity-90 text-white font-semibold rounded-full text-xs flex items-center gap-2 transition-all self-start sm:self-center active:scale-[0.99]"
+          className="px-4 py-2.5 bg-accent hover:opacity-90 text-white font-semibold rounded-full whitespace-nowrap text-xs flex items-center gap-2 transition-all self-start sm:self-center active:scale-[0.99]"
         >
           <PlusCircle className="w-4 h-4" />
           <span>Post Hazard Observation</span>
@@ -133,10 +133,10 @@ export const CommunityPollPage = () => {
       {/* ─────────────────────────────────────────────────────────────
           1. ACTIVE COMMUNITY POLL CARD (Full Width Interactive)
           ───────────────────────────────────────────────────────────── */}
-      <div className="bg-surface border border-line rounded-card p-6 shadow-sm space-y-5">
+      <div className="bg-surface rounded-card p-6 space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-line pb-3">
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-risk-low " />
+            <span className="w-2.5 h-2.5 rounded-full bg-risk-low" />
             <h2 className="text-sm font-semibold text-label font-sans ">
               Active Daily Poll
             </h2>
@@ -166,8 +166,8 @@ export const CommunityPollPage = () => {
                 disabled={voting}
                 className={`p-4 rounded-tile border text-left transition-all relative overflow-hidden flex flex-col justify-between space-y-3 ${
                   isSelected
-                    ? 'bg-surface-2 border-risk-low/30 text-label  '
-                    : 'bg-surface border-line text-label-2 hover:border-line'
+                    ? 'bg-surface-2 border-accent/60 text-label '
+                    : 'bg-surface-2 border-transparent text-label-2 '
                 }`}
               >
                 <div className="flex items-start justify-between gap-2">
@@ -211,7 +211,7 @@ export const CommunityPollPage = () => {
       </div>
 
       {/* ─────────────────────────────────────────────────────────────
-          2. AI CROSS-CHECKED GROUND REPORTS FEED
+          2. AI cross-checked ground reports feed
           ───────────────────────────────────────────────────────────── */}
       <div className="space-y-4">
         
@@ -224,7 +224,7 @@ export const CommunityPollPage = () => {
             </h2>
           </div>
 
-          <div className="flex items-center gap-1.5 bg-surface p-1.5 rounded-full border border-line text-xs">
+          <div className="flex items-center gap-1.5 bg-surface-2 p-1.5 rounded-full text-xs">
             {[
               { id: 'ALL', label: 'All Reports' },
               { id: 'AI_VERIFIED', label: 'AI Cross-Checked' },
@@ -234,7 +234,7 @@ export const CommunityPollPage = () => {
               <button
                 key={tab.id}
                 onClick={() => setFilter(tab.id)}
-                className={`px-3 py-1.5 rounded-full transition-colors font-medium ${
+                className={`px-3 py-1.5 rounded-full whitespace-nowrap transition-colors font-medium ${
                   filter === tab.id
                     ? 'bg-surface-2 text-label font-semibold'
                     : 'text-label-2 hover:text-label'
@@ -256,7 +256,7 @@ export const CommunityPollPage = () => {
             return (
               <div 
                 key={reportKey} 
-                className="bg-surface border border-line hover:border-line p-5 rounded-card space-y-3.5 transition-colors shadow-sm flex flex-col justify-between"
+                className="bg-surface p-5 rounded-card space-y-3.5 transition-colors flex flex-col justify-between"
               >
                 <div className="space-y-2.5">
                   {/* Top Bar: Reporter & AI Badge */}
@@ -276,7 +276,7 @@ export const CommunityPollPage = () => {
                     </div>
 
                     {isAiVerified && (
-                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-risk-low/[0.12] border border-risk-low/30 text-risk-low text-xs font-semibold shrink-0">
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-risk-low/[0.12] border-risk-low/30 text-risk-low text-xs font-semibold shrink-0">
                         <BrainCircuit className="w-3 h-3 text-risk-low" />
                         <span>AI Cross-Checked ({report.ai_confidence_score || 94.2}%)</span>
                       </div>
@@ -301,7 +301,7 @@ export const CommunityPollPage = () => {
 
                   {/* AI Multi-Agent Verification Note */}
                   {report.ai_summary && (
-                    <div className="p-2.5 bg-surface border border-line rounded-tile text-xs text-label-2 space-y-1">
+                    <div className="p-2.5 bg-surface-2 rounded-tile text-xs text-label-2 space-y-1">
                       <span className="text-xs font-semibold text-risk-low flex items-center gap-1">
                         <ShieldCheck className="w-3 h-3" />
                         <span>AI Agent Telemetry Verification</span>
@@ -321,7 +321,7 @@ export const CommunityPollPage = () => {
 
                   <button
                     onClick={() => handleUpvoteReport(report.id)}
-                    className="flex items-center gap-1.5 px-3 py-1 bg-surface-2 hover:bg-surface-2 text-label-2 hover:text-label rounded-full text-xs font-semibold transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-1 bg-surface-2 hover:bg-surface-2 text-label-2 hover:text-label rounded-full whitespace-nowrap text-xs font-semibold transition-colors"
                   >
                     <ThumbsUp className="w-3 h-3 text-risk-low" />
                     <span>{reportVotes} Confirmed</span>

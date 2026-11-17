@@ -22,6 +22,7 @@
     --rgb-page: 0 0 0;
     --rgb-surface: 28 28 30;
     --rgb-surface-2: 44 44 46;
+    --rgb-surface-3: 58 58 60;
     --rgb-line: 56 56 58;
     --rgb-label: 255 255 255;
     --rgb-label-2: 152 152 159;
@@ -57,6 +58,7 @@
     --rgb-page: 245 245 247;
     --rgb-surface: 255 255 255;
     --rgb-surface-2: 242 242 247;
+    --rgb-surface-3: 255 255 255;
     --rgb-line: 210 210 215;
     --rgb-label: 29 29 31;
     --rgb-label-2: 110 110 115;
@@ -99,6 +101,13 @@
   background-color: rgb(var(--rgb-surface) / 0.78);
   -webkit-backdrop-filter: blur(24px) saturate(1.5);
   backdrop-filter: blur(24px) saturate(1.5);
+}
+
+/* A grey fill inside a grey fill steps up one level so it stays visible
+   (selected segments, nested fields, progress tracks) */
+.bg-surface-2 .bg-surface-2,
+.bg-surface-2 .hover\:bg-surface-2:hover {
+  background-color: rgb(var(--rgb-surface-3));
 }
 
 @keyframes sky-fade {

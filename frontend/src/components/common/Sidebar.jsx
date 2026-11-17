@@ -55,7 +55,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
         {/* Brand Header */}
         <div className="px-5 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5 cursor-default">
-            <div className="w-8 h-8 rounded-[9px] bg-surface-2 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-field bg-surface-2 flex items-center justify-center">
               <Mountain className="w-4 h-4 text-label" strokeWidth={1.75} />
             </div>
             <div className="leading-tight">

@@ -5,15 +5,15 @@ import { Terrain3DBackground } from '../components/common/Terrain3DBackground';
 
 export const TermsPage = () => {
   return (
-    <div className="min-h-screen relative text-label flex flex-col selection:bg-risk-critical selection:text-label">
+    <div className="min-h-screen relative isolate text-label flex flex-col selection:bg-accent/30">
       <Terrain3DBackground />
 
-      <nav className="h-16 border-b border-line px-6 flex items-center justify-between bg-page backdrop-blur sticky top-0 z-30">
+      <nav className="h-16 border-b border-line px-6 flex items-center justify-between bg-page/75 backdrop-blur-xl sticky top-0 z-30">
         <Link to="/" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-tile bg-risk-critical/[0.12] border border-risk-critical/30 flex items-center justify-center text-risk-critical">
+          <div className="w-8 h-8 rounded-field bg-surface-2 flex items-center justify-center text-label">
             <Shield className="w-4 h-4" />
           </div>
-          <span className="font-semibold text-sm text-label">LAND<span className="text-risk-critical">GUARD</span></span>
+          <span className="font-semibold text-sm text-label">LandSafe</span>
         </Link>
         <Link to="/login" className="text-xs text-label-2 hover:text-label flex items-center gap-1">
           <ArrowLeft className="w-3.5 h-3.5" />
@@ -22,12 +22,12 @@ export const TermsPage = () => {
       </nav>
 
       <main className="max-w-3xl mx-auto px-6 py-12 space-y-6">
-        <div className="p-3.5 rounded-card bg-risk-moderate/[0.12] border border-risk-moderate/30 flex items-center gap-3 text-xs text-risk-moderate">
+        <div className="p-3.5 rounded-card bg-risk-moderate/[0.12] border-risk-moderate/30 flex items-center gap-3 text-xs text-risk-moderate">
           <AlertCircle className="w-4 h-4 text-risk-moderate shrink-0" />
           <span>Draft Document — Created for Smart India Hackathon 2026 (SIH26001) Prototype Review</span>
         </div>
 
-        <div className="bg-surface backdrop-blur-md border border-line rounded-card p-8 space-y-6">
+        <div className="bg-surface backdrop-blur-md rounded-card p-8 space-y-6">
           <div className="flex items-center gap-3 border-b border-line pb-4">
             <FileText className="w-6 h-6 text-risk-critical" />
             <h1 className="text-2xl font-semibold text-label">Terms of Service</h1>
@@ -37,7 +37,7 @@ export const TermsPage = () => {
             <section className="space-y-2">
               <h2 className="text-sm font-semibold text-label">1. Purpose and Scope</h2>
               <p>
-                LANDSLIDEGUARD is a prototype disaster-management and early warning intelligence platform designed for the North Eastern Region (NER) and Himalayan belt under Smart India Hackathon 2026 Problem Statement SIH26001.
+                LandSafe is a prototype disaster-management and early warning intelligence platform designed for the North Eastern Region (NER) and Himalayan belt under Smart India Hackathon 2026 Problem Statement SIH26001.
               </p>
             </section>
 

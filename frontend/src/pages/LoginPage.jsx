@@ -57,7 +57,7 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen relative flex flex-col justify-center items-center px-4 py-12 bg-surface-2 text-label selection:bg-risk-critical selection:text-label">
+    <div className="min-h-screen relative isolate flex flex-col justify-center items-center px-4 py-12 text-label selection:bg-accent/30">
       {/* 3D Elevation Mesh Background */}
       <Terrain3DBackground />
 
@@ -66,22 +66,22 @@ export const LoginPage = () => {
         {/* Brand Header */}
         <div className="text-center space-y-1.5">
           <Link to="/" className="inline-flex items-center gap-2">
-            <div className="w-8 h-8 rounded-tile bg-risk-critical/[0.12] border border-risk-critical/30 flex items-center justify-center text-risk-critical">
+            <div className="w-8 h-8 rounded-field bg-surface-2 flex items-center justify-center text-label">
               <Shield className="w-4 h-4" />
             </div>
             <div className="text-left">
-              <span className="font-semibold text-lg text-label">LANDSAFE</span>
-              <span className="block text-xs tabular-nums text-label-2">SIH26001 • OPERATIONS CONSOLE</span>
+              <span className="font-semibold text-lg text-label">LandSafe</span>
+              <span className="block text-xs tabular-nums text-label-2">SIH26001 • operations console</span>
             </div>
           </Link>
           <h2 className="text-xl font-semibold text-label tracking-tight pt-1">Sign In</h2>
         </div>
 
         {/* Login Form Card (Section 7) */}
-        <div className="bg-surface-2 border border-line rounded-tile p-6 space-y-4">
+        <div className="bg-surface rounded-card p-6 space-y-4">
           
           {errorMessage && (
-            <div className="p-3 rounded-tile bg-risk-critical/[0.12] border border-risk-critical/30 flex items-start gap-2.5 text-xs text-risk-critical">
+            <div className="p-3 rounded-tile bg-risk-critical/[0.12] border-risk-critical/30 flex items-start gap-2.5 text-xs text-risk-critical">
               <AlertCircle className="w-4 h-4 text-risk-critical shrink-0 mt-0.5" />
               <span>{errorMessage}</span>
             </div>
@@ -106,7 +106,7 @@ export const LoginPage = () => {
                   autoComplete="username"
                   required
                   disabled={loading}
-                  className="w-full pl-9 pr-3 py-2 bg-surface-2 border border-line rounded-field text-xs text-label placeholder-label-3 focus:outline-none focus:border-line transition-colors tabular-nums disabled:opacity-50"
+                  className="w-full pl-9 pr-3 py-2 bg-surface-2 rounded-field text-xs text-label placeholder-label-3 focus:outline-none transition-colors tabular-nums disabled:opacity-50 focus:ring-2 focus:ring-accent/40"
                 />
               </div>
             </div>
@@ -137,7 +137,7 @@ export const LoginPage = () => {
                   autoComplete="current-password"
                   required
                   disabled={loading}
-                  className="w-full pl-9 pr-9 py-2 bg-surface-2 border border-line rounded-field text-xs text-label placeholder-label-3 focus:outline-none focus:border-line transition-colors disabled:opacity-50 tabular-nums"
+                  className="w-full pl-9 pr-9 py-2 bg-surface-2 rounded-field text-xs text-label placeholder-label-3 focus:outline-none transition-colors disabled:opacity-50 tabular-nums focus:ring-2 focus:ring-accent/40"
                 />
                 <button
                   type="button"
@@ -154,9 +154,9 @@ export const LoginPage = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 px-4 bg-surface-2 hover:bg-[#1f3254] text-label rounded-full text-xs tabular-nums font-semibold flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
+              className="w-full py-2.5 px-4 bg-accent hover:opacity-90 text-white rounded-full text-xs tabular-nums font-semibold flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
             >
-              {loading ? <span>Authenticating...</span> : <><span>Sign In</span><ArrowRight className="w-3.5 h-3.5 text-label-2" /></>}
+              {loading ? <span>Authenticating...</span> : <><span>Sign In</span><ArrowRight className="w-3.5 h-3.5" /></>}
             </button>
           </form>
 
@@ -166,14 +166,14 @@ export const LoginPage = () => {
               to="/register"
               className="text-xs text-label-2 hover:text-label-2 transition-colors tabular-nums"
             >
-              New to LANDSAFE? <strong className="text-label underline">Create Account</strong>
+              New to LandSafe? <strong className="text-label underline">Create Account</strong>
             </Link>
           </div>
         </div>
 
         {/* Demo Quick-Fill Accordion (only when VITE_DEMO_MODE=true; emails only, no passwords) */}
         {import.meta.env.VITE_DEMO_MODE === 'true' && (
-        <div className="bg-surface-2 border border-line rounded-tile overflow-hidden text-xs">
+        <div className="bg-surface rounded-card overflow-hidden text-xs">
           <button
             type="button"
             onClick={() => setShowDemoCredentials(!showDemoCredentials)}
@@ -193,7 +193,7 @@ export const LoginPage = () => {
                   key={acc.role}
                   type="button"
                   onClick={() => handleQuickFill(acc)}
-                  className="w-full p-1.5 rounded-tile bg-surface-2 hover:bg-surface-2 text-left flex items-center justify-between transition-colors tabular-nums text-xs"
+                  className="w-full p-1.5 rounded-tile bg-surface-2 hover:opacity-80 text-left flex items-center justify-between transition-colors tabular-nums text-xs"
                 >
                   <span className="text-label font-semibold">{acc.role}</span>
                   <span className="text-label-2 text-xs">{acc.identifier}</span>

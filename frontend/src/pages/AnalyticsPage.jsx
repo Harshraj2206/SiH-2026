@@ -24,7 +24,7 @@ import {
   ShieldAlert,
   Layers
 } from 'lucide-react';
-import { getRiskScoreColor, getRiskLevelColor } from '../utils/formatters';
+import { getRiskScoreColor, getRiskLevelColor, toLabel } from '../utils/formatters';
 
 export const AnalyticsPage = () => {
   const [analytics, setAnalytics] = useState(null);
@@ -60,13 +60,13 @@ export const AnalyticsPage = () => {
 
   if (error && !analytics) {
     return (
-      <div className="bg-surface border border-line rounded-card p-8 max-w-xl mx-auto text-center space-y-4 my-12">
+      <div className="bg-surface rounded-card p-8 max-w-xl mx-auto text-center space-y-4 my-12">
         <ShieldAlert className="w-10 h-10 text-risk-critical mx-auto" />
         <h2 className="text-lg font-semibold text-label">Telemetry Aggregation Unavailable</h2>
         <p className="text-sm text-label-2">{error}</p>
         <button
           onClick={loadAnalytics}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-accent hover:bg-accent text-label text-xs font-semibold rounded-full transition"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-accent hover:opacity-90 text-white text-xs font-semibold rounded-full whitespace-nowrap transition"
         >
           <Activity className="w-4 h-4" />
           Retry Aggregation
@@ -81,14 +81,14 @@ export const AnalyticsPage = () => {
     <div className="space-y-6">
       
       {/* Header */}
-      <div className="bg-surface border border-line p-5 rounded-card flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-surface p-5 rounded-card flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-tile bg-surface-2 border border-line flex items-center justify-center text-label-2">
+            <div className="w-8 h-8 rounded-tile bg-surface-2 flex items-center justify-center text-label-2">
               <BarChart3 className="w-5 h-5" />
             </div>
             <h1 className="text-xl font-semibold text-label">Disaster Telemetry & Model Analytics</h1>
-            <span className="text-xs px-2 py-0.5 rounded-full tabular-nums font-semibold bg-risk-low/[0.12] text-risk-low border border-risk-low/30">
+            <span className="text-xs px-2 py-0.5 rounded-full tabular-nums font-semibold bg-risk-low/[0.12] text-risk-low border-risk-low/30">
               Authoritative WMO & Copernicus Telemetry
             </span>
           </div>
@@ -106,7 +106,7 @@ export const AnalyticsPage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* 1. Risk Distribution Bar Chart */}
-        <div className="bg-surface border border-line rounded-card p-5 space-y-3">
+        <div className="bg-surface rounded-card p-5 space-y-3">
           <div className="flex items-center justify-between border-b border-line pb-2.5">
             <h3 className="text-sm font-semibold text-label flex items-center gap-2">
               <ShieldAlert className="w-4 h-4 text-risk-critical" />
@@ -119,7 +119,7 @@ export const AnalyticsPage = () => {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={analytics.risk_distribution} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#38383A" />
-                <XAxis dataKey="level" tick={{ fill: '#98989F', fontSize: 10 }} />
+                <XAxis dataKey="level" tick={{ fill: '#98989F', fontSize: 10 }} tickFormatter={(v) => toLabel(String(v).split(' (')[0])} />
                 <YAxis tick={{ fill: '#98989F', fontSize: 10 }} />
                 <Tooltip 
                   contentStyle={{ backgroundColor: '#1C1C1E', borderColor: '#38383A', borderRadius: '12px', color: '#FFFFFF' }}
@@ -135,7 +135,7 @@ export const AnalyticsPage = () => {
         </div>
 
         {/* 2. Rainfall vs Risk Score Correlation */}
-        <div className="bg-surface border border-line rounded-card p-5 space-y-3">
+        <div className="bg-surface rounded-card p-5 space-y-3">
           <div className="flex items-center justify-between border-b border-line pb-2.5">
             <h3 className="text-sm font-semibold text-label flex items-center gap-2">
               <CloudRain className="w-4 h-4 text-label-2" />
@@ -161,7 +161,7 @@ export const AnalyticsPage = () => {
         </div>
 
         {/* 3. Community Reports Timeline */}
-        <div className="bg-surface border border-line rounded-card p-5 space-y-3">
+        <div className="bg-surface rounded-card p-5 space-y-3">
           <div className="flex items-center justify-between border-b border-line pb-2.5">
             <h3 className="text-sm font-semibold text-label flex items-center gap-2">
               <Users className="w-4 h-4 text-risk-moderate" />
@@ -197,7 +197,7 @@ export const AnalyticsPage = () => {
         </div>
 
         {/* 4. Global Random Forest Feature Importance */}
-        <div className="bg-surface border border-line rounded-card p-5 space-y-3">
+        <div className="bg-surface rounded-card p-5 space-y-3">
           <div className="flex items-center justify-between border-b border-line pb-2.5">
             <h3 className="text-sm font-semibold text-label flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-label-2" />
@@ -224,7 +224,7 @@ export const AnalyticsPage = () => {
       </div>
 
       {/* Top Critical Slopes Ranking Table */}
-      <div className="bg-surface border border-line rounded-card p-5 space-y-3">
+      <div className="bg-surface rounded-card p-5 space-y-3">
         <h3 className="text-sm font-semibold text-label flex items-center gap-2">
           <TrendingUp className="w-4 h-4 text-risk-critical" />
           Highest Vulnerability Sector Rankings (Operational Telemetry)

@@ -127,21 +127,21 @@ export const RegisterPage = () => {
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen relative flex flex-col justify-center items-center px-4 py-12 bg-surface-2 text-label selection:bg-risk-critical selection:text-label">
+      <div className="min-h-screen relative isolate flex flex-col justify-center items-center px-4 py-12 text-label selection:bg-accent/30">
         <Terrain3DBackground />
-        <div className="w-full max-w-md bg-surface-2 border border-risk-low/30 rounded-tile p-6 text-center space-y-4 animate-in fade-in">
-          <div className="w-12 h-12 rounded-full bg-risk-low/[0.12] border border-risk-low/30 flex items-center justify-center text-risk-low mx-auto">
+        <div className="w-full max-w-md bg-surface rounded-card p-6 text-center space-y-4 animate-in fade-in">
+          <div className="w-12 h-12 rounded-full bg-risk-low/[0.12] border-risk-low/30 flex items-center justify-center text-risk-low mx-auto">
             <CheckCircle2 className="w-6 h-6" />
           </div>
           <div className="space-y-1">
             <h2 className="text-xl font-semibold text-label">Account Created</h2>
             <p className="text-xs text-label-2">
-              Welcome to <strong>LANDSAFE</strong>, {formData.fullName}. Your citizen dashboard is ready.
+              Welcome to <strong>LandSafe</strong>, {formData.fullName}. Your citizen dashboard is ready.
             </p>
           </div>
           <button
             onClick={() => navigate('/overview', { replace: true })}
-            className="w-full py-2.5 px-4 bg-surface-2 hover:bg-[#1f3254] text-label rounded-full text-xs tabular-nums font-semibold flex items-center justify-center gap-1.5 transition-colors"
+            className="w-full py-2.5 px-4 bg-accent hover:opacity-90 text-white rounded-full text-xs tabular-nums font-semibold flex items-center justify-center gap-1.5 transition-colors"
           >
             <span>Open Dashboard</span>
             <ArrowRight className="w-4 h-4 text-label-2" />
@@ -152,27 +152,27 @@ export const RegisterPage = () => {
   }
 
   return (
-    <div className="min-h-screen relative flex flex-col justify-center items-center px-4 py-12 bg-surface-2 text-label selection:bg-risk-critical selection:text-label">
+    <div className="min-h-screen relative isolate flex flex-col justify-center items-center px-4 py-12 text-label selection:bg-accent/30">
       <Terrain3DBackground />
 
       <div className="w-full max-w-lg space-y-5 z-10 animate-in fade-in duration-200">
         <div className="text-center space-y-1.5">
           <Link to="/" className="inline-flex items-center gap-2">
-            <div className="w-8 h-8 rounded-tile bg-risk-critical/[0.12] border border-risk-critical/30 flex items-center justify-center text-risk-critical">
+            <div className="w-8 h-8 rounded-field bg-surface-2 flex items-center justify-center text-label">
               <Shield className="w-4 h-4" />
             </div>
             <div className="text-left">
-              <span className="font-semibold text-lg text-label">LANDSAFE</span>
-              <span className="block text-xs tabular-nums text-label-2">SIH26001 • CITIZEN ONBOARDING</span>
+              <span className="font-semibold text-lg text-label">LandSafe</span>
+              <span className="block text-xs tabular-nums text-label-2">SIH26001 • citizen onboarding</span>
             </div>
           </Link>
           <h2 className="text-xl font-semibold text-label tracking-tight pt-1">Create Account</h2>
         </div>
 
-        <div className="bg-surface-2 border border-line rounded-tile p-6 space-y-4">
+        <div className="bg-surface rounded-card p-6 space-y-4">
           
           {errorMessage && (
-            <div className="p-3 rounded-tile bg-risk-critical/[0.12] border border-risk-critical/30 flex items-start gap-2.5 text-xs text-risk-critical">
+            <div className="p-3 rounded-tile bg-risk-critical/[0.12] border-risk-critical/30 flex items-start gap-2.5 text-xs text-risk-critical">
               <AlertCircle className="w-4 h-4 text-risk-critical shrink-0 mt-0.5" />
               <span>{errorMessage}</span>
             </div>
@@ -192,7 +192,7 @@ export const RegisterPage = () => {
                   placeholder="Rohan Lyngdoh"
                   required
                   disabled={loading}
-                  className="w-full px-3 py-2 bg-surface-2 border border-line rounded-field text-xs text-label placeholder-label-3 focus:outline-none focus:border-line tabular-nums disabled:opacity-50"
+                  className="w-full px-3 py-2 bg-surface-2 rounded-field text-xs text-label placeholder-label-3 focus:outline-none tabular-nums disabled:opacity-50 focus:ring-2 focus:ring-accent/40"
                 />
               </div>
 
@@ -208,7 +208,7 @@ export const RegisterPage = () => {
                   placeholder="rohan_lyngdoh"
                   required
                   disabled={loading}
-                  className="w-full px-3 py-2 bg-surface-2 border border-line rounded-field text-xs text-label placeholder-label-3 focus:outline-none focus:border-line tabular-nums disabled:opacity-50"
+                  className="w-full px-3 py-2 bg-surface-2 rounded-field text-xs text-label placeholder-label-3 focus:outline-none tabular-nums disabled:opacity-50 focus:ring-2 focus:ring-accent/40"
                 />
               </div>
             </div>
@@ -226,7 +226,7 @@ export const RegisterPage = () => {
                   placeholder="rohan@example.com"
                   required
                   disabled={loading}
-                  className="w-full px-3 py-2 bg-surface-2 border border-line rounded-field text-xs text-label placeholder-label-3 focus:outline-none focus:border-line tabular-nums disabled:opacity-50"
+                  className="w-full px-3 py-2 bg-surface-2 rounded-field text-xs text-label placeholder-label-3 focus:outline-none tabular-nums disabled:opacity-50 focus:ring-2 focus:ring-accent/40"
                 />
               </div>
 
@@ -241,7 +241,7 @@ export const RegisterPage = () => {
                   onChange={(e) => handleChange('phone', e.target.value)}
                   placeholder="+91 98620-XXXXX"
                   disabled={loading}
-                  className="w-full px-3 py-2 bg-surface-2 border border-line rounded-field text-xs text-label placeholder-label-3 focus:outline-none focus:border-line tabular-nums disabled:opacity-50"
+                  className="w-full px-3 py-2 bg-surface-2 rounded-field text-xs text-label placeholder-label-3 focus:outline-none tabular-nums disabled:opacity-50 focus:ring-2 focus:ring-accent/40"
                 />
               </div>
             </div>
@@ -260,7 +260,7 @@ export const RegisterPage = () => {
                     placeholder="Min 8 chars"
                     required
                     disabled={loading}
-                    className="w-full pl-3 pr-8 py-2 bg-surface-2 border border-line rounded-field text-xs text-label placeholder-label-3 focus:outline-none focus:border-line tabular-nums disabled:opacity-50"
+                    className="w-full pl-3 pr-8 py-2 bg-surface-2 rounded-field text-xs text-label placeholder-label-3 focus:outline-none tabular-nums disabled:opacity-50 focus:ring-2 focus:ring-accent/40"
                   />
                   <button
                     type="button"
@@ -285,7 +285,7 @@ export const RegisterPage = () => {
                     placeholder="Re-enter password"
                     required
                     disabled={loading}
-                    className="w-full pl-3 pr-8 py-2 bg-surface-2 border border-line rounded-field text-xs text-label placeholder-label-3 focus:outline-none focus:border-line tabular-nums disabled:opacity-50"
+                    className="w-full pl-3 pr-8 py-2 bg-surface-2 rounded-field text-xs text-label placeholder-label-3 focus:outline-none tabular-nums disabled:opacity-50 focus:ring-2 focus:ring-accent/40"
                   />
                   <button
                     type="button"
@@ -316,9 +316,9 @@ export const RegisterPage = () => {
             <button
               type="submit"
               disabled={loading || !formData.termsAccepted}
-              className="w-full py-2.5 px-4 bg-surface-2 hover:bg-[#1f3254] text-label rounded-full text-xs tabular-nums font-semibold flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
+              className="w-full py-2.5 px-4 bg-accent hover:opacity-90 text-white rounded-full text-xs tabular-nums font-semibold flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
             >
-              {loading ? <span>Creating Account...</span> : <><span>Create Account</span><ArrowRight className="w-3.5 h-3.5 text-label-2" /></>}
+              {loading ? <span>Creating Account...</span> : <><span>Create Account</span><ArrowRight className="w-3.5 h-3.5" /></>}
             </button>
           </form>
 

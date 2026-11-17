@@ -1,4 +1,6 @@
+import { createPortal } from 'react-dom';
 import React, { useState, useEffect } from 'react';
+import { toLabel } from '../utils/formatters';
 import { useEmergency } from '../context/EmergencyContext';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
@@ -162,7 +164,7 @@ export const MlModelPage = () => {
     <div className="space-y-6 w-full select-none pb-10">
       
       {/* Header */}
-      <div className="bg-surface border border-line p-5 rounded-card flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+      <div className="bg-surface p-5 rounded-card flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
             <BrainCircuit className="w-4 h-4 text-risk-low" />
@@ -186,7 +188,7 @@ export const MlModelPage = () => {
           {/* SIH Judge Technical Panel Button */}
           <button
             onClick={() => setShowJudgePanel(true)}
-            className="px-3 py-1.5 rounded-full transition-all flex items-center gap-1.5 bg-surface-2 text-label-2 hover:bg-surface-2 text-xs font-semibold active:scale-95"
+            className="px-3 py-1.5 rounded-full whitespace-nowrap transition-all flex items-center gap-1.5 bg-surface-2 text-label-2 hover:bg-surface-2 text-xs font-semibold active:scale-95"
             title="Open SIH Judge Technical Audit & Provenance Panel"
           >
             <ShieldCheck className="w-3.5 h-3.5 text-label-2" />
@@ -194,12 +196,12 @@ export const MlModelPage = () => {
           </button>
 
           {/* Mode Switcher */}
-          <div className="flex bg-surface border border-line rounded-tile p-0.5 text-xs font-semibold">
+          <div className="flex bg-surface-2 rounded-tile p-0.5 text-xs font-semibold">
             <button
               onClick={() => setViewMode('zones')}
-              className={`px-3 py-1.5 rounded-full transition-colors flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-full whitespace-nowrap transition-colors flex items-center gap-1.5 ${
                 viewMode === 'zones' 
-                  ? 'bg-risk-low/[0.12] text-risk-low border border-risk-low/30 font-semibold' 
+                  ? 'bg-risk-low/[0.12] text-risk-low border border-accent/60 font-semibold' 
                   : 'text-label-2 hover:text-label'
               }`}
             >
@@ -208,7 +210,7 @@ export const MlModelPage = () => {
             </button>
             <button
               onClick={() => setViewMode('replay')}
-              className={`px-3 py-1.5 rounded-full transition-colors flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-full whitespace-nowrap transition-colors flex items-center gap-1.5 ${
                 viewMode === 'replay' 
                   ? 'bg-surface-2 text-label-2 font-semibold' 
                   : 'text-label-2 hover:text-label'
@@ -228,11 +230,11 @@ export const MlModelPage = () => {
                   const found = zones.find(z => z.zone_id === e.target.value);
                   if (found) setSelectedZone(found);
                 }}
-                className="bg-surface border border-line text-xs text-label rounded-field px-3 py-2 focus:outline-none focus:border-risk-low/30 font-medium"
+                className="bg-surface-2 text-xs text-label rounded-full px-3 py-2 focus:outline-none font-medium focus:ring-2 focus:ring-accent/40"
               >
                 {zones.map(z => (
                   <option key={z.zone_id} value={z.zone_id}>
-                    {z.name} ({z.risk_level})
+                    {z.name} ({toLabel(z.risk_level)})
                   </option>
                 ))}
               </select>
@@ -244,7 +246,7 @@ export const MlModelPage = () => {
               <select
                 value={selectedReplayId}
                 onChange={(e) => setSelectedReplayId(e.target.value)}
-                className="bg-surface border border-line text-xs text-label-2 rounded-field px-3 py-2 focus:outline-none focus:border-line font-medium"
+                className="bg-surface-2 text-xs text-label-2 rounded-full px-3 py-2 focus:outline-none font-medium focus:ring-2 focus:ring-accent/40"
               >
                 {replayScenarios.map(r => (
                   <option key={r.scenario_id} value={r.scenario_id}>
@@ -259,14 +261,14 @@ export const MlModelPage = () => {
 
       {/* Historical Replay Ground Truth Banner (if in Replay mode) */}
       {viewMode === 'replay' && selectedReplay && (
-        <div className="bg-surface-2 border border-line p-4 rounded-card flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+        <div className="bg-surface p-4 rounded-card flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-label-2" />
               <span className="font-semibold text-label text-xs">
                 Ground Truth Validation Result
               </span>
-              <span className="px-2 py-0.5 rounded-full tabular-nums font-semibold text-xs bg-risk-low/[0.12] text-risk-low border border-risk-low/30">
+              <span className="px-2 py-0.5 rounded-full tabular-nums font-semibold text-xs bg-risk-low/[0.12] text-risk-low border-risk-low/30">
                 {selectedReplay.ground_truth.outcome_classification}
               </span>
             </div>
@@ -282,7 +284,7 @@ export const MlModelPage = () => {
       )}
 
       {/* Main Prediction Score Card - Full Width */}
-      <div className="bg-surface border border-line p-6 rounded-card space-y-6 shadow-sm">
+      <div className="bg-surface p-6 rounded-card space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-line">
           <div>
             <span className="text-xs text-label-2 block font-medium" title="Random Forest ensemble output: share of decision trees indicating slope failure. A relative risk score, not a calibrated probability.">
@@ -291,7 +293,7 @@ export const MlModelPage = () => {
             {isDataInsufficient ? (
               <div className="space-y-1 mt-1.5">
                 <span className="text-2xl sm:text-3xl font-semibold text-risk-moderate font-sans">
-                  INFERENCE PAUSED
+                  Inference paused
                 </span>
                 <p className="text-xs text-label-2 max-w-md">
                   Precipitation telemetry is currently unavailable. LandSafe pauses ML inference to prevent misleading predictions with zero rainfall.
@@ -303,14 +305,14 @@ export const MlModelPage = () => {
                   {activeScore}%
                 </span>
                 <span className={`text-xs px-3 py-1 rounded-full font-semibold ${
-                  activeScore > 80 
-                    ? 'bg-risk-critical/[0.12] text-risk-critical border border-risk-critical/30' 
-                    : activeScore > 60 
-                    ? 'bg-risk-critical/[0.12] text-risk-critical border border-risk-critical/30' 
-                    : activeScore > 30
-                    ? 'bg-risk-moderate/[0.12] text-risk-moderate border border-risk-moderate/30'
-                    : 'bg-risk-low/[0.12] text-risk-low border border-risk-low/30'
-                }`}>
+ activeScore > 80 
+ ? 'bg-risk-critical/[0.12] text-risk-critical ' 
+ : activeScore > 60 
+ ? 'bg-risk-critical/[0.12] text-risk-critical ' 
+ : activeScore > 30
+ ? 'bg-risk-moderate/[0.12] text-risk-moderate '
+ : 'bg-risk-low/[0.12] text-risk-low '
+ }`}>
                   {activeLevel} Risk
                 </span>
               </div>
@@ -339,7 +341,7 @@ export const MlModelPage = () => {
         </div>
 
         {/* AI Hazard Summary & Action Advisory */}
-        <div className="bg-surface border border-line p-4 rounded-tile space-y-2 text-xs">
+        <div className="bg-surface-2 p-4 rounded-tile space-y-2 text-xs">
           <div>
             <span className="font-semibold text-label block mb-0.5">Decision-Path (Saabas) XAI Assessment:</span>
             <p className="text-label-2">{summaryText}</p>
@@ -368,7 +370,7 @@ export const MlModelPage = () => {
               const delta = f.net_delta !== undefined ? (f.net_delta > 0 ? `+${f.net_delta}%` : `${f.net_delta}%`) : null;
 
               return (
-                <div key={i} className="bg-surface border border-line p-4 rounded-tile space-y-2.5">
+                <div key={i} className="bg-surface-2 p-4 rounded-tile space-y-2.5">
                   <div className="flex items-center justify-between text-xs">
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-label">{f.name}</span>
@@ -376,7 +378,7 @@ export const MlModelPage = () => {
                     </div>
                     <div className="flex items-center gap-1.5">
                       {delta && (
-                        <span className={`text-xs tabular-nums px-1.5 py-0.2 rounded-full ${
+                        <span className={`text-xs tabular-nums px-1.5 py-0.5 rounded-full ${
                           f.net_delta > 0 ? 'text-risk-critical bg-risk-critical/[0.12]' : 'text-risk-low bg-risk-low/[0.12]'
                         }`}>
                           {delta}
@@ -410,16 +412,16 @@ export const MlModelPage = () => {
           </div>
           <div>
             Data Health: {isDataInsufficient ? (
-              <span className="text-risk-critical font-semibold px-2 py-0.5 rounded-full bg-risk-critical/[0.12] border border-risk-critical/30">
+              <span className="text-risk-critical font-semibold px-2 py-0.5 rounded-full bg-risk-critical/[0.12] border-risk-critical/30">
                 TELEMETRY UNAVAILABLE (PAUSED)
               </span>
             ) : currentZone?.is_weather_fallback || dynamicPrediction?.precision_context?.data_quality?.freshness_status === 'FALLBACK' ? (
-              <span className="text-risk-moderate font-semibold px-2 py-0.5 rounded-full bg-risk-moderate/[0.12] border border-risk-moderate/30">
+              <span className="text-risk-moderate font-semibold px-2 py-0.5 rounded-full bg-risk-moderate/[0.12] border-risk-moderate/30">
                 FALLBACK ACTIVE (CAUTION)
               </span>
             ) : (
-              <span className="text-risk-low font-semibold px-2 py-0.5 rounded-full bg-risk-low/[0.12] border border-risk-low/30">
-                OPEN-METEO NWP GRID SYNCED
+              <span className="text-risk-low font-semibold px-2 py-0.5 rounded-full bg-risk-low/[0.12] border-risk-low/30">
+                Open-meteo NWP grid synced
               </span>
             )}
           </div>
@@ -439,13 +441,14 @@ export const MlModelPage = () => {
 
       {/* SIH JUDGE TECHNICAL AUDIT & SCIENTIFIC LINEAGE PANEL (EXPANDABLE MODAL) */}
       {showJudgePanel && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface-2 backdrop-blur-md p-4 sm:p-6 overflow-y-auto">
-          <div className="bg-surface border border-line rounded-card w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden text-label">
+        createPortal(
+<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md p-4 sm:p-6 overflow-y-auto">
+          <div className="bg-surface rounded-card w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden text-label">
             
             {/* Modal Header */}
             <div className="p-5 border-b border-line flex items-center justify-between bg-surface-2">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-tile bg-surface-2 border border-line text-label-2">
+                <div className="p-2 rounded-tile bg-surface-2 text-label-2">
                   <ShieldCheck className="w-5 h-5" />
                 </div>
                 <div>
@@ -469,55 +472,55 @@ export const MlModelPage = () => {
             <div className="p-6 overflow-y-auto space-y-6 text-xs leading-relaxed">
               
               {/* Section 1: Immutable Model Verification */}
-              <div className="bg-surface border border-line p-4 rounded-card space-y-3">
+              <div className="bg-surface p-4 rounded-card space-y-3">
                 <div className="flex items-center gap-2 text-label font-semibold text-xs ">
                   <Cpu className="w-4 h-4 text-risk-low" />
                   <span>1. Serialized Model Architecture & Immutability</span>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 tabular-nums text-xs">
-                  <div className="p-2.5 rounded-tile bg-surface-2 border border-line">
+                  <div className="p-2.5 rounded-tile bg-surface-2">
                     <span className="text-label-3 block text-xs">Algorithm</span>
                     <strong className="text-label">RandomForest</strong>
                   </div>
-                  <div className="p-2.5 rounded-tile bg-surface-2 border border-line">
+                  <div className="p-2.5 rounded-tile bg-surface-2">
                     <span className="text-label-3 block text-xs">Estimators</span>
                     <strong className="text-risk-low">{modelMetrics?.n_estimators ?? '—'} Trees</strong>
                   </div>
-                  <div className="p-2.5 rounded-tile bg-surface-2 border border-line">
+                  <div className="p-2.5 rounded-tile bg-surface-2">
                     <span className="text-label-3 block text-xs">Min Leaf Size</span>
                     <strong className="text-label">{modelMetrics?.min_samples_leaf ?? '—'}</strong>
                   </div>
-                  <div className="p-2.5 rounded-tile bg-surface-2 border border-line">
+                  <div className="p-2.5 rounded-tile bg-surface-2">
                     <span className="text-label-3 block text-xs">Class Weight</span>
                     <strong className="text-label">Balanced</strong>
                   </div>
                 </div>
-                <div className="p-2.5 rounded-tile bg-surface-2 border border-line tabular-nums text-xs break-all">
+                <div className="p-2.5 rounded-tile bg-surface-2 tabular-nums text-xs break-all">
                   <span className="text-label-2">Deployed model SHA-256: </span>
                   <strong className="text-risk-low">{modelMetrics?.model_sha256 ?? '—'}</strong>
                 </div>
               </div>
 
               {/* Section 2: Spatial Cross-Validation on Real Data */}
-              <div className="bg-surface border border-line p-4 rounded-card space-y-3">
+              <div className="bg-surface p-4 rounded-card space-y-3">
                 <div className="flex items-center gap-2 text-label font-semibold text-xs ">
                   <BarChart2 className="w-4 h-4 text-label-2" />
                   <span>2. Validation: Spatial Cross-Validation on Real Events</span>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center tabular-nums">
-                  <div className="p-2 rounded-tile bg-surface-2 border border-line">
-                    <span className="text-label-3 block text-xs">ROC-AUC</span>
+                  <div className="p-2 rounded-tile bg-surface-2">
+                    <span className="text-label-3 block text-xs">Roc-auc</span>
                     <strong className="text-label">{modelMetrics?.metrics?.roc_auc ?? '—'}</strong>
                   </div>
-                  <div className="p-2 rounded-tile bg-surface-2 border border-line">
+                  <div className="p-2 rounded-tile bg-surface-2">
                     <span className="text-label-3 block text-xs">Recall</span>
                     <strong className="text-label">{modelMetrics?.metrics?.recall ?? '—'}%</strong>
                   </div>
-                  <div className="p-2 rounded-tile bg-surface-2 border border-line">
+                  <div className="p-2 rounded-tile bg-surface-2">
                     <span className="text-label-3 block text-xs">Precision</span>
                     <strong className="text-label">{modelMetrics?.metrics?.precision ?? '—'}%</strong>
                   </div>
-                  <div className="p-2 rounded-tile bg-surface-2 border border-line">
+                  <div className="p-2 rounded-tile bg-surface-2">
                     <span className="text-label-3 block text-xs">F1</span>
                     <strong className="text-label">{modelMetrics?.metrics?.f1_score ?? '—'}%</strong>
                   </div>
@@ -535,7 +538,7 @@ export const MlModelPage = () => {
               </div>
 
               {/* Section 3: Explainable AI Verification (Saabas) */}
-              <div className="bg-surface border border-line p-4 rounded-card space-y-2">
+              <div className="bg-surface-2 p-4 rounded-tile space-y-2">
                 <div className="flex items-center gap-2 text-label font-semibold text-xs ">
                   <BrainCircuit className="w-4 h-4 text-label-2" />
                   <span>3. Explainability: Saabas Decision-Tree Path Feature Attribution</span>
@@ -543,7 +546,7 @@ export const MlModelPage = () => {
                 <p className="text-xs text-label-2">
                   LandSafe uses exact Saabas tree path decomposition rather than Lundberg TreeSHAP. For every decision tree, feature contributions are computed as the delta change in class probability at each node split along the exact sample traversal path.
                 </p>
-                <div className="p-3 rounded-tile bg-surface-2 border border-line tabular-nums text-xs space-y-1">
+                <div className="p-3 rounded-tile bg-surface-2 tabular-nums text-xs space-y-1">
                   <div className="text-risk-low font-semibold">Mathematical Identity Axiom Verified:</div>
                   <div className="text-label-2">sum(contributions[j]) + bias == predicted_probability</div>
                   <div className="text-xs text-label-3">Checked by an automated test against the deployed model.</div>
@@ -551,12 +554,12 @@ export const MlModelPage = () => {
               </div>
 
               {/* Section 4: Deterministic Limit-Equilibrium Slope Stability (Physics Engine) */}
-              <div className="bg-surface border border-line p-4 rounded-card space-y-2">
+              <div className="bg-surface-2 p-4 rounded-tile space-y-2">
                 <div className="flex items-center gap-2 text-label font-semibold text-xs ">
                   <Scale className="w-4 h-4 text-risk-moderate" />
                   <span>4. Geotechnical Mechanics: Limit-Equilibrium Infinite Slope Model</span>
                 </div>
-                <div className="p-3 rounded-tile bg-surface-2 border border-line tabular-nums text-xs space-y-1">
+                <div className="p-3 rounded-tile bg-surface-2 tabular-nums text-xs space-y-1">
                   <div className="text-risk-moderate font-semibold">Infinite Slope Factor of Safety Equation:</div>
                   <div className="text-label-2">FS = [ c' + (γ·z·cos²β - u)·tan φ' ] / [ γ·z·sin β·cos β ]</div>
                   <div className="text-xs text-label-2 pt-1">
@@ -569,7 +572,7 @@ export const MlModelPage = () => {
               </div>
 
               {/* Section 5: Data Provenance & Lineage Table */}
-              <div className="bg-surface border border-line p-4 rounded-card space-y-3">
+              <div className="bg-surface p-4 rounded-card space-y-3">
                 <div className="flex items-center gap-2 text-label font-semibold text-xs ">
                   <Database className="w-4 h-4 text-label-2" />
                   <span>5. Authoritative Data Lineage & Provenance Matrix</span>
@@ -623,7 +626,7 @@ export const MlModelPage = () => {
                       </tr>
                       <tr>
                         <td className="py-2 text-label font-semibold">ndvi</td>
-                        <td className="py-2">NASA MODIS MOD13Q1 (ORNL DAAC)</td>
+                        <td className="py-2">NASA modis mod13q1 (ornl daac)</td>
                         <td className="py-2">250 meters</td>
                         <td className="py-2">16-day composite</td>
                         <td className="py-2 text-risk-moderate">Context only (not a model input)</td>
@@ -649,14 +652,15 @@ export const MlModelPage = () => {
               </span>
               <button
                 onClick={() => setShowJudgePanel(false)}
-                className="px-4 py-2 bg-surface-2 hover:bg-surface-2 text-label font-semibold rounded-full transition-colors"
+                className="px-4 py-2 bg-surface-2 hover:bg-surface-2 text-label font-semibold rounded-full whitespace-nowrap transition-colors"
               >
                 Close Audit Panel
               </button>
             </div>
 
           </div>
-        </div>
+        </div>,
+ document.body)
       )}
 
     </div>

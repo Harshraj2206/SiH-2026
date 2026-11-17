@@ -19,7 +19,7 @@ export const ThemeSwitcher = () => {
     <div className="relative">
       <button
         onClick={() => setDropdownOpen(!dropdownOpen)}
-        className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-2 hover:bg-[#182744] text-label-2 hover:text-label text-xs tabular-nums font-medium transition-colors"
+        className="flex items-center gap-1.5 px-2.5 py-1 rounded-full whitespace-nowrap bg-surface-2 hover:opacity-90 text-label-2 hover:text-label text-xs tabular-nums font-medium transition-colors"
         title={`Theme: ${currentOption.label} (${resolvedTheme})`}
         aria-label="Switch Appearance Theme"
       >
@@ -30,7 +30,7 @@ export const ThemeSwitcher = () => {
 
       {dropdownOpen && (
         <div
-          className="absolute right-0 mt-2 w-32 rounded-tile bg-surface-2 border border-line p-1 z-50 animate-in fade-in"
+          className="absolute right-0 mt-2 w-32 rounded-tile bg-surface-2 p-1 z-50 animate-in fade-in"
           onMouseLeave={() => setDropdownOpen(false)}
         >
           {options.map((opt) => {

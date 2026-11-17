@@ -32,6 +32,17 @@ export const Header = ({ onToggleSidebar }) => {
     '/sos': ['Emergency SOS', 'Request help and share your location.'],
     '/profile': ['Profile', 'Your details and emergency contacts.'],
     '/settings': ['Settings', 'Appearance, language and notifications.'],
+    '/community-poll': ['Community', 'Daily poll and ground reports from residents.'],
+    '/community-reports': ['Community Reports', 'Ground reports from residents.'],
+    '/reports': ['Community Reports', 'Ground reports from residents.'],
+    '/gis-map': ['Hazard Map', 'Risk zones, terrain and live conditions.'],
+    '/explore-incidents': ['Incidents', 'Recorded and forecast landslide events.'],
+    '/hospitals-shelters': ['Hospitals & Shelters', 'Medical care and shelters nearby.'],
+    '/rescue': ['Rescue Operations', 'Teams, dispatch and field status.'],
+    '/data-sources': ['Data Sources', 'Where each data feed comes from.'],
+    '/post-disaster': ['Post-Disaster Review', 'What happened, and what the model learned.'],
+    '/simulator': ['Simulator', 'Try the model with your own conditions.'],
+    '/about': ['About', 'What LandSafe is and how it works.'],
   };
   const [pageTitle, pageSubtitle] = PAGE_TITLES[pathname] || ['LandSafe', ''];
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
@@ -93,9 +104,9 @@ export const Header = ({ onToggleSidebar }) => {
         <div className="relative">
           <button
             onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-            className="flex items-center gap-2 py-1 pl-1 pr-2 rounded-tile hover:bg-surface-2 transition-colors text-left"
+            className="flex items-center gap-2 py-1 pl-1 pr-3 rounded-full hover:bg-surface-2 transition-colors text-left"
           >
-            <div className="w-7 h-7 rounded-full bg-surface-2 flex items-center justify-center text-xs font-semibold text-label">
+            <div className="w-7 h-7 rounded-full bg-label/[0.12] flex items-center justify-center text-xs font-semibold text-label">
               {currentUser?.full_name?.charAt(0) || 'U'}
             </div>
             <div className="hidden sm:block leading-tight">
@@ -111,7 +122,7 @@ export const Header = ({ onToggleSidebar }) => {
 
           {userDropdownOpen && (
             <div
-              className="absolute right-0 mt-2 w-56 rounded-tile bg-surface border border-line shadow-lg p-1.5 z-50"
+              className="absolute right-0 mt-2 w-56 rounded-tile bg-surface-2 shadow-lg p-1.5 z-50"
               onMouseLeave={() => setUserDropdownOpen(false)}
             >
               <div className="px-2.5 py-2 border-b border-line">

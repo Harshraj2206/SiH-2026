@@ -15,7 +15,7 @@ import {
 } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { getRiskScoreColor, formatDate } from '../../utils/formatters';
+import { getRiskScoreColor, formatDate, toLabel } from '../../utils/formatters';
 import { useLanguage } from '../../context/LanguageContext';
 import { api } from '../../services/api';
 import { useTheme } from '../../context/ThemeContext';
@@ -105,7 +105,7 @@ const createIncidentIcon = (severity) => {
   const color = isCrit ? '#E06C66' : '#D4B24C';
   const html = `
     <div style="width:24px; height:24px; border-radius:50%; background:#1C1C1E; border:2px solid ${color}; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,0.6);">
-      <span style="color:${color}; font-size:11px; font-weight:900;">▲</span>
+      <span style="color:${color}; font-size:10px; font-weight:600;">▲</span>
     </div>
   `;
   return L.divIcon({ className: 'custom-incident-pin', html, iconSize: [24, 24], iconAnchor: [12, 12], popupAnchor: [0, -12] });
@@ -113,8 +113,8 @@ const createIncidentIcon = (severity) => {
 
 const createSOSIcon = () => {
   const html = `
-    <div style="width:26px; height:26px; border-radius:50%; background:#dc2626; border:2px solid #ffffff; display:flex; align-items:center; justify-content:center; box-shadow:0 0 10px rgba(220,38,38,0.7);">
-      <span style="color:#ffffff; font-size:9px; font-weight:900; font-family:monospace;">SOS</span>
+    <div style="width:26px; height:26px; border-radius:50%; background:#E06C66; border:2px solid #ffffff; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.4);">
+      <span style="color:#ffffff; font-size:9px; font-weight:600; font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',Inter,sans-serif;">SOS</span>
     </div>
   `;
   return L.divIcon({ className: 'custom-sos-pin', html, iconSize: [26, 26], iconAnchor: [13, 13], popupAnchor: [0, -13] });
@@ -122,7 +122,7 @@ const createSOSIcon = () => {
 
 const createHospitalIcon = () => {
   const html = `
-    <div style="width:22px; height:22px; border-radius:5px; background:#0284c7; border:1.5px solid #ffffff; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.5); font-size:12px; font-weight:bold; color:white;">
+    <div style="width:22px; height:22px; border-radius:50%; background:#2C2C2E; border:1.5px solid #ffffff; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.5); font-size:12px; font-weight:bold; color:white;">
       +
     </div>
   `;
@@ -131,8 +131,8 @@ const createHospitalIcon = () => {
 
 const createShelterIcon = () => {
   const html = `
-    <div style="width:22px; height:22px; border-radius:5px; background:#059669; border:1.5px solid #ffffff; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.5); font-size:11px; color:white;">
-      🏕
+    <div style="width:22px; height:22px; border-radius:50%; background:#2C2C2E; border:1.5px solid #ffffff; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.5); font-size:11px; color:white;">
+      S
     </div>
   `;
   return L.divIcon({ className: 'custom-shelter-pin', html, iconSize: [22, 22], iconAnchor: [11, 11], popupAnchor: [0, -11] });
@@ -140,8 +140,8 @@ const createShelterIcon = () => {
 
 const createTeamIcon = () => {
   const html = `
-    <div style="width:22px; height:22px; border-radius:50%; background:#4f46e5; border:1.5px solid #ffffff; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.5); font-size:10px; color:white;">
-      🛡
+    <div style="width:22px; height:22px; border-radius:50%; background:#2C2C2E; border:1.5px solid #ffffff; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.5); font-size:10px; color:white;">
+      R
     </div>
   `;
   return L.divIcon({ className: 'custom-team-pin', html, iconSize: [22, 22], iconAnchor: [11, 11], popupAnchor: [0, -11] });
@@ -601,7 +601,7 @@ export const LeafletRiskMap = ({
   };
 
   return (
-    <div className="relative isolate z-0 w-full h-full min-h-[480px] rounded-card overflow-hidden border border-line bg-surface flex flex-col" style={{ height: height || '100%' }}>
+    <div className="relative isolate z-0 w-full h-full min-h-[480px] rounded-tile overflow-hidden bg-surface-2 flex flex-col" style={{ height: height || '100%' }}>
       
       {/* Top Search & Locate Bar - Fully Responsive with Glassmorphic Rounded-Full Radius */}
       <div 
@@ -615,7 +615,7 @@ export const LeafletRiskMap = ({
         <div className="flex items-center gap-2 max-w-[calc(100%-80px)] sm:max-w-md w-full pointer-events-auto">
           <form 
             onSubmit={handleSearchSubmit} 
-            className="flex items-center bg-surface backdrop-blur-md border border-line rounded-full px-3.5 py-1.5 sm:py-2 flex-1 min-w-[120px] focus-within:border-risk-low/30 focus-within:ring-1 focus-within:ring-risk-low/30 transition-all"
+            className="flex items-center bg-surface-2 backdrop-blur-md rounded-full px-3.5 py-1.5 sm:py-2 flex-1 min-w-[120px] focus-within:border-risk-low/30 focus-within:ring-1 focus-within:ring-risk-low/30 transition-all"
             onKeyDown={(e) => e.stopPropagation()}
           >
             <button 
@@ -637,7 +637,7 @@ export const LeafletRiskMap = ({
           <button
             onClick={handleLocateMe}
             disabled={geoLocating}
-            className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 bg-surface-2 hover:bg-surface-2 text-label border border-line hover:border-risk-low/30 text-xs sm:text-xs font-medium rounded-full transition-all flex-shrink-0 backdrop-blur-md active:scale-95"
+            className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 bg-surface-2 hover:bg-surface-2 text-label hover:border-risk-low/30 text-xs sm:text-xs font-medium rounded-full whitespace-nowrap transition-all flex-shrink-0 backdrop-blur-md active:scale-95"
             title="Detect GPS Location"
           >
             <Crosshair className={`w-3.5 h-3.5 ${geoLocating ? 'animate-spin text-risk-low' : 'text-label-2'}`} />
@@ -649,7 +649,7 @@ export const LeafletRiskMap = ({
         <div className="pointer-events-auto shrink-0">
           <button
             onClick={() => setShowLayerPanel(!showLayerPanel)}
-            className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 bg-surface text-label text-xs sm:text-xs font-medium rounded-full transition-all backdrop-blur-md active:scale-95"
+            className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 bg-surface-2 text-label text-xs sm:text-xs font-medium rounded-full whitespace-nowrap transition-all backdrop-blur-md active:scale-95"
           >
             <Layers className="w-3.5 h-3.5 text-label-2" />
             <span className="hidden sm:inline">{t('gis_layers') || 'GIS Layers'}</span>
@@ -659,7 +659,7 @@ export const LeafletRiskMap = ({
 
       {/* Layer Control Panel Flyout */}
       {showLayerPanel && (
-        <div className="absolute top-14 right-3.5 z-[1001] bg-surface backdrop-blur-md border border-line p-4 rounded-card w-64 text-xs space-y-3 animate-in fade-in">
+        <div className="absolute top-14 right-3.5 z-[1001] bg-surface backdrop-blur-md p-4 rounded-card w-64 text-xs space-y-3 animate-in fade-in">
           <div className="flex items-center justify-between pb-2 border-b border-line">
             <span className="text-xs font-semibold text-label flex items-center gap-1.5">
               <Compass className="w-3.5 h-3.5 text-label-2" />
@@ -932,8 +932,8 @@ export const LeafletRiskMap = ({
               <div className="p-2 space-y-1 min-w-[200px]">
                 <div className="flex items-center justify-between border-b border-line pb-1">
                   <span className="tabular-nums text-xs text-risk-moderate font-semibold">{inc.incident_id}</span>
-                  <span className="text-xs px-1 py-0.2 rounded-full font-semibold bg-surface-2 text-label-2">
-                    {inc.status}
+                  <span className="text-xs px-1 py-0.5 rounded-full font-semibold bg-surface-2 text-label-2">
+                    {toLabel(inc.status)}
                   </span>
                 </div>
                 <h4 className="font-semibold text-xs text-label">{inc.title}</h4>
@@ -953,8 +953,8 @@ export const LeafletRiskMap = ({
             <Popup>
               <div className="p-2 space-y-1 min-w-[220px]">
                 <div className="flex items-center justify-between border-b border-risk-critical/30 pb-1">
-                  <span className="font-semibold text-risk-critical tabular-nums text-xs">🆘 {sos.sos_id}</span>
-                  <span className="text-xs px-1.5 py-0.2 rounded-full font-semibold bg-risk-critical text-label tabular-nums">
+                  <span className="font-semibold text-risk-critical tabular-nums text-xs">SOS {sos.sos_id}</span>
+                  <span className="text-xs px-1.5 py-0.5 rounded-full font-semibold bg-risk-critical text-white tabular-nums">
                     {sos.triage_priority}
                   </span>
                 </div>
@@ -976,9 +976,9 @@ export const LeafletRiskMap = ({
               <div className="p-2 space-y-1 min-w-[180px]">
                 <div className="flex justify-between text-xs border-b border-line pb-1">
                   <span className="tabular-nums text-label-2">{rep.id}</span>
-                  <span className="font-semibold text-risk-moderate">{rep.status}</span>
+                  <span className="font-semibold text-risk-moderate">{toLabel(rep.status)}</span>
                 </div>
-                <h4 className="font-semibold text-xs text-label">{rep.report_type}</h4>
+                <h4 className="font-semibold text-xs text-label">{toLabel(rep.report_type)}</h4>
                 <p className="text-xs text-label-2 italic">"{rep.description}"</p>
               </div>
             </Popup>
@@ -1047,9 +1047,9 @@ export const LeafletRiskMap = ({
               const startPt = routeData.safe_route.coordinates[0];
               const startName = routeData.start?.name || startPt.name || 'Origin';
               const startHtml = `
-                <div style="display:flex; align-items:center; gap:4px; background:#1C1C1E; border:2px solid #0ea5e9; border-radius:8px; padding:3px 8px; box-shadow:0 4px 12px rgba(0,0,0,0.8); white-space:nowrap;">
-                  <span style="width:8px; height:8px; border-radius:50%; background:#0ea5e9;"></span>
-                  <span style="font-family:monospace; font-weight:bold; font-size:11px; color:#ffffff;">A: ${startName}</span>
+                <div style="display:flex; align-items:center; gap:4px; background:#1C1C1E; border:1.5px solid #4A86E8; border-radius:999px; padding:3px 10px; box-shadow:0 2px 8px rgba(0,0,0,0.4); white-space:nowrap;">
+                  <span style="width:8px; height:8px; border-radius:50%; background:#4A86E8;"></span>
+                  <span style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',Inter,sans-serif; font-weight:600; font-size:11px; color:#ffffff;">A: ${startName}</span>
                 </div>
               `;
               const startIcon = L.divIcon({ className: 'route-start-pin', html: startHtml, iconSize: [140, 26], iconAnchor: [70, 13] });
@@ -1070,9 +1070,9 @@ export const LeafletRiskMap = ({
               const endPt = routeData.safe_route.coordinates[routeData.safe_route.coordinates.length - 1];
               const destName = routeData.destination?.name || endPt.name || 'Destination';
               const endHtml = `
-                <div style="display:flex; align-items:center; gap:4px; background:#1C1C1E; border:2px solid #10b981; border-radius:8px; padding:3px 8px; box-shadow:0 4px 12px rgba(0,0,0,0.8); white-space:nowrap;">
+                <div style="display:flex; align-items:center; gap:4px; background:#1C1C1E; border:1.5px solid #6BBF8A; border-radius:999px; padding:3px 10px; box-shadow:0 2px 8px rgba(0,0,0,0.4); white-space:nowrap;">
                   <span style="width:8px; height:8px; border-radius:50%; background:#6BBF8A;"></span>
-                  <span style="font-family:monospace; font-weight:bold; font-size:11px; color:#ffffff;">B: ${destName}</span>
+                  <span style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',Inter,sans-serif; font-weight:600; font-size:11px; color:#ffffff;">B: ${destName}</span>
                 </div>
               `;
               const endIcon = L.divIcon({ className: 'route-end-pin', html: endHtml, iconSize: [140, 26], iconAnchor: [70, 13] });
@@ -1093,24 +1093,24 @@ export const LeafletRiskMap = ({
 
       {/* Unified Compact Hazard Legend Bottom-Left - Fully Responsive */}
       {showLegend && (
-        <div className="absolute bottom-3 left-3 z-[1000] bg-surface backdrop-blur-md border border-line px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full flex items-center gap-2.5 sm:gap-3.5 text-xs max-w-[calc(100%-75px)] overflow-x-auto whitespace-nowrap scrollbar-none">
+        <div className="absolute bottom-3 left-3 z-[1000] bg-surface-2 backdrop-blur-md px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full flex items-center gap-2.5 sm:gap-3.5 text-xs max-w-[calc(100%-75px)] overflow-x-auto whitespace-nowrap scrollbar-none">
           <span className="text-label-2 font-semibold text-xs sm:text-xs hidden lg:inline">
             {t('risk_threshold') || 'Risk Level'}:
           </span>
           <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
-            <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-risk-low shrink-0 shadow-sm" />
+            <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-risk-low shrink-0" />
             <span className="text-label text-xs sm:text-xs font-medium">Low <span className="text-label-3 tabular-nums text-xs sm:text-xs hidden sm:inline">(0–30)</span></span>
           </div>
           <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
-            <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-risk-moderate shrink-0 shadow-sm" />
+            <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-risk-moderate shrink-0" />
             <span className="text-label text-xs sm:text-xs font-medium">Moderate <span className="text-label-3 tabular-nums text-xs sm:text-xs hidden sm:inline">(31–60)</span></span>
           </div>
           <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
-            <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-risk-high shrink-0 shadow-sm" />
+            <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-risk-high shrink-0" />
             <span className="text-label text-xs sm:text-xs font-medium">High <span className="text-label-3 tabular-nums text-xs sm:text-xs hidden sm:inline">(61–80)</span></span>
           </div>
           <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
-            <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-risk-critical shrink-0 shadow-sm" />
+            <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-risk-critical shrink-0" />
             <span className="text-label text-xs sm:text-xs font-medium">Critical <span className="text-label-3 tabular-nums text-xs sm:text-xs hidden sm:inline">(81–100)</span></span>
           </div>
         </div>

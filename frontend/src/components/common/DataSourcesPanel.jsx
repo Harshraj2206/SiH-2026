@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toLabel } from '../../utils/formatters';
 import { api } from '../../services/api';
 import { 
   Database, 
@@ -104,7 +105,7 @@ export const DataSourcesPanel = () => {
               </div>
               <div className="flex items-center justify-between text-xs text-label-2">
                 <span className="truncate max-w-[150px]">{src.provenance || src.spatial_resolution || ''}</span>
-                {src.status && <span>{src.status}</span>}
+                {src.status && <span>{toLabel(src.status)}</span>}
               </div>
             </div>
           ))}
