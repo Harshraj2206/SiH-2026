@@ -1,10 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useEmergency } from '../context/EmergencyContext';
 import { LeafletRiskMap } from '../components/map/LeafletRiskMap';
-import { Mountain, Navigation, ChevronRight, Crosshair } from 'lucide-react';
+import { Navigation, ChevronRight, Crosshair } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { normalizeWeather } from '../utils/weatherNormalizer';
-import { DataSourcesPanel } from '../components/common/DataSourcesPanel';
 import { useLocationIntelligence } from '../context/LocationIntelligenceContext';
 import { WeatherIcon } from '../components/common/WeatherIcon';
 
@@ -12,23 +10,6 @@ export const OverviewPage = () => {
   const navigate = useNavigate();
   const { zones, reports, alerts, selectedZone, setSelectedZone } = useEmergency();
   const { location, weather: intelWeather, environment, requestLocation, setManualLocation } = useLocationIntelligence();
-  const [activeTipIndex, setActiveTipIndex] = useState(0);
-
-  const awarenessTips = [
-    {
-      title: 'Monsoon Precautions',
-      text: 'Stay alert during heavy rainfall. Avoid steep slopes and follow regional safety advisories.'
-    },
-    {
-      title: 'Structural Watch',
-      text: 'Check for new tension cracks in building foundations, retaining walls, and mountain roadways.'
-    },
-    {
-      title: 'Evacuation Readiness',
-      text: 'Keep emergency grab-bags packed and identify high-elevation designated safe relief centers.'
-    }
-  ];
-
   // Soft risk colours: text + faint tint, never a solid block
   const riskTone = (level) => {
     switch ((level || '').toUpperCase()) {
@@ -47,9 +28,9 @@ export const OverviewPage = () => {
 
       {/* Current conditions */}
       {(() => {
-        const weather = intelWeather?.normalized || (selectedZone ? normalizeWeather(selectedZone) : (zones && zones[0] ? normalizeWeather(zones[0]) : null));
+        const weather = intelWeather?.normalized || null;
         if (!weather) return null;
-        const locationName = (selectedZone && selectedZone.name) || location?.displayName || (zones && zones[0]?.name) || 'Monitored Region';
+        const locationName = location?.displayName || '';
         const isLive = !(weather.status === 'CACHED' || weather.type === 'UNKNOWN' || weather.status === 'UNAVAILABLE');
 
         return (
@@ -68,7 +49,7 @@ export const OverviewPage = () => {
                   {environment?.localTimeFormatted && (
                     <>
                       <span>·</span>
-                      <span className="tabular-nums">{environment.localTimeFormatted} {environment.timezoneAbbr || 'IST'}</span>
+                      <span className="tabular-nums">{environment.localTimeFormatted} {environment.timezoneAbbr}</span>
                     </>
                   )}
                   <span>·</span>
@@ -176,21 +157,11 @@ export const OverviewPage = () => {
         <div className="lg:col-span-4 flex flex-col gap-6">
 
           {(() => {
-            const currentZone = selectedZone || (zones && zones[0]) || {
-              name: 'Selected Sector',
-              risk_score: null,
-              risk_level: null,
-              rainfall_24h: null,
-              slope_deg: null
-            };
-
-            const isDataInsufficient = currentZone.risk_level === 'DATA_INSUFFICIENT' || currentZone.status === 'DATA_INSUFFICIENT' || currentZone.rainfall_24h === null || currentZone.rainfall_24h === undefined;
-            const score = typeof currentZone.risk_score === 'number'
-              ? currentZone.risk_score
-              : (typeof currentZone.ml_base_score === 'number' ? currentZone.ml_base_score : null);
-            const tone = riskTone(isDataInsufficient || score === null ? null : currentZone.risk_level);
-
-            const locName = currentZone.name || currentZone.formatted_address || currentZone.district || 'Selected Location';
+            const currentZone = selectedZone || {};
+            const loadingZone = !selectedZone || currentZone.is_weather_loading;
+            const score = typeof currentZone.risk_score === 'number' ? currentZone.risk_score : null;
+            const tone = riskTone(score === null ? null : currentZone.risk_level);
+            const locName = currentZone.name || '—';
             const rainVal = typeof currentZone.rainfall_24h === 'number' ? `${currentZone.rainfall_24h.toFixed(1)} mm` : '—';
             const slopeVal = typeof currentZone.slope_deg === 'number' ? `${currentZone.slope_deg.toFixed(1)}°` : '—';
 
@@ -200,22 +171,24 @@ export const OverviewPage = () => {
                   <h2 className="text-[17px] font-semibold text-label">Risk assessment</h2>
                   <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full ${tone.tint} ${tone.text}`}>
                     <span className={`w-1.5 h-1.5 rounded-full ${tone.dot}`} />
-                    {isDataInsufficient ? 'Paused' : score === null ? 'No score' : tone.label}
+                    {loadingZone ? 'Loading' : score === null ? 'No score' : tone.label}
                   </span>
                 </div>
 
                 <div>
-                  {isDataInsufficient || score === null ? (
+                  {score === null ? (
                     <>
                       <span className="text-[44px] font-semibold text-label-3 leading-none">–</span>
                       <p className="text-[13px] text-label-2 mt-2">
-                        {isDataInsufficient ? 'Rainfall data unavailable. The model does not score without it.' : 'No score for this location yet. Pick a monitored zone.'}
+                        {loadingZone
+                          ? 'Checking your location…'
+                          : currentZone.unavailability_reason || 'No score: live rain or terrain data is missing for this place.'}
                       </p>
                     </>
                   ) : (
                     <>
                       <span className="text-[44px] font-semibold text-label leading-none tabular-nums tracking-tight">
-                        {score !== null ? score.toFixed(1) : '—'}
+                        {Math.round(score)}
                       </span>
                       <span className="text-[15px] text-label-2 ml-1">/ 100</span>
                       <p className="text-[13px] text-label-2 mt-2">Landslide risk score</p>
@@ -259,7 +232,8 @@ export const OverviewPage = () => {
             </div>
 
             <div className="flex flex-col max-h-64 overflow-y-auto -mx-2">
-              {zones.slice(0, 5).map((zone) => {
+              {zones.length === 0 && <p className="text-[13px] text-label-2 px-2">Zone scores are loading.</p>}
+              {[...zones].sort((a, b) => b.risk_score - a.risk_score).map((zone) => {
                 const tone = riskTone(zone.risk_level);
                 const active = selectedZone?.zone_id === zone.zone_id;
                 return (
@@ -275,7 +249,7 @@ export const OverviewPage = () => {
                   >
                     <div className="min-w-0">
                       <div className="text-[13px] font-medium text-label truncate">{zone.name}</div>
-                      <div className="text-xs text-label-2 truncate">{zone.district ? `${zone.district}, ` : ''}{zone.state || 'Monitored Region'}</div>
+                      <div className="text-xs text-label-2 truncate">{[zone.district, zone.state].filter(Boolean).join(', ')}</div>
                     </div>
                     <span className={`text-xs font-medium tabular-nums px-2 py-0.5 rounded-full shrink-0 ${tone.tint} ${tone.text}`}>
                       {typeof zone.risk_score === 'number' ? zone.risk_score.toFixed(0) : '—'}
@@ -294,34 +268,8 @@ export const OverviewPage = () => {
             </button>
           </section>
 
-          <section className="bg-surface rounded-card p-5 flex items-start justify-between gap-3">
-            <div className="flex items-start gap-3">
-              <Mountain className="w-5 h-5 text-label-2 shrink-0 mt-0.5" strokeWidth={1.75} />
-              <div>
-                <h3 className="text-[15px] font-medium text-label leading-tight">
-                  {awarenessTips[activeTipIndex].title}
-                </h3>
-                <p className="text-[13px] text-label-2 mt-1 leading-snug">
-                  {awarenessTips[activeTipIndex].text}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-1.5 shrink-0 pt-1.5">
-              {awarenessTips.map((_, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setActiveTipIndex(idx)}
-                  className={`h-1.5 rounded-full transition-all duration-200 ${activeTipIndex === idx ? 'w-4 bg-label' : 'w-1.5 bg-label-3'}`}
-                  aria-label={`Tip ${idx + 1}`}
-                />
-              ))}
-            </div>
-          </section>
         </div>
       </div>
-
-      {/* Authoritative Data Sources & Provenance Registry Panel */}
-      <DataSourcesPanel />
 
     </div>
   );

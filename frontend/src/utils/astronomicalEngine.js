@@ -279,64 +279,41 @@ export function mapCelestialToScreen(altitudeDeg, azimuthDeg, lat = 12.0) {
  *   timeString: string
  * }}
  */
-export function getFormattedLocalTime(date = new Date(), timezone = 'Asia/Kolkata', utcOffsetSeconds = 19800) {
+export function getFormattedLocalTime(date = new Date(), timezone = null) {
+  if (!timezone) {
+    return { formattedTime: null, formattedDate: null, hour24: null, minute: null, timeString: null };
+  }
   try {
-    const timeFormatter = new Intl.DateTimeFormat('en-US', {
-      timeZone: timezone,
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: true
-    });
-
-    const hourFormatter = new Intl.DateTimeFormat('en-US', {
-      timeZone: timezone,
-      hour: 'numeric',
-      hour12: false
-    });
-
-    const minuteFormatter = new Intl.DateTimeFormat('en-US', {
-      timeZone: timezone,
-      minute: 'numeric'
-    });
-
-    const dateFormatter = new Intl.DateTimeFormat('en-US', {
-      timeZone: timezone,
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
-
-    const formattedTime = timeFormatter.format(date);
-    const formattedDate = dateFormatter.format(date);
-    const hour24 = parseInt(hourFormatter.format(date), 10) || 0;
-    const minute = parseInt(minuteFormatter.format(date), 10) || 0;
-
+    const parts = (opts) => new Intl.DateTimeFormat('en-US', { timeZone: timezone, ...opts }).format(date);
+    const hour24 = parseInt(parts({ hour: 'numeric', hourCycle: 'h23' }), 10);
+    const minute = parseInt(parts({ minute: 'numeric' }), 10);
     return {
-      formattedTime,
-      formattedDate,
+      formattedTime: parts({ hour: 'numeric', minute: '2-digit', hour12: true }),
+      formattedDate: parts({ weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }),
       hour24,
       minute,
       timeString: `${String(hour24).padStart(2, '0')}:${String(minute).padStart(2, '0')}`
     };
   } catch {
-    // Fallback using utcOffsetSeconds
-    const targetMs = date.getTime() + (utcOffsetSeconds || 0) * 1000;
-    const targetDate = new Date(targetMs);
-    const hour24 = targetDate.getUTCHours();
-    const minute = targetDate.getUTCMinutes();
-    const period = hour24 >= 12 ? 'PM' : 'AM';
-    const hour12 = hour24 % 12 || 12;
-
-    return {
-      formattedTime: `${hour12}:${String(minute).padStart(2, '0')} ${period}`,
-      formattedDate: targetDate.toUTCString().slice(0, 16),
-      hour24,
-      minute,
-      timeString: `${String(hour24).padStart(2, '0')}:${String(minute).padStart(2, '0')}`
-    };
+    return { formattedTime: null, formattedDate: null, hour24: null, minute: null, timeString: null };
   }
+}
+
+/**
+ * Short name of a timezone, e.g. "IST" for Asia/Kolkata, "JST" for Asia/Tokyo.
+ * Falls back to the GMT offset form when no locale has a short name for it.
+ */
+export function getTimezoneAbbr(timezone, date = new Date()) {
+  if (!timezone) return null;
+  const names = ['en-US', 'en-IN', 'en-GB', 'en-AU', 'ja-JP'].map((loc) => {
+    try {
+      return new Intl.DateTimeFormat(loc, { timeZone: timezone, timeZoneName: 'short' })
+        .formatToParts(date).find((p) => p.type === 'timeZoneName')?.value;
+    } catch {
+      return null;
+    }
+  }).filter(Boolean);
+  return names.find((n) => /^[A-Z]{2,5}$/.test(n)) || names[0] || null;
 }
 
 /**
@@ -348,25 +325,24 @@ export function getFormattedLocalTime(date = new Date(), timezone = 'Asia/Kolkat
  * @param {number} params.longitude
  * @param {string} params.displayName
  * @param {string} params.timezone - e.g. 'Asia/Kolkata'
- * @param {string} params.timezoneAbbr - e.g. 'IST'
  * @param {number} params.utcOffsetSeconds - e.g. 19800
  * @param {Object} params.weather - Weather telemetry object
  * @param {Date} [params.currentDate] - Override for testing
  * @returns {Object} Full authoritative environment state
  */
 export function buildEnvironmentState({
-  latitude = 12.9716,
-  longitude = 77.5946,
-  displayName = 'Selected Location',
-  timezone = 'Asia/Kolkata',
-  timezoneAbbr = 'IST',
-  utcOffsetSeconds = 19800,
+  latitude,
+  longitude,
+  displayName = null,
+  timezone = null,
+  utcOffsetSeconds = null,
   weather = {},
   currentDate = new Date()
 }) {
   const solar = getSolarPosition(latitude, longitude, currentDate);
   const lunar = getLunarPosition(latitude, longitude, currentDate);
-  const localTime = getFormattedLocalTime(currentDate, timezone, utcOffsetSeconds);
+  const localTime = getFormattedLocalTime(currentDate, timezone);
+  const timezoneAbbr = getTimezoneAbbr(timezone, currentDate);
   const dayPhase = getDayPhase(solar.altitudeDeg, solar.azimuthDeg);
 
   const sunScreen = mapCelestialToScreen(solar.altitudeDeg, solar.azimuthDeg, latitude);
@@ -466,18 +442,18 @@ export function buildEnvironmentState({
     dayPhase, // 'night' | 'dawn' | 'morning' | 'noon' | 'afternoon' | 'dusk'
 
     // Meteorological Telemetry
-    weatherCondition: weather.condition || 'Clear',
+    weatherCondition: weather.condition || null,
     weatherCode: code,
     weatherCategory: category,
     temperatureC: weather.temperature_c ?? null,
     apparentTemperatureC: weather.apparent_temperature_c ?? null,
-    precipitationMm: weather.precipitation_mm ?? 0,
+    precipitationMm: weather.precipitation_mm ?? null,
     cloudCoverPct: weather.cloud_cover_pct ?? (category === 'clear' ? 5 : category === 'partly_cloudy' ? 45 : 95),
     humidityPct: weather.humidity_pct ?? null,
     windSpeedKmh: weather.wind_speed_kmh ?? null,
     sunrise: weather.sunrise || null,
     sunset: weather.sunset || null,
-    observedAt: weather.observation_time || new Date().toISOString(),
-    weatherSource: weather.source || 'Open-Meteo High-Resolution WMO Grid'
+    observedAt: weather.observation_time || null,
+    weatherSource: weather.source || null
   };
 }

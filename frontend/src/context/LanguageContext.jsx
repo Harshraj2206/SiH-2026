@@ -11,9 +11,8 @@ export const SUPPORTED_LANGUAGES = [
 ];
 
 export function LanguageProvider({ children }) {
-  const [language, setLanguage] = useState(() => {
-    return localStorage.getItem('landsafe_lang') || 'en';
-  });
+  // English only: the other languages were only partly translated.
+  const [language, setLanguage] = useState('en');
 
   useEffect(() => {
     localStorage.setItem('landsafe_lang', language);

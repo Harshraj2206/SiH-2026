@@ -110,7 +110,7 @@ def inspect_coordinate_telemetry(payload: CoordinateInspectRequest) -> Dict[str,
     prediction, forecast_trend = score_features(built)
 
     ml_score = prediction.get("risk_score")
-    risk_level = prediction.get("risk_level", "DATA_INSUFFICIENT")
+    risk_level = prediction.get("risk_level")
 
     zone_id = f"GPS-{round(lat, 2)}-{round(lng, 2)}"
 
@@ -123,11 +123,11 @@ def inspect_coordinate_telemetry(payload: CoordinateInspectRequest) -> Dict[str,
         "formatted_address": geo["formatted_address"],
         "center": {"lat": lat, "lng": lng},
         "coordinates": {"lat": lat, "lng": lng},
-        "elevation_amsl": dem.get("elevation_meters_amsl"),
+        "elevation_amsl": f["elevation_amsl"],
         "slope_deg": slope_deg,
         "temperature_c": weather.get("temperature_c"),
         "humidity_pct": weather.get("humidity_pct"),
-        "is_day": weather.get("is_day", 1),
+        "is_day": weather.get("is_day"),
         "cloud_cover_pct": weather.get("cloud_cover_pct"),
         "snowfall_cm": weather.get("snowfall_cm"),
         "condition": weather.get("condition"),

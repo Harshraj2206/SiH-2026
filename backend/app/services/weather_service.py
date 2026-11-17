@@ -1,6 +1,6 @@
 """
 LANDSLIDEGUARD SIH26001 - Weather & Precipitation Data Ingestion Service
-Queries live meteorological data from IMD / WMO-standard open grids for North Eastern India.
+Live weather for a point from the Open-Meteo forecast API.
 Calculates real 1h, 24h, and 72h accumulated rainfall with full provenance and timestamping.
 """
 
@@ -46,14 +46,12 @@ def fetch_live_meteorology(latitude: float, longitude: float) -> Dict[str, Any]:
         "rainfall_outlook": data.get("rainfall_outlook") or [],
         "wind_speed_kmh": data.get("wind_speed_kmh"),
         "wind_direction_deg": data.get("wind_direction_deg"),
-        "is_day": data.get("is_day", 1),
-        "cloud_cover_pct": data.get("cloud_cover_pct", 0),
-        "snowfall_cm": float(data.get("snowfall_cm") or 0.0),
+        "is_day": data.get("is_day"),
+        "cloud_cover_pct": data.get("cloud_cover_pct"),
+        "snowfall_cm": data.get("snowfall_cm"),
         "weather_code": data.get("weather_code"),
-        "condition": data.get("condition") or _map_wmo_code(data.get("weather_code")),
-        "source": "Open-Meteo WMO Reanalysis Grid",
-        "underlying_providers": "ECMWF / WMO Multi-Model Ensemble",
-        "source_resolution": data.get("spatial_resolution", "0.1° (~10 km)"),
+        "condition": data.get("condition") or (_map_wmo_code(data.get("weather_code")) if data.get("weather_code") is not None else None),
+        "source": data.get("source") or "Open-Meteo",
         "observation_time": data.get("observation_time"),
         "retrieved_at": data.get("retrieval_time"),
         "freshness_status": status,

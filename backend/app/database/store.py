@@ -54,6 +54,12 @@ def persists(method):
     return wrapper
 
 
+
+def _haversine_km(lat1, lng1, lat2, lng2):
+    dlat, dlng = math.radians(lat2 - lat1), math.radians(lng2 - lng1)
+    a = math.sin(dlat / 2) ** 2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlng / 2) ** 2
+    return 6371 * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
 class StateStore:
     def __init__(self):
         self.lock = threading.RLock()
@@ -67,11 +73,10 @@ class StateStore:
         self.roads: Dict[str, Dict[str, Any]] = {}
         self.hospitals: Dict[str, Dict[str, Any]] = {}
         self.shelters: Dict[str, Dict[str, Any]] = {}
-        self.post_disaster_events: Dict[str, Dict[str, Any]] = {}
         self.subscriptions: Dict[str, Dict[str, Any]] = {}
         self.poll_data: Dict[str, Any] = {
             "id": "poll-landslide-signs-today",
-            "question": "Have you noticed any signs of active landslide or ground movement near your district today?",
+            "question": "Have you seen signs of a landslide near you today (cracks, falling rocks, tilting trees)?",
             "description": "Answer once a day for the area around you.",
             "votes": {
                 "yes": 0,
@@ -123,7 +128,8 @@ class StateStore:
                     self.zones[zid].update(live)
                     self.zones[zid]["inference_status"] = "STALE_LAST_KNOWN"
             meta = self._records.load("meta")
-            self.poll_data = meta.get("poll_data", self.poll_data)
+            saved_poll = meta.get("poll_data") or {}
+            self.poll_data.update({k: saved_poll[k] for k in ("votes", "date") if k in saved_poll})
             self.poll_voters = meta.get("poll_voters", self.poll_voters)
             self.simulation_step = meta.get("simulation_step", self.simulation_step)
             self._recalculate_all_fusion_internal()
@@ -483,7 +489,6 @@ class StateStore:
         self.shelters = {}
 
         # 10. Post-Disaster Analysis & Machine Learning Retrospective Records
-        self.post_disaster_events = {}
 
         # 11. Alert Subscriptions
         self.subscriptions = {
@@ -560,13 +565,14 @@ class StateStore:
                 facts.append(f"{verified} verified ground report{'s' if verified != 1 else ''}")
             reason = ", ".join(facts).capitalize() + "." if facts else ""
 
-            if score >= 80.0:
+            level = z.get("risk_level")  # same bands as the map and the model
+            if level == "CRITICAL":
                 category, title = "CRITICAL", f"Critical landslide risk: {z['name']}"
                 action = "Avoid travel through this area and follow local authority instructions."
-            elif score >= 60.0:
+            elif level == "HIGH":
                 category, title = "HIGH", f"High landslide risk: {z['name']}"
                 action = "Avoid travel at night and watch for falling debris and cracks."
-            elif score >= 35.0 and verified > 0:
+            elif level == "MODERATE" and verified > 0:
                 category, title = "MODERATE", f"Ground movement reported: {z['name']}"
                 action = "Drive carefully and watch for loose debris on sharp turns."
             else:
@@ -663,12 +669,12 @@ class StateStore:
             zone_id = report_data.get("zone_id")
             zone_name = None
             if not zone_id:
+                # Link the report to a zone only if it is within 25 km of that zone's centre
                 lat, lng = report_data["latitude"], report_data["longitude"]
-                best_dist = 999999.0
+                best_dist = 25.0
                 for zid, z in self.zones.items():
-                    clat, clng = z["center"]["lat"], z["center"]["lng"]
-                    d = (lat - clat) ** 2 + (lng - clng) ** 2
-                    if d < best_dist:
+                    d = _haversine_km(lat, lng, z["center"]["lat"], z["center"]["lng"])
+                    if d <= best_dist:
                         best_dist = d
                         zone_id = zid
             
@@ -705,8 +711,16 @@ class StateStore:
             return new_rep
 
     # ---------------- Community Poll API ----------------
+    def _roll_poll_day(self):
+        """Votes count for the current UTC day only."""
+        today = datetime.now(timezone.utc).date().isoformat()
+        if self.poll_data.get("date") != today:
+            self.poll_data["date"] = today
+            self.poll_data["votes"] = {k: 0 for k in self.poll_data["votes"]}
+
     def get_community_poll(self) -> Dict[str, Any]:
         with self.lock:
+            self._roll_poll_day()
             total = sum(self.poll_data["votes"].values())
             tot = total or 1  # avoid division by zero in percentages
             return {
@@ -717,19 +731,19 @@ class StateStore:
                 "options": [
                     {
                         "id": "yes",
-                        "label": "Yes (Observed Rockfall / Tension Cracks)",
+                        "label": "Yes, I saw signs",
                         "votes": self.poll_data["votes"]["yes"],
                         "percentage": round((self.poll_data["votes"]["yes"] / tot) * 100, 1)
                     },
                     {
                         "id": "no",
-                        "label": "No (Terrain Appears Stable)",
+                        "label": "No",
                         "votes": self.poll_data["votes"]["no"],
                         "percentage": round((self.poll_data["votes"]["no"] / tot) * 100, 1)
                     },
                     {
                         "id": "unsure",
-                        "label": "Not Sure / Low Visibility",
+                        "label": "Not sure",
                         "votes": self.poll_data["votes"]["unsure"],
                         "percentage": round((self.poll_data["votes"]["unsure"] / tot) * 100, 1)
                     }
@@ -743,6 +757,7 @@ class StateStore:
             today = datetime.now(timezone.utc).date().isoformat()
             if self.poll_voters.get(user_id) == today:
                 return None
+            self._roll_poll_day()
             opt = option_id.lower().strip()
             if opt in self.poll_data["votes"]:
                 self.poll_data["votes"][opt] += 1
@@ -869,13 +884,12 @@ class StateStore:
             lat, lng = data["latitude"], data["longitude"]
             
             # Find nearest zone risk
-            best_dist = 999999.0
+            best_dist = 25.0  # only a zone within 25 km affects priority
             zone_id = None
             zone_risk = None
             for zid, z in self.zones.items():
-                clat, clng = z["center"]["lat"], z["center"]["lng"]
-                d = (lat - clat) ** 2 + (lng - clng) ** 2
-                if d < best_dist:
+                d = _haversine_km(lat, lng, z["center"]["lat"], z["center"]["lng"])
+                if d <= best_dist:
                     best_dist = d
                     zone_id = zid
                     zone_risk = z.get("risk_score")
@@ -917,11 +931,11 @@ class StateStore:
             new_sos = {
                 "sos_id": sos_id,
                 "user_id": user.get("id", "usr-anonymous") if user else "usr-citizen",
-                "user_name": data.get("user_name") or (user.get("full_name") if user else "Citizen in Need"),
-                "emergency_contact": data.get("emergency_contact") or "+91 98000-00000",
+                "user_name": data.get("user_name") or (user.get("full_name") if user else None),
+                "emergency_contact": data.get("emergency_contact") or (user.get("phone") if user else None),
                 "latitude": lat,
                 "longitude": lng,
-                "location_name": data.get("location_name") or f"Emergency Location near {zone_id or 'Mountain Route'}",
+                "location_name": data.get("location_name"),
                 "zone_id": zone_id,
                 "timestamp": datetime.now(timezone.utc).isoformat(),
                 "people_count": data.get("people_count", 1),
@@ -1015,11 +1029,6 @@ class StateStore:
             return list(self.shelters.values())
 
     # ---------------- Post-Disaster Events API ----------------
-    def get_all_post_disaster_events(self) -> List[Dict[str, Any]]:
-        with self.lock:
-            return list(self.post_disaster_events.values())
-
-    # ---------------- Alerts API ----------------
     def get_all_alerts(self, category_filter: Optional[str] = None) -> List[Dict[str, Any]]:
         with self.lock:
             alerts_list = list(self.alerts.values())

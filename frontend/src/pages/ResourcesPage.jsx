@@ -1,4 +1,3 @@
-import { createPortal } from 'react-dom';
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -35,7 +34,6 @@ import {
   Radio, 
   Star, 
   Clock, 
-  Key, 
   X, 
   ChevronRight,
   CheckCircle2,
@@ -53,6 +51,9 @@ import {
   ChevronDown,
   ChevronUp
 } from 'lucide-react';
+import { WorldBounds, WORLD_BOUNDS } from '../components/map/WorldBounds';
+import { PlaceSearch } from '../components/common/PlaceSearch';
+import { toLabel } from '../utils/formatters';
 
 // Fix Leaflet's default marker asset URLs
 delete L.Icon.Default.prototype._getIconUrl;
@@ -64,11 +65,11 @@ L.Icon.Default.mergeOptions({
 
 // Category definitions with icons and colors
 const CATEGORIES = [
-  { id: 'hospitals', label: 'Hospitals & Trauma', icon: Ambulance, color: 'emerald' },
-  { id: 'police', label: 'Police Stations', icon: Shield, color: 'sky' },
-  { id: 'fire', label: 'Fire & Rescue', icon: Flame, color: 'rose' },
-  { id: 'shelters', label: 'Evacuation Shelters', icon: Home, color: 'amber' },
-  { id: 'all', label: 'All Emergency', icon: Radio, color: 'purple' },
+  { id: 'hospitals', label: 'Hospitals and clinics', icon: Ambulance, color: 'emerald' },
+  { id: 'police', label: 'Police', icon: Shield, color: 'sky' },
+  { id: 'fire', label: 'Fire stations', icon: Flame, color: 'rose' },
+  { id: 'shelters', label: 'Shelters', icon: Home, color: 'amber' },
+  { id: 'all', label: 'All', icon: Radio, color: 'purple' },
 ];
 
 const SEARCH_RADII = [5, 10, 25, 50];
@@ -224,8 +225,7 @@ export const ResourcesPage = () => {
   const navigate = useNavigate();
   const {
     location: unifiedLocation,
-    requestLocation: requestUnifiedGps,
-    searchLocation: searchUnifiedLocation
+    requestLocation: requestUnifiedGps
   } = useLocationIntelligence();
 
   // Location & Geolocation state
@@ -238,8 +238,6 @@ export const ResourcesPage = () => {
   const [activeCategory, setActiveCategory] = useState('hospitals');
   const [radiusKm, setRadiusKm] = useState(10);
   const [searchKeyword, setSearchKeyword] = useState('');
-  const [manualQuery, setManualQuery] = useState('');
-  const [isSearchingLocation, setIsSearchingLocation] = useState(false);
 
   // Discovered data & loading state
   const [places, setPlaces] = useState([]);
@@ -293,7 +291,7 @@ export const ResourcesPage = () => {
     }
 
     // Mathematical rule: resource.distance <= selectedRadius (with 5% tolerance for boundary)
-    const withinRadius = allPlaces.filter((p) => p.distance_km <= radius * 1.05);
+    const withinRadius = allPlaces.filter((p) => p.distance_km <= radius);
     withinRadius.sort((a, b) => a.distance_km - b.distance_km);
 
     return withinRadius;
@@ -380,15 +378,15 @@ export const ResourcesPage = () => {
           travel_time_min: routeData.travel_time_min,
           coordinates: routeData.coordinates,
           segments: routeData.segments || [],
-          safety_level: routeData.safety_level || 'LOW RISK',
-          slope_deg: routeData.slope_deg || 0,
+          safety_level: routeData.safety_level || null,
+          slope_deg: routeData.slope_deg ?? null,
           explanation: res.comparison?.explanation || ''
         });
         if (viewLayout === 'cards') {
           setViewLayout('split');
         }
       } else {
-        setRouteError('Could not calculate an authentic road route to this facility.');
+        setRouteError('No road route was found to this place.');
       }
     } catch (err) {
       console.error('Route calculation error:', err);
@@ -464,11 +462,6 @@ export const ResourcesPage = () => {
     };
   }, []);
 
-  // Google Places API Key override modal
-  const [showKeyModal, setShowKeyModal] = useState(false);
-  const [customApiKey, setCustomApiKey] = useState(() => localStorage.getItem('landsafe_google_maps_key') || '');
-  const [keySavedMsg, setKeySavedMsg] = useState(null);
-
   // Refs
   const cardRefs = useRef({});
 
@@ -478,7 +471,7 @@ export const ResourcesPage = () => {
       const coords = {
         lat: unifiedLocation.latitude,
         lng: unifiedLocation.longitude,
-        accuracy: unifiedLocation.accuracy || 25,
+        accuracy: unifiedLocation.accuracy ?? null,
         area: unifiedLocation.displayName,
         isDefault: !unifiedLocation.isGps && (unifiedLocation.source || '').includes('Fallback')
       };
@@ -545,37 +538,14 @@ export const ResourcesPage = () => {
     }
   }, [activeCategory, radiusKm]);
 
-  // 4. Manual Location Search using Unified Geocoding
-  const handleManualSearch = async (e) => {
-    if (e) e.preventDefault();
-    if (!manualQuery.trim()) return;
-
-    setIsSearchingLocation(true);
+  // 4. Manual location chosen from the place search
+  const handlePlaceSearchSelect = (place) => {
+    setLocationMode('manual');
     setLocationError(null);
-    try {
-      const res = await searchUnifiedLocation(manualQuery);
-      if (res && res.latitude && res.longitude) {
-        setLocationMode('manual');
-        const newCoords = {
-          lat: res.latitude,
-          lng: res.longitude,
-          accuracy: 25,
-          area: res.displayName || manualQuery,
-          isManual: true
-        };
-        setUserCoords(newCoords);
-        setMapCenter({ lat: res.latitude, lng: res.longitude });
-        setMapZoom(13);
-        fetchNearby(res.latitude, res.longitude, radiusKm, activeCategory, searchKeyword, true);
-      } else {
-        setLocationError(`Could not find "${manualQuery}". Please try another city, landmark, or PIN code.`);
-      }
-    } catch (err) {
-      console.error('Manual search failed:', err);
-      setLocationError(`Unable to geocode "${manualQuery}". Please enter a valid Indian city, area, or PIN code.`);
-    } finally {
-      setIsSearchingLocation(false);
-    }
+    setUserCoords({ lat: place.latitude, lng: place.longitude, accuracy: null, area: place.label, isManual: true });
+    setMapCenter({ lat: place.latitude, lng: place.longitude });
+    setMapZoom(13);
+    fetchNearby(place.latitude, place.longitude, radiusKm, activeCategory, searchKeyword, true);
   };
 
   // 5. Select & Synchronize Place on Map and Card List
@@ -589,24 +559,6 @@ export const ResourcesPage = () => {
     if (cardEl) {
       cardEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
-  };
-
-  // 6. Save Custom Google Maps API Key
-  const handleSaveApiKey = () => {
-    if (customApiKey.trim()) {
-      localStorage.setItem('landsafe_google_maps_key', customApiKey.trim());
-      setKeySavedMsg('Google Maps API Key saved! Refreshing places with Google Places API...');
-    } else {
-      localStorage.removeItem('landsafe_google_maps_key');
-      setKeySavedMsg('API Key removed. Using verified open geospatial infrastructure.');
-    }
-    setTimeout(() => {
-      setShowKeyModal(false);
-      setKeySavedMsg(null);
-      if (userCoords?.lat && userCoords?.lng) {
-        fetchNearby(userCoords.lat, userCoords.lng, radiusKm, activeCategory);
-      }
-    }, 1200);
   };
 
   // Format "Updated X ago"
@@ -633,24 +585,10 @@ export const ResourcesPage = () => {
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-lg font-semibold text-label tracking-tight">Real-Time Emergency Resources</h1>
-                <span className="text-xs px-2 py-0.5 rounded-full tabular-nums bg-risk-low/[0.12] border-risk-low/30 text-risk-low font-semibold flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-risk-low"></span>
-                  Location aware
-                </span>
-                {dataSourceInfo && (
-                  <span 
-                    onClick={() => setShowKeyModal(true)}
-                    className="text-xs px-2 py-0.5 rounded-full tabular-nums bg-surface-2 text-label-2 hover:text-label cursor-pointer transition-colors flex items-center gap-1"
-                    title="Click to view or configure Google Places API key"
-                  >
-                    <Key className="w-2.5 h-2.5 text-risk-moderate" />
-                    <span>{dataSourceInfo.is_google_configured ? 'Google Places Active' : 'Open Infrastructure'}</span>
-                  </span>
-                )}
+                <h1 className="text-lg font-semibold text-label tracking-tight">Emergency resources</h1>
               </div>
               <p className="text-xs text-label-2 mt-0.5">
-                Authentic certified hospitals, trauma centers, and disaster response units discovered near your current GPS position.
+                Hospitals, clinics, police, fire stations and shelters near you, from OpenStreetMap.
               </p>
             </div>
           </div>
@@ -701,7 +639,7 @@ export const ResourcesPage = () => {
           <div className="flex items-center gap-2 flex-wrap">
             <div className="flex items-center gap-1.5 font-medium text-label-2">
               <MapPin className="w-3.5 h-3.5 text-risk-low shrink-0" />
-              <span className="text-label-2">Search Center:</span>
+              <span className="text-label-2">Near:</span>
               <strong className="text-label truncate max-w-[320px] sm:max-w-md">
                 {userCoords?.area || (geoState === 'checking' ? 'Acquiring GPS location...' : 'Location not set')}
               </strong>
@@ -726,26 +664,7 @@ export const ResourcesPage = () => {
             )}
           </div>
 
-          {/* Manual Location Search Bar */}
-          <form onSubmit={handleManualSearch} className="flex items-center gap-1.5 w-full md:w-auto">
-            <div className="relative flex-1 md:w-64">
-              <Search className="w-3.5 h-3.5 text-label-3 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Search city, area, PIN code..."
-                value={manualQuery}
-                onChange={(e) => setManualQuery(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 bg-surface-2 rounded-full text-xs text-label placeholder-label-3 focus:outline-none transition-colors"
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={isSearchingLocation || !manualQuery.trim()}
-              className="px-3 py-1.5 bg-risk-low/[0.12] hover:bg-risk-low/20 border-risk-low/30 text-risk-low font-medium rounded-full whitespace-nowrap text-xs flex items-center gap-1 transition-colors disabled:opacity-40 shrink-0"
-            >
-              <span>{isSearchingLocation ? 'Searching...' : 'Go'}</span>
-            </button>
-          </form>
+          <PlaceSearch onSelect={handlePlaceSearchSelect} placeholder="Search a place" className="w-full md:w-72" />
         </div>
 
         {/* Accuracy Warning Banner (if GPS accuracy > 500m) */}
@@ -792,19 +711,10 @@ export const ResourcesPage = () => {
             <div>
               <h3 className="text-sm font-semibold text-label">Location access is required to find emergency resources near you</h3>
               <p className="text-xs text-label-2 mt-0.5">
-                Browser geolocation was declined. Use the search bar above to type any Indian city, landmark, or PIN code.
+                Location access was declined. Use the search above to choose a place instead.
               </p>
             </div>
           </div>
-          <button
-            onClick={() => {
-              setManualQuery('Bengaluru, Karnataka');
-              handleManualSearch();
-            }}
-            className="px-3 py-1.5 bg-surface-2 hover:bg-surface-2 text-label text-xs font-medium rounded-full whitespace-nowrap transition-colors self-start sm:self-center shrink-0"
-          >
-            Try Example: Bengaluru
-          </button>
         </div>
       )}
 
@@ -863,8 +773,8 @@ export const ResourcesPage = () => {
       <div className="flex items-center justify-between text-xs px-1 text-label-2">
         <span className="flex items-center gap-1">
           <Compass className="w-3.5 h-3.5 text-label-2" />
-          Showing {activeCategory === 'all' ? 'all emergency resources' : (CATEGORIES.find(c => c.id === activeCategory)?.label || activeCategory)} within <strong className="text-label tabular-nums">{radiusKm} km</strong> of your location
-          {places.length > 0 && ` (${places.length} verified facilities)`}
+          Showing {activeCategory === 'all' ? 'all emergency services' : (CATEGORIES.find(c => c.id === activeCategory)?.label || activeCategory).toLowerCase()} within <strong className="text-label tabular-nums">{radiusKm} km</strong>
+          {places.length > 0 && ` (${places.length} found on OpenStreetMap)`}
         </span>
         {dataSourceInfo?.provider && (
           <span className="text-xs text-label-3 tabular-nums hidden sm:inline">
@@ -925,7 +835,7 @@ export const ResourcesPage = () => {
                     <strong className="text-xs tabular-nums font-semibold text-risk-low">~{activeRoute.travel_time_min} mins</strong>
                   </div>
                   <div>
-                    <span className="text-xs text-label-2 block font-medium">Hazard Profile</span>
+                    <span className="text-xs text-label-2 block font-medium">Landslide risk</span>
                     <strong className={`text-xs tabular-nums font-semibold ${
                       activeRoute.safety_level === 'HIGH RISK' 
                         ? 'text-risk-critical' 
@@ -933,7 +843,7 @@ export const ResourcesPage = () => {
                           ? 'text-risk-moderate' 
                           : 'text-risk-low'
                     }`}>
-                      {activeRoute.safety_level}
+                      {activeRoute.safety_level ? toLabel(activeRoute.safety_level.replace(/ /g, '_')) : '—'}
                     </strong>
                   </div>
                 </div>
@@ -967,7 +877,7 @@ export const ResourcesPage = () => {
                       </button>
                       <span className="text-xs text-risk-low tabular-nums flex items-center gap-1 font-semibold">
                         <span className="w-2 h-2 rounded-full bg-risk-low"></span>
-                        Live GPS Tracking
+                        Following your GPS
                       </span>
                     </div>
                   ) : (
@@ -1019,10 +929,10 @@ export const ResourcesPage = () => {
               <div className="bg-surface-2 px-4 py-2.5 border-b border-line flex items-center justify-between text-xs z-10">
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-risk-low"></span>
-                  <span className="font-semibold text-label">Live Geospatial Radar</span>
+                  <span className="font-semibold text-label">Map</span>
                 </div>
                 <div className="flex items-center gap-2 text-label-2 tabular-nums text-xs">
-                  <span>Center: {userCoords?.lat?.toFixed(3)}°N, {userCoords?.lng?.toFixed(3)}°E</span>
+                  <span>{userCoords?.area || (userCoords ? `${userCoords.lat.toFixed(4)}, ${userCoords.lng.toFixed(4)}` : '')}</span>
                 </div>
               </div>
             )}
@@ -1078,6 +988,7 @@ export const ResourcesPage = () => {
                   style={{ width: '100%', height: '100%', background: '#0a0a0a' }}
                   zoomControl={false}
                 >
+                  <WorldBounds />
                   <MapRouteController 
                     center={mapCenter} 
                     zoom={mapZoom} 
@@ -1091,6 +1002,8 @@ export const ResourcesPage = () => {
                     attribution={activeMapConfig.attribution}
                     maxNativeZoom={activeMapConfig.maxNativeZoom || 17}
                     maxZoom={activeMapConfig.maxZoom || 19}
+                    noWrap={true}
+                    bounds={WORLD_BOUNDS}
                   />
 
                   {/* If Hybrid mode, add the reference labels & boundaries overlay */}
@@ -1101,6 +1014,8 @@ export const ResourcesPage = () => {
                       attribution={activeMapConfig.attribution}
                       maxNativeZoom={18}
                       maxZoom={19}
+                      noWrap={true}
+                      bounds={WORLD_BOUNDS}
                     />
                   )}
 
@@ -1367,15 +1282,7 @@ export const ResourcesPage = () => {
                     <ChevronRight className="w-4 h-4" />
                   </button>
                 ) : (
-                  <button
-                    onClick={() => {
-                      setManualQuery('District Hospital');
-                      handleManualSearch();
-                    }}
-                    className="px-4 py-2 bg-surface-2 hover:bg-surface-2 text-label font-medium rounded-full whitespace-nowrap text-xs inline-flex items-center gap-1.5 transition-colors"
-                  >
-                    <span>Search by City Name</span>
-                  </button>
+                  <span className="text-xs text-label-2">Nothing found within 50 km. Try another place with the search above.</span>
                 )}
               </div>
             )}
@@ -1453,9 +1360,6 @@ export const ResourcesPage = () => {
                           </span>
                         ) : null}
 
-                        <span className="text-label-3 tabular-nums">
-                          ID: {place.place_id ? place.place_id.slice(-6) : place.id.slice(-6)}
-                        </span>
                       </div>
                     </div>
 
@@ -1567,79 +1471,6 @@ export const ResourcesPage = () => {
 
       </div>
 
-      {/* 5. Google Places API Key Configuration Modal */}
-      {showKeyModal && (
-        createPortal(
-<div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[2000] flex items-center justify-center p-4">
-          <div className="bg-surface rounded-card max-w-lg w-full p-6 space-y-4">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-tile bg-risk-moderate/[0.12] border-risk-moderate/30 flex items-center justify-center text-risk-moderate">
-                  <Key className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="text-base font-semibold text-label">Google Maps Platform Integration</h3>
-                  <p className="text-xs text-label-2">Places API & Places API (New) Configuration</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowKeyModal(false)}
-                className="p-1 rounded-full text-label-2 hover:text-label hover:bg-surface-2 transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="space-y-2 text-xs text-label-2 leading-relaxed bg-surface-2 p-3.5 rounded-tile">
-              <p>
-                <strong>Architecture:</strong> When an API Key is present, LandSafe automatically connects to official <strong>Google Places API (New)</strong> (<code className="text-risk-low">places:searchNearby</code>) for verified facility coordinates, hours, ratings, and phone numbers.
-              </p>
-              <p className="text-label-2">
-                When no key is configured in the environment, the system gracefully queries verified open geospatial infrastructure (OpenStreetMap / Overpass) so you get 100% real, authentic facilities for any location in India with zero fake data.
-              </p>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-label-2">
-                Google Maps API Key (Optional Override)
-              </label>
-              <input
-                type="password"
-                placeholder="AIzaSy..."
-                value={customApiKey}
-                onChange={(e) => setCustomApiKey(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-surface-2 rounded-field text-xs text-label placeholder-label-3 focus:outline-none tabular-nums focus:ring-2 focus:ring-accent/40"
-              />
-              <p className="text-xs text-label-3">
-                Key can also be defined via server environment variable <code className="text-label-2">Google_maps_api_key</code>.
-              </p>
-            </div>
-
-            {keySavedMsg && (
-              <div className="p-2.5 bg-risk-low/[0.12] border-risk-low/30 rounded-tile text-risk-low text-xs flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-risk-low shrink-0" />
-                <span>{keySavedMsg}</span>
-              </div>
-            )}
-
-            <div className="flex items-center justify-end gap-2 pt-2">
-              <button
-                onClick={() => setShowKeyModal(false)}
-                className="px-4 py-2 bg-surface-2 hover:bg-surface-2 text-label text-xs font-medium rounded-full whitespace-nowrap transition-colors"
-              >
-                Close
-              </button>
-              <button
-                onClick={handleSaveApiKey}
-                className="px-4 py-2 bg-accent hover:opacity-90 text-white font-semibold text-xs rounded-full whitespace-nowrap transition-colors"
-              >
-                Save & Apply
-              </button>
-            </div>
-          </div>
-        </div>,
- document.body)
-      )}
 
     </div>
   );

@@ -56,20 +56,20 @@ def orchestrate_location_intelligence(
     if not validate_geographic_consistency(latitude, longitude, geo_info):
         raise ValueError(f"Geographic consistency validation failed for coordinates ({latitude}, {longitude})")
 
-    country_code = geo_info.get("country_code", "").upper()
-    country_name = geo_info.get("country", "Global")
+    country_code = (geo_info.get("country_code") or "").upper()
+    country_name = geo_info.get("country")
     state_prov = geo_info.get("state", "")
     district_county = geo_info.get("district", "")
-    place_name = geo_info.get("name", "Inspected Coordinate")
+    place_name = geo_info.get("name")
 
     # Canonical Location Object
     canonical_location = {
         "latitude": latitude,
         "longitude": longitude,
-        "accuracy": 10.0,
+        "accuracy": None,
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "source": source,
-        "display_name": f"{place_name}, {state_prov}" if state_prov else place_name,
+        "display_name": place_name,
         "country": country_name,
         "country_code": country_code,
         "state_province": state_prov,
@@ -102,72 +102,29 @@ def orchestrate_location_intelligence(
     ml_result, live_forecast_trend = score_features(built)
     is_paused = ml_result.get("status") == "DATA_INSUFFICIENT"
     risk_score = ml_result.get("risk_score")
-    risk_level = ml_result.get("risk_level", "LOW")
+    risk_level = ml_result.get("risk_level")
 
-    # Determine Model Coverage Label
-    is_india = country_code == "IN"
+    # Model and data sources, stated as they are
     model_coverage = {
-        "model_name": "Random Forest Ensemble (150 Trees)",
-        "coverage_scope": "GSI NLSM & NASA GLC Empirical Benchmark" if is_india else "Global Geotechnical Baseline",
-        "validation_status": "EMPIRICALLY VALIDATED" if is_india else "BASELINE PROTOTYPE",
-        "primary_driver": ml_result.get("xai", {}).get("primary_driver", "slope gradient and rainfall saturation"),
+        "model_name": "Random Forest (200 trees)",
+        "coverage_scope": "India only (trained on NASA Global Landslide Catalog events in India)",
+        "primary_driver": (ml_result.get("xai") or {}).get("primary_driver"),
         "model_confidence": ml_result.get("model_confidence"),
         "tree_variance": ml_result.get("tree_variance"),
-        "data_quality": ml_result.get("data_quality", "HIGH")
+        "data_quality": ml_result.get("data_quality")
     }
 
-    # Data Quality & Provenance Registry
     data_sources_registry = [
-        {
-            "name": "Open-Meteo NWP Grid (ECMWF IFS / Multi-Model Assimilation)",
-            "dataset": "Near-Real-Time Global Weather Reanalysis (0.1° Grid)",
-            "tier": "TIER 1 (Global Numerical Weather Prediction)",
-            "spatial_resolution": "0.1° (~10 km)",
-            "observation_time": weather_data.get("observation_time"),
-            "latency": "1-3 hours",
-            "status": "CONNECTED" if rain_24h is not None else "UNAVAILABLE",
-            "quality": "HIGH" if rain_24h is not None else "UNAVAILABLE"
-        },
-        {
-            "name": "ECMWF IFS Land-Surface Grid (topsoil 0–7 cm)",
-            "dataset": "Topsoil Volumetric Water Content (m³/m³)",
-            "tier": "TIER 1 (European NWP Land-Surface Model)",
-            "spatial_resolution": "0.1° (~10 km)",
-            "observation_time": weather_data.get("observation_time"),
-            "latency": "Hourly Assimilation",
-            "status": "CONNECTED" if not soil_is_fallback else "REGIONAL_BASELINE",
-            "quality": "HIGH" if not soil_is_fallback else "MODERATE"
-        },
-        {
-            "name": terrain_data.get("source", "Copernicus 90m / Open-Meteo Elevation Grid"),
-            "dataset": "Terrain Geoid Elevation & 3D Slope Gradient",
-            "tier": "TIER 1 (Copernicus / SRTM)",
-            "spatial_resolution": terrain_data.get("spatial_resolution", "30-90 meters"),
-            "observation_time": "Geodetic Baseline",
-            "latency": "Sub-second",
-            "status": "CONNECTED" if terrain_data.get("is_dynamic") else "BASELINE_PROFILE",
-            "quality": "HIGH" if terrain_data.get("is_dynamic") else "BASELINE"
-        },
-        {
-            "name": "USGS Global Real-Time Seismic Network",
-            "dataset": "Real-Time Earthquake Feeds (M2.5+ Global)",
-            "tier": "TIER 1 (US Geological Survey)",
-            "spatial_resolution": "Global Point Sensors",
-            "observation_time": earthquakes[0]["time_ms"] if earthquakes else "Past 24h Quiescent",
-            "latency": "< 5 minutes",
-            "status": "CONNECTED",
-            "quality": "HIGH"
-        },
-        {
-            "name": "OpenStreetMap Geographic Infrastructure",
-            "dataset": "Overpass Road Network, Trauma Hospitals & Shelters",
-            "tier": "TIER 3 (Open Geographic Database)",
-            "spatial_resolution": "Street-Level (< 5 m)",
-            "observation_time": "Live Overpass Query",
-            "latency": "Real-Time",
-            "status": "CONNECTED",
-            "quality": "HIGH"
-        }
+        {"name": "Open-Meteo (rain, temperature)", "observation_time": weather_data.get("observation_time"),
+         "status": "CONNECTED" if rain_24h is not None else "UNAVAILABLE"},
+        {"name": "Open-Meteo (topsoil moisture, 0-7 cm)", "observation_time": weather_data.get("observation_time"),
+         "status": "CONNECTED" if not soil_is_fallback else "UNAVAILABLE"},
+        {"name": terrain_data.get("source") or "Copernicus DEM (elevation, slope)", "observation_time": None,
+         "status": "CONNECTED" if slope_deg is not None else "UNAVAILABLE"},
+        {"name": "USGS earthquakes (past day)", "observation_time": None,
+         "status": "CONNECTED" if earthquakes is not None else "UNAVAILABLE"},
+        {"name": "OpenStreetMap (hospitals, shelters)", "observation_time": None,
+         "status": "CONNECTED" if facilities.get("status") != "UNAVAILABLE" else "UNAVAILABLE"}
     ]
 
     bundle = {
@@ -177,24 +134,20 @@ def orchestrate_location_intelligence(
             "rate_1h_mm": weather_data.get("precipitation_1h_mm"),
             "accum_24h_mm": rain_24h,
             "accum_72h_mm": rain_72h,
-            "source": "Open-Meteo NWP Grid (ECMWF IFS)",
-            "spatial_resolution": "0.1° (~10 km)",
+            "source": "Open-Meteo",
             "observation_time": weather_data.get("observation_time")
         },
         "soil_moisture": {
             "volumetric_m3m3": soil_moisture_val,
             "saturation_pct": None if soil_moisture_val is None else (round(soil_moisture_val * 100, 1) if soil_moisture_val <= 1.0 else soil_moisture_val),
             "depth_layer": "0-7 cm topsoil",
-            "source": "ECMWF IFS Land-Surface Grid",
-            "spatial_resolution": "0.1° (~10 km)",
+            "source": "Open-Meteo",
             "is_fallback": soil_is_fallback
         },
         "terrain": {
             "elevation_amsl": elev_m,
             "slope_deg": slope_deg,
-            "aspect": terrain_data.get("aspect", "North-East"),
-            "source": terrain_data.get("source", "Copernicus 90m / SRTM 30m Global DEM"),
-            "spatial_resolution": terrain_data.get("spatial_resolution", "30-90 meters"),
+            "source": terrain_data.get("source"),
             "is_dynamic": terrain_data.get("is_dynamic", False)
         },
         "earthquakes": earthquakes,

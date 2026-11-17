@@ -42,7 +42,7 @@ export function normalizeWeather(raw) {
       humidity: null,
       isDay: true,
       theme: 'neutral',
-      source: 'Authoritative Satellite Grid',
+      source: null,
       observationTime: null
     };
   }
@@ -51,7 +51,7 @@ export function normalizeWeather(raw) {
     return {
       type: WEATHER_TYPES.LOADING,
       category: 'loading',
-      label: 'Updating Weather Telemetry...',
+      label: 'Loading weather…',
       icon: '⏳',
       temp: null,
       tempFormatted: '...',
@@ -60,7 +60,7 @@ export function normalizeWeather(raw) {
       humidity: null,
       isDay: true,
       theme: 'loading',
-      source: 'Querying Satellite Telemetry',
+      source: null,
       status: 'LOADING',
       dataAgeMinutes: null,
       observationTime: null
@@ -80,7 +80,7 @@ export function normalizeWeather(raw) {
       humidity: null,
       isDay: true,
       theme: 'neutral',
-      source: raw.source || 'Telemetry Offline',
+      source: raw.source || null,
       status: 'UNAVAILABLE',
       dataAgeMinutes: null,
       observationTime: null
@@ -97,7 +97,7 @@ export function normalizeWeather(raw) {
   const weatherCode = typeof raw.weather_code === 'number' ? raw.weather_code : (typeof raw.code === 'number' ? raw.code : null);
   const conditionStr = String(raw.condition || '').toLowerCase().trim();
   const isDay = raw.is_day !== undefined ? Boolean(raw.is_day) : true;
-  const source = raw.weather_source || raw.source || 'Open-Meteo / WMO Satellite Grid';
+  const source = raw.weather_source || raw.source || null;
   const observationTime = raw.observation_time || raw.inspected_at || null;
 
   // 1. Thunderstorm (WMO 95, 96, 99)
@@ -412,7 +412,7 @@ export function normalizeWeather(raw) {
   return {
     type: WEATHER_TYPES.UNKNOWN,
     category: 'unknown',
-    label: conditionStr ? (conditionStr.charAt(0).toUpperCase() + conditionStr.slice(1)) : 'Live Weather Standby',
+    label: conditionStr ? (conditionStr.charAt(0).toUpperCase() + conditionStr.slice(1)) : '—',
     icon: isDay ? '⛅' : '🌙',
     temp,
     tempFormatted,

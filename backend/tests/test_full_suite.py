@@ -347,20 +347,13 @@ def test_emergency_resources():
         assert isinstance(res.json(), list)
 
 
-# ---------------- 8. Analytics & Post-Disaster ----------------
-def test_analytics_and_post_disaster():
+# ---------------- 8. Analytics ----------------
+def test_analytics():
     res_analytics = client.get("/api/analytics")
     assert res_analytics.status_code == 200
     data = res_analytics.json()
     assert "total_zones" in data
     assert "risk_distribution" in data
-
-    res_pd = client.get("/api/post-disaster")
-    assert res_pd.status_code == 200
-
-    res_metrics = client.get("/api/post-disaster/metrics")
-    assert res_metrics.status_code == 200
-    assert "accuracy" in res_metrics.json()
 
 
 # ---------------- 9. India-Wide Landslide Intelligence & Verification ----------------

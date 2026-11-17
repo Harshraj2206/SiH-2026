@@ -644,8 +644,8 @@ def discover_nearby_emergency_resources(
     # Save complete cumulative pool for this center & category
     _LOCATION_PLACES_POOL[pool_key] = deduped_places
 
-    # 5. Filter strictly within requested maximum radius: distance_km <= radius_km * 1.05
-    places = [p for p in deduped_places if p["distance_km"] <= (radius_km * 1.05)]
+    # 5. Keep only places within the requested radius
+    places = [p for p in deduped_places if p["distance_km"] <= radius_km]
 
     # 6. Optional Keyword Filtering
     if keyword and keyword.strip():
@@ -673,7 +673,7 @@ def discover_nearby_emergency_resources(
             "retrieved_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             "message": (
                 "Live real-time places discovered via official Google Places API" if "Google" in used_provider
-                else ("From OpenStreetMap." if not is_google_configured else "Google Places returned 0 places in radius; verified open geospatial facilities shown.")
+                else ("From OpenStreetMap." if not is_google_configured else "Google Places found nothing in this radius, so places come from OpenStreetMap.")
             )
         }
     }

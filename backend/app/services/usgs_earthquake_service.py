@@ -8,7 +8,7 @@ import json
 import time
 import math
 import urllib.request
-from typing import List, Dict, Any
+from typing import Optional, List, Dict, Any
 
 _USGS_FEED_URL = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson"
 _SEISMIC_CACHE: Dict[str, Any] = {"data": [], "cached_at": 0}
@@ -24,9 +24,9 @@ def _haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     return R * c
 
 
-def get_nearby_earthquakes(latitude: float, longitude: float, max_radius_km: float = 600.0) -> List[Dict[str, Any]]:
+def get_nearby_earthquakes(latitude: float, longitude: float, max_radius_km: float = 600.0) -> Optional[List[Dict[str, Any]]]:
     """
-    Query real USGS global earthquake feed and filter seismic events around the selected location.
+    Earthquakes from the USGS feed within max_radius_km, nearest first. None if the feed is unreachable.
     """
     now = time.time()
     all_events = []
@@ -46,7 +46,7 @@ def get_nearby_earthquakes(latitude: float, longitude: float, max_radius_km: flo
                     coords = geom.get("coordinates", [])
                     if len(coords) >= 2:
                         eq_lon, eq_lat = coords[0], coords[1]
-                        depth_km = coords[2] if len(coords) >= 3 else 10.0
+                        depth_km = coords[2] if len(coords) >= 3 else None
                         parsed.append({
                             "event_id": f.get("id"),
                             "title": props.get("title"),
@@ -55,7 +55,7 @@ def get_nearby_earthquakes(latitude: float, longitude: float, max_radius_km: flo
                             "time_ms": props.get("time"),
                             "latitude": eq_lat,
                             "longitude": eq_lon,
-                            "depth_km": round(depth_km, 1),
+                            "depth_km": round(depth_km, 1) if depth_km is not None else None,
                             "significance": props.get("sig"),
                             "source": "USGS Real-Time Seismic Network"
                         })
@@ -64,7 +64,7 @@ def get_nearby_earthquakes(latitude: float, longitude: float, max_radius_km: flo
                 _SEISMIC_CACHE["cached_at"] = now
         except Exception as e:
             print(f"USGS earthquake feed fetch error: {e}")
-            all_events = []
+            return None
 
     # Geographically filter by radius from selected coordinates
     nearby = []

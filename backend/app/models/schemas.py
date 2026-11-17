@@ -444,11 +444,11 @@ class SOSTriageUpdate(BaseModel):
 class SOSResponse(BaseModel):
     sos_id: str
     user_id: str
-    user_name: str
+    user_name: Optional[str] = None
     emergency_contact: Optional[str]
     latitude: float
     longitude: float
-    location_name: str
+    location_name: Optional[str] = None
     zone_id: Optional[str]
     timestamp: str
     people_count: int
@@ -467,34 +467,6 @@ class SOSResponse(BaseModel):
     destination_shelter_name: Optional[str] = None
     triage_notes: Optional[str] = None
     updated_at: str
-
-
-# ---------------- Rescue Team Schemas ----------------
-class RescueTeamUpdate(BaseModel):
-    status: Optional[str] = Field(None, description="AVAILABLE, DISPATCHED, ON_SITE, RETURNING, OFFLINE")
-    current_assignment_id: Optional[str] = None
-    latitude: Optional[float] = None
-    longitude: Optional[float] = None
-    eta_minutes: Optional[int] = None
-
-
-class RescueTeamResponse(BaseModel):
-    is_demo: Optional[bool] = None
-    team_id: str
-    name: str
-    team_type: str = Field(..., description="NDRF, SDRF, Police, Fire & Rescue, Medical, Volunteers")
-    base_location: str
-    members_count: int
-    leader_name: str
-    contact_phone: str
-    vehicle: str
-    equipment: List[str]
-    status: str
-    current_assignment_id: Optional[str] = None
-    current_assignment_title: Optional[str] = None
-    latitude: float
-    longitude: float
-    eta_minutes: int
 
 
 # ---------------- Roads & Blockages Schemas ----------------
@@ -522,7 +494,7 @@ class HospitalResponse(BaseModel):
     is_demo: Optional[bool] = None
     hospital_id: str
     name: str
-    type: str = "Civil / District Hospital"
+    type: Optional[str] = None
     district: str
     state: str
     latitude: float
@@ -530,10 +502,10 @@ class HospitalResponse(BaseModel):
     total_beds: Optional[int] = None
     available_beds: Optional[int] = None
     icu_available: Optional[int] = None
-    capacity_status: Optional[str] = "LIVE CAPACITY UNAVAILABLE"
-    trauma_center: bool = True
-    blood_bank: bool = True
-    contact_phone: str = "108"
+    capacity_status: Optional[str] = None
+    trauma_center: Optional[bool] = None
+    blood_bank: Optional[bool] = None
+    contact_phone: Optional[str] = None
     emergency_ambulance_count: Optional[int] = None
     source: Optional[str] = "OpenStreetMap Geographic Directory"
     data_category: Optional[str] = "DIRECTORY RECORD"
@@ -543,45 +515,22 @@ class ShelterResponse(BaseModel):
     is_demo: Optional[bool] = None
     shelter_id: str
     name: str
-    type: str = "Relief Camp / Community Hall"
+    type: Optional[str] = None
     district: str
     state: str
     latitude: float
     longitude: float
     capacity: Optional[int] = None
     current_occupancy: Optional[int] = None
-    capacity_status: Optional[str] = "OCCUPANCY TELEMETRY UNAVAILABLE"
-    facilities: List[str] = ["High-Ground Assembly", "Potable Water Supply"]
+    capacity_status: Optional[str] = None
+    facilities: List[str] = []
     food_supply_days: Optional[int] = None
-    medical_station: bool = True
-    contact_person: str = "Designated Relief Warden / SDMA Liaison"
-    contact_phone: str = "1070"
-    accessibility: str = "Paved Road Access"
+    medical_station: Optional[bool] = None
+    contact_person: Optional[str] = None
+    contact_phone: Optional[str] = None
+    accessibility: Optional[str] = None
     source: Optional[str] = "OpenStreetMap Geographic Directory"
     data_category: Optional[str] = "DIRECTORY RECORD"
-
-
-# ---------------- Post-Disaster Analysis Schemas ----------------
-class PostDisasterEventResponse(BaseModel):
-    is_demo: Optional[bool] = None
-    record_id: str
-    incident_id: str
-    event_name: str
-    date_occurred: str
-    district: str
-    pre_event_ml_risk: float
-    actual_rainfall_24h_mm: float
-    actual_slope_deg: float
-    community_reports_prior: int
-    time_to_first_response_min: int
-    total_people_evacuated: int
-    casualties: int
-    injuries_treated: int
-    primary_hospital_used: str
-    primary_shelter_used: str
-    primary_road_diverted_to: str
-    lessons_learned: str
-    model_calibration_feedback: str
 
 
 # ---------------- Alert & Subscription Schemas ----------------
@@ -597,8 +546,8 @@ class AlertItem(BaseModel):
     timestamp: str
     status: str = "ACTIVE"
     affected_highway: Optional[str] = None
-    source: Optional[str] = "State Disaster Management Authority (SDMA) / NDMA SACHET"
-    data_category: Optional[str] = "OFFICIAL WARNING"
+    source: Optional[str] = "LandSafe model"
+    data_category: Optional[str] = "MODEL WARNING"
     issued_at: Optional[str] = None
     expires_at: Optional[str] = None
 

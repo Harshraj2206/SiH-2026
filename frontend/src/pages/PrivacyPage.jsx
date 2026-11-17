@@ -37,28 +37,28 @@ export const PrivacyPage = () => {
             <section className="space-y-2">
               <h2 className="text-sm font-semibold text-label">1. Data Collected</h2>
               <p>
-                LandSafe collects essential profile information (Full Name, Username, Email, Phone), user-managed Emergency Contacts, and device GPS telemetry when explicitly permitted for hazard triangulation.
+                When you create an account LandSafe stores your name, username, email, phone number and any emergency contacts you add. Reports and SOS requests you send are stored with their location.
               </p>
             </section>
 
             <section className="space-y-2">
               <h2 className="text-sm font-semibold text-label">2. Password Security & Hashing</h2>
               <p>
-                Plaintext passwords are never logged, transmitted in unencrypted form, or stored in database tables. All authentication credentials are salted and hashed using enterprise-grade bcrypt algorithms.
+                Passwords are stored only as salted bcrypt hashes, never as plain text.
               </p>
             </section>
 
             <section className="space-y-2">
               <h2 className="text-sm font-semibold text-label">3. Geolocation Privacy</h2>
               <p>
-                Live GPS coordinates are processed for localized hazard assessment and dynamic route calculation. Location permissions can be enabled or dismissed at any time in user profile settings.
+                If you allow location, your coordinates are sent to the LandSafe server and to Open-Meteo and OpenStreetMap to look up weather, terrain and place names. They are not stored unless you send a report or an SOS. You can block location in your browser at any time.
               </p>
             </section>
 
             <section className="space-y-2">
               <h2 className="text-sm font-semibold text-label">4. Emergency Contacts</h2>
               <p>
-                Stored emergency contacts are linked to your profile to assist first responders (NDRF / SDRF) during active SOS rescue missions.
+                Emergency contacts are stored with your profile so you can reach them quickly. LandSafe does not message them for you.
               </p>
             </section>
           </div>

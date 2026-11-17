@@ -84,18 +84,18 @@ async function fetchDirectOsmFacilities(latitude, longitude, radiusKm, category)
 
   const categoryAmenityMap = {
     hospitals: [
-      { amenity: 'hospital', type: 'Government / General Hospital', cat: 'hospitals' },
-      { amenity: 'clinic', type: 'Medical Clinic / Trauma Center', cat: 'hospitals' }
+      { amenity: 'hospital', type: 'Hospital', cat: 'hospitals' },
+      { amenity: 'clinic', type: 'Clinic', cat: 'hospitals' }
     ],
     police: [
       { amenity: 'police', type: 'Police Station', cat: 'police' }
     ],
     fire: [
-      { amenity: 'fire_station', type: 'Fire & Rescue Station', cat: 'fire' }
+      { amenity: 'fire_station', type: 'Fire station', cat: 'fire' }
     ],
     shelters: [
-      { amenity: 'community_centre', type: 'Evacuation & Community Shelter', cat: 'shelters' },
-      { amenity: 'shelter', type: 'Evacuation Shelter', cat: 'shelters' }
+      { amenity: 'community_centre', type: 'Community centre', cat: 'shelters' },
+      { amenity: 'shelter', type: 'Shelter', cat: 'shelters' }
     ]
   };
 
@@ -112,7 +112,7 @@ async function fetchDirectOsmFacilities(latitude, longitude, radiusKm, category)
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 6000);
     try {
-      const url = `https://nominatim.openstreetmap.org/search?amenity=${encodeURIComponent(item.amenity)}&viewbox=${minLon},${maxLat},${maxLon},${minLat}&bounded=1&format=json&limit=50&addressdetails=1`;
+      const url = `https://nominatim.openstreetmap.org/search?amenity=${encodeURIComponent(item.amenity)}&viewbox=${minLon},${maxLat},${maxLon},${minLat}&bounded=1&format=json&limit=50&addressdetails=1&accept-language=en`;
       const resp = await fetch(url, {
         signal: controller.signal,
         headers: {
@@ -233,25 +233,16 @@ export async function getNearbyEmergencyResources(
     }
   }
 
-  const customGoogleKey = localStorage.getItem('landsafe_google_maps_key') || undefined;
-
   // Tier 1: Query backend GET /api/resources/nearby
   try {
-    const headers = {};
-    if (customGoogleKey) {
-      headers['X-Google-Maps-Key'] = customGoogleKey;
-    }
-
     const res = await apiClient.get('/resources/nearby', {
       params: {
         lat: latitude,
         lng: longitude,
         radius_km: radiusKm,
         category: cleanCategory,
-        keyword: keyword || undefined,
-        api_key_override: customGoogleKey || undefined
+        keyword: keyword || undefined
       },
-      headers,
       timeout: 8000
     });
 

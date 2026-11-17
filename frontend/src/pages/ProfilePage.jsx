@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useLocationIntelligence } from '../context/LocationIntelligenceContext';
+import { Link } from 'react-router-dom';
 import { 
   User, 
   CheckCircle2, 
@@ -22,10 +24,10 @@ export const ProfilePage = () => {
     updateProfile, 
     addEmergencyContact, 
     deleteEmergencyContact, 
-    logout,
-    locationStatus,
-    requestLocationPermission
+    logout
   } = useAuth();
+  const { userGpsLocation, location, requestLocation } = useLocationIntelligence();
+  const locationOn = userGpsLocation?.latitude != null;
 
   const [isEditing, setIsEditing] = useState(false);
   const [editFullName, setEditFullName] = useState(currentUser?.full_name || '');
@@ -80,6 +82,15 @@ export const ProfilePage = () => {
     }
   };
 
+  if (!currentUser) {
+    return (
+      <div className="bg-surface p-6 rounded-card text-xs text-label-2 space-y-3">
+        <p>Sign in to see your profile and emergency contacts.</p>
+        <Link to="/login" className="inline-block px-4 py-2 rounded-full bg-accent text-white font-semibold">Sign in</Link>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 w-full select-none pb-10">
       
@@ -104,13 +115,13 @@ export const ProfilePage = () => {
       <div className="bg-surface p-6 rounded-card flex flex-col sm:flex-row sm:items-center justify-between gap-5">
         <div className="flex items-start sm:items-center gap-4">
           <div className="w-16 h-16 rounded-full bg-risk-low/[0.12] border-risk-low/30 flex items-center justify-center text-risk-low text-2xl font-semibold shrink-0">
-            {currentUser?.full_name?.charAt(0) || 'U'}
+            {currentUser.full_name?.charAt(0)}
           </div>
           <div className="space-y-1">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-xl font-semibold text-label">{currentUser?.full_name || 'User'}</h1>
-              <span className="text-xs px-2.5 py-0.5 rounded-full font-medium bg-risk-low/[0.12] text-risk-low border-risk-low/30">
-                {currentUser?.role || 'Citizen'}
+              <h1 className="text-xl font-semibold text-label">{currentUser.full_name}</h1>
+              <span className="text-xs px-2.5 py-0.5 rounded-full font-medium bg-surface-2 text-label-2">
+                {currentUser.role === 'USER' ? 'Resident' : currentUser.role.toLowerCase().replace('_', ' ')}
               </span>
             </div>
             <p className="text-xs text-label-2 tabular-nums">@{currentUser?.username}</p>
@@ -341,21 +352,17 @@ export const ProfilePage = () => {
               <span>Location Access</span>
             </h2>
             <p className="text-xs text-label-2 mt-0.5">
-              Used for localized landslide hazard alerts, real-time risk telemetry, and closest safe shelter routing.
+              Used to show the risk, weather and services near you, and to send your position with an SOS.
             </p>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className={`text-xs px-3.5 py-1 rounded-full font-medium ${
- locationStatus === 'GRANTED'
- ? 'bg-risk-low/[0.12] text-risk-low '
- : 'bg-surface-2 text-label-2 '
- }`}>
-              {locationStatus === 'GRANTED' ? 'Location Enabled' : 'Location Disabled'}
+            <span className="text-xs px-3.5 py-1 rounded-full font-medium bg-surface-2 text-label-2">
+              {locationOn ? 'On' : location?.permissionStatus === 'denied' ? 'Blocked in your browser' : 'Off'}
             </span>
-            {locationStatus !== 'GRANTED' && (
+            {!locationOn && (
               <button
-                onClick={requestLocationPermission}
+                onClick={() => requestLocation(true)}
                 className="px-4 py-1.5 bg-accent hover:opacity-90 text-white rounded-full whitespace-nowrap text-xs font-semibold"
               >
                 Enable

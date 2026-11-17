@@ -52,11 +52,11 @@ async def get_analytics_overview():
     rainfall_vs_risk = [
         {
             "zone_id": z["zone_id"],
-            "name": z["name"].split(" ")[0],
-            "rainfall_24h": z["rainfall_24h"] if z.get("rainfall_24h") is not None else 0.0,
-            "slope_deg": z["slope_deg"],
-            "soil_moisture": round(z["soil_moisture"] * 100) if z.get("soil_moisture") is not None else 0,
-            "risk_score": z["risk_score"] if z.get("risk_score") is not None else 0.0,
+            "name": z["name"],
+            "rainfall_24h": z.get("rainfall_24h"),
+            "slope_deg": z.get("slope_deg"),
+            "soil_moisture": round(z["soil_moisture"] * 100) if z.get("soil_moisture") is not None else None,
+            "risk_score": z["risk_score"],
             "level": z["risk_level"]
         }
         for z in sorted(zones, key=lambda x: (x.get("rainfall_24h") is None, x.get("rainfall_24h") or 0.0))

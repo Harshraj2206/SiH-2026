@@ -3,49 +3,6 @@ import { authApi } from '../services/api';
 
 const AuthContext = createContext(null);
 
-export const PRESET_DEMO_ACCOUNTS = [
-  {
-    role: 'AUTHORITY',
-    title: 'Dr. Anamika Sharma (SDMA Regional Officer)',
-    identifier: 'officer@sdim.ner.gov.in',
-    username: 'officer_sdma',
-    targetRoute: '/explore-incidents',
-    agency: 'State Disaster Management Authority (NER)'
-  },
-  {
-    role: 'RESCUE_TEAM',
-    title: 'SI Wanbah Khonglah (SDRF Field Commander)',
-    identifier: 'rescue@sdrf.ner.gov.in',
-    username: 'sdrf_commander',
-    targetRoute: '/rescue',
-    agency: 'SDRF Ri-Bhoi Fast Response Unit'
-  },
-  {
-    role: 'MEDICAL_CENTER',
-    title: 'Dr. Prabal Das (Civil Hospital Trauma Head)',
-    identifier: 'medical@civilhosp.ner.gov.in',
-    username: 'civil_hospital',
-    targetRoute: '/hospitals-shelters',
-    agency: 'Civil Hospital Nongpoh Emergency Cell'
-  },
-  {
-    role: 'ADMIN',
-    title: 'Col. Rajesh Barua (NDMA HQ Commander)',
-    identifier: 'admin@landslideguard.gov.in',
-    username: 'admin_ndma',
-    targetRoute: '/analytics',
-    agency: 'National Disaster Management Authority'
-  },
-  {
-    role: 'USER',
-    title: 'Tariang Lyngdoh (Hill Citizen & Resident)',
-    identifier: 'resident@landslideguard.gov.in',
-    username: 'resident_nongpoh',
-    targetRoute: '/overview',
-    agency: 'Ri-Bhoi Community Watch'
-  }
-];
-
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [token, setToken] = useState(() => localStorage.getItem('landslideguard_token') || null);
@@ -221,10 +178,8 @@ export const AuthProvider = ({ children }) => {
     switch (role?.toUpperCase()) {
       case 'AUTHORITY':
         return '/explore-incidents';
-      case 'RESCUE_TEAM':
-        return '/rescue';
       case 'MEDICAL_CENTER':
-        return '/hospitals-shelters';
+        return '/resources';
       case 'ADMIN':
         return '/analytics';
       case 'USER':
@@ -261,8 +216,7 @@ export const AuthProvider = ({ children }) => {
         locationStatus,
         userCoordinates,
         requestLocationPermission,
-        dismissLocationPrompt,
-        PRESET_DEMO_ACCOUNTS
+        dismissLocationPrompt
       }}
     >
       {children}

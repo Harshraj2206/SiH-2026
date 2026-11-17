@@ -59,7 +59,7 @@ PAST_EVENTS: List[Dict[str, Any]] = [
         "state": "Maharashtra",
         "latitude": 18.9339,
         "longitude": 73.2358,
-        "timestamp": "2023-07-19T17:00:00Z",
+        "timestamp": "2023-07-19T17:30:00Z",
         "severity": "CRITICAL",
         "description": "A landslide during heavy rain buried much of the hamlet of Irshalwadi on the slopes "
                        "of Irshalgad hill at about 10:30 PM on 19 July 2023.",
@@ -76,7 +76,7 @@ PAST_EVENTS: List[Dict[str, Any]] = [
         "state": "Uttarakhand",
         "latitude": 30.5550,
         "longitude": 79.5650,
-        "timestamp": "2023-01-02T00:00:00Z",
+        "timestamp": "2023-01-02",
         "severity": "HIGH",
         "description": "From 2-3 January 2023 cracks spread through homes and roads as the town sank. "
                        "A district bulletin of 21 January listed 863 buildings with visible cracks and 181 as unsafe.",
@@ -93,7 +93,7 @@ PAST_EVENTS: List[Dict[str, Any]] = [
         "state": "Sikkim",
         "latitude": 27.6000,
         "longitude": 88.6450,
-        "timestamp": "2023-10-03T18:30:00Z",
+        "timestamp": "2023-10-03T16:42:00Z",  # lake breach about 22:12 IST (Natural Hazards, 2025)
         "severity": "CRITICAL",
         "description": "On the night of 3-4 October 2023 South Lhonak lake burst, most likely after a landslide "
                        "fell into it. The flood swept down the Teesta valley and destroyed the Chungthang dam.",
@@ -126,6 +126,8 @@ def compute_freshness_label(timestamp_str: Optional[str]) -> Optional[str]:
         dt = datetime.fromisoformat(str(timestamp_str).replace("Z", "+00:00"))
     except ValueError:
         return None
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
     diff = (datetime.now(timezone.utc) - dt).total_seconds()
     if diff < 60:
         return "Updated just now"

@@ -286,7 +286,7 @@ async def forgot_password(payload: ForgotPasswordRequest, request: Request):
     return {
         "status": "info",
         "email": payload.email,
-        "message": "If that email address is registered, password reset instructions have been queued."
+        "message": "Reset emails are not set up yet, so no email will arrive. Please contact the LandSafe administrator to reset your password."
     }
 
 

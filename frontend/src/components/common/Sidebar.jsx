@@ -23,16 +23,16 @@ export const Sidebar = ({ isOpen, onClose }) => {
   // Core functional navigation items (Clean, human-readable & robust)
   const navItems = [
     { to: '/overview', label: 'Dashboard', icon: LayoutDashboard },
-    { to: '/community', label: 'Community Poll', icon: Users },
-    { to: '/risk-map', label: 'GIS Hazard Map', icon: Map },
-    { to: '/ml-model', label: 'ML Predictions', icon: BrainCircuit },
-    { to: '/safe-route', label: 'Safe Route', icon: Navigation },
-    { to: '/alerts', label: 'Alerts & Advisories', icon: Bell },
-    { to: '/incidents', label: 'Incident Events', icon: AlertTriangle },
-    { to: '/analytics', label: 'Telemetry & Analytics', icon: BarChart3 },
-    { to: '/resources', label: 'Emergency Resources', icon: Shield },
-    { to: '/sos', label: 'Emergency SOS', icon: Radio },
-    { to: '/profile', label: 'Profile & Contacts', icon: User },
+    { to: '/community', label: 'Community', icon: Users },
+    { to: '/risk-map', label: 'Risk map', icon: Map },
+    { to: '/ml-model', label: 'Risk model', icon: BrainCircuit },
+    { to: '/safe-route', label: 'Safe route', icon: Navigation },
+    { to: '/alerts', label: 'Alerts', icon: Bell },
+    { to: '/incidents', label: 'Landslides', icon: AlertTriangle },
+    { to: '/analytics', label: 'Analytics', icon: BarChart3 },
+    { to: '/resources', label: 'Emergency resources', icon: Shield },
+    { to: '/sos', label: 'SOS', icon: Radio },
+    { to: '/profile', label: 'Profile', icon: User },
     { to: '/settings', label: 'Settings', icon: Settings },
   ];
 
@@ -60,7 +60,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
             </div>
             <div className="leading-tight">
               <span className="text-[15px] font-semibold text-label block">LandSafe</span>
-              <span className="text-[11px] text-label-2 block">Predict. Alert. Protect.</span>
+              <span className="text-[11px] text-label-2 block">Landslide risk for India</span>
             </div>
           </div>
 

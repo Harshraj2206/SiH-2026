@@ -20,7 +20,7 @@ const LocationIntelligenceContext = createContext(null);
 const DEFAULT_FALLBACK_LOCATION = {
   latitude: 12.9716,
   longitude: 77.5946,
-  displayName: 'Bengaluru, Karnataka',
+  displayName: 'Bengaluru (default location)',
   city: 'Bengaluru',
   state: 'Karnataka',
   country: 'India',
@@ -28,7 +28,7 @@ const DEFAULT_FALLBACK_LOCATION = {
   timezoneAbbr: 'IST',
   utcOffsetSeconds: 19800,
   isGps: false,
-  source: 'Regional Centroid Fallback'
+  source: 'Default location'
 };
 
 export const LocationIntelligenceProvider = ({ children }) => {
@@ -78,16 +78,16 @@ export const LocationIntelligenceProvider = ({ children }) => {
     precipitation_mm: null,
     rainfall_24h: null,
     weather_code: null,
-    condition: 'Updating...',
+    condition: null,
     wind_speed_kmh: null,
-    is_day: true,
-    cloud_cover_pct: 0,
+    is_day: null,
+    cloud_cover_pct: null,
     timezone: DEFAULT_FALLBACK_LOCATION.timezone,
     timezone_abbreviation: DEFAULT_FALLBACK_LOCATION.timezoneAbbr,
     utc_offset_seconds: DEFAULT_FALLBACK_LOCATION.utcOffsetSeconds,
     sunrise: null,
     sunset: null,
-    source: 'Initializing...',
+    source: null,
     observation_time: null,
     loading: true,
     error: null,
@@ -105,8 +105,6 @@ export const LocationIntelligenceProvider = ({ children }) => {
       longitude: DEFAULT_FALLBACK_LOCATION.longitude,
       displayName: DEFAULT_FALLBACK_LOCATION.displayName,
       timezone: DEFAULT_FALLBACK_LOCATION.timezone,
-      timezoneAbbr: DEFAULT_FALLBACK_LOCATION.timezoneAbbr,
-      utcOffsetSeconds: DEFAULT_FALLBACK_LOCATION.utcOffsetSeconds,
       weather: {},
       currentDate: new Date()
     })
@@ -128,9 +126,8 @@ export const LocationIntelligenceProvider = ({ children }) => {
       latitude: lat,
       longitude: lon,
       displayName: name,
-      timezone: tz || 'Asia/Kolkata',
-      timezoneAbbr: tzAbbr || 'UTC',
-      utcOffsetSeconds: offsetSec || 0,
+      timezone: tz || null,
+      utcOffsetSeconds: offsetSec ?? null,
       weather: currentWeatherObj || {},
       currentDate: targetDate
     });
@@ -149,9 +146,8 @@ export const LocationIntelligenceProvider = ({ children }) => {
         latitude: loc.latitude,
         longitude: loc.longitude,
         displayName: loc.displayName,
-        timezone: loc.timezone || 'Asia/Kolkata',
-        timezoneAbbr: loc.timezoneAbbr || 'IST',
-        utcOffsetSeconds: loc.utcOffsetSeconds ?? 19800,
+        timezone: weather.timezone || null,
+        utcOffsetSeconds: weather.utc_offset_seconds ?? null,
         weather,
         currentDate: targetDate
       });
@@ -166,8 +162,12 @@ export const LocationIntelligenceProvider = ({ children }) => {
   const updateWeatherForCoords = useCallback(async (lat, lon, forceRefresh = false, locationName = null) => {
     const reqSeq = ++weatherReqSeqRef.current;
 
+    // Clear the old place's timezone so its time is never shown for the new place
     setWeather(prev => ({
       ...prev,
+      timezone: null,
+      timezone_abbreviation: null,
+      utc_offset_seconds: null,
       loading: true,
       error: null,
       normalized: prev.normalized && prev.normalized.type !== 'LOADING' 
@@ -181,9 +181,9 @@ export const LocationIntelligenceProvider = ({ children }) => {
 
       const normalized = normalizeWeather(rawWeather);
 
-      const targetTz = rawWeather.timezone || 'Asia/Kolkata';
-      const targetAbbr = rawWeather.timezone_abbreviation || 'UTC';
-      const targetOffset = rawWeather.utc_offset_seconds ?? 19800;
+      const targetTz = rawWeather.timezone || null;
+      const targetAbbr = rawWeather.timezone_abbreviation || null;
+      const targetOffset = rawWeather.utc_offset_seconds ?? null;
 
       const updatedWeather = {
         temperature_c: rawWeather.temperature_c,
@@ -195,7 +195,7 @@ export const LocationIntelligenceProvider = ({ children }) => {
         condition: rawWeather.condition,
         wind_speed_kmh: rawWeather.wind_speed_kmh,
         is_day: rawWeather.is_day,
-        cloud_cover_pct: rawWeather.cloud_cover_pct ?? 0,
+        cloud_cover_pct: rawWeather.cloud_cover_pct ?? null,
         timezone: targetTz,
         timezone_abbreviation: targetAbbr,
         utc_offset_seconds: targetOffset,
@@ -242,9 +242,9 @@ export const LocationIntelligenceProvider = ({ children }) => {
         lat,
         lon,
         resolvedDisplayName,
-        'Asia/Kolkata',
-        'IST',
-        19800,
+        null,
+        null,
+        null,
         {}
       );
       return null;
@@ -463,123 +463,6 @@ export const LocationIntelligenceProvider = ({ children }) => {
     });
   }, [updateWeatherForCoords, updateDeepIntelligence]);
 
-  /**
-   * Search for a location by string query.
-   */
-  const searchLocation = useCallback(async (query) => {
-    if (!query || !query.trim()) return null;
-    const cleanQuery = query.trim();
-
-    // Explicit user action: user searched for a specific place
-    locationModeRef.current = 'selected';
-    setLocationMode('selected');
-
-    const reqId = ++activeReqRef.current;
-    setLocation(prev => ({ ...prev, loading: true, error: null }));
-
-    try {
-      let lat = null;
-      let lon = null;
-      let displayName = '';
-      let locality = '';
-      let state = '';
-      let country = '';
-
-      // Check if query is coordinates format (e.g. "31.1048, 77.1734")
-      const coordMatch = cleanQuery.match(/^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?)[,\s]+[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/);
-      if (coordMatch) {
-        const parts = cleanQuery.split(/[,\s]+/).filter(Boolean);
-        lat = parseFloat(parts[0]);
-        lon = parseFloat(parts[1]);
-        const rev = await reverseGeocode(lat, lon).catch(() => null);
-        displayName = rev?.displayName || formatCoordinateFallback(lat, lon);
-        locality = rev?.city || '';
-        state = rev?.state || '';
-        country = rev?.country || '';
-      } else {
-        // Try backend geocode endpoint first (avoids browser CORS and custom header limitations)
-        let resolved = null;
-        try {
-          const geoRes = await apiClient.post('/safe-route/geocode', { query: cleanQuery }, { timeout: 8000 });
-          if (geoRes.data && typeof geoRes.data.lat === 'number' && typeof geoRes.data.lng === 'number') {
-            resolved = {
-              lat: geoRes.data.lat,
-              lon: geoRes.data.lng,
-              displayName: geoRes.data.full_name || geoRes.data.name
-            };
-          }
-        } catch {
-          // Backend geocode fallback
-        }
-
-        if (resolved) {
-          lat = resolved.lat;
-          lon = resolved.lon;
-          displayName = resolved.displayName;
-        } else {
-          // Fallback to client-side Nominatim search
-          const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cleanQuery)}&format=json&limit=1&addressdetails=1`;
-          const res = await fetch(url, {
-            headers: {
-              'Accept': 'application/json'
-            }
-          });
-          const data = await res.json();
-          if (!data || data.length === 0) {
-            throw new Error(`Location "${cleanQuery}" could not be resolved. Please enter a valid city, town, or district.`);
-          }
-
-          const item = data[0];
-          lat = parseFloat(item.lat);
-          lon = parseFloat(item.lon);
-          const addr = item.address || {};
-          locality = addr.suburb || addr.neighbourhood || addr.village || addr.town || addr.city || '';
-          state = addr.state || '';
-          country = addr.country || '';
-          displayName = [locality, state, country].filter(Boolean).join(', ') || item.display_name.split(',').slice(0, 2).join(', ');
-        }
-      }
-
-      if (typeof lat !== 'number' || typeof lon !== 'number' || isNaN(lat) || isNaN(lon)) {
-        throw new Error(`Location "${cleanQuery}" could not be resolved.`);
-      }
-
-      if (reqId !== activeReqRef.current) return null;
-
-      await updateWeatherForCoords(lat, lon, false, displayName);
-
-      if (reqId !== activeReqRef.current) return null;
-
-      const newLoc = {
-        latitude: lat,
-        longitude: lon,
-        accuracy: null,
-        timestamp: new Date().toISOString(),
-        displayName,
-        city: locality,
-        state,
-        country,
-        isGps: false,
-        source: `Search: ${cleanQuery}`,
-        permissionStatus: locationRef.current ? locationRef.current.permissionStatus : 'prompt',
-        loading: false,
-        error: null
-      };
-
-      setLocation(newLoc);
-      updateDeepIntelligence(lat, lon, `Search: ${cleanQuery}`);
-      return newLoc;
-    } catch (err) {
-      if (reqId !== activeReqRef.current) return null;
-      console.warn('[LocationIntelligence] Search failed:', err.message);
-      setLocation(prev => ({
-        ...prev,
-        loading: false,
-        error: err.message || 'Search failed'
-      }));
-      return null;
-    }
-  }, [updateWeatherForCoords, updateDeepIntelligence]);
 
   // Initial Auto-Discovery on mount (strictly runs once)
   useEffect(() => {
@@ -617,9 +500,8 @@ export const LocationIntelligenceProvider = ({ children }) => {
           latitude: location.latitude,
           longitude: location.longitude,
           displayName: location.displayName,
-          timezone: location.timezone || weather.timezone || 'Asia/Kolkata',
-          timezoneAbbr: location.timezoneAbbr || weather.timezone_abbreviation || 'UTC',
-          utcOffsetSeconds: location.utcOffsetSeconds ?? weather.utc_offset_seconds ?? 19800,
+          timezone: weather.timezone || null,
+          utcOffsetSeconds: weather.utc_offset_seconds ?? null,
           weather,
           currentDate: targetDate
         });
@@ -627,7 +509,7 @@ export const LocationIntelligenceProvider = ({ children }) => {
     }, 3000);
 
     return () => clearInterval(clockInterval);
-  }, [location.latitude, location.longitude, location.displayName, location.timezone, location.timezoneAbbr, location.utcOffsetSeconds, weather]);
+  }, [location.latitude, location.longitude, location.displayName, weather]);
 
   const value = {
     location,
@@ -641,7 +523,6 @@ export const LocationIntelligenceProvider = ({ children }) => {
     intelLoading,
     requestLocation,
     setManualLocation,
-    searchLocation,
     timeOffsetHours,
     setTimeOffsetHours,
     refreshWeather: () => updateWeatherForCoords(
@@ -665,7 +546,6 @@ export const LocationIntelligenceProvider = ({ children }) => {
     },
     useLiveGps: () => requestLocation(true),
     inspectCoordinates: (lat, lng, label) => setManualLocation(lat, lng, label),
-    searchPlace: searchLocation,
     loading: location.loading || weather.loading,
     error: location.error || weather.error
   };

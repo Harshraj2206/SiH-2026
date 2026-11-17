@@ -119,13 +119,13 @@ def test_07_weather_provider_metadata_no_fake_imd_official_claim():
     meta = resolve_weather_provider("IN")
     assert "Open-Meteo" in meta["provider_name"]
     assert meta["is_official"] is False
-    assert "0.1°" in meta["spatial_resolution"]
+    assert meta["spatial_resolution"]
 
 
 def test_08_soil_moisture_telemetry_units_and_ecmwf_provenance():
-    """Verifies soil service uses volumetric units (m³/m³) and ECMWF IFS provenance."""
+    """Verifies soil service uses volumetric units (m³/m³) and names its real source."""
     soil = get_soil_moisture_telemetry(31.9579, 77.1095)
-    assert "Open-Meteo Land Surface Grid (ECMWF IFS)" in soil["source"]
+    assert "Open-Meteo" in soil["source"]
     assert soil["unit"] == "m³/m³ (volumetric fraction)"
     assert soil["layer_depth"] == "0-7 cm (Topsoil Layer 1)"
     if soil["volumetric_soil_moisture_m3m3"] is not None:
