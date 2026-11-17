@@ -19,18 +19,18 @@ export const ThemeSwitcher = () => {
     <div className="relative">
       <button
         onClick={() => setDropdownOpen(!dropdownOpen)}
-        className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#121d33] hover:bg-[#182744] text-slate-300 hover:text-white border border-[#1c2b48] text-xs font-mono font-medium transition-colors"
+        className="flex items-center gap-1.5 px-2.5 py-1 rounded-full whitespace-nowrap bg-surface-2 hover:opacity-90 text-label-2 hover:text-label text-xs tabular-nums font-medium transition-colors"
         title={`Theme: ${currentOption.label} (${resolvedTheme})`}
         aria-label="Switch Appearance Theme"
       >
-        <CurrentIcon className="w-3.5 h-3.5 text-amber-400" />
-        <span className="hidden sm:inline font-mono">{currentOption.label}</span>
-        <ChevronDown className="w-3 h-3 text-slate-400" />
+        <CurrentIcon className="w-3.5 h-3.5 text-risk-moderate" />
+        <span className="hidden sm:inline tabular-nums">{currentOption.label}</span>
+        <ChevronDown className="w-3 h-3 text-label-2" />
       </button>
 
       {dropdownOpen && (
         <div
-          className="absolute right-0 mt-2 w-32 rounded-xl bg-[#0d1527] border border-[#1c2b48] shadow-2xl p-1 z-50 animate-in fade-in"
+          className="absolute right-0 mt-2 w-32 rounded-tile bg-surface-2 p-1 z-50 animate-in fade-in"
           onMouseLeave={() => setDropdownOpen(false)}
         >
           {options.map((opt) => {
@@ -43,17 +43,17 @@ export const ThemeSwitcher = () => {
                   setTheme(opt.mode);
                   setDropdownOpen(false);
                 }}
-                className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs flex items-center justify-between font-mono transition-colors ${
+                className={`w-full text-left px-2.5 py-1.5 rounded-tile text-xs flex items-center justify-between tabular-nums transition-colors ${
                   isSelected
-                    ? 'bg-[#16243d] text-cyan-300 font-bold'
-                    : 'text-slate-300 hover:bg-[#121d33]'
+                    ? 'bg-surface-2 text-label-2 font-semibold'
+                    : 'text-label-2 hover:bg-surface-2'
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <Icon className={`w-3.5 h-3.5 ${opt.mode === 'light' ? 'text-amber-400' : opt.mode === 'dark' ? 'text-cyan-400' : 'text-slate-400'}`} />
+                  <Icon className={`w-3.5 h-3.5 ${opt.mode === 'light' ? 'text-risk-moderate' : opt.mode === 'dark' ? 'text-label-2' : 'text-label-2'}`} />
                   <span>{opt.label}</span>
                 </div>
-                {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />}
+                {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-accent" />}
               </button>
             );
           })}

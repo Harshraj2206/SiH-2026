@@ -42,7 +42,7 @@ class GlobalErrorBoundary extends React.Component {
             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7)'
           }}>
             <h1 style={{ color: '#f87171', fontSize: '20px', fontWeight: 'bold', marginBottom: '12px' }}>
-              ⚠️ Application Component Error
+               Application Component Error
             </h1>
             <p style={{ color: '#cbd5e1', fontSize: '14px', marginBottom: '16px' }}>
               {this.state.error?.toString()}

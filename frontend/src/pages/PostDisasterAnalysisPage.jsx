@@ -38,47 +38,47 @@ export const PostDisasterAnalysisPage = () => {
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-line pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-950/60 text-purple-400 border border-purple-800/60 flex items-center gap-1">
+            <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-surface-2 text-label-2 flex items-center gap-1">
               <BrainCircuit className="w-3 h-3" />
-              DISASTER AUDIT & CONTINUOUS LEARNING
+              Disaster audit & continuous learning
             </span>
-            <span className="text-xs text-slate-400 font-mono">SIH26001</span>
+            <span className="text-xs text-label-2 tabular-nums">SIH26001</span>
           </div>
-          <h1 className="text-2xl font-black text-white mt-1">Post-Disaster Review & ML Calibration</h1>
-          <p className="text-xs text-slate-400">
+          <h1 className="text-2xl font-semibold text-label mt-1">Post-Disaster Review & ML Calibration</h1>
+          <p className="text-xs text-label-2">
             Retrospective lifecycle tracking from initial ML risk prediction to ground truth verification, response time, evacuation efficiency, and future AI model tuning.
           </p>
         </div>
       </div>
 
       {/* Closed-Loop Workflow Banner */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 text-xs">
-        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">
+      <div className="bg-surface rounded-card p-4 text-xs">
+        <span className="text-xs font-semibold text-label-2 block mb-2">
           Continuous AI Learning Pipeline
         </span>
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center">
-          <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-            <span className="text-[10px] text-slate-500 font-mono block">1. PREDICTION</span>
-            <strong className="text-cyan-400">Pre-Event ML Risk</strong>
+          <div className="bg-surface-2 p-2.5 rounded-tile">
+            <span className="text-xs text-label-3 tabular-nums block">1. Prediction</span>
+            <strong className="text-label-2">Pre-Event ML Risk</strong>
           </div>
-          <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-            <span className="text-[10px] text-slate-500 font-mono block">2. GROUND TRUTH</span>
-            <strong className="text-amber-400">Field Reports</strong>
+          <div className="bg-surface-2 p-2.5 rounded-tile">
+            <span className="text-xs text-label-3 tabular-nums block">2. Ground truth</span>
+            <strong className="text-risk-moderate">Field Reports</strong>
           </div>
-          <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-            <span className="text-[10px] text-slate-500 font-mono block">3. DISPATCH</span>
-            <strong className="text-indigo-400">Response Speed</strong>
+          <div className="bg-surface-2 p-2.5 rounded-tile">
+            <span className="text-xs text-label-3 tabular-nums block">3. Dispatch</span>
+            <strong className="text-label-2">Response Speed</strong>
           </div>
-          <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-            <span className="text-[10px] text-slate-500 font-mono block">4. EVACUATION</span>
-            <strong className="text-emerald-400">Shelter & Care</strong>
+          <div className="bg-surface-2 p-2.5 rounded-tile">
+            <span className="text-xs text-label-3 tabular-nums block">4. Evacuation</span>
+            <strong className="text-risk-low">Shelter & Care</strong>
           </div>
-          <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800 col-span-2 sm:col-span-1">
-            <span className="text-[10px] text-slate-500 font-mono block">5. CALIBRATION</span>
-            <strong className="text-purple-400">Weight Tuning</strong>
+          <div className="bg-surface-2 p-2.5 rounded-tile col-span-2 sm:col-span-1">
+            <span className="text-xs text-label-3 tabular-nums block">5. Calibration</span>
+            <strong className="text-label-2">Weight Tuning</strong>
           </div>
         </div>
       </div>
@@ -88,73 +88,73 @@ export const PostDisasterAnalysisPage = () => {
         {records.map((rec) => (
           <div
             key={rec.record_id}
-            className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-2xl space-y-4"
+            className="bg-surface rounded-card p-5 space-y-4"
           >
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-line pb-3">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-xs font-bold text-purple-400 bg-purple-950/60 px-2 py-0.5 rounded border border-purple-800/60">
+                  <span className="tabular-nums text-xs font-semibold text-label-2 bg-surface-2 px-2 py-0.5 rounded-full">
                     {rec.record_id}
                   </span>
-                  <span className="text-xs font-mono text-slate-400">INCIDENT: {rec.incident_id}</span>
+                  <span className="text-xs tabular-nums text-label-2">INCIDENT: {rec.incident_id}</span>
                 </div>
-                <h3 className="font-extrabold text-base text-white mt-1">{rec.event_name}</h3>
-                <p className="text-xs text-slate-400">{rec.district} • Occurred on {rec.date_occurred}</p>
+                <h3 className="font-semibold text-base text-label mt-1">{rec.event_name}</h3>
+                <p className="text-xs text-label-2">{rec.district} • Occurred on {rec.date_occurred}</p>
               </div>
 
               <div className="text-right">
-                <span className="text-[10px] text-slate-500 font-mono block">FIRST RESPONDER TIME</span>
-                <span className="text-sm font-mono font-bold text-emerald-400">{rec.time_to_first_response_min} minutes</span>
+                <span className="text-xs text-label-3 tabular-nums block">First responder time</span>
+                <span className="text-sm tabular-nums font-semibold text-risk-low">{rec.time_to_first_response_min} minutes</span>
               </div>
             </div>
 
             {/* Metrics Comparison */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-              <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                <span className="text-[10px] text-slate-400 block font-mono">PRE-EVENT ML RISK</span>
-                <span className="font-mono font-bold text-sm text-cyan-400">{rec.pre_event_ml_risk}/100</span>
+              <div className="bg-surface-2 p-2.5 rounded-tile">
+                <span className="text-xs text-label-2 block tabular-nums">Pre-event ML risk</span>
+                <span className="tabular-nums font-semibold text-sm text-label-2">{rec.pre_event_ml_risk}/100</span>
               </div>
 
-              <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                <span className="text-[10px] text-slate-400 block font-mono">24H RAINFALL RECORD</span>
-                <span className="font-mono font-bold text-sm text-slate-100">{rec.actual_rainfall_24h_mm} mm</span>
+              <div className="bg-surface-2 p-2.5 rounded-tile">
+                <span className="text-xs text-label-2 block tabular-nums">24H rainfall record</span>
+                <span className="tabular-nums font-semibold text-sm text-label">{rec.actual_rainfall_24h_mm} mm</span>
               </div>
 
-              <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                <span className="text-[10px] text-slate-400 block font-mono">PEOPLE EVACUATED</span>
-                <span className="font-mono font-bold text-sm text-emerald-400">{rec.total_people_evacuated} evacuated</span>
+              <div className="bg-surface-2 p-2.5 rounded-tile">
+                <span className="text-xs text-label-2 block tabular-nums">People evacuated</span>
+                <span className="tabular-nums font-semibold text-sm text-risk-low">{rec.total_people_evacuated} evacuated</span>
               </div>
 
-              <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                <span className="text-[10px] text-slate-400 block font-mono">CASUALTIES PREVENTED</span>
-                <span className="font-mono font-bold text-sm text-emerald-300">0 Fatalities ({rec.injuries_treated} treated)</span>
+              <div className="bg-surface-2 p-2.5 rounded-tile">
+                <span className="text-xs text-label-2 block tabular-nums">Casualties prevented</span>
+                <span className="tabular-nums font-semibold text-sm text-risk-low">0 Fatalities ({rec.injuries_treated} treated)</span>
               </div>
             </div>
 
             {/* Operational Review Details */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-              <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Operational Logistics</span>
-                <div className="text-slate-300">Primary Trauma Facility: <strong className="text-white">{rec.primary_hospital_used}</strong></div>
-                <div className="text-slate-300">Evacuation Camp: <strong className="text-white">{rec.primary_shelter_used}</strong></div>
-                <div className="text-slate-300">Safe Highway Diversion: <strong className="text-cyan-300">{rec.primary_road_diverted_to}</strong></div>
+              <div className="bg-surface-2 p-3 rounded-tile space-y-1">
+                <span className="text-xs font-semibold text-label-2 block">Operational Logistics</span>
+                <div className="text-label-2">Primary Trauma Facility: <strong className="text-label">{rec.primary_hospital_used}</strong></div>
+                <div className="text-label-2">Evacuation Camp: <strong className="text-label">{rec.primary_shelter_used}</strong></div>
+                <div className="text-label-2">Safe Highway Diversion: <strong className="text-label-2">{rec.primary_road_diverted_to}</strong></div>
               </div>
 
-              <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1">
-                <span className="text-[10px] font-bold text-purple-400 uppercase tracking-wider block flex items-center gap-1">
+              <div className="bg-surface-2 p-3 rounded-tile space-y-1">
+                <span className="text-xs font-semibold text-label-2 block flex items-center gap-1">
                   <Sparkles className="w-3 h-3" />
                   AI Model Calibration Feedback
                 </span>
-                <p className="text-[11px] text-purple-200 italic leading-relaxed">
+                <p className="text-xs text-label-2 italic leading-relaxed">
                   "{rec.model_calibration_feedback}"
                 </p>
               </div>
             </div>
 
             {/* Lessons Learned */}
-            <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800 text-xs">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Standard Operating Procedure Lessons</span>
-              <p className="text-slate-300 leading-relaxed text-[11px]">
+            <div className="bg-surface-2 p-3 rounded-tile text-xs">
+              <span className="text-xs font-semibold text-label-2 block mb-1">Standard Operating Procedure Lessons</span>
+              <p className="text-label-2 leading-relaxed text-xs">
                 {rec.lessons_learned}
               </p>
             </div>

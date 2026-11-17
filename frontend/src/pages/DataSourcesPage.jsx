@@ -61,25 +61,25 @@ export const DataSourcesPage = () => {
     <div className="space-y-6 max-w-7xl mx-auto pb-12">
       
       {/* Header Banner */}
-      <div className="bg-slate-900/90 border border-slate-800 p-6 rounded-3xl shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-surface p-6 rounded-card flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-            <h1 className="text-xl font-extrabold text-white">Authoritative Data Sources & Provenance Registry</h1>
-            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-              PRODUCTION INGESTION
+            <span className="w-2.5 h-2.5 rounded-full bg-risk-low" />
+            <h1 className="text-xl font-semibold text-label">Authoritative Data Sources & Provenance Registry</h1>
+            <span className="text-xs tabular-nums font-semibold px-2 py-0.5 rounded-full bg-risk-low/[0.12] text-risk-low border-risk-low/30">
+              Production ingestion
             </span>
           </div>
-          <p className="text-xs text-slate-300">
+          <p className="text-xs text-label-2">
             Real-time multi-agency environmental telemetry, spatial resolutions, refresh frequencies, and calibration feeds.
           </p>
         </div>
 
         <button
           onClick={fetchSources}
-          className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white rounded-xl text-xs font-bold border border-slate-700 flex items-center gap-1.5 transition-colors self-start md:self-center"
+          className="px-4 py-2 bg-surface-2 hover:bg-surface-2 text-label hover:text-label rounded-full whitespace-nowrap text-xs font-semibold flex items-center gap-1.5 transition-colors self-start md:self-center"
         >
-          <RefreshCw className={`w-3.5 h-3.5 text-cyan-400 ${loading ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`w-3.5 h-3.5 text-label-2 ${loading ? 'animate-spin' : ''}`} />
           <span>Refresh API Status</span>
         </button>
       </div>
@@ -88,200 +88,200 @@ export const DataSourcesPage = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         
         {/* 1. IMD Weather & Rainfall */}
-        <div className="bg-slate-900/90 border border-slate-800 hover:border-slate-700 p-5 rounded-3xl shadow-lg space-y-3.5 transition-all">
+        <div className="bg-surface p-5 rounded-card space-y-3.5 transition-all">
           <div className="flex items-start justify-between gap-2">
-            <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+            <div className="w-10 h-10 rounded-tile bg-surface-2 flex items-center justify-center text-label-2">
               <CloudRain className="w-5 h-5" />
             </div>
-            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              LIVE CONNECTED
+            <span className="text-xs tabular-nums font-semibold px-2 py-0.5 rounded-full bg-risk-low/[0.12] text-risk-low border-risk-low/30 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-risk-low" />
+              Live connected
             </span>
           </div>
 
           <div>
-            <h3 className="text-sm font-bold text-white">Open-Meteo NWP Grid (ECMWF & Multi-Model Assimilation)</h3>
-            <p className="text-xs text-cyan-300 font-mono mt-0.5">Precipitation & Atmospheric Telemetry</p>
+            <h3 className="text-sm font-semibold text-label">Open-Meteo NWP Grid (ECMWF & Multi-Model Assimilation)</h3>
+            <p className="text-xs text-label-2 tabular-nums mt-0.5">Precipitation & Atmospheric Telemetry</p>
           </div>
 
 
-          <div className="space-y-1.5 text-xs text-slate-300 bg-slate-950/60 p-3 rounded-2xl border border-slate-800/80">
+          <div className="space-y-1.5 text-xs text-label-2 bg-surface-2 p-3 rounded-tile">
             <div className="flex justify-between">
-              <span className="text-slate-400">Data Type:</span>
-              <span className="font-medium text-slate-200">1h, 24h, 72h Rain Accumulations</span>
+              <span className="text-label-2">Data Type:</span>
+              <span className="font-medium text-label">1h, 24h, 72h Rain Accumulations</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">Spatial Resolution:</span>
-              <span className="font-mono text-slate-200 font-bold">0.1° (~10 km) WMO Grid</span>
+              <span className="text-label-2">Spatial Resolution:</span>
+              <span className="tabular-nums text-label font-semibold">0.1° (~10 km) WMO Grid</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">Update Frequency:</span>
-              <span className="font-medium text-slate-200">15-Min Ingestion Cache</span>
+              <span className="text-label-2">Update Frequency:</span>
+              <span className="font-medium text-label">15-Min Ingestion Cache</span>
             </div>
           </div>
         </div>
 
         {/* 2. ECMWF IFS Land Surface Model (Soil Moisture) */}
-        <div className="bg-slate-900/90 border border-slate-800 hover:border-slate-700 p-5 rounded-3xl shadow-lg space-y-3.5 transition-all">
+        <div className="bg-surface p-5 rounded-card space-y-3.5 transition-all">
           <div className="flex items-start justify-between gap-2">
-            <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400">
+            <div className="w-10 h-10 rounded-tile bg-surface-2 flex items-center justify-center text-label-2">
               <Activity className="w-5 h-5" />
             </div>
-            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              NWP GRID SYNCED
+            <span className="text-xs tabular-nums font-semibold px-2 py-0.5 rounded-full bg-risk-low/[0.12] text-risk-low border-risk-low/30 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-risk-low" />
+              NWP grid synced
             </span>
           </div>
 
           <div>
-            <h3 className="text-sm font-bold text-white">ECMWF IFS (Land Surface Model)</h3>
-            <p className="text-xs text-blue-300 font-mono mt-0.5">Topsoil Layer 1 (0-7 cm) Volumetric Content</p>
+            <h3 className="text-sm font-semibold text-label">ECMWF IFS (Land Surface Model)</h3>
+            <p className="text-xs text-label-2 tabular-nums mt-0.5">Topsoil Layer 1 (0-7 cm) Volumetric Content</p>
           </div>
 
-          <div className="space-y-1.5 text-xs text-slate-300 bg-slate-950/60 p-3 rounded-2xl border border-slate-800/80">
+          <div className="space-y-1.5 text-xs text-label-2 bg-surface-2 p-3 rounded-tile">
             <div className="flex justify-between">
-              <span className="text-slate-400">Data Type:</span>
-              <span className="font-medium text-slate-200">Volumetric Soil Water (m³/m³)</span>
+              <span className="text-label-2">Data Type:</span>
+              <span className="font-medium text-label">Volumetric Soil Water (m³/m³)</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">Provider:</span>
-              <span className="font-mono text-slate-200">Open-Meteo / ECMWF IFS</span>
+              <span className="text-label-2">Provider:</span>
+              <span className="tabular-nums text-label">Open-Meteo / ECMWF IFS</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">Spatial Resolution:</span>
-              <span className="font-mono text-slate-200 font-bold">0.1° (~10 km Grid)</span>
+              <span className="text-label-2">Spatial Resolution:</span>
+              <span className="tabular-nums text-label font-semibold">0.1° (~10 km Grid)</span>
             </div>
           </div>
         </div>
 
         {/* 3. SRTM 30m Digital Elevation Model */}
-        <div className="bg-slate-900/90 border border-slate-800 hover:border-slate-700 p-5 rounded-3xl shadow-lg space-y-3.5 transition-all">
+        <div className="bg-surface p-5 rounded-card space-y-3.5 transition-all">
           <div className="flex items-start justify-between gap-2">
-            <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400">
+            <div className="w-10 h-10 rounded-tile bg-surface-2 flex items-center justify-center text-label-2">
               <Compass className="w-5 h-5" />
             </div>
-            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/40 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />
-              STATIC DEM
+            <span className="text-xs tabular-nums font-semibold px-2 py-0.5 rounded-full bg-surface-2 text-label-2 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-accent" />
+              Static DEM
             </span>
           </div>
 
           <div>
-            <h3 className="text-sm font-bold text-white">SRTM 1-ArcSecond (30m) DEM</h3>
-            <p className="text-xs text-purple-300 font-mono mt-0.5">Topographic Elevation & Slope Gradient</p>
+            <h3 className="text-sm font-semibold text-label">SRTM 1-ArcSecond (30m) DEM</h3>
+            <p className="text-xs text-label-2 tabular-nums mt-0.5">Topographic Elevation & Slope Gradient</p>
           </div>
 
-          <div className="space-y-1.5 text-xs text-slate-300 bg-slate-950/60 p-3 rounded-2xl border border-slate-800/80">
+          <div className="space-y-1.5 text-xs text-label-2 bg-surface-2 p-3 rounded-tile">
             <div className="flex justify-between">
-              <span className="text-slate-400">Data Type:</span>
-              <span className="font-medium text-slate-200">Elevation (AMSL) & Slope (deg)</span>
+              <span className="text-label-2">Data Type:</span>
+              <span className="font-medium text-label">Elevation (AMSL) & Slope (deg)</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">Spatial Resolution:</span>
-              <span className="font-mono text-slate-200 font-bold">30 meters (0.000277°)</span>
+              <span className="text-label-2">Spatial Resolution:</span>
+              <span className="tabular-nums text-label font-semibold">30 meters (0.000277°)</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">Vertical Datum:</span>
-              <span className="font-medium text-slate-200">EGM96 Geoid / WGS84</span>
+              <span className="text-label-2">Vertical Datum:</span>
+              <span className="font-medium text-label">EGM96 Geoid / WGS84</span>
             </div>
           </div>
         </div>
 
-        {/* 4. Geological Survey of India (GSI) NLSM */}
-        <div className="bg-slate-900/90 border border-slate-800 hover:border-slate-700 p-5 rounded-3xl shadow-lg space-y-3.5 transition-all">
+        {/* 4. NASA Global Landslide Catalog */}
+        <div className="bg-surface p-5 rounded-card space-y-3.5 transition-all">
           <div className="flex items-start justify-between gap-2">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+            <div className="w-10 h-10 rounded-tile bg-risk-moderate/[0.12] border-risk-moderate/30 flex items-center justify-center text-risk-moderate">
               <FileSpreadsheet className="w-5 h-5" />
             </div>
-            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-              OFFICIAL CATALOG
+            <span className="text-xs tabular-nums font-semibold px-2 py-0.5 rounded-full bg-risk-moderate/[0.12] text-risk-moderate border-risk-moderate/30 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-risk-moderate" />
+              Official catalog
             </span>
           </div>
 
           <div>
-            <h3 className="text-sm font-bold text-white">Geological Survey of India (GSI) NLSM</h3>
-            <p className="text-xs text-amber-300 font-mono mt-0.5">Historical Landslide Inventory (NER)</p>
+            <h3 className="text-sm font-semibold text-label">NASA Global Landslide Catalog</h3>
+            <p className="text-xs text-risk-moderate tabular-nums mt-0.5">Historical landslide inventory (India)</p>
           </div>
 
-          <div className="space-y-1.5 text-xs text-slate-300 bg-slate-950/60 p-3 rounded-2xl border border-slate-800/80">
+          <div className="space-y-1.5 text-xs text-label-2 bg-surface-2 p-3 rounded-tile">
             <div className="flex justify-between">
-              <span className="text-slate-400">Coverage:</span>
-              <span className="font-medium text-slate-200">Meghalaya, Sikkim, Nagaland Ghats</span>
+              <span className="text-label-2">Coverage:</span>
+              <span className="font-medium text-label">India, 1,265 events</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">Authority:</span>
-              <span className="font-mono text-slate-200 font-bold">Ministry of Mines / GSI</span>
+              <span className="text-label-2">Authority:</span>
+              <span className="tabular-nums text-label font-semibold">NASA Goddard</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">Attributes:</span>
-              <span className="font-medium text-slate-200">Trigger, Volume (m³), Casualties</span>
+              <span className="text-label-2">Attributes:</span>
+              <span className="font-medium text-label">Date, location, trigger, accuracy</span>
             </div>
           </div>
         </div>
 
         {/* 5. OpenStreetMap Highway Topology */}
-        <div className="bg-slate-900/90 border border-slate-800 hover:border-slate-700 p-5 rounded-3xl shadow-lg space-y-3.5 transition-all">
+        <div className="bg-surface p-5 rounded-card space-y-3.5 transition-all">
           <div className="flex items-start justify-between gap-2">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+            <div className="w-10 h-10 rounded-tile bg-risk-low/[0.12] border-risk-low/30 flex items-center justify-center text-risk-low">
               <Layers className="w-5 h-5" />
             </div>
-            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              LIVE CONNECTED
+            <span className="text-xs tabular-nums font-semibold px-2 py-0.5 rounded-full bg-risk-low/[0.12] text-risk-low border-risk-low/30 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-risk-low" />
+              Live connected
             </span>
           </div>
 
           <div>
-            <h3 className="text-sm font-bold text-white">OpenStreetMap (OSM) Vector Network</h3>
-            <p className="text-xs text-emerald-300 font-mono mt-0.5">Highways & Safe Mountain Bypasses</p>
+            <h3 className="text-sm font-semibold text-label">OpenStreetMap (OSM) Vector Network</h3>
+            <p className="text-xs text-risk-low tabular-nums mt-0.5">Highways & Safe Mountain Bypasses</p>
           </div>
 
-          <div className="space-y-1.5 text-xs text-slate-300 bg-slate-950/60 p-3 rounded-2xl border border-slate-800/80">
+          <div className="space-y-1.5 text-xs text-label-2 bg-surface-2 p-3 rounded-tile">
             <div className="flex justify-between">
-              <span className="text-slate-400">Corridors:</span>
-              <span className="font-medium text-slate-200">NH-6, NH-10, NH-29, SH-14</span>
+              <span className="text-label-2">Corridors:</span>
+              <span className="font-medium text-label">NH-6, NH-10, NH-29, SH-14</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">Algorithm:</span>
-              <span className="font-mono text-slate-200 font-bold">NetworkX Risk-Penalized Dijkstra</span>
+              <span className="text-label-2">Algorithm:</span>
+              <span className="tabular-nums text-label font-semibold">NetworkX Risk-Penalized Dijkstra</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">Dynamic Blockages:</span>
-              <span className="font-medium text-slate-200">Authority Incident Overrides</span>
+              <span className="text-label-2">Dynamic Blockages:</span>
+              <span className="font-medium text-label">Authority Incident Overrides</span>
             </div>
           </div>
         </div>
 
         {/* 6. Random Forest ML Hazard Model Engine */}
-        <div className="bg-slate-900/90 border border-slate-800 hover:border-slate-700 p-5 rounded-3xl shadow-lg space-y-3.5 transition-all">
+        <div className="bg-surface p-5 rounded-card space-y-3.5 transition-all">
           <div className="flex items-start justify-between gap-2">
-            <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400">
+            <div className="w-10 h-10 rounded-tile bg-risk-critical/[0.12] border-risk-critical/30 flex items-center justify-center text-risk-critical">
               <Cpu className="w-5 h-5" />
             </div>
-            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
-              LOADED v2.0
+            <span className="text-xs tabular-nums font-semibold px-2 py-0.5 rounded-full bg-risk-critical/[0.12] text-risk-critical border-risk-critical/30 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-risk-critical" />
+              Loaded
             </span>
           </div>
 
           <div>
-            <h3 className="text-sm font-bold text-white">Random Forest Hazard Regressor</h3>
-            <p className="text-xs text-rose-300 font-mono mt-0.5">Multi-Factor Geotechnical Prediction</p>
+            <h3 className="text-sm font-semibold text-label">Random Forest Risk Classifier</h3>
+            <p className="text-xs text-risk-critical tabular-nums mt-0.5">Multi-Factor Geotechnical Prediction</p>
           </div>
 
-          <div className="space-y-1.5 text-xs text-slate-300 bg-slate-950/60 p-3 rounded-2xl border border-slate-800/80">
+          <div className="space-y-1.5 text-xs text-label-2 bg-surface-2 p-3 rounded-tile">
             <div className="flex justify-between">
-              <span className="text-slate-400">Primary Driver:</span>
-              <span className="font-medium text-slate-200">Slope Gradient & 24h Rain</span>
+              <span className="text-label-2">Primary Driver:</span>
+              <span className="font-medium text-label">Slope Gradient & 24h Rain</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">Explainable AI:</span>
-              <span className="font-mono text-slate-200 font-bold">Feature Attribution Weights</span>
+              <span className="text-label-2">Explainable AI:</span>
+              <span className="tabular-nums text-label font-semibold">Feature Attribution Weights</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">Calibration:</span>
-              <span className="font-medium text-slate-200">Post-Disaster Feedback Loop</span>
+              <span className="text-label-2">Calibration:</span>
+              <span className="font-medium text-label">Post-Disaster Feedback Loop</span>
             </div>
           </div>
         </div>
@@ -289,13 +289,13 @@ export const DataSourcesPage = () => {
       </div>
 
       {/* Interactive Live Coordinate Telemetry Inspector (Section 13) */}
-      <div className="bg-slate-900/90 border border-slate-800 p-6 rounded-3xl shadow-xl space-y-5">
+      <div className="bg-surface p-6 rounded-card space-y-5">
         <div>
-          <h2 className="text-base font-extrabold text-white flex items-center gap-2">
-            <Search className="w-4 h-4 text-cyan-400" />
+          <h2 className="text-base font-semibold text-label flex items-center gap-2">
+            <Search className="w-4 h-4 text-label-2" />
             <span>Interactive Live Coordinate Telemetry Inspector</span>
           </h2>
-          <p className="text-xs text-slate-300 mt-1">
+          <p className="text-xs text-label-2 mt-1">
             Query real-time meteorological, DEM elevation, slope, and ECMWF IFS topsoil moisture data for any GPS coordinate:
           </p>
 
@@ -303,26 +303,26 @@ export const DataSourcesPage = () => {
 
         <form onSubmit={handleInspect} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
-            <label className="text-xs font-bold text-slate-300 block mb-1" htmlFor="insp-lat">Latitude (°N)</label>
+            <label className="text-xs font-semibold text-label-2 block mb-1" htmlFor="insp-lat">Latitude (°N)</label>
             <input
               id="insp-lat"
               type="number"
               step="0.0001"
               value={testLat}
               onChange={(e) => setTestLat(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white font-mono focus:outline-none focus:border-cyan-500"
+              className="w-full px-3.5 py-2.5 bg-surface-2 rounded-field text-xs text-label tabular-nums focus:outline-none focus:ring-2 focus:ring-accent/40"
             />
           </div>
 
           <div>
-            <label className="text-xs font-bold text-slate-300 block mb-1" htmlFor="insp-lng">Longitude (°E)</label>
+            <label className="text-xs font-semibold text-label-2 block mb-1" htmlFor="insp-lng">Longitude (°E)</label>
             <input
               id="insp-lng"
               type="number"
               step="0.0001"
               value={testLng}
               onChange={(e) => setTestLng(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white font-mono focus:outline-none focus:border-cyan-500"
+              className="w-full px-3.5 py-2.5 bg-surface-2 rounded-field text-xs text-label tabular-nums focus:outline-none focus:ring-2 focus:ring-accent/40"
             />
           </div>
 
@@ -330,7 +330,7 @@ export const DataSourcesPage = () => {
             <button
               type="submit"
               disabled={inspecting}
-              className="w-full py-2.5 px-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-cyan-950/50 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+              className="w-full py-2.5 px-4 bg-surface-2 text-label rounded-full text-xs font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-50"
             >
               <Search className={`w-3.5 h-3.5 ${inspecting ? 'animate-spin' : ''}`} />
               <span>{inspecting ? 'Querying Live Feeds...' : 'Inspect Live Telemetry'}</span>
@@ -340,64 +340,64 @@ export const DataSourcesPage = () => {
 
         {/* Real Inspection Result Box */}
         {inspectResult && (
-          <div className="p-4 bg-slate-950/80 border border-cyan-500/30 rounded-2xl space-y-4 animate-in fade-in">
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
+          <div className="p-4 bg-surface rounded-card space-y-4 animate-in fade-in">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line pb-3">
               <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping" />
-                <span className="text-xs font-bold text-white">Live Ingested Observation for Location</span>
-                <span className="text-xs font-mono text-cyan-300">({inspectResult.coordinates.lat}°N, {inspectResult.coordinates.lng}°E)</span>
+                <span className="w-2.5 h-2.5 rounded-full bg-accent" />
+                <span className="text-xs font-semibold text-label">Live Ingested Observation for Location</span>
+                <span className="text-xs tabular-nums text-label-2">({inspectResult.coordinates.lat}°N, {inspectResult.coordinates.lng}°E)</span>
               </div>
-              <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded uppercase ${
-                inspectResult.risk_level === 'CRITICAL' ? 'bg-red-500/20 text-red-300 border border-red-500/40' :
-                inspectResult.risk_level === 'HIGH' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' :
-                'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-              }`}>
+              <span className={`text-xs tabular-nums font-semibold px-2 py-0.5 rounded-full ${
+ inspectResult.risk_level === 'CRITICAL' ? 'bg-risk-critical/[0.12] text-risk-critical ' :
+ inspectResult.risk_level === 'HIGH' ? 'bg-risk-moderate/[0.12] text-risk-moderate ' :
+ 'bg-risk-low/[0.12] text-risk-low '
+ }`}>
                 Risk Score: {inspectResult.risk_score} / 100 ({inspectResult.risk_level})
               </span>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-              <div className="p-2.5 bg-slate-900 rounded-xl border border-slate-800">
-                <span className="text-[10px] text-slate-400 block">REAL 24H RAIN</span>
-                <span className="text-sm font-bold text-cyan-400 font-mono">
+              <div className="p-2.5 bg-surface-2 rounded-tile">
+                <span className="text-xs text-label-2 block">Real 24h rain</span>
+                <span className="text-sm font-semibold text-label-2 tabular-nums">
                   {(inspectResult.rainfall_24h !== null && inspectResult.rainfall_24h !== undefined) 
                     ? `${Number(inspectResult.rainfall_24h).toFixed(1)} mm` 
                     : (inspectResult.rainfall_24h_mm !== null && inspectResult.rainfall_24h_mm !== undefined 
                       ? `${Number(inspectResult.rainfall_24h_mm).toFixed(1)} mm` 
                       : '—')}
                 </span>
-                <span className="text-[10px] text-slate-400 block mt-0.5">Source: Open-Meteo NWP Grid</span>
+                <span className="text-xs text-label-2 block mt-0.5">Source: Open-Meteo NWP Grid</span>
               </div>
 
-              <div className="p-2.5 bg-slate-900 rounded-xl border border-slate-800">
-                <span className="text-[10px] text-slate-400 block">REAL SRTM SLOPE</span>
-                <span className="text-sm font-bold text-purple-400 font-mono">{inspectResult.slope_deg}° Incline</span>
-                <span className="text-[10px] text-slate-400 block mt-0.5">Elevation: {inspectResult.elevation_amsl}m AMSL</span>
+              <div className="p-2.5 bg-surface-2 rounded-tile">
+                <span className="text-xs text-label-2 block">Real SRTM slope</span>
+                <span className="text-sm font-semibold text-label-2 tabular-nums">{inspectResult.slope_deg}° Incline</span>
+                <span className="text-xs text-label-2 block mt-0.5">Elevation: {inspectResult.elevation_amsl}m AMSL</span>
               </div>
 
-              <div className="p-2.5 bg-slate-900 rounded-xl border border-slate-800">
-                <span className="text-[10px] text-slate-400 block">REAL SOIL MOISTURE</span>
-                <span className="text-sm font-bold text-blue-400 font-mono">{inspectResult.soil_moisture ?? inspectResult.soil_moisture_m3m3 ?? 0.35} m³/m³</span>
-                <span className="text-[10px] text-slate-400 block mt-0.5">Source: ECMWF IFS (Open-Meteo)</span>
+              <div className="p-2.5 bg-surface-2 rounded-tile">
+                <span className="text-xs text-label-2 block">Real soil moisture</span>
+                <span className="text-sm font-semibold text-label-2 tabular-nums">{inspectResult.soil_moisture ?? inspectResult.soil_moisture_m3m3 ?? 0.35} m³/m³</span>
+                <span className="text-xs text-label-2 block mt-0.5">Source: ECMWF IFS (Open-Meteo)</span>
               </div>
 
-              <div className="p-2.5 bg-slate-900 rounded-xl border border-slate-800">
-                <span className="text-[10px] text-slate-400 block">GSI HISTORY DENSITY</span>
-                <span className="text-sm font-bold text-amber-400 font-mono">{inspectResult.historical_landslides_nearby ?? inspectResult.historical_incidents ?? 0} Events</span>
-                <span className="text-[10px] text-slate-400 block mt-0.5">Within 25 km radius</span>
+              <div className="p-2.5 bg-surface-2 rounded-tile">
+                <span className="text-xs text-label-2 block">GSI history density</span>
+                <span className="text-sm font-semibold text-risk-moderate tabular-nums">{inspectResult.historical_landslides_nearby ?? inspectResult.historical_incidents ?? 0} Events</span>
+                <span className="text-xs text-label-2 block mt-0.5">Within 25 km radius</span>
               </div>
             </div>
 
-            <div className="p-3 bg-slate-900/60 rounded-xl border border-slate-800 text-xs space-y-1">
+            <div className="p-3 bg-surface-2 rounded-tile text-xs space-y-1">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="font-bold text-white block">Explainable AI Primary Driver: {inspectResult.primary_driver}</span>
+                <span className="font-semibold text-label block">Explainable AI Primary Driver: {inspectResult.primary_driver}</span>
                 {inspectResult.model_confidence && (
-                  <span className="text-[11px] font-mono text-emerald-400">
+                  <span className="text-xs tabular-nums text-risk-low">
                     Model Confidence: <strong>{inspectResult.model_confidence}%</strong>
                   </span>
                 )}
               </div>
-              <p className="text-slate-300">{inspectResult.recommended_action}</p>
+              <p className="text-label-2">{inspectResult.recommended_action}</p>
             </div>
           </div>
         )}

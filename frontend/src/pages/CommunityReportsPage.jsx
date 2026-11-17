@@ -49,21 +49,21 @@ export const CommunityReportsPage = () => {
     <div className="space-y-4 max-w-5xl mx-auto">
       
       {/* Top Header */}
-      <div className="bg-[#111111] border border-[#262626] p-3.5 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="bg-surface-2 p-3.5 rounded-tile flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-md bg-amber-600/20 border border-amber-500/30 flex items-center justify-center text-amber-400">
+          <div className="w-8 h-8 rounded-tile bg-risk-moderate/[0.12] border-risk-moderate/30 flex items-center justify-center text-risk-moderate">
             <Users className="w-4 h-4" />
           </div>
           <div>
-            <h1 className="text-sm font-bold text-neutral-100">{t('reports_title') || 'Ground Hazard Reports'}</h1>
-            <p className="text-xs text-neutral-400">{t('reports_subtitle') || 'Crowdsourced Field Observations & Verification'}</p>
+            <h1 className="text-sm font-semibold text-label">{t('reports_title') || 'Ground Hazard Reports'}</h1>
+            <p className="text-xs text-label-2">{t('reports_subtitle') || 'Crowdsourced Field Observations & Verification'}</p>
           </div>
         </div>
 
         {/* Action Button */}
         <button
           onClick={() => setSubmissionModalOpen(true)}
-          className="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded-md text-xs font-semibold flex items-center gap-1.5 transition-colors self-start sm:self-auto shadow"
+          className="px-3 py-1.5 bg-risk-moderate hover:opacity-90 text-white rounded-full whitespace-nowrap text-xs font-semibold flex items-center gap-1.5 transition-colors self-start sm:self-auto"
         >
           <PlusCircle className="w-3.5 h-3.5" />
           <span>{t('submit_report_btn') || 'Submit Hazard Report'}</span>
@@ -71,7 +71,7 @@ export const CommunityReportsPage = () => {
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-1 bg-[#151515] p-1 rounded-md border border-[#262626] text-xs">
+      <div className="flex items-center gap-1 bg-surface-2 p-1 rounded-full text-xs">
         {[
           { id: 'ALL', label: `${t('filter_all') || 'All'} (${reports.length})` },
           { id: 'PENDING', label: `${t('pending') || 'Pending'} (${pendingCount})` },
@@ -80,10 +80,10 @@ export const CommunityReportsPage = () => {
           <button
             key={tab.id}
             onClick={() => setStatusFilter(tab.id)}
-            className={`px-3 py-1 rounded transition-colors ${
+            className={`px-3 py-1 rounded-full whitespace-nowrap transition-colors ${
               statusFilter === tab.id
-                ? 'bg-[#1C1C1C] text-white font-semibold border border-sky-400'
-                : 'text-neutral-400 hover:text-neutral-200'
+                ? 'bg-surface-2 text-label font-semibold '
+                : 'text-label-2 hover:text-label'
             }`}
           >
             {tab.label}
@@ -92,35 +92,35 @@ export const CommunityReportsPage = () => {
       </div>
 
       {/* Reports List */}
-      <div className="bg-[#111111] border border-[#262626] rounded-lg overflow-hidden divide-y divide-[#262626]">
+      <div className="bg-surface-2 rounded-tile overflow-hidden divide-y divide-line">
         {filteredReports.map((report) => (
-          <div key={report.report_id} className="p-4 hover:bg-[#151515] transition-colors space-y-2">
+          <div key={report.report_id} className="p-4 rounded-tile hover:bg-surface-2 transition-colors space-y-2">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-bold text-xs text-neutral-100">{report.reporter_name}</span>
-                <span className="text-[11px] text-sky-400 bg-[#1A1A1A] px-1.5 py-0.2 rounded border border-[#2A2A2A] font-mono">
+                <span className="font-semibold text-xs text-label">{report.reporter_name}</span>
+                <span className="text-xs text-label-2 bg-surface-2 px-1.5 py-0.5 rounded-full tabular-nums">
                   {report.zone_id}
                 </span>
-                <span className={`text-[10px] px-1.5 py-0.2 rounded font-semibold uppercase ${
-                  report.status === 'VERIFIED' ? 'bg-emerald-950/40 text-emerald-400 border border-emerald-600/30' :
-                  report.status === 'REJECTED' ? 'bg-red-950/40 text-red-400 border border-red-600/30' :
-                  'bg-amber-950/40 text-amber-400 border border-amber-600/30'
-                }`}>
+                <span className={`text-xs px-1.5 py-0.5 rounded-full font-semibold ${
+ report.status === 'VERIFIED' ? 'bg-risk-low/[0.12] text-risk-low ' :
+ report.status === 'REJECTED' ? 'bg-risk-critical/[0.12] text-risk-critical ' :
+ 'bg-risk-moderate/[0.12] text-risk-moderate '
+ }`}>
                   {report.status === 'VERIFIED' ? (t('verified') || 'Verified') :
                    report.status === 'REJECTED' ? (t('rejected') || 'Rejected') :
                    (t('pending') || 'Pending Verification')}
                 </span>
               </div>
-              <span className="text-xs text-neutral-400 font-mono">{formatDate(report.timestamp)}</span>
+              <span className="text-xs text-label-2 tabular-nums">{formatDate(report.timestamp)}</span>
             </div>
 
-            <p className="text-xs text-neutral-300 leading-normal">
+            <p className="text-xs text-label-2 leading-normal">
               {report.description}
             </p>
 
-            <div className="flex items-center justify-between pt-1 border-t border-[#1C1C1C] text-xs">
-              <div className="flex items-center gap-2 text-neutral-400 text-xs">
-                <MapPin className="w-3.5 h-3.5 text-sky-400" />
+            <div className="flex items-center justify-between pt-1 border-t border-line text-xs">
+              <div className="flex items-center gap-2 text-label-2 text-xs">
+                <MapPin className="w-3.5 h-3.5 text-label-2" />
                 <span>
                   {report.location_text || 
                    (typeof report.lat === 'number' && typeof report.lng === 'number' 
@@ -134,7 +134,7 @@ export const CommunityReportsPage = () => {
                   <button
                     onClick={() => handleAction(report.report_id, 'VERIFIED')}
                     disabled={verifyingId === report.report_id}
-                    className="px-2.5 py-1 bg-emerald-700 hover:bg-emerald-600 text-white rounded text-xs font-semibold flex items-center gap-1 transition-colors"
+                    className="px-2.5 py-1 bg-risk-low hover:opacity-90 text-white rounded-full whitespace-nowrap text-xs font-semibold flex items-center gap-1 transition-colors"
                   >
                     {verifyingId === report.report_id ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />}
                     <span>{t('verified') || 'Verify'}</span>
@@ -142,7 +142,7 @@ export const CommunityReportsPage = () => {
                   <button
                     onClick={() => handleAction(report.report_id, 'REJECTED')}
                     disabled={verifyingId === report.report_id}
-                    className="px-2.5 py-1 bg-red-700 hover:bg-red-600 text-white rounded text-xs font-semibold flex items-center gap-1 transition-colors"
+                    className="px-2.5 py-1 bg-risk-critical hover:opacity-90 text-white rounded-full whitespace-nowrap text-xs font-semibold flex items-center gap-1 transition-colors"
                   >
                     <XCircle className="w-3 h-3" />
                     <span>{t('rejected') || 'Reject'}</span>
@@ -154,7 +154,7 @@ export const CommunityReportsPage = () => {
         ))}
 
         {filteredReports.length === 0 && (
-          <div className="p-8 text-center text-xs text-neutral-400">
+          <div className="p-8 text-center text-xs text-label-2">
             {t('no_reports_found') || 'No hazard reports submitted yet.'}
           </div>
         )}

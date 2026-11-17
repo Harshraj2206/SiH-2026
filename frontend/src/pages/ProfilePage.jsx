@@ -85,43 +85,43 @@ export const ProfilePage = () => {
       
       {/* Toast Notification */}
       {profileMsg.text && (
-        <div className={`p-3.5 rounded-2xl border flex items-center justify-between text-xs animate-in fade-in ${
-          profileMsg.type === 'success' 
-            ? 'bg-emerald-950/80 border-emerald-500/40 text-emerald-200' 
-            : 'bg-red-950/80 border-red-500/40 text-red-200'
-        }`}>
+        <div className={`p-3.5 rounded-card flex items-center justify-between text-xs animate-in fade-in ${
+ profileMsg.type === 'success' 
+ ? 'bg-risk-low/[0.12] text-risk-low' 
+ : 'bg-risk-critical/[0.12] text-risk-critical'
+ }`}>
           <div className="flex items-center gap-2">
-            {profileMsg.type === 'success' ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <AlertCircle className="w-4 h-4 text-red-400" />}
+            {profileMsg.type === 'success' ? <CheckCircle2 className="w-4 h-4 text-risk-low" /> : <AlertCircle className="w-4 h-4 text-risk-critical" />}
             <span>{profileMsg.text}</span>
           </div>
-          <button onClick={() => setProfileMsg({ type: '', text: '' })} className="p-1 hover:bg-[#181818] rounded">
+          <button onClick={() => setProfileMsg({ type: '', text: '' })} className="p-1 hover:bg-surface-2 rounded-full">
             <X className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
 
       {/* Main Profile Header Card - Full Width */}
-      <div className="bg-[#0a0a0a] border border-[#1a1a1a] p-6 rounded-2xl shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+      <div className="bg-surface p-6 rounded-card flex flex-col sm:flex-row sm:items-center justify-between gap-5">
         <div className="flex items-start sm:items-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 text-2xl font-black shrink-0">
+          <div className="w-16 h-16 rounded-full bg-risk-low/[0.12] border-risk-low/30 flex items-center justify-center text-risk-low text-2xl font-semibold shrink-0">
             {currentUser?.full_name?.charAt(0) || 'U'}
           </div>
           <div className="space-y-1">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-xl font-bold text-white">{currentUser?.full_name || 'User'}</h1>
-              <span className="text-xs px-2.5 py-0.5 rounded-full font-medium bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+              <h1 className="text-xl font-semibold text-label">{currentUser?.full_name || 'User'}</h1>
+              <span className="text-xs px-2.5 py-0.5 rounded-full font-medium bg-risk-low/[0.12] text-risk-low border-risk-low/30">
                 {currentUser?.role || 'Citizen'}
               </span>
             </div>
-            <p className="text-xs text-neutral-400 font-mono">@{currentUser?.username}</p>
-            <div className="flex flex-wrap items-center gap-3 text-xs text-neutral-400 pt-1">
+            <p className="text-xs text-label-2 tabular-nums">@{currentUser?.username}</p>
+            <div className="flex flex-wrap items-center gap-3 text-xs text-label-2 pt-1">
               <span className="flex items-center gap-1">
-                <Mail className="w-3.5 h-3.5 text-neutral-400" />
+                <Mail className="w-3.5 h-3.5 text-label-2" />
                 {currentUser?.email}
               </span>
               {currentUser?.phone && (
-                <span className="flex items-center gap-1 font-mono">
-                  <Phone className="w-3.5 h-3.5 text-neutral-400" />
+                <span className="flex items-center gap-1 tabular-nums">
+                  <Phone className="w-3.5 h-3.5 text-label-2" />
                   {currentUser?.phone}
                 </span>
               )}
@@ -137,15 +137,15 @@ export const ProfilePage = () => {
                 setEditPhone(currentUser?.phone || '');
                 setIsEditing(true);
               }}
-              className="px-4 py-2 bg-[#121212] hover:bg-[#1a1a1a] text-neutral-200 hover:text-white rounded-xl text-xs font-bold border border-[#222222] flex items-center gap-1.5 transition-colors"
+              className="px-4 py-2 bg-surface-2 hover:bg-surface-2 text-label hover:text-label rounded-full whitespace-nowrap text-xs font-semibold flex items-center gap-1.5 transition-colors"
             >
-              <Edit2 className="w-3.5 h-3.5 text-emerald-400" />
+              <Edit2 className="w-3.5 h-3.5 text-risk-low" />
               <span>Edit Profile</span>
             </button>
           ) : (
             <button
               onClick={() => setIsEditing(false)}
-              className="px-4 py-2 bg-[#121212] hover:bg-[#1a1a1a] text-neutral-400 rounded-xl text-xs font-semibold transition-colors"
+              className="px-4 py-2 bg-surface-2 hover:bg-surface-2 text-label-2 rounded-full whitespace-nowrap text-xs font-semibold transition-colors"
             >
               Cancel
             </button>
@@ -153,9 +153,9 @@ export const ProfilePage = () => {
 
           <button
             onClick={logout}
-            className="px-4 py-2 bg-red-950/40 hover:bg-red-900/60 text-red-300 hover:text-white border border-red-800/40 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors"
+            className="px-4 py-2 bg-risk-critical/[0.12] hover:bg-risk-critical/20 text-risk-critical hover:text-label border-risk-critical/30 rounded-full whitespace-nowrap text-xs font-semibold flex items-center gap-1.5 transition-colors"
           >
-            <LogOut className="w-3.5 h-3.5 text-red-400" />
+            <LogOut className="w-3.5 h-3.5 text-risk-critical" />
             <span>Sign Out</span>
           </button>
         </div>
@@ -163,32 +163,32 @@ export const ProfilePage = () => {
 
       {/* Profile Edit Inline Form */}
       {isEditing && (
-        <form onSubmit={handleSaveProfile} className="bg-[#0a0a0a] border border-emerald-500/40 p-6 rounded-2xl space-y-4 animate-in fade-in shadow-sm">
-          <h3 className="text-xs font-bold text-white flex items-center gap-2">
-            <Edit2 className="w-4 h-4 text-emerald-400" />
+        <form onSubmit={handleSaveProfile} className="bg-surface border-risk-low/30 p-6 rounded-card space-y-4 animate-in fade-in">
+          <h3 className="text-xs font-semibold text-label flex items-center gap-2">
+            <Edit2 className="w-4 h-4 text-risk-low" />
             <span>Edit Profile Information</span>
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-neutral-300" htmlFor="prof-name">Full Name</label>
+              <label className="text-xs font-semibold text-label-2" htmlFor="prof-name">Full Name</label>
               <input
                 id="prof-name"
                 type="text"
                 value={editFullName}
                 onChange={(e) => setEditFullName(e.target.value)}
                 required
-                className="w-full px-3.5 py-2.5 bg-[#121212] border border-[#222222] rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500"
+                className="w-full px-3.5 py-2.5 bg-surface-2 rounded-field text-xs text-label focus:outline-none focus:ring-2 focus:ring-accent/40"
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-neutral-300" htmlFor="prof-phone">Phone Number</label>
+              <label className="text-xs font-semibold text-label-2" htmlFor="prof-phone">Phone Number</label>
               <input
                 id="prof-phone"
                 type="tel"
                 value={editPhone}
                 onChange={(e) => setEditPhone(e.target.value)}
                 placeholder="+91 98XXX-XXXXX"
-                className="w-full px-3.5 py-2.5 bg-[#121212] border border-[#222222] rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
+                className="w-full px-3.5 py-2.5 bg-surface-2 rounded-field text-xs text-label focus:outline-none tabular-nums focus:ring-2 focus:ring-accent/40"
               />
             </div>
           </div>
@@ -196,14 +196,14 @@ export const ProfilePage = () => {
             <button
               type="button"
               onClick={() => setIsEditing(false)}
-              className="px-4 py-2 text-xs text-neutral-400 hover:text-white"
+              className="px-4 py-2 text-xs text-label-2 hover:text-label"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={savingProfile}
-              className="px-5 py-2 bg-emerald-500 hover:bg-emerald-400 text-black rounded-xl text-xs font-bold flex items-center gap-1.5"
+              className="px-5 py-2 bg-accent hover:opacity-90 text-white rounded-full whitespace-nowrap text-xs font-semibold flex items-center gap-1.5"
             >
               <Save className="w-3.5 h-3.5" />
               <span>{savingProfile ? 'Saving...' : 'Save Changes'}</span>
@@ -213,20 +213,20 @@ export const ProfilePage = () => {
       )}
 
       {/* Emergency Contacts Manager - Full Width */}
-      <div className="bg-[#0a0a0a] border border-[#1a1a1a] p-6 rounded-2xl space-y-4 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#1a1a1a] pb-4">
+      <div className="bg-surface p-6 rounded-card space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-line pb-4">
           <div>
-            <h2 className="text-sm font-bold text-white flex items-center gap-2">
-              <HeartHandshake className="w-4 h-4 text-rose-400" />
+            <h2 className="text-sm font-semibold text-label flex items-center gap-2">
+              <HeartHandshake className="w-4 h-4 text-risk-critical" />
               <span>Emergency Contacts</span>
             </h2>
-            <p className="text-xs text-neutral-400 mt-0.5">
+            <p className="text-xs text-label-2 mt-0.5">
               Designated relatives or guardians automatically notified upon emergency SOS trigger.
             </p>
           </div>
           <button
             onClick={() => setShowAddContact(!showAddContact)}
-            className="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors self-start sm:self-center"
+            className="px-4 py-2 bg-risk-critical hover:opacity-90 text-white rounded-full whitespace-nowrap text-xs font-semibold flex items-center gap-1.5 transition-colors self-start sm:self-center"
           >
             <Plus className="w-4 h-4" />
             <span>Add Contact</span>
@@ -235,26 +235,26 @@ export const ProfilePage = () => {
 
         {/* Add Contact Modal / Form */}
         {showAddContact && (
-          <form onSubmit={handleAddContact} className="p-4 bg-[#121212] border border-rose-500/40 rounded-xl space-y-3 animate-in fade-in">
-            <h4 className="text-xs font-bold text-white">Add New Contact</h4>
+          <form onSubmit={handleAddContact} className="p-4 bg-surface-2 border-risk-critical/30 rounded-tile space-y-3 animate-in fade-in">
+            <h4 className="text-xs font-semibold text-label">Add New Contact</h4>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
-                <label className="text-[11px] text-neutral-400 block mb-1">Contact Name</label>
+                <label className="text-xs text-label-2 block mb-1">Contact Name</label>
                 <input
                   type="text"
                   placeholder="e.g. Ramesh Kumar"
                   value={newContact.name}
                   onChange={(e) => setNewContact({ ...newContact, name: e.target.value })}
                   required
-                  className="w-full px-3 py-2 bg-[#050505] border border-[#222222] rounded-lg text-xs text-white focus:outline-none focus:border-rose-500"
+                  className="w-full px-3 py-2 bg-surface-2 rounded-field text-xs text-label focus:outline-none focus:ring-2 focus:ring-accent/40"
                 />
               </div>
               <div>
-                <label className="text-[11px] text-neutral-400 block mb-1">Relationship</label>
+                <label className="text-xs text-label-2 block mb-1">Relationship</label>
                 <select
                   value={newContact.relationship}
                   onChange={(e) => setNewContact({ ...newContact, relationship: e.target.value })}
-                  className="w-full px-3 py-2 bg-[#050505] border border-[#222222] rounded-lg text-xs text-white focus:outline-none focus:border-rose-500"
+                  className="w-full px-3 py-2 bg-surface-2 rounded-field text-xs text-label focus:outline-none focus:ring-2 focus:ring-accent/40"
                 >
                   <option value="Family">Family</option>
                   <option value="Parent">Parent</option>
@@ -264,14 +264,14 @@ export const ProfilePage = () => {
                 </select>
               </div>
               <div>
-                <label className="text-[11px] text-neutral-400 block mb-1">Phone Number</label>
+                <label className="text-xs text-label-2 block mb-1">Phone Number</label>
                 <input
                   type="tel"
                   placeholder="+91 98XXX-XXXXX"
                   value={newContact.phone}
                   onChange={(e) => setNewContact({ ...newContact, phone: e.target.value })}
                   required
-                  className="w-full px-3 py-2 bg-[#050505] border border-[#222222] rounded-lg text-xs text-white focus:outline-none focus:border-rose-500 font-mono"
+                  className="w-full px-3 py-2 bg-surface-2 rounded-field text-xs text-label focus:outline-none tabular-nums focus:ring-2 focus:ring-accent/40"
                 />
               </div>
             </div>
@@ -279,14 +279,14 @@ export const ProfilePage = () => {
               <button
                 type="button"
                 onClick={() => setShowAddContact(false)}
-                className="px-3 py-1.5 text-xs text-neutral-400 hover:text-white"
+                className="px-3 py-1.5 text-xs text-label-2 hover:text-label"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={addingContact}
-                className="px-4 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-xs font-bold"
+                className="px-4 py-1.5 bg-risk-critical hover:opacity-90 text-white rounded-full whitespace-nowrap text-xs font-semibold"
               >
                 {addingContact ? 'Adding...' : 'Save Contact'}
               </button>
@@ -300,24 +300,24 @@ export const ProfilePage = () => {
             {currentUser.emergency_contacts.map((contact) => (
               <div
                 key={contact.id}
-                className="p-4 bg-[#0f0f0f] border border-[#1e1e1e] rounded-xl flex items-center justify-between"
+                className="p-4 bg-surface-2 rounded-tile flex items-center justify-between"
               >
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-xs text-white">{contact.name}</span>
-                    <span className="text-[10px] px-2 py-0.5 rounded bg-[#1a1a1a] text-rose-300 font-medium">
+                    <span className="font-semibold text-xs text-label">{contact.name}</span>
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-surface-2 text-risk-critical font-medium">
                       {contact.relationship}
                     </span>
                   </div>
-                  <span className="text-xs text-neutral-400 font-mono flex items-center gap-1">
-                    <Phone className="w-3 h-3 text-neutral-500" />
+                  <span className="text-xs text-label-2 tabular-nums flex items-center gap-1">
+                    <Phone className="w-3 h-3 text-label-3" />
                     {contact.phone}
                   </span>
                 </div>
 
                 <button
                   onClick={() => handleDeleteContact(contact.id)}
-                  className="p-1.5 text-neutral-400 hover:text-red-400 rounded-lg hover:bg-red-950/40 transition-colors"
+                  className="p-1.5 text-label-2 hover:text-risk-critical rounded-full hover:bg-risk-critical/[0.12] transition-colors"
                   title="Delete Contact"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -326,37 +326,37 @@ export const ProfilePage = () => {
             ))}
           </div>
         ) : (
-          <p className="text-xs text-neutral-400 text-center py-6 bg-[#0f0f0f] rounded-xl border border-dashed border-[#222222]">
+          <p className="text-xs text-label-2 text-center py-6 bg-surface rounded-tile border border-dashed border-line">
             No emergency contacts added yet. Click &quot;Add Contact&quot; to designate emergency contacts.
           </p>
         )}
       </div>
 
       {/* Location Toggle - Full Width */}
-      <div className="bg-[#0a0a0a] border border-[#1a1a1a] p-6 rounded-2xl space-y-3 shadow-sm">
+      <div className="bg-surface p-6 rounded-card space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h2 className="text-sm font-bold text-white flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-emerald-400" />
+            <h2 className="text-sm font-semibold text-label flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-risk-low" />
               <span>Location Access</span>
             </h2>
-            <p className="text-xs text-neutral-400 mt-0.5">
+            <p className="text-xs text-label-2 mt-0.5">
               Used for localized landslide hazard alerts, real-time risk telemetry, and closest safe shelter routing.
             </p>
           </div>
 
           <div className="flex items-center gap-2">
             <span className={`text-xs px-3.5 py-1 rounded-full font-medium ${
-              locationStatus === 'GRANTED'
-                ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
-                : 'bg-[#181818] text-neutral-400 border border-[#2a2a2a]'
-            }`}>
+ locationStatus === 'GRANTED'
+ ? 'bg-risk-low/[0.12] text-risk-low '
+ : 'bg-surface-2 text-label-2 '
+ }`}>
               {locationStatus === 'GRANTED' ? 'Location Enabled' : 'Location Disabled'}
             </span>
             {locationStatus !== 'GRANTED' && (
               <button
                 onClick={requestLocationPermission}
-                className="px-4 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-black rounded-lg text-xs font-bold"
+                className="px-4 py-1.5 bg-accent hover:opacity-90 text-white rounded-full whitespace-nowrap text-xs font-semibold"
               >
                 Enable
               </button>

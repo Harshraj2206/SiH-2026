@@ -7,43 +7,74 @@
   .dark,
   [data-theme="dark"] {
     --bg-base: #000000;
-    --surface-primary: #0a0a0a;
-    --surface-secondary: #0f0f0f;
-    --surface-card: #0a0a0a;
-    --surface-card-subtle: #050505;
-    --border-subtle: #1a1a1a;
-    --border-hover: #2a2a2a;
-    --text-primary: #ffffff;
-    --text-secondary: #a3a3a3;
-    --text-muted: #737373;
-    --input-bg: #0d0d0d;
-    
-    --color-safe: #10b981;
-    --color-warning: #f59e0b;
-    --color-high: #f97316;
-    --color-critical: #ef4444;
-    --color-info: #0ea5e9;
+    --surface-primary: #1C1C1E;
+    --surface-secondary: #2C2C2E;
+    --surface-card: #1C1C1E;
+    --surface-card-subtle: #2C2C2E;
+    --border-subtle: #38383A;
+    --border-hover: #48484A;
+    --text-primary: #FFFFFF;
+    --text-secondary: #98989F;
+    --text-muted: #636366;
+    --input-bg: #2C2C2E;
+
+    /* RGB channels so Tailwind can apply opacity (bg-risk-low/10) */
+    --rgb-page: 0 0 0;
+    --rgb-surface: 28 28 30;
+    --rgb-surface-2: 44 44 46;
+    --rgb-surface-3: 58 58 60;
+    --rgb-line: 56 56 58;
+    --rgb-label: 255 255 255;
+    --rgb-label-2: 152 152 159;
+    --rgb-label-3: 99 99 102;
+    --rgb-accent: 74 134 232;
+    --rgb-accent-text: 138 180 248;
+    --rgb-low: 107 191 138;
+    --rgb-moderate: 212 178 76;
+    --rgb-high: 219 142 85;
+    --rgb-critical: 224 108 102;
+
+    --color-safe: rgb(var(--rgb-low));
+    --color-warning: rgb(var(--rgb-moderate));
+    --color-high: rgb(var(--rgb-high));
+    --color-critical: rgb(var(--rgb-critical));
+    --color-info: rgb(var(--rgb-accent));
   }
 
   .light,
   [data-theme="light"] {
-    --bg-base: #F6F8FA;
+    --bg-base: #F5F5F7;
     --surface-primary: #FFFFFF;
-    --surface-secondary: #F6F8FA;
+    --surface-secondary: #F2F2F7;
     --surface-card: #FFFFFF;
-    --surface-card-subtle: #F6F8FA;
-    --border-subtle: #D0D7DE;
-    --border-hover: #8C959F;
-    --text-primary: #1F2328;
-    --text-secondary: #656D76;
-    --text-muted: #8C959F;
-    --input-bg: #FFFFFF;
+    --surface-card-subtle: #F2F2F7;
+    --border-subtle: #D2D2D7;
+    --border-hover: #86868B;
+    --text-primary: #1D1D1F;
+    --text-secondary: #6E6E73;
+    --text-muted: #86868B;
+    --input-bg: #F2F2F7;
 
-    --color-safe: #1A7F37;
-    --color-warning: #9A6700;
-    --color-high: #BC4C00;
-    --color-critical: #CF222E;
-    --color-info: #0969DA;
+    --rgb-page: 245 245 247;
+    --rgb-surface: 255 255 255;
+    --rgb-surface-2: 242 242 247;
+    --rgb-surface-3: 255 255 255;
+    --rgb-line: 210 210 215;
+    --rgb-label: 29 29 31;
+    --rgb-label-2: 110 110 115;
+    --rgb-label-3: 134 134 139;
+    --rgb-accent: 45 108 223;
+    --rgb-accent-text: 45 108 223;
+    --rgb-low: 47 143 85;
+    --rgb-moderate: 156 118 18;
+    --rgb-high: 181 97 44;
+    --rgb-critical: 196 68 62;
+
+    --color-safe: rgb(var(--rgb-low));
+    --color-warning: rgb(var(--rgb-moderate));
+    --color-high: rgb(var(--rgb-high));
+    --color-critical: rgb(var(--rgb-critical));
+    --color-info: rgb(var(--rgb-accent));
   }
 
   * {
@@ -51,7 +82,8 @@
   }
 
   body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', Inter, 'Segoe UI', Roboto, Arial, sans-serif;
+    letter-spacing: -0.01em;
     background-color: var(--bg-base);
     color: var(--text-primary);
     -webkit-font-smoothing: antialiased;
@@ -60,8 +92,27 @@
   }
 
   code, pre, .font-mono {
-    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-family: 'SF Mono', ui-monospace, SFMono-Regular, Menlo, 'JetBrains Mono', Consolas, monospace;
   }
+}
+
+/* Cards float over the live weather sky: slightly see-through with a frosted blur */
+.bg-surface.rounded-card {
+  background-color: rgb(var(--rgb-surface) / 0.78);
+  -webkit-backdrop-filter: blur(24px) saturate(1.5);
+  backdrop-filter: blur(24px) saturate(1.5);
+}
+
+/* A grey fill inside a grey fill steps up one level so it stays visible
+   (selected segments, nested fields, progress tracks) */
+.bg-surface-2 .bg-surface-2,
+.bg-surface-2 .hover\:bg-surface-2:hover {
+  background-color: rgb(var(--rgb-surface-3));
+}
+
+@keyframes sky-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 /* Operational Clean Scrollbars */
@@ -73,11 +124,11 @@
   background: var(--bg-base);
 }
 ::-webkit-scrollbar-thumb {
-  background: #30363D;
+  background: #38383A;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #484F58;
+  background: #48484A;
 }
 
 /* ========================================================================= */
@@ -91,21 +142,21 @@
 .dark .bg-\[\#030712\],
 .dark .bg-slate-950,
 .dark .bg-black {
-  background-color: #0D1117 !important;
+  background-color: #000000 !important;
 }
 
 .dark .bg-\[\#0a0a0a\],
 .dark .bg-\[\#0d1527\],
 .dark .bg-slate-900,
 .dark .bg-\[\#111111\] {
-  background-color: #161B22 !important;
-  border-color: #30363D !important;
+  background-color: #1C1C1E !important;
+  border-color: #38383A !important;
 }
 
 .dark .bg-\[\#121d33\],
 .dark .bg-\[\#151515\] {
-  background-color: #161B22 !important;
-  border-color: #30363D !important;
+  background-color: #1C1C1E !important;
+  border-color: #38383A !important;
 }
 
 .dark .bg-\[\#090f1d\],
@@ -113,8 +164,8 @@
 .dark .bg-\[\#0f0f0f\],
 .dark .bg-\[\#101010\],
 .dark .bg-\[\#0E0E0E\] {
-  background-color: #0D1117 !important;
-  border-color: #21262D !important;
+  background-color: #000000 !important;
+  border-color: #2C2C2E !important;
 }
 
 .dark .bg-\[\#16243d\],
@@ -123,8 +174,8 @@
 .dark .bg-\[\#181818\],
 .dark .bg-\[\#161616\],
 .dark .bg-\[\#141414\] {
-  background-color: #21262D !important;
-  border-color: #30363D !important;
+  background-color: #2C2C2E !important;
+  border-color: #38383A !important;
 }
 
 .dark .border-\[\#1a1a1a\],
@@ -134,7 +185,7 @@
 .dark .border-\[\#1e1e1e\],
 .dark .border-\[\#202020\],
 .dark .border-\[\#262626\] {
-  border-color: #30363D !important;
+  border-color: #38383A !important;
 }
 
 .dark .border-\[\#223555\],
@@ -143,51 +194,51 @@
 .dark .border-\[\#222222\],
 .dark .border-\[\#2A2A2A\],
 .dark .border-\[\#333333\] {
-  border-color: #30363D !important;
+  border-color: #38383A !important;
 }
 
 .dark .text-white {
-  color: #F0F6FC !important;
+  color: #F5F5F7 !important;
 }
 
 .dark .text-slate-100,
 .dark .text-slate-200,
 .dark .text-neutral-100,
 .dark .text-neutral-200 {
-  color: #F0F6FC !important;
+  color: #F5F5F7 !important;
 }
 
 .dark .text-slate-300,
 .dark .text-neutral-300 {
-  color: #C9D1D9 !important;
+  color: #D1D1D6 !important;
 }
 
 .dark .text-slate-400,
 .dark .text-neutral-400 {
-  color: #8B949E !important;
+  color: #98989F !important;
 }
 
 .dark .placeholder-slate-400::placeholder,
 .dark .placeholder-slate-500::placeholder,
 .dark .placeholder-neutral-500::placeholder {
-  color: #6E7681 !important;
+  color: #636366 !important;
 }
 
 /* Dark Theme Leaflet Map Container & Popups */
 .dark .leaflet-container {
-  background-color: #0D1117 !important;
+  background-color: #000000 !important;
 }
 
 .dark .leaflet-popup-content-wrapper {
-  background-color: #161B22 !important;
-  color: #F0F6FC !important;
+  background-color: #1C1C1E !important;
+  color: #F5F5F7 !important;
   border: 1px solid #30363D !important;
-  border-radius: 6px !important;
+  border-radius: 12px !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
 }
 
 .dark .leaflet-popup-tip {
-  background-color: #161B22 !important;
+  background-color: #1C1C1E !important;
   border: 1px solid #30363D !important;
 }
 
@@ -195,8 +246,8 @@
 /* LIGHT THEME OVERRIDES (Clean Enterprise Daylight UI)                      */
 /* ========================================================================= */
 .light body {
-  background-color: #F8FAFC !important;
-  color: #0F172A !important;
+  background-color: #F5F5F7 !important;
+  color: #1D1D1F !important;
 }
 
 /* Primary Light Card & Panel Surfaces */
@@ -243,7 +294,7 @@
 .light .bg-\[\#222222\],
 .light .bg-\[\#262626\],
 .light .bg-\[\#090e0c\] {
-  background-color: #F1F5F9 !important;
+  background-color: #F2F2F7 !important;
 }
 
 /* Translucent Overlays in Light Mode */
@@ -255,8 +306,8 @@
 .light .bg-black\/60,
 .light .bg-black\/40 {
   background-color: rgba(255, 255, 255, 0.92) !important;
-  color: #0F172A !important;
-  border-color: #E2E8F0 !important;
+  color: #1D1D1F !important;
+  border-color: #E5E5EA !important;
   backdrop-filter: blur(12px) !important;
 }
 
@@ -284,7 +335,7 @@
 .light .border-slate-700,
 .light .border-neutral-800,
 .light .border-neutral-900 {
-  border-color: #E2E8F0 !important;
+  border-color: #E5E5EA !important;
 }
 
 /* Text Hierarchy in Light Mode */
@@ -293,30 +344,30 @@
 .light .text-slate-200,
 .light .text-neutral-100,
 .light .text-neutral-200 {
-  color: #0F172A !important;
+  color: #1D1D1F !important;
 }
 
 .light .text-slate-300,
 .light .text-neutral-300 {
-  color: #334155 !important;
+  color: #3A3A3C !important;
 }
 
 .light .text-slate-400,
 .light .text-neutral-400,
 .light .text-\[\#8a9690\],
 .light .text-\[\#707c76\] {
-  color: #475569 !important;
+  color: #515154 !important;
 }
 
 .light .text-neutral-500,
 .light .text-slate-500 {
-  color: #64748B !important;
+  color: #6E6E73 !important;
 }
 
 .light .placeholder-slate-400::placeholder,
 .light .placeholder-slate-500::placeholder,
 .light .placeholder-neutral-500::placeholder {
-  color: #94A3B8 !important;
+  color: #86868B !important;
 }
 
 /* Active buttons and tags that already have specific solid backgrounds should preserve contrast */
@@ -342,13 +393,13 @@
 .light .hover\:bg-\[\#222222\]:hover,
 .light .hover\:bg-\[\#0e0e0e\]:hover,
 .light .hover\:bg-\[\#121d33\]:hover {
-  background-color: #E2E8F0 !important;
+  background-color: #E5E5EA !important;
 }
 
 .light .hover\:text-white:hover,
 .light .hover\:text-neutral-100:hover,
 .light .hover\:text-neutral-200:hover {
-  color: #0F172A !important;
+  color: #1D1D1F !important;
 }
 
 /* Inputs & Form Elements in Light Mode */
@@ -356,26 +407,26 @@
 .light select,
 .light textarea {
   background-color: #FFFFFF !important;
-  color: #0F172A !important;
-  border-color: #CBD5E1 !important;
+  color: #1D1D1F !important;
+  border-color: #D2D2D7 !important;
 }
 
 .light input[type="checkbox"],
 .light input[type="radio"] {
   background-color: #FFFFFF !important;
-  border-color: #CBD5E1 !important;
+  border-color: #D2D2D7 !important;
 }
 
 /* Leaflet Map Controls in Light Mode */
 .light .leaflet-container {
-  background-color: #F1F5F9 !important;
+  background-color: #F2F2F7 !important;
 }
 
 .light .leaflet-popup-content-wrapper {
   background-color: #FFFFFF !important;
-  color: #0F172A !important;
+  color: #1D1D1F !important;
   border: 1px solid #E2E8F0 !important;
-  border-radius: 8px !important;
+  border-radius: 12px !important;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
 }
 
@@ -392,13 +443,13 @@
 
 .light .leaflet-bar a {
   background-color: rgba(255, 255, 255, 0.95) !important;
-  color: #334155 !important;
+  color: #3A3A3C !important;
   border-bottom: 1px solid #E2E8F0 !important;
 }
 
 .light .leaflet-bar a:hover {
-  background-color: #F1F5F9 !important;
-  color: #0F172A !important;
+  background-color: #F2F2F7 !important;
+  color: #1D1D1F !important;
 }
 
 .leaflet-popup-content {
@@ -582,8 +633,15 @@
   color: #555555 !important;
 }
 
+/* Map data attribution is required by OpenStreetMap / tile providers: keep it, but quiet */
 .leaflet-control-attribution {
-  display: none !important;
+  background: rgb(var(--rgb-surface) / 0.7) !important;
+  color: rgb(var(--rgb-label-2)) !important;
+  font-size: 10px !important;
+  border-radius: 6px 0 0 0;
+}
+.leaflet-control-attribution a {
+  color: rgb(var(--rgb-label-2)) !important;
 }
 
 /* ==========================================================================
@@ -599,4 +657,22 @@
     animation: none !important;
     transition: none !important;
   }
+}
+
+/* Map zoom buttons as an Apple-style rounded control */
+.leaflet-bar {
+  border: none !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+  background: rgb(var(--rgb-surface) / 0.85) !important;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+.leaflet-bar a {
+  background: transparent !important;
+  color: rgb(var(--rgb-label)) !important;
+  border-bottom: 1px solid rgb(var(--rgb-line)) !important;
+}
+.leaflet-bar a:last-child {
+  border-bottom: none !important;
 }

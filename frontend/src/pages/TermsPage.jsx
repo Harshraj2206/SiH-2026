@@ -5,58 +5,58 @@ import { Terrain3DBackground } from '../components/common/Terrain3DBackground';
 
 export const TermsPage = () => {
   return (
-    <div className="min-h-screen relative text-slate-100 flex flex-col selection:bg-rose-500 selection:text-white">
+    <div className="min-h-screen relative isolate text-label flex flex-col selection:bg-accent/30">
       <Terrain3DBackground />
 
-      <nav className="h-16 border-b border-slate-800/80 px-6 flex items-center justify-between bg-slate-950/80 backdrop-blur sticky top-0 z-30">
+      <nav className="h-16 border-b border-line px-6 flex items-center justify-between bg-page/75 backdrop-blur-xl sticky top-0 z-30">
         <Link to="/" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-500">
+          <div className="w-8 h-8 rounded-field bg-surface-2 flex items-center justify-center text-label">
             <Shield className="w-4 h-4" />
           </div>
-          <span className="font-black text-sm tracking-wider text-white">LAND<span className="text-rose-500">GUARD</span></span>
+          <span className="font-semibold text-sm text-label">LandSafe</span>
         </Link>
-        <Link to="/login" className="text-xs text-slate-300 hover:text-white flex items-center gap-1">
+        <Link to="/login" className="text-xs text-label-2 hover:text-label flex items-center gap-1">
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Back to Sign In</span>
         </Link>
       </nav>
 
       <main className="max-w-3xl mx-auto px-6 py-12 space-y-6">
-        <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center gap-3 text-xs text-amber-200">
-          <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
+        <div className="p-3.5 rounded-card bg-risk-moderate/[0.12] border-risk-moderate/30 flex items-center gap-3 text-xs text-risk-moderate">
+          <AlertCircle className="w-4 h-4 text-risk-moderate shrink-0" />
           <span>Draft Document — Created for Smart India Hackathon 2026 (SIH26001) Prototype Review</span>
         </div>
 
-        <div className="bg-slate-900/85 backdrop-blur-md border border-slate-800 rounded-3xl p-8 shadow-2xl space-y-6">
-          <div className="flex items-center gap-3 border-b border-slate-800 pb-4">
-            <FileText className="w-6 h-6 text-rose-500" />
-            <h1 className="text-2xl font-black text-white">Terms of Service</h1>
+        <div className="bg-surface backdrop-blur-md rounded-card p-8 space-y-6">
+          <div className="flex items-center gap-3 border-b border-line pb-4">
+            <FileText className="w-6 h-6 text-risk-critical" />
+            <h1 className="text-2xl font-semibold text-label">Terms of Service</h1>
           </div>
 
-          <div className="space-y-4 text-xs text-slate-300 leading-relaxed">
+          <div className="space-y-4 text-xs text-label-2 leading-relaxed">
             <section className="space-y-2">
-              <h2 className="text-sm font-bold text-white">1. Purpose and Scope</h2>
+              <h2 className="text-sm font-semibold text-label">1. Purpose and Scope</h2>
               <p>
-                LANDSLIDEGUARD is a prototype disaster-management and early warning intelligence platform designed for the North Eastern Region (NER) and Himalayan belt under Smart India Hackathon 2026 Problem Statement SIH26001.
+                LandSafe is a prototype disaster-management and early warning intelligence platform designed for the North Eastern Region (NER) and Himalayan belt under Smart India Hackathon 2026 Problem Statement SIH26001.
               </p>
             </section>
 
             <section className="space-y-2">
-              <h2 className="text-sm font-bold text-white">2. Crowdsourced Ground Reports</h2>
+              <h2 className="text-sm font-semibold text-label">2. Crowdsourced Ground Reports</h2>
               <p>
                 Users agree to provide truthful and accurate observational data when submitting citizen reports (such as tension cracks, water seepage, or rockfalls). Falsified disaster reports may degrade ML hazard calibration and endanger public safety.
               </p>
             </section>
 
             <section className="space-y-2">
-              <h2 className="text-sm font-bold text-white">3. Emergency SOS Dispatch</h2>
+              <h2 className="text-sm font-semibold text-label">3. Emergency SOS Dispatch</h2>
               <p>
                 The 1-Click Emergency SOS beacon is reserved for bona fide life-safety emergencies. Misuse of the emergency beacon interferes with real multi-agency rescue dispatch (NDRF/SDRF/108 Medical).
               </p>
             </section>
 
             <section className="space-y-2">
-              <h2 className="text-sm font-bold text-white">4. Predictive Disclaimers</h2>
+              <h2 className="text-sm font-semibold text-label">4. Predictive Disclaimers</h2>
               <p>
                 Risk scores generated by the Random Forest ML model and dynamic safe routing are advisory. Extreme weather and rapid geomorphic shifts can occur suddenly in mountainous corridors.
               </p>

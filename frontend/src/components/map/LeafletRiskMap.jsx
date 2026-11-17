@@ -15,7 +15,7 @@ import {
 } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { getRiskScoreColor, formatDate } from '../../utils/formatters';
+import { getRiskScoreColor, formatDate, toLabel } from '../../utils/formatters';
 import { useLanguage } from '../../context/LanguageContext';
 import { api } from '../../services/api';
 import { useTheme } from '../../context/ThemeContext';
@@ -102,10 +102,10 @@ const BASEMAP_TILES = {
 // Clean Operational Marker Pin Generators
 const createIncidentIcon = (severity) => {
   const isCrit = severity === 'CRITICAL';
-  const color = isCrit ? '#ef4444' : '#f59e0b';
+  const color = isCrit ? '#E06C66' : '#D4B24C';
   const html = `
-    <div style="width:24px; height:24px; border-radius:50%; background:#0d1527; border:2px solid ${color}; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,0.6);">
-      <span style="color:${color}; font-size:11px; font-weight:900;">▲</span>
+    <div style="width:24px; height:24px; border-radius:50%; background:#1C1C1E; border:2px solid ${color}; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,0.6);">
+      <span style="color:${color}; font-size:10px; font-weight:600;">▲</span>
     </div>
   `;
   return L.divIcon({ className: 'custom-incident-pin', html, iconSize: [24, 24], iconAnchor: [12, 12], popupAnchor: [0, -12] });
@@ -113,8 +113,8 @@ const createIncidentIcon = (severity) => {
 
 const createSOSIcon = () => {
   const html = `
-    <div style="width:26px; height:26px; border-radius:50%; background:#dc2626; border:2px solid #ffffff; display:flex; align-items:center; justify-content:center; box-shadow:0 0 10px rgba(220,38,38,0.7);">
-      <span style="color:#ffffff; font-size:9px; font-weight:900; font-family:monospace;">SOS</span>
+    <div style="width:26px; height:26px; border-radius:50%; background:#E06C66; border:2px solid #ffffff; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.4);">
+      <span style="color:#ffffff; font-size:9px; font-weight:600; font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',Inter,sans-serif;">SOS</span>
     </div>
   `;
   return L.divIcon({ className: 'custom-sos-pin', html, iconSize: [26, 26], iconAnchor: [13, 13], popupAnchor: [0, -13] });
@@ -122,7 +122,7 @@ const createSOSIcon = () => {
 
 const createHospitalIcon = () => {
   const html = `
-    <div style="width:22px; height:22px; border-radius:5px; background:#0284c7; border:1.5px solid #ffffff; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.5); font-size:12px; font-weight:bold; color:white;">
+    <div style="width:22px; height:22px; border-radius:50%; background:#2C2C2E; border:1.5px solid #ffffff; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.5); font-size:12px; font-weight:bold; color:white;">
       +
     </div>
   `;
@@ -131,8 +131,8 @@ const createHospitalIcon = () => {
 
 const createShelterIcon = () => {
   const html = `
-    <div style="width:22px; height:22px; border-radius:5px; background:#059669; border:1.5px solid #ffffff; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.5); font-size:11px; color:white;">
-      🏕
+    <div style="width:22px; height:22px; border-radius:50%; background:#2C2C2E; border:1.5px solid #ffffff; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.5); font-size:11px; color:white;">
+      S
     </div>
   `;
   return L.divIcon({ className: 'custom-shelter-pin', html, iconSize: [22, 22], iconAnchor: [11, 11], popupAnchor: [0, -11] });
@@ -140,8 +140,8 @@ const createShelterIcon = () => {
 
 const createTeamIcon = () => {
   const html = `
-    <div style="width:22px; height:22px; border-radius:50%; background:#4f46e5; border:1.5px solid #ffffff; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.5); font-size:10px; color:white;">
-      🛡
+    <div style="width:22px; height:22px; border-radius:50%; background:#2C2C2E; border:1.5px solid #ffffff; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.5); font-size:10px; color:white;">
+      R
     </div>
   `;
   return L.divIcon({ className: 'custom-team-pin', html, iconSize: [22, 22], iconAnchor: [11, 11], popupAnchor: [0, -11] });
@@ -149,9 +149,9 @@ const createTeamIcon = () => {
 
 const createReportIcon = (status) => {
   const isVerified = status === 'VERIFIED';
-  const color = isVerified ? '#10b981' : '#f59e0b';
+  const color = isVerified ? '#6BBF8A' : '#D4B24C';
   const html = `
-    <div style="width:18px; height:18px; background:#0d1527; border:2px solid ${color}; border-radius:50%; display:flex; align-items:center; justify-content:center;">
+    <div style="width:18px; height:18px; background:#1C1C1E; border:2px solid ${color}; border-radius:50%; display:flex; align-items:center; justify-content:center;">
       <div style="width:6px; height:6px; border-radius:50%; background:${color};"></div>
     </div>
   `;
@@ -601,7 +601,7 @@ export const LeafletRiskMap = ({
   };
 
   return (
-    <div className="relative isolate z-0 w-full h-full min-h-[480px] rounded-2xl overflow-hidden border border-[#262626] bg-[#0B0B0B] flex flex-col" style={{ height: height || '100%' }}>
+    <div className="relative isolate z-0 w-full h-full min-h-[480px] rounded-tile overflow-hidden bg-surface-2 flex flex-col" style={{ height: height || '100%' }}>
       
       {/* Top Search & Locate Bar - Fully Responsive with Glassmorphic Rounded-Full Radius */}
       <div 
@@ -615,12 +615,12 @@ export const LeafletRiskMap = ({
         <div className="flex items-center gap-2 max-w-[calc(100%-80px)] sm:max-w-md w-full pointer-events-auto">
           <form 
             onSubmit={handleSearchSubmit} 
-            className="flex items-center bg-[#121212]/95 backdrop-blur-md border border-[#303030] rounded-full px-3.5 py-1.5 sm:py-2 shadow-xl flex-1 min-w-[120px] focus-within:border-emerald-500/70 focus-within:ring-1 focus-within:ring-emerald-500/50 transition-all"
+            className="flex items-center bg-surface-2 backdrop-blur-md rounded-full px-3.5 py-1.5 sm:py-2 flex-1 min-w-[120px] focus-within:border-risk-low/30 focus-within:ring-1 focus-within:ring-risk-low/30 transition-all"
             onKeyDown={(e) => e.stopPropagation()}
           >
             <button 
               type="submit" 
-              className="text-neutral-400 hover:text-emerald-400 mr-2 flex-shrink-0 focus:outline-none transition-colors"
+              className="text-label-2 hover:text-risk-low mr-2 flex-shrink-0 focus:outline-none transition-colors"
               title="Search place or coordinates"
             >
               <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -630,17 +630,17 @@ export const LeafletRiskMap = ({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t('search_place_placeholder') || 'Search place, district, or coordinates...'}
-              className="bg-transparent text-[11px] sm:text-xs text-neutral-100 placeholder-neutral-500 focus:outline-none w-full font-medium"
+              className="bg-transparent text-xs sm:text-xs text-label placeholder-label-3 focus:outline-none w-full font-medium"
             />
           </form>
 
           <button
             onClick={handleLocateMe}
             disabled={geoLocating}
-            className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 bg-[#161616]/95 hover:bg-[#222222] text-neutral-200 border border-[#303030] hover:border-emerald-500/50 text-[11px] sm:text-xs font-medium rounded-full shadow-xl transition-all flex-shrink-0 backdrop-blur-md active:scale-95"
+            className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 bg-surface-2 hover:bg-surface-2 text-label hover:border-risk-low/30 text-xs sm:text-xs font-medium rounded-full whitespace-nowrap transition-all flex-shrink-0 backdrop-blur-md active:scale-95"
             title="Detect GPS Location"
           >
-            <Crosshair className={`w-3.5 h-3.5 ${geoLocating ? 'animate-spin text-emerald-400' : 'text-neutral-400'}`} />
+            <Crosshair className={`w-3.5 h-3.5 ${geoLocating ? 'animate-spin text-risk-low' : 'text-label-2'}`} />
             <span className="hidden md:inline">{geoLocating ? (t('locating') || 'Locating...') : (t('locate_me') || 'Locate Me')}</span>
           </button>
         </div>
@@ -649,9 +649,9 @@ export const LeafletRiskMap = ({
         <div className="pointer-events-auto shrink-0">
           <button
             onClick={() => setShowLayerPanel(!showLayerPanel)}
-            className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 bg-[#121212]/95 border border-[#303030] hover:border-neutral-500 text-neutral-200 text-[11px] sm:text-xs font-medium rounded-full shadow-xl transition-all backdrop-blur-md active:scale-95"
+            className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 bg-surface-2 text-label text-xs sm:text-xs font-medium rounded-full whitespace-nowrap transition-all backdrop-blur-md active:scale-95"
           >
-            <Layers className="w-3.5 h-3.5 text-sky-400" />
+            <Layers className="w-3.5 h-3.5 text-label-2" />
             <span className="hidden sm:inline">{t('gis_layers') || 'GIS Layers'}</span>
           </button>
         </div>
@@ -659,20 +659,20 @@ export const LeafletRiskMap = ({
 
       {/* Layer Control Panel Flyout */}
       {showLayerPanel && (
-        <div className="absolute top-14 right-3.5 z-[1001] bg-[#121212]/95 backdrop-blur-md border border-[#303030] p-4 rounded-2xl shadow-2xl w-64 text-xs space-y-3 animate-in fade-in">
-          <div className="flex items-center justify-between pb-2 border-b border-[#262626]">
-            <span className="text-xs font-semibold text-neutral-200 flex items-center gap-1.5">
-              <Compass className="w-3.5 h-3.5 text-sky-400" />
+        <div className="absolute top-14 right-3.5 z-[1001] bg-surface backdrop-blur-md p-4 rounded-card w-64 text-xs space-y-3 animate-in fade-in">
+          <div className="flex items-center justify-between pb-2 border-b border-line">
+            <span className="text-xs font-semibold text-label flex items-center gap-1.5">
+              <Compass className="w-3.5 h-3.5 text-label-2" />
               {t('gis_overlays_basemap') || 'GIS Overlays & Basemap'}
             </span>
-            <button onClick={() => setShowLayerPanel(false)} className="text-neutral-400 hover:text-white">
+            <button onClick={() => setShowLayerPanel(false)} className="text-label-2 hover:text-label">
               <X className="w-3.5 h-3.5" />
             </button>
           </div>
 
           {/* Basemap Selection */}
           <div className="space-y-1">
-            <span className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider block">
+            <span className="text-xs font-semibold text-label-2 block">
               {t('basemap_provider') || 'Basemap Provider'}
             </span>
             <div className="grid grid-cols-2 gap-1.5">
@@ -680,10 +680,10 @@ export const LeafletRiskMap = ({
                 <button
                   key={key}
                   onClick={() => setActiveBasemap(key)}
-                  className={`py-1 px-2 rounded-lg text-xs border transition-colors text-left truncate ${
+                  className={`py-1 px-2 rounded-tile text-xs transition-colors text-left truncate ${
                     activeBasemap === key 
-                      ? 'bg-[#1C1C1C] border-sky-500 text-sky-300 font-semibold' 
-                      : 'bg-[#151515] border-[#262626] text-neutral-400 hover:text-neutral-200'
+                      ? 'bg-surface-2 text-label-2 font-semibold' 
+                      : 'bg-surface-2 text-label-2 hover:text-label'
                   }`}
                 >
                   {item.label || item.name}
@@ -693,67 +693,67 @@ export const LeafletRiskMap = ({
           </div>
 
           {/* Operational Overlays */}
-          <div className="space-y-1 pt-2 border-t border-[#262626]">
-            <span className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider block">
+          <div className="space-y-1 pt-2 border-t border-line">
+            <span className="text-xs font-semibold text-label-2 block">
               {t('operational_layers') || 'Operational Layers'}
             </span>
             <div className="grid grid-cols-2 gap-1.5 text-xs">
-              <label className="flex items-center gap-1.5 text-neutral-300 hover:text-white cursor-pointer">
+              <label className="flex items-center gap-1.5 text-label-2 hover:text-label cursor-pointer">
                 <input
                   type="checkbox"
                   checked={layers.zones}
                   onChange={(e) => setLayers({ ...layers, zones: e.target.checked })}
-                  className="rounded bg-neutral-900 border-[#262626] text-red-500 focus:ring-0"
+                  className="rounded bg-surface border-line text-risk-critical focus:ring-0"
                 />
                 <span>{t('layer_risk_zones') || 'Risk Zones'} ({zones.length})</span>
               </label>
 
-              <label className="flex items-center gap-1.5 text-neutral-300 hover:text-white cursor-pointer">
+              <label className="flex items-center gap-1.5 text-label-2 hover:text-label cursor-pointer">
                 <input
                   type="checkbox"
                   checked={layers.incidents}
                   onChange={(e) => setLayers({ ...layers, incidents: e.target.checked })}
-                  className="rounded bg-neutral-900 border-[#262626] text-amber-500 focus:ring-0"
+                  className="rounded bg-surface border-line text-risk-moderate focus:ring-0"
                 />
                 <span>{t('layer_incidents') || 'Incidents'} ({incidents.length})</span>
               </label>
 
-              <label className="flex items-center gap-1.5 text-neutral-300 hover:text-white cursor-pointer">
+              <label className="flex items-center gap-1.5 text-label-2 hover:text-label cursor-pointer">
                 <input
                   type="checkbox"
                   checked={layers.sos}
                   onChange={(e) => setLayers({ ...layers, sos: e.target.checked })}
-                  className="rounded bg-neutral-900 border-[#262626] text-red-600 focus:ring-0"
+                  className="rounded bg-surface border-line text-risk-critical focus:ring-0"
                 />
                 <span>{t('layer_sos_alerts') || 'SOS Alerts'} ({sosRequests.length})</span>
               </label>
 
-              <label className="flex items-center gap-1.5 text-neutral-300 hover:text-white cursor-pointer">
+              <label className="flex items-center gap-1.5 text-label-2 hover:text-label cursor-pointer">
                 <input
                   type="checkbox"
                   checked={layers.reports}
                   onChange={(e) => setLayers({ ...layers, reports: e.target.checked })}
-                  className="rounded bg-neutral-900 border-[#262626] text-emerald-500 focus:ring-0"
+                  className="rounded bg-surface border-line text-risk-low focus:ring-0"
                 />
                 <span>{t('layer_reports') || 'Reports'} ({reports.length})</span>
               </label>
 
-              <label className="flex items-center gap-1.5 text-neutral-300 hover:text-white cursor-pointer">
+              <label className="flex items-center gap-1.5 text-label-2 hover:text-label cursor-pointer">
                 <input
                   type="checkbox"
                   checked={layers.hospitals}
                   onChange={(e) => setLayers({ ...layers, hospitals: e.target.checked })}
-                  className="rounded bg-neutral-900 border-[#262626] text-sky-500 focus:ring-0"
+                  className="rounded bg-surface border-line text-label-2 focus:ring-0"
                 />
                 <span>{t('layer_hospitals') || 'Hospitals'} ({hospitals.length})</span>
               </label>
 
-              <label className="flex items-center gap-1.5 text-neutral-300 hover:text-white cursor-pointer">
+              <label className="flex items-center gap-1.5 text-label-2 hover:text-label cursor-pointer">
                 <input
                   type="checkbox"
                   checked={layers.shelters}
                   onChange={(e) => setLayers({ ...layers, shelters: e.target.checked })}
-                  className="rounded bg-neutral-900 border-[#262626] text-emerald-500 focus:ring-0"
+                  className="rounded bg-surface border-line text-risk-low focus:ring-0"
                 />
                 <span>{t('layer_shelters') || 'Shelters'} ({shelters.length})</span>
               </label>
@@ -773,7 +773,7 @@ export const LeafletRiskMap = ({
         worldCopyJump={false}
         scrollWheelZoom={true}
         zoomControl={false}
-        attributionControl={false}
+        attributionControl={true}
         className="w-full h-full"
       >
         {/* Dedicated Non-Overlapping Zoom Control placed cleanly at bottom-right */}
@@ -809,7 +809,7 @@ export const LeafletRiskMap = ({
               <Circle
                 center={[activeLocationPin.lat, activeLocationPin.lng]}
                 radius={Math.min(300, activeLocationPin.accuracy * 2)}
-                pathOptions={{ color: '#10b981', fillColor: '#10b981', fillOpacity: 0.15, weight: 1.5 }}
+                pathOptions={{ color: '#6BBF8A', fillColor: '#6BBF8A', fillOpacity: 0.15, weight: 1.5 }}
               />
             )}
             <Marker 
@@ -824,16 +824,16 @@ export const LeafletRiskMap = ({
             >
               <Popup autoPan={false}>
                 <div className="p-2.5 text-xs space-y-1.5 min-w-[170px]">
-                  <div className="flex items-center justify-between border-b border-neutral-700 pb-1">
-                    <span className="font-bold text-emerald-400">
-                      {activeLocationPin.type === 'gps' ? '📍 GPS Location' : '📍 Selected Location'}
+                  <div className="flex items-center justify-between border-b border-line pb-1">
+                    <span className="font-semibold text-risk-low">
+                      {activeLocationPin.type === 'gps' ? ' GPS Location' : ' Selected Location'}
                     </span>
                   </div>
-                  <div className="text-neutral-300 font-mono text-[11px]">
+                  <div className="text-label-2 tabular-nums text-xs">
                     {activeLocationPin.lat.toFixed(4)}°N, {activeLocationPin.lng.toFixed(4)}°E
                   </div>
-                  <div className="text-[10px] text-emerald-400 font-semibold">
-                    ✓ Risk Telemetry Inspected
+                  <div className="text-xs text-risk-low font-semibold">
+                     Risk Telemetry Inspected
                   </div>
                   <button
                     type="button"
@@ -842,7 +842,7 @@ export const LeafletRiskMap = ({
                       setActiveLocationPin(null);
                       if (onSelectZone) onSelectZone(null);
                     }}
-                    className="w-full mt-1.5 px-2 py-1 bg-neutral-800 hover:bg-neutral-700 border border-neutral-600 text-neutral-200 rounded text-[10px] font-semibold transition-colors"
+                    className="w-full mt-1.5 px-2 py-1 bg-surface-2 hover:bg-surface-2 text-label rounded-full text-xs font-semibold transition-colors"
                   >
                     Remove Pin
                   </button>
@@ -871,7 +871,7 @@ export const LeafletRiskMap = ({
                     color: isSelected ? '#ffffff' : riskColor.hex,
                     weight: isSelected ? 3 : 1.5,
                     fillColor: riskColor.hex,
-                    fillOpacity: isSelected ? 0.5 : 0.3,
+                    fillOpacity: isSelected ? 0.4 : 0.25,
                     dashArray: isSelected ? '4, 4' : null
                   }}
                   eventHandlers={{
@@ -882,9 +882,9 @@ export const LeafletRiskMap = ({
                 >
                   <Tooltip direction="top" offset={[0, -8]} opacity={0.95}>
                     <div className="text-xs p-1">
-                      <div className="font-bold text-slate-100">{zone.zone_id}: {zone.name}</div>
-                      <div className="text-[11px] text-slate-300 mt-0.5">
-                        Risk: <span className="font-mono font-bold" style={{ color: riskColor.hex }}>{zone.risk_score}/100 ({zone.risk_level})</span>
+                      <div className="font-semibold text-label">{zone.zone_id}: {zone.name}</div>
+                      <div className="text-xs text-label-2 mt-0.5">
+                        Risk: <span className="tabular-nums font-semibold" style={{ color: riskColor.hex }}>{zone.risk_score}/100 ({zone.risk_level})</span>
                       </div>
                     </div>
                   </Tooltip>
@@ -909,9 +909,9 @@ export const LeafletRiskMap = ({
                 >
                   <Tooltip direction="top" offset={[0, -6]} opacity={0.95}>
                     <div className="text-xs p-1">
-                      <div className="font-bold text-white">{zone.name}</div>
-                      <div className="text-[10px] text-slate-300 font-mono">
-                        Corridor {zone.zone_id} • <span style={{ color: riskColor.hex }} className="font-bold">{zone.risk_score}/100</span>
+                      <div className="font-semibold text-label">{zone.name}</div>
+                      <div className="text-xs text-label-2 tabular-nums">
+                        Corridor {zone.zone_id} • <span style={{ color: riskColor.hex }} className="font-semibold">{zone.risk_score}/100</span>
                       </div>
                     </div>
                   </Tooltip>
@@ -930,14 +930,14 @@ export const LeafletRiskMap = ({
           >
             <Popup>
               <div className="p-2 space-y-1 min-w-[200px]">
-                <div className="flex items-center justify-between border-b border-[#1c2b48] pb-1">
-                  <span className="font-mono text-[10px] text-amber-400 font-bold">{inc.incident_id}</span>
-                  <span className="text-[10px] px-1 py-0.2 rounded font-bold bg-[#16243d] text-slate-300">
-                    {inc.status}
+                <div className="flex items-center justify-between border-b border-line pb-1">
+                  <span className="tabular-nums text-xs text-risk-moderate font-semibold">{inc.incident_id}</span>
+                  <span className="text-xs px-1 py-0.5 rounded-full font-semibold bg-surface-2 text-label-2">
+                    {toLabel(inc.status)}
                   </span>
                 </div>
-                <h4 className="font-bold text-xs text-white">{inc.title}</h4>
-                <p className="text-[11px] text-slate-300">{inc.description}</p>
+                <h4 className="font-semibold text-xs text-label">{inc.title}</h4>
+                <p className="text-xs text-label-2">{inc.description}</p>
               </div>
             </Popup>
           </Marker>
@@ -952,14 +952,14 @@ export const LeafletRiskMap = ({
           >
             <Popup>
               <div className="p-2 space-y-1 min-w-[220px]">
-                <div className="flex items-center justify-between border-b border-red-900/60 pb-1">
-                  <span className="font-bold text-red-400 font-mono text-xs">🆘 {sos.sos_id}</span>
-                  <span className="text-[10px] px-1.5 py-0.2 rounded font-bold bg-red-700 text-white font-mono">
+                <div className="flex items-center justify-between border-b border-risk-critical/30 pb-1">
+                  <span className="font-semibold text-risk-critical tabular-nums text-xs">SOS {sos.sos_id}</span>
+                  <span className="text-xs px-1.5 py-0.5 rounded-full font-semibold bg-risk-critical text-white tabular-nums">
                     {sos.triage_priority}
                   </span>
                 </div>
-                <div className="text-xs font-bold text-white">{sos.user_name} ({sos.people_count} people)</div>
-                <p className="text-[11px] text-slate-300 italic">"{sos.message || 'Distress assistance requested'}"</p>
+                <div className="text-xs font-semibold text-label">{sos.user_name} ({sos.people_count} people)</div>
+                <p className="text-xs text-label-2 italic">"{sos.message || 'Distress assistance requested'}"</p>
               </div>
             </Popup>
           </Marker>
@@ -974,12 +974,12 @@ export const LeafletRiskMap = ({
           >
             <Popup>
               <div className="p-2 space-y-1 min-w-[180px]">
-                <div className="flex justify-between text-[10px] border-b border-[#1c2b48] pb-1">
-                  <span className="font-mono text-slate-400">{rep.id}</span>
-                  <span className="font-bold text-amber-400">{rep.status}</span>
+                <div className="flex justify-between text-xs border-b border-line pb-1">
+                  <span className="tabular-nums text-label-2">{rep.id}</span>
+                  <span className="font-semibold text-risk-moderate">{toLabel(rep.status)}</span>
                 </div>
-                <h4 className="font-bold text-xs text-white">{rep.report_type}</h4>
-                <p className="text-[11px] text-slate-300 italic">"{rep.description}"</p>
+                <h4 className="font-semibold text-xs text-label">{toLabel(rep.report_type)}</h4>
+                <p className="text-xs text-label-2 italic">"{rep.description}"</p>
               </div>
             </Popup>
           </Marker>
@@ -994,11 +994,11 @@ export const LeafletRiskMap = ({
           >
             <Popup>
               <div className="p-2 space-y-1 min-w-[200px]">
-                <div className="font-bold text-xs text-sky-400 flex items-center gap-1">
+                <div className="font-semibold text-xs text-label-2 flex items-center gap-1">
                   <Ambulance className="w-3 h-3" />
                   {hosp.name}
                 </div>
-                <div className="text-[10px] text-slate-300">Available Beds: <strong className="text-emerald-400">{hosp.available_beds}</strong></div>
+                <div className="text-xs text-label-2">Available Beds: <strong className="text-risk-low">{hosp.available_beds}</strong></div>
               </div>
             </Popup>
           </Marker>
@@ -1013,11 +1013,11 @@ export const LeafletRiskMap = ({
           >
             <Popup>
               <div className="p-2 space-y-1 min-w-[200px]">
-                <div className="font-bold text-xs text-emerald-400 flex items-center gap-1">
+                <div className="font-semibold text-xs text-risk-low flex items-center gap-1">
                   <Home className="w-3 h-3" />
                   {shelt.name}
                 </div>
-                <div className="text-[10px] text-slate-300">Capacity: {shelt.current_occupancy} / {shelt.capacity}</div>
+                <div className="text-xs text-label-2">Capacity: {shelt.current_occupancy} / {shelt.capacity}</div>
               </div>
             </Popup>
           </Marker>
@@ -1030,7 +1030,7 @@ export const LeafletRiskMap = ({
             {routeData.fastest_route && (
               <Polyline
                 positions={routeData.fastest_route.coordinates.map(c => [c.lat, c.lng])}
-                pathOptions={{ color: '#ef4444', weight: 3, dashArray: '6, 6', opacity: 0.75 }}
+                pathOptions={{ color: '#E06C66', weight: 3, dashArray: '6, 6', opacity: 0.75 }}
               />
             )}
 
@@ -1038,7 +1038,7 @@ export const LeafletRiskMap = ({
             {routeData.safe_route && (
               <Polyline
                 positions={routeData.safe_route.coordinates.map(c => [c.lat, c.lng])}
-                pathOptions={{ color: '#10b981', weight: 6, opacity: 0.95 }}
+                pathOptions={{ color: '#6BBF8A', weight: 6, opacity: 0.95 }}
               />
             )}
 
@@ -1047,18 +1047,18 @@ export const LeafletRiskMap = ({
               const startPt = routeData.safe_route.coordinates[0];
               const startName = routeData.start?.name || startPt.name || 'Origin';
               const startHtml = `
-                <div style="display:flex; align-items:center; gap:4px; background:#0d1527; border:2px solid #0ea5e9; border-radius:8px; padding:3px 8px; box-shadow:0 4px 12px rgba(0,0,0,0.8); white-space:nowrap;">
-                  <span style="width:8px; height:8px; border-radius:50%; background:#0ea5e9;"></span>
-                  <span style="font-family:monospace; font-weight:bold; font-size:11px; color:#ffffff;">A: ${startName}</span>
+                <div style="display:flex; align-items:center; gap:4px; background:#1C1C1E; border:1.5px solid #4A86E8; border-radius:999px; padding:3px 10px; box-shadow:0 2px 8px rgba(0,0,0,0.4); white-space:nowrap;">
+                  <span style="width:8px; height:8px; border-radius:50%; background:#4A86E8;"></span>
+                  <span style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',Inter,sans-serif; font-weight:600; font-size:11px; color:#ffffff;">A: ${startName}</span>
                 </div>
               `;
               const startIcon = L.divIcon({ className: 'route-start-pin', html: startHtml, iconSize: [140, 26], iconAnchor: [70, 13] });
               return (
                 <Marker position={[startPt.lat, startPt.lng]} icon={startIcon}>
                   <Popup>
-                    <div className="p-2 text-xs font-mono">
-                      <strong className="text-cyan-400">ORIGIN: {startName}</strong>
-                      <div className="text-slate-400 text-[10px] mt-0.5">{startPt.lat.toFixed(4)}°N, {startPt.lng.toFixed(4)}°E</div>
+                    <div className="p-2 text-xs tabular-nums">
+                      <strong className="text-label-2">ORIGIN: {startName}</strong>
+                      <div className="text-label-2 text-xs mt-0.5">{startPt.lat.toFixed(4)}°N, {startPt.lng.toFixed(4)}°E</div>
                     </div>
                   </Popup>
                 </Marker>
@@ -1070,18 +1070,18 @@ export const LeafletRiskMap = ({
               const endPt = routeData.safe_route.coordinates[routeData.safe_route.coordinates.length - 1];
               const destName = routeData.destination?.name || endPt.name || 'Destination';
               const endHtml = `
-                <div style="display:flex; align-items:center; gap:4px; background:#0d1527; border:2px solid #10b981; border-radius:8px; padding:3px 8px; box-shadow:0 4px 12px rgba(0,0,0,0.8); white-space:nowrap;">
-                  <span style="width:8px; height:8px; border-radius:50%; background:#10b981;"></span>
-                  <span style="font-family:monospace; font-weight:bold; font-size:11px; color:#ffffff;">B: ${destName}</span>
+                <div style="display:flex; align-items:center; gap:4px; background:#1C1C1E; border:1.5px solid #6BBF8A; border-radius:999px; padding:3px 10px; box-shadow:0 2px 8px rgba(0,0,0,0.4); white-space:nowrap;">
+                  <span style="width:8px; height:8px; border-radius:50%; background:#6BBF8A;"></span>
+                  <span style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',Inter,sans-serif; font-weight:600; font-size:11px; color:#ffffff;">B: ${destName}</span>
                 </div>
               `;
               const endIcon = L.divIcon({ className: 'route-end-pin', html: endHtml, iconSize: [140, 26], iconAnchor: [70, 13] });
               return (
                 <Marker position={[endPt.lat, endPt.lng]} icon={endIcon}>
                   <Popup>
-                    <div className="p-2 text-xs font-mono">
-                      <strong className="text-emerald-400">DESTINATION: {destName}</strong>
-                      <div className="text-slate-400 text-[10px] mt-0.5">{endPt.lat.toFixed(4)}°N, {endPt.lng.toFixed(4)}°E</div>
+                    <div className="p-2 text-xs tabular-nums">
+                      <strong className="text-risk-low">DESTINATION: {destName}</strong>
+                      <div className="text-label-2 text-xs mt-0.5">{endPt.lat.toFixed(4)}°N, {endPt.lng.toFixed(4)}°E</div>
                     </div>
                   </Popup>
                 </Marker>
@@ -1093,25 +1093,25 @@ export const LeafletRiskMap = ({
 
       {/* Unified Compact Hazard Legend Bottom-Left - Fully Responsive */}
       {showLegend && (
-        <div className="absolute bottom-3 left-3 z-[1000] bg-[#121212]/95 backdrop-blur-md border border-[#303030] px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full flex items-center gap-2.5 sm:gap-3.5 text-xs shadow-2xl max-w-[calc(100%-75px)] overflow-x-auto whitespace-nowrap scrollbar-none">
-          <span className="text-neutral-400 font-semibold text-[10px] sm:text-[11px] uppercase tracking-wider hidden lg:inline">
+        <div className="absolute bottom-3 left-3 z-[1000] bg-surface-2 backdrop-blur-md px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full flex items-center gap-2.5 sm:gap-3.5 text-xs max-w-[calc(100%-75px)] overflow-x-auto whitespace-nowrap scrollbar-none">
+          <span className="text-label-2 font-semibold text-xs sm:text-xs hidden lg:inline">
             {t('risk_threshold') || 'Risk Level'}:
           </span>
           <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
-            <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-emerald-500 shrink-0 shadow-sm" />
-            <span className="text-neutral-200 text-[10px] sm:text-[11px] font-medium">Low <span className="text-neutral-500 font-mono text-[9px] sm:text-[10px] hidden sm:inline">(0–30)</span></span>
+            <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-risk-low shrink-0" />
+            <span className="text-label text-xs sm:text-xs font-medium">Low <span className="text-label-3 tabular-nums text-xs sm:text-xs hidden sm:inline">(0–30)</span></span>
           </div>
           <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
-            <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-amber-500 shrink-0 shadow-sm" />
-            <span className="text-neutral-200 text-[10px] sm:text-[11px] font-medium">Moderate <span className="text-neutral-500 font-mono text-[9px] sm:text-[10px] hidden sm:inline">(31–60)</span></span>
+            <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-risk-moderate shrink-0" />
+            <span className="text-label text-xs sm:text-xs font-medium">Moderate <span className="text-label-3 tabular-nums text-xs sm:text-xs hidden sm:inline">(31–60)</span></span>
           </div>
           <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
-            <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-orange-500 shrink-0 shadow-sm" />
-            <span className="text-neutral-200 text-[10px] sm:text-[11px] font-medium">High <span className="text-neutral-500 font-mono text-[9px] sm:text-[10px] hidden sm:inline">(61–80)</span></span>
+            <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-risk-high shrink-0" />
+            <span className="text-label text-xs sm:text-xs font-medium">High <span className="text-label-3 tabular-nums text-xs sm:text-xs hidden sm:inline">(61–80)</span></span>
           </div>
           <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
-            <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-rose-600 shrink-0 shadow-sm" />
-            <span className="text-neutral-200 text-[10px] sm:text-[11px] font-medium">Critical <span className="text-neutral-500 font-mono text-[9px] sm:text-[10px] hidden sm:inline">(81–100)</span></span>
+            <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-risk-critical shrink-0" />
+            <span className="text-label text-xs sm:text-xs font-medium">Critical <span className="text-label-3 tabular-nums text-xs sm:text-xs hidden sm:inline">(81–100)</span></span>
           </div>
         </div>
       )}
