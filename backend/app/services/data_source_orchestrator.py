@@ -224,5 +224,7 @@ def orchestrate_location_intelligence(
         }
     }
 
-    _ORCHESTRATOR_CACHE[cache_key] = {"data": bundle, "cached_at": now}
+    # browser-supplied weather/elevation is for this request only
+    if not weather_data.get("client_supplied") and not terrain_data.get("client_supplied"):
+        _ORCHESTRATOR_CACHE[cache_key] = {"data": bundle, "cached_at": now}
     return bundle

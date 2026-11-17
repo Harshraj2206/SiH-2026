@@ -8,6 +8,7 @@ import json
 import time
 import urllib.request
 import urllib.error
+from contextvars import ContextVar
 from typing import Dict, Any, Optional
 
 
@@ -200,6 +201,13 @@ def get_global_live_weather(latitude: float, longitude: float, country_code: Opt
     now = time.time()
     existing_entry = _WEATHER_CACHE.get(cache_key)
 
+    # A saved wttr.in result (no 72h rain or soil moisture) must not hide better
+    # Open-Meteo data that the user's browser sent for this point.
+    client = _CLIENT_WEATHER.get()
+    has_client = bool(client and client.get("key") == cache_key)
+    if has_client and existing_entry and existing_entry.get("data", {}).get("secondary_source"):
+        existing_entry = None
+
     # 1. Return fresh live cache if within 15 minutes
     if existing_entry and existing_entry.get("data", {}).get("status") in ["LIVE", "CACHED"]:
         age = now - existing_entry["cached_at"]
@@ -244,16 +252,22 @@ def get_global_live_weather(latitude: float, longitude: float, country_code: Opt
         except Exception as e:
             print(f"Error parsing primary weather payload: {e}")
 
-    # 3. Query Secondary Failover (wttr.in)
+    # 3. Open-Meteo data the user's browser fetched for this request (own IP, so not
+    #    rate-limited like the shared server IP). Used for this request only, never cached.
+    if has_client:
+        return dict(client["data"])
+
+    # 4. Query Secondary Failover (wttr.in)
     print("Attempting secondary live meteorological failover...")
     secondary = _fetch_secondary_live_weather(latitude, longitude, country_code)
     if secondary:
         secondary["status"] = "LIVE"
         secondary["data_age_minutes"] = 0
+        secondary["secondary_source"] = True
         _WEATHER_CACHE[cache_key] = {"data": secondary, "cached_at": now}
         return secondary
 
-    # 4. Graceful Stale Cache Fallback (Up to 60 minutes)
+    # 5. Graceful Stale Cache Fallback (Up to 60 minutes)
     if existing_entry and existing_entry.get("data", {}).get("temperature_c") is not None:
         age_seconds = now - existing_entry["cached_at"]
         if age_seconds < _STALE_CACHE_TTL:
@@ -263,7 +277,7 @@ def get_global_live_weather(latitude: float, longitude: float, country_code: Opt
             cached_data["source"] = f"{cached_data.get('source', 'Open-Meteo')} (Cached {cached_data['data_age_minutes']}m ago)"
             return cached_data
 
-    # 5. Scientific Fallback with explicit null markers (UNKNOWN != ZERO)
+    # 6. Scientific Fallback with explicit null markers (UNKNOWN != ZERO)
     fallback = {
         "temperature_c": None,
         "feels_like_c": None,
@@ -314,6 +328,29 @@ def open_meteo_url(latitude: float, longitude: float) -> str:
         f"&hourly=temperature_2m,precipitation,precipitation_probability,soil_moisture_0_to_7cm"
         f"&timezone=auto&past_days=3&forecast_days=3"
     )
+
+
+_CLIENT_WEATHER: ContextVar[Optional[Dict[str, Any]]] = ContextVar("client_weather", default=None)
+
+
+def use_client_weather(latitude: float, longitude: float, data: Optional[Dict[str, Any]]) -> None:
+    """Accept an Open-Meteo response fetched by the user's browser as a fallback for this request.
+
+    Ignored if it is missing, unparseable, or for a different point than the one requested.
+    """
+    _CLIENT_WEATHER.set(None)
+    if not isinstance(data, dict):
+        return
+    try:
+        if abs(float(data.get("latitude")) - latitude) > 0.1 or abs(float(data.get("longitude")) - longitude) > 0.1:
+            return
+        country = "IN" if 6.0 <= latitude <= 38.0 and 68.0 <= longitude <= 98.0 else None
+        result = _parse_open_meteo(data, resolve_weather_provider(country))
+    except Exception:
+        return
+    result["source"] = f"{result['source']} (fetched by your browser)"
+    result["client_supplied"] = True
+    _CLIENT_WEATHER.set({"key": _cache_key(latitude, longitude), "data": result})
 
 
 RELAY_TTL = 4500  # relay pushes every 30 min; keep data 75 min so one missed run doesn't blank zones

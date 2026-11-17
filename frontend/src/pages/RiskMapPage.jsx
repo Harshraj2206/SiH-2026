@@ -74,7 +74,7 @@ export const RiskMapPage = () => {
       }
       const liveData = await api.inspectTelemetry(lat, lng);
       if (liveData) {
-        setSelectedZone(liveData);
+        setSelectedZone(label ? { ...liveData, name: label } : liveData);
       }
     } catch (e) {
       console.warn('Could not inspect telemetry for state:', label, e);

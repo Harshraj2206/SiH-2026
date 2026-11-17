@@ -10,6 +10,43 @@ export const apiClient = axios.create({
   timeout: 12000,
 });
 
+// The server's shared IP can be rate-limited by Open-Meteo, so the browser fetches the
+// same forecast from its own IP and sends it along; the server uses it only as a fallback.
+export const fetchOpenMeteoRaw = async (lat, lon) => {
+  const url = 'https://api.open-meteo.com/v1/forecast'
+    + `?latitude=${Number(lat).toFixed(4)}&longitude=${Number(lon).toFixed(4)}`
+    + '&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,rain,snowfall,weather_code,surface_pressure,wind_speed_10m,wind_direction_10m,is_day,cloud_cover'
+    + '&daily=sunrise,sunset,precipitation_sum'
+    + '&hourly=temperature_2m,precipitation,precipitation_probability,soil_moisture_0_to_7cm'
+    + '&timezone=auto&past_days=3&forecast_days=3';
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+    return res.ok ? await res.json() : null;
+  } catch {
+    return null;
+  }
+};
+
+// Elevation at the point and ~110 m north and east, used by the server for slope
+// (same request the server makes, fetched here for the same reason as above).
+export const fetchOpenMeteoElevation = async (lat, lon) => {
+  const la = Number(lat), lo = Number(lon), d = 0.001;
+  const url = 'https://api.open-meteo.com/v1/elevation'
+    + `?latitude=${la.toFixed(5)},${(la + d).toFixed(5)},${la.toFixed(5)}`
+    + `&longitude=${lo.toFixed(5)},${lo.toFixed(5)},${(lo + d).toFixed(5)}`;
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+    return res.ok ? (await res.json()).elevation || null : null;
+  } catch {
+    return null;
+  }
+};
+
+export const fetchBrowserInputs = async (lat, lon) => {
+  const [weather, elevation] = await Promise.all([fetchOpenMeteoRaw(lat, lon), fetchOpenMeteoElevation(lat, lon)]);
+  return { weather, elevation };
+};
+
 // Intercept requests to attach Bearer token if available
 apiClient.interceptors.request.use(
   (config) => {
@@ -362,7 +399,8 @@ export const api = {
   getAnalytics: analyticsApi.getOverview,
 
   inspectTelemetry: async (latitude, longitude) => {
-    const res = await apiClient.post('/telemetry/inspect', { latitude, longitude });
+    const inputs = await fetchBrowserInputs(latitude, longitude);
+    const res = await apiClient.post('/telemetry/inspect', { latitude, longitude, ...inputs });
     return res.data;
   },
 
