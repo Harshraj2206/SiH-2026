@@ -1,6 +1,6 @@
 """
 LANDSLIDEGUARD SIH26001 - Persistent User & Emergency Contacts Database Store
-SQLite-backed thread-safe store with bcrypt password hashing and RBAC.
+SQLite store (Postgres when DATABASE_URL is set) with bcrypt password hashing and RBAC.
 """
 
 import os
@@ -18,6 +18,44 @@ from backend.app.core.config import IS_PRODUCTION
 
 DB_DIR = os.environ.get("DATA_DIR") or os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data")
 DB_PATH = os.environ.get("DATABASE_PATH") or os.environ.get("SQLITE_DB_PATH") or os.path.join(DB_DIR, "landslideguard_users.db")
+
+
+def _postgres_url() -> str:
+    url = os.environ.get("DATABASE_URL", "").strip()
+    return url if url.startswith(("postgres://", "postgresql://")) else ""
+
+
+class _PgCursor:
+    """Lets the sqlite-style queries below ('?' placeholders) run on Postgres."""
+    def __init__(self, cur):
+        self._cur = cur
+
+    def execute(self, sql, params=()):
+        self._cur.execute(sql.replace("?", "%s"), params)
+        return self
+
+    def executemany(self, sql, seq):
+        self._cur.executemany(sql.replace("?", "%s"), seq)
+
+    def fetchone(self):
+        return self._cur.fetchone()
+
+
+class _PgConnection:
+    """One short-lived connection per operation (Neon closes idle connections)."""
+    def __init__(self, url):
+        import psycopg
+        from psycopg.rows import dict_row
+        self._conn = psycopg.connect(url, row_factory=dict_row, connect_timeout=10)
+
+    def cursor(self):
+        return _PgCursor(self._conn.cursor())
+
+    def commit(self):
+        self._conn.commit()
+
+    def close(self):
+        self._conn.close()
 
 
 def hash_pw(password: str) -> str:
@@ -45,7 +83,10 @@ class UserDatabase:
                 cls._instance._init_db()
             return cls._instance
 
-    def _get_connection(self) -> sqlite3.Connection:
+    def _get_connection(self):
+        url = _postgres_url()
+        if url:
+            return _PgConnection(url)
         os.makedirs(DB_DIR, exist_ok=True)
         conn = sqlite3.connect(DB_PATH, check_same_thread=False)
         conn.row_factory = sqlite3.Row
@@ -55,13 +96,14 @@ class UserDatabase:
         """Initialize user table schema and pre-seed privileged roles."""
         conn = self._get_connection()
         cursor = conn.cursor()
+        nocase = "" if _postgres_url() else " COLLATE NOCASE"  # lookups use LOWER() on both engines
 
-        cursor.execute("""
+        cursor.execute(f"""
         CREATE TABLE IF NOT EXISTS users (
             id TEXT PRIMARY KEY,
             full_name TEXT NOT NULL,
-            username TEXT UNIQUE NOT NULL COLLATE NOCASE,
-            email TEXT UNIQUE NOT NULL COLLATE NOCASE,
+            username TEXT UNIQUE NOT NULL{nocase},
+            email TEXT UNIQUE NOT NULL{nocase},
             phone TEXT,
             password_hash TEXT NOT NULL,
             role TEXT NOT NULL DEFAULT 'USER',
@@ -85,13 +127,13 @@ class UserDatabase:
         conn.commit()
 
         # Check if default accounts need seeding
-        cursor.execute("SELECT COUNT(*) FROM users")
-        count = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) AS n FROM users")
+        count = cursor.fetchone()["n"]
         if count == 0:
             self._seed_default_users(conn)
         conn.close()
 
-    def _seed_default_users(self, conn: sqlite3.Connection):
+    def _seed_default_users(self, conn):
         """Seed default pre-created privileged and resident accounts with env-configurable passwords."""
         now = datetime.now(timezone.utc).isoformat()
         def seed_pw(env_name: str, dev_default: str) -> str:
@@ -194,10 +236,11 @@ class UserDatabase:
         cursor.executemany("""
         INSERT INTO users (id, full_name, username, email, phone, password_hash, role, is_active, emergency_contacts, created_at, updated_at)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT DO NOTHING
         """, default_users)
         conn.commit()
 
-    def _row_to_dict(self, row: sqlite3.Row) -> Optional[Dict[str, Any]]:
+    def _row_to_dict(self, row) -> Optional[Dict[str, Any]]:
         if not row:
             return None
         d = dict(row)

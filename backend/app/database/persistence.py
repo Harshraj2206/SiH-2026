@@ -19,11 +19,10 @@ from backend.app.core.config import DATA_DIR
 class RecordStore:
     def __init__(self):
         self._lock = threading.Lock()
-        url = os.environ.get("DATABASE_URL", "").strip()
-        self.is_postgres = url.startswith(("postgres://", "postgresql://"))
+        self._url = os.environ.get("DATABASE_URL", "").strip()
+        self.is_postgres = self._url.startswith(("postgres://", "postgresql://"))
         if self.is_postgres:
-            import psycopg  # only needed when a Postgres URL is configured
-            self._conn = psycopg.connect(url, autocommit=True)
+            self._connect()
             self._ph = "%s"
         else:
             path = os.environ.get("STATE_DATABASE_PATH") or os.path.join(DATA_DIR, "landsafe_state.db")
@@ -36,6 +35,20 @@ class RecordStore:
             "PRIMARY KEY (collection, record_key))"
         )
 
+    def _connect(self):
+        import psycopg  # only needed when a Postgres URL is configured
+        self._conn = psycopg.connect(self._url, autocommit=True, connect_timeout=10)
+
+    def _retry(self, fn):
+        """Neon closes idle connections (scale to zero): reconnect once and retry."""
+        try:
+            return fn()
+        except Exception:
+            if not self.is_postgres or not (self._conn.closed or self._conn.broken):
+                raise
+            self._connect()
+            return fn()
+
     def _execute(self, sql: str, params: tuple = ()):
         cur = self._conn.cursor()
         cur.execute(sql.replace("?", self._ph), params)
@@ -43,27 +56,30 @@ class RecordStore:
 
     def is_empty(self) -> bool:
         with self._lock:
-            return self._execute("SELECT COUNT(*) FROM store_records").fetchone()[0] == 0
+            return self._retry(lambda: self._execute("SELECT COUNT(*) FROM store_records").fetchone()[0] == 0)
 
     def load(self, collection: str) -> Dict[str, Any]:
         with self._lock:
-            rows = self._execute(
+            rows = self._retry(lambda: self._execute(
                 "SELECT record_key, data FROM store_records WHERE collection = ?", (collection,)
-            ).fetchall()
+            ).fetchall())
         return {key: json.loads(data) for key, data in rows}
 
     def replace(self, collection: str, records: Dict[str, Any]):
         """Write the full contents of one collection (delete + insert in one transaction)."""
         with self._lock:
-            self._execute("BEGIN")
-            try:
-                self._execute("DELETE FROM store_records WHERE collection = ?", (collection,))
-                for key, value in records.items():
-                    self._execute(
-                        "INSERT INTO store_records (collection, record_key, data) VALUES (?, ?, ?)",
-                        (collection, str(key), json.dumps(value, default=str)),
-                    )
-                self._execute("COMMIT")
-            except Exception:
-                self._execute("ROLLBACK")
-                raise
+            self._retry(lambda: self._replace(collection, records))
+
+    def _replace(self, collection: str, records: Dict[str, Any]):
+        self._execute("BEGIN")
+        try:
+            self._execute("DELETE FROM store_records WHERE collection = ?", (collection,))
+            for key, value in records.items():
+                self._execute(
+                    "INSERT INTO store_records (collection, record_key, data) VALUES (?, ?, ?)",
+                    (collection, str(key), json.dumps(value, default=str)),
+                )
+            self._execute("COMMIT")
+        except Exception:
+            self._execute("ROLLBACK")
+            raise
