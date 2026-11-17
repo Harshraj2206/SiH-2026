@@ -201,6 +201,13 @@ def get_global_live_weather(latitude: float, longitude: float, country_code: Opt
     now = time.time()
     existing_entry = _WEATHER_CACHE.get(cache_key)
 
+    # A saved wttr.in result (no 72h rain or soil moisture) must not hide better
+    # Open-Meteo data that the user's browser sent for this point.
+    client = _CLIENT_WEATHER.get()
+    has_client = bool(client and client.get("key") == cache_key)
+    if has_client and existing_entry and existing_entry.get("data", {}).get("secondary_source"):
+        existing_entry = None
+
     # 1. Return fresh live cache if within 15 minutes
     if existing_entry and existing_entry.get("data", {}).get("status") in ["LIVE", "CACHED"]:
         age = now - existing_entry["cached_at"]
@@ -247,8 +254,7 @@ def get_global_live_weather(latitude: float, longitude: float, country_code: Opt
 
     # 3. Open-Meteo data the user's browser fetched for this request (own IP, so not
     #    rate-limited like the shared server IP). Used for this request only, never cached.
-    client = _CLIENT_WEATHER.get()
-    if client and client.get("key") == cache_key:
+    if has_client:
         return dict(client["data"])
 
     # 4. Query Secondary Failover (wttr.in)
@@ -257,6 +263,7 @@ def get_global_live_weather(latitude: float, longitude: float, country_code: Opt
     if secondary:
         secondary["status"] = "LIVE"
         secondary["data_age_minutes"] = 0
+        secondary["secondary_source"] = True
         _WEATHER_CACHE[cache_key] = {"data": secondary, "cached_at": now}
         return secondary
 

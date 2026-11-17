@@ -15,6 +15,7 @@ from backend.app.services.geocode_service import reverse_geocode_location
 from backend.app.ml.predictor import predict_landslide_risk, categorize_risk_level
 from backend.app.services.feature_builder import build_features, score_features, provenance
 from backend.app.services.weather_resolver import use_client_weather
+from backend.app.services.elevation_service import use_client_elevation
 
 router = APIRouter(prefix="/api", tags=["Real Data Ingestion & Sources"])
 
@@ -23,6 +24,7 @@ class CoordinateInspectRequest(BaseModel):
     latitude: float = Field(..., ge=-90.0, le=90.0)
     longitude: float = Field(..., ge=-180.0, le=180.0)
     weather: Optional[Dict[str, Any]] = None  # raw Open-Meteo response fetched by the browser
+    elevation: Optional[list] = None  # Open-Meteo elevations [point, +0.001 lat, +0.001 lng] from the browser
 
 
 @router.get("/data-sources")
@@ -109,6 +111,7 @@ def inspect_coordinate_telemetry(payload: CoordinateInspectRequest) -> Dict[str,
     """
     lat, lng = payload.latitude, payload.longitude
     use_client_weather(lat, lng, payload.weather)
+    use_client_elevation(lat, lng, payload.elevation)
 
     # 1. Reverse Geocoding for Real Place Name
     geo = reverse_geocode_location(lat, lng)
