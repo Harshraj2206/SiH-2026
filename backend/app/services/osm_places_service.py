@@ -1,7 +1,6 @@
 """
-LANDSAFE - Real OpenStreetMap Overpass Infrastructure Discovery Service
-Queries live OpenStreetMap Overpass API for real hospitals, clinics, trauma centers,
-and emergency shelters within radial distance of any coordinates on Earth.
+Hospitals, clinics and shelters near a point, from OpenStreetMap (Overpass API).
+Only what OpenStreetMap lists is returned; nothing is invented when the lookup fails.
 """
 
 import json
@@ -11,9 +10,15 @@ import urllib.request
 import urllib.parse
 from typing import List, Dict, Any
 
-_OVERPASS_API_URL = "https://overpass-api.de/api/interpreter"
+_OVERPASS_URLS = (
+    "https://overpass-api.de/api/interpreter",
+    "https://overpass.kumi.systems/api/interpreter",
+    "https://overpass.private.coffee/api/interpreter",
+)
 _PLACES_CACHE: Dict[str, Dict[str, Any]] = {}
 _CACHE_TTL = 1800  # 30 minutes
+# amenity=shelter also covers bus stops and picnic huts; those are not emergency shelters.
+_NOT_EMERGENCY_SHELTERS = {"public_transport", "picnic_shelter", "lean_to", "gazebo", "field_shelter", "sun_shelter"}
 
 
 def _haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
@@ -21,147 +26,93 @@ def _haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     dlat = math.radians(lat2 - lat1)
     dlon = math.radians(lon2 - lon1)
     a = math.sin(dlat / 2)**2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlon / 2)**2
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-    return R * c
+    return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
 
-def get_nearby_real_facilities(latitude: float, longitude: float, radius_km: float = 25.0) -> Dict[str, List[Dict[str, Any]]]:
-    """
-    Dynamically discover real medical facilities and evacuation shelters within radius of selected coordinates.
-    """
-    cache_key = f"{round(latitude, 2)}_{round(longitude, 2)}"
+def _overpass(query: str) -> List[Dict[str, Any]]:
+    data = urllib.parse.urlencode({"data": query}).encode("utf-8")
+    last_error = None
+    for url in _OVERPASS_URLS:
+        try:
+            req = urllib.request.Request(url, data=data, headers={"User-Agent": "LandSafe/2.0"})
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                return json.loads(resp.read().decode("utf-8")).get("elements", [])
+        except Exception as e:  # try the next public Overpass server
+            last_error = e
+    raise RuntimeError(f"Overpass unavailable: {last_error}")
+
+
+def get_nearby_real_facilities(latitude: float, longitude: float, radius_km: float = 25.0) -> Dict[str, Any]:
+    """Real facilities within radius_km. On failure: empty lists and status UNAVAILABLE."""
+    cache_key = f"{round(latitude, 2)}_{round(longitude, 2)}_{radius_km}"
     now = time.time()
-    if cache_key in _PLACES_CACHE:
-        entry = _PLACES_CACHE[cache_key]
-        if now - entry["cached_at"] < _CACHE_TTL:
-            return entry["data"]
+    entry = _PLACES_CACHE.get(cache_key)
+    if entry and now - entry["cached_at"] < _CACHE_TTL:
+        return entry["data"]
 
-    radius_meters = int(radius_km * 1000)
-
-    # Overpass QL query for hospitals, clinics, emergency facilities, and community centres
+    r = int(radius_km * 1000)
     query = f"""
-    [out:json][timeout:2];
+    [out:json][timeout:12];
     (
-      node["amenity"="hospital"](around:{radius_meters},{latitude},{longitude});
-      node["amenity"="clinic"](around:{radius_meters},{latitude},{longitude});
-      node["amenity"="community_centre"](around:{radius_meters},{latitude},{longitude});
-      node["amenity"="shelter"](around:{radius_meters},{latitude},{longitude});
+      nwr["amenity"="hospital"](around:{r},{latitude},{longitude});
+      nwr["amenity"="clinic"](around:{r},{latitude},{longitude});
+      nwr["emergency"="assembly_point"](around:{r},{latitude},{longitude});
+      nwr["amenity"="shelter"](around:{r},{latitude},{longitude});
+      nwr["amenity"="community_centre"](around:{r},{latitude},{longitude});
     );
-    out body 6;
+    out center tags 200;
     """
-
-    hospitals = []
-    shelters = []
-
     try:
-        data_encoded = urllib.parse.urlencode({"data": query}).encode("utf-8")
-        req = urllib.request.Request(_OVERPASS_API_URL, data=data_encoded, headers={"User-Agent": "LandSafe-FastOverpass/2.0"})
-        with urllib.request.urlopen(req, timeout=2.0) as resp:
-            res_json = json.loads(resp.read().decode("utf-8"))
-            elements = res_json.get("elements", [])
-            for el in elements:
-                tags = el.get("tags", {})
-                name = tags.get("name") or tags.get("name:en") or tags.get("operator")
-                if not name:
-                    continue
-
-                el_lat = float(el.get("lat", latitude))
-                el_lon = float(el.get("lon", longitude))
-                dist = round(_haversine_km(latitude, longitude, el_lat, el_lon), 1)
-
-                amenity = tags.get("amenity", "")
-                beds_tag = tags.get("beds")
-                beds_val = int(beds_tag) if beds_tag and beds_tag.isdigit() else None
-                capacity_tag = tags.get("capacity")
-                cap_val = int(capacity_tag) if capacity_tag and capacity_tag.isdigit() else None
-
-                if amenity in ["hospital", "clinic"]:
-                    hospitals.append({
-                        "hospital_id": f"OSM-HOSP-{el['id']}",
-                        "name": name,
-                        "type": "General Hospital" if amenity == "hospital" else "Medical Clinic",
-                        "latitude": el_lat,
-                        "longitude": el_lon,
-                        "distance_km": dist,
-                        "total_beds": beds_val,
-                        "available_beds": None,
-                        "capacity_status": "LIVE CAPACITY UNAVAILABLE",
-                        "icu_available": None,
-                        "contact_phone": tags.get("phone") or tags.get("contact:phone") or "108 (National Ambulance Helpline)",
-                        "emergency_ambulance_count": None,
-                        "source": "OpenStreetMap Geographic Directory",
-                        "data_category": "DIRECTORY RECORD",
-                        "verified_at": "Continuous OSM Registry"
-                    })
-                elif amenity in ["shelter", "community_centre"] or tags.get("emergency"):
-                    shelters.append({
-                        "shelter_id": f"OSM-SHELT-{el['id']}",
-                        "name": name,
-                        "type": "Community Relief Center" if amenity == "community_centre" else "Emergency Evacuation Shelter",
-                        "latitude": el_lat,
-                        "longitude": el_lon,
-                        "distance_km": dist,
-                        "capacity": cap_val,
-                        "current_occupancy": None,
-                        "capacity_status": "OCCUPANCY TELEMETRY UNAVAILABLE",
-                        "food_supply_days": None,
-                        "contact_person": "Designated Relief Warden / SDMA Liaison",
-                        "contact_phone": tags.get("phone") or "1070 (Disaster Relief Helpline)",
-                        "facilities": ["Structural High-Ground Elevation", "Designated Assembly Area"],
-                        "source": "OpenStreetMap Geographic Directory",
-                        "data_category": "DIRECTORY RECORD",
-                        "verified_at": "Continuous OSM Registry"
-                    })
+        elements = _overpass(query)
     except Exception as e:
-        print(f"Overpass infrastructure query error: {e}")
+        print(f"Overpass facility query failed: {e}")
+        return {"hospitals": [], "shelters": [], "status": "UNAVAILABLE"}
 
-    # Fallback to nearest verified regional directory records if OSM query timed out
-    if not hospitals:
-        hospitals.append({
-            "hospital_id": f"DIR-HOSP-{round(latitude, 2)}-{round(longitude, 2)}",
-            "name": f"Regional Trauma & Medical Center ({round(latitude, 2)}°N, {round(longitude, 2)}°E)",
-            "type": "Regional Medical Center",
-            "latitude": latitude,
-            "longitude": longitude,
-            "distance_km": 0.0,
-            "total_beds": None,
-            "available_beds": None,
-            "capacity_status": "LIVE CAPACITY UNAVAILABLE",
-            "icu_available": None,
-            "contact_phone": "108 (National Emergency Ambulance)",
-            "emergency_ambulance_count": None,
-            "source": "National Health & Disaster Directory Baseline",
-            "data_category": "DIRECTORY RECORD",
-            "verified_at": "Static Regional Baseline"
-        })
+    hospitals, shelters = [], []
+    for el in elements:
+        tags = el.get("tags", {})
+        name = tags.get("name:en") or tags.get("name")
+        el_lat = el.get("lat", (el.get("center") or {}).get("lat"))
+        el_lon = el.get("lon", (el.get("center") or {}).get("lon"))
+        if not name or el_lat is None or el_lon is None:
+            continue
+        dist = round(_haversine_km(latitude, longitude, el_lat, el_lon), 1)
+        phone = tags.get("phone") or tags.get("contact:phone")
+        amenity = tags.get("amenity", "")
+        beds = tags.get("beds")
+        base = {
+            "name": name,
+            "latitude": el_lat,
+            "longitude": el_lon,
+            "distance_km": dist,
+            "contact_phone": phone,
+            "address": ", ".join(v for v in (tags.get("addr:street"), tags.get("addr:city")) if v) or None,
+            "opening_hours": tags.get("opening_hours"),
+            "operator": tags.get("operator"),
+            "source": "OpenStreetMap",
+            "osm_url": f"https://www.openstreetmap.org/{el.get('type', 'node')}/{el.get('id')}",
+        }
+        if amenity in ("hospital", "clinic"):
+            hospitals.append({
+                **base,
+                "hospital_id": f"OSM-{el.get('type', 'n')[0]}{el['id']}",
+                "type": "Hospital" if amenity == "hospital" else "Clinic",
+                "has_emergency": tags.get("emergency") == "yes",
+                "total_beds": int(beds) if beds and beds.isdigit() else None,
+            })
+        elif tags.get("emergency") == "assembly_point" or (
+                amenity == "shelter" and tags.get("shelter_type") not in _NOT_EMERGENCY_SHELTERS) or amenity == "community_centre":
+            cap = tags.get("capacity")
+            shelters.append({
+                **base,
+                "shelter_id": f"OSM-{el.get('type', 'n')[0]}{el['id']}",
+                "type": ("Emergency assembly point" if tags.get("emergency") == "assembly_point"
+                         else "Community centre" if amenity == "community_centre" else "Shelter"),
+                "capacity": int(cap) if cap and cap.isdigit() else None,
+            })
 
-    if not shelters:
-        shelters.append({
-            "shelter_id": f"DIR-SHELT-{round(latitude, 2)}-{round(longitude, 2)}",
-            "name": f"Designated Evacuation & Relief Center ({round(latitude, 2)}°N, {round(longitude, 2)}°E)",
-            "type": "High-Elevation Designated Shelter",
-            "latitude": latitude,
-            "longitude": longitude,
-            "distance_km": 0.0,
-            "capacity": None,
-            "current_occupancy": None,
-            "capacity_status": "OCCUPANCY TELEMETRY UNAVAILABLE",
-            "food_supply_days": None,
-            "contact_person": "Local Disaster Management Warden",
-            "contact_phone": "1070 (Disaster Helpline)",
-            "facilities": ["High Ground Relief Zone"],
-            "source": "Disaster Management Directory Baseline",
-            "data_category": "DIRECTORY RECORD",
-            "verified_at": "Static Regional Baseline"
-        })
-
-    # Sort by nearest distance
     hospitals.sort(key=lambda x: x["distance_km"])
     shelters.sort(key=lambda x: x["distance_km"])
-
-    result = {
-        "hospitals": hospitals[:6],
-        "shelters": shelters[:6]
-    }
+    result = {"hospitals": hospitals[:20], "shelters": shelters[:20], "status": "OK"}
     _PLACES_CACHE[cache_key] = {"data": result, "cached_at": now}
     return result

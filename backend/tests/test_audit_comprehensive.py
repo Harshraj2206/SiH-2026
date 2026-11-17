@@ -122,8 +122,8 @@ class TestMLPredictor:
             "rainfall_72h": 220.0,
             "slope_deg": 42.0,
             "soil_moisture": 0.55,
-            "ndvi": 0.28,
-            "historical_incidents": 6
+            "historical_incidents": 6,
+            "elevation_amsl": 1200.0
         }
         res = client.post("/api/predict", json=payload)
         assert res.status_code == 200
@@ -140,8 +140,8 @@ class TestMLPredictor:
             "rainfall_72h": 900.0,
             "slope_deg": 85.0,
             "soil_moisture": 1.0,
-            "ndvi": 0.05,
-            "historical_incidents": 20
+            "historical_incidents": 20,
+            "elevation_amsl": 1500.0
         }
         res = client.post("/api/predict", json=payload)
         assert res.status_code == 200
@@ -153,8 +153,8 @@ class TestMLPredictor:
             "rainfall_72h": 0.0,
             "slope_deg": 0.0,
             "soil_moisture": 0.0,
-            "ndvi": 1.0,
-            "historical_incidents": 0
+            "historical_incidents": 0,
+            "elevation_amsl": 50.0
         }
         res = client.post("/api/predict", json=payload)
         assert res.status_code == 200
@@ -340,7 +340,7 @@ class TestSOSLifecycle:
         assert res.status_code in [200, 201]
         sos = res.json()
         sos_id = sos["sos_id"]
-        assert sos["status"] in ["PENDING", "ACTIVE", "DISPATCHED"]
+        assert sos["status"] in ["RESPONSE_REQUESTED", "DISPATCHED"]
 
         # Resident attempts to triage -> Forbidden
         res_forbidden = client.patch(
@@ -360,19 +360,3 @@ class TestSOSLifecycle:
         assert res_triaged.json()["status"] == "DISPATCHED"
 
 
-# ============================================================
-# 10. SIMULATION LIFECYCLE & RESET
-# ============================================================
-class TestSimulation:
-    def test_simulation_reset_and_steps(self):
-        res_reset = client.post("/api/simulation/reset", headers=ADMIN_HEADERS)
-        assert res_reset.status_code == 200
-        assert res_reset.json()["status"] == "success"
-
-        # Step 1
-        res_step1 = client.post("/api/simulation/step/1", headers=ADMIN_HEADERS)
-        assert res_step1.status_code == 200
-        assert res_step1.json()["step"] == 1
-
-        # Reset back
-        client.post("/api/simulation/reset", headers=ADMIN_HEADERS)

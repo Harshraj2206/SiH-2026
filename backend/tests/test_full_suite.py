@@ -39,24 +39,6 @@ def test_health_check():
     assert "ml_engine" in data
 
 
-def test_simulation_reset_and_step():
-    res_login = client.post("/api/auth/login", json={"identifier": "admin@landslideguard.gov.in", "password": "Admin@2026!"})
-    admin_token = res_login.json()["access_token"]
-    headers = {"Authorization": f"Bearer {admin_token}"}
-
-    res_reset = client.post("/api/simulation/reset", headers=headers)
-    assert res_reset.status_code == 200
-    
-    res_step = client.post("/api/simulation/step/1", headers=headers)
-    assert res_step.status_code == 200
-    data = res_step.json()
-    assert data["step"] == 1
-
-    # Invalid step should return 400
-    res_invalid = client.post("/api/simulation/step/99", headers=headers)
-    assert res_invalid.status_code == 400
-
-
 # ---------------- 2. Authentication & RBAC ----------------
 def test_auth_login_all_seeded_roles():
     roles_credentials = [
@@ -206,8 +188,8 @@ def test_predict_risk_ml():
         "rainfall_72h": 180.0,
         "slope_deg": 36.0,
         "soil_moisture": 0.45,
-        "ndvi": 0.35,
-        "historical_incidents": 5
+        "historical_incidents": 5,
+        "elevation_amsl": 1200.0
     }
     res = client.post("/api/predict", json=payload)
     assert res.status_code == 200
@@ -358,19 +340,11 @@ def test_sos_lifecycle():
 # ---------------- 7. Emergency Resources: Roads, Hospitals, Shelters ----------------
 def test_emergency_resources():
     # Roads
-    res_roads = client.get("/api/resources/roads")
-    assert res_roads.status_code == 200
-    assert len(res_roads.json()) > 0
-
-    # Hospitals
-    res_hosp = client.get("/api/resources/hospitals")
-    assert res_hosp.status_code == 200
-    assert len(res_hosp.json()) > 0
-
-    # Shelters
-    res_shelt = client.get("/api/resources/shelters")
-    assert res_shelt.status_code == 200
-    assert len(res_shelt.json()) > 0
+    # No invented records: these lists start empty and fill only with real entries.
+    for path in ("/api/resources/roads", "/api/resources/hospitals", "/api/resources/shelters"):
+        res = client.get(path)
+        assert res.status_code == 200
+        assert isinstance(res.json(), list)
 
 
 # ---------------- 8. Analytics & Post-Disaster ----------------
@@ -407,10 +381,9 @@ def test_india_wide_intelligence_endpoint():
     assert len(confirmed) >= 5
     for inc in confirmed:
         assert inc["category"] == "CONFIRMED_INCIDENT"
-        assert inc["verification_status"] in ["OFFICIAL", "VERIFIED"]
+        assert inc["verification_status"] == "REPORTED"
         assert inc["source"]
         assert inc["state"]
-        assert inc["district"]
         assert -90.0 <= inc["latitude"] <= 90.0
         assert -180.0 <= inc["longitude"] <= 180.0
         # Check no fake "0 casualties" when unstated
@@ -426,13 +399,8 @@ def test_india_wide_intelligence_endpoint():
         assert fc["slope_gradient_deg"] > 0
         assert "why_at_risk" in fc
 
-    # 4. Verify demo simulations are strictly tagged
-    sims = data["demo_simulations"]
-    assert len(sims) == 3
-    for s in sims:
-        assert s["category"] == "DEMO_SIMULATION"
-        assert s["verification_status"] == "DEMO / SIMULATION"
-        assert s["is_simulation"] is True
+    # 4. No made-up demo events
+    assert data["demo_simulations"] == []
 
 
 def test_incident_proximity_calculation():
@@ -449,7 +417,7 @@ def test_incident_proximity_calculation():
     assert res_far.status_code == 200
     prox_far = res_far.json()
     assert prox_far["advisory_type"] == "SAFE"
-    assert "No current official landslide warnings" in prox_far["advisory_text"]
+    assert "No monitored zone within 50 km" in prox_far["advisory_text"]
 
 
 def test_incidents_filtration_and_backward_compatibility():
@@ -465,12 +433,10 @@ def test_incidents_filtration_and_backward_compatibility():
     for i in res_crit.json():
         assert i["severity"] == "CRITICAL"
 
-    # Filter by simulation category
+    # No demo events exist
     res_sim = client.get("/api/incidents?category=DEMO_SIMULATION")
     assert res_sim.status_code == 200
-    assert len(res_sim.json()) == 3
-    for s in res_sim.json():
-        assert s["verification_status"] == "DEMO / SIMULATION"
+    assert res_sim.json() == []
 
 
 # ---------------- 8. Emergency Resources Discovery & All Emergency Aggregation ----------------

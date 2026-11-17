@@ -1,0 +1,63 @@
+{
+ "generated_at": "2026-11-17T15:23:42.496665+00:00",
+ "sources": "ERA5 via Open-Meteo archive API; Copernicus DEM via Open-Meteo elevation API; NASA Global Landslide Catalog",
+ "events": [
+  {
+   "incident_id": "IN-2024-WAYANAD",
+   "title": "Mundakkai - Chooralmala landslides",
+   "district": "Wayanad",
+   "state": "Kerala",
+   "latitude": 11.4646,
+   "longitude": 76.1348,
+   "timestamp": "2024-07-29T20:30:00Z",
+   "conditions": {
+    "rainfall_24h": 51.6,
+    "rainfall_72h": 72.2,
+    "soil_moisture": 0.428,
+    "slope_deg": 27.8,
+    "elevation_amsl": 1627.0,
+    "historical_incidents": 5
+   },
+   "source": "International Consortium on Landslides - landslide record",
+   "source_url": "https://www.landslides.org/report/mundakkai-landslide-wayanad/"
+  },
+  {
+   "incident_id": "IN-2023-SHIMLA",
+   "title": "Summer Hill (Shiv Bawadi) landslide",
+   "district": "Shimla",
+   "state": "Himachal Pradesh",
+   "latitude": 31.104,
+   "longitude": 77.143,
+   "timestamp": "2023-08-14T01:45:00Z",
+   "conditions": {
+    "rainfall_24h": 37.7,
+    "rainfall_72h": 60.8,
+    "soil_moisture": 0.518,
+    "slope_deg": 44.2,
+    "elevation_amsl": 2138.0,
+    "historical_incidents": 36
+   },
+   "source": "The Tribune",
+   "source_url": "https://www.tribuneindia.com/news/himachal/homage-paid-to-victims-of-summer-hill-tragedy"
+  },
+  {
+   "incident_id": "IN-2023-IRSHALWADI",
+   "title": "Irshalwadi landslide",
+   "district": "Raigad",
+   "state": "Maharashtra",
+   "latitude": 18.9339,
+   "longitude": 73.2358,
+   "timestamp": "2023-07-19T17:00:00Z",
+   "conditions": {
+    "rainfall_24h": 58.0,
+    "rainfall_72h": 135.8,
+    "soil_moisture": 0.437,
+    "slope_deg": 11.2,
+    "elevation_amsl": 429.0,
+    "historical_incidents": 15
+   },
+   "source": "Deccan Herald (PTI)",
+   "source_url": "https://www.deccanherald.com/india/maharashtra/raigad-tragedy-ndrf-calls-off-operation-says-minister-no-body-found-on-sunday-toll-stays-at-27-1239894.html"
+  }
+ ]
+}

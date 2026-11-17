@@ -1,109 +1,49 @@
 """
-LANDSLIDEGUARD SIH26001 - Geological Survey of India (GSI) & NASA GLC Landslide Catalog Service
-Authoritative historical landslide database for the North Eastern Region & Himalayan Ghats.
+Historical landslides in India from the NASA Global Landslide Catalog (backend/data/glc_india_landslides.csv).
 """
 
 import csv
 import os
 from typing import List, Dict, Any, Optional
 
-# Verified Historical Landslide Records from GSI National Landslide Susceptibility Mapping & NASA GLC
-GSI_HISTORICAL_LANDSLIDES = [
-    {
-        "incident_id": "GSI-NLSM-MEG-2022-014",
-        "location_name": "Umsning Bypass Hill Cut (NH-6)",
-        "district": "Ri Bhoi",
-        "state": "Meghalaya",
-        "latitude": 25.7520,
-        "longitude": 91.8940,
-        "event_date": "2022-06-17",
-        "event_type": "Debris Flow & Rock Fall",
-        "trigger": "Continuous Monsoon Downpour (>185 mm / 24h)",
-        "fatalities": 0,
-        "injuries": 4,
-        "road_blocked": "NH-6 Shillong-Guwahati Corridor (48 hours)",
-        "source": "Geological Survey of India (GSI) NLSM Inventory",
-        "source_type": "DEMO_SEED",
-        "landslide_volume_m3": 12500
-    },
-    {
-        "incident_id": "GSI-NLSM-MEG-2023-009",
-        "location_name": "Nongpoh Valley Ghats (NH-6 KM 42)",
-        "district": "Ri Bhoi",
-        "state": "Meghalaya",
-        "latitude": 25.9030,
-        "longitude": 91.8810,
-        "event_date": "2023-07-22",
-        "event_type": "Rotational Earth Slide",
-        "trigger": "Heavy Infiltration on 35° Weathered Phyllite Slope",
-        "fatalities": 0,
-        "injuries": 2,
-        "road_blocked": "NH-6 Single Lane Obstruction",
-        "source": "Geological Survey of India (GSI) NLSM Inventory",
-        "source_type": "DEMO_SEED",
-        "landslide_volume_m3": 8400
-    },
-    {
-        "incident_id": "NASA-GLC-SIK-2020-041",
-        "location_name": "Singtam-Dikchu Mountain Corridor",
-        "district": "East Sikkim",
-        "state": "Sikkim",
-        "latitude": 27.2360,
-        "longitude": 88.5020,
-        "event_date": "2020-09-11",
-        "event_type": "Mudflow & Flash Toe Erosion",
-        "trigger": "Cloudburst & Teesta River bank undercutting",
-        "fatalities": 2,
-        "injuries": 6,
-        "road_blocked": "Singtam Link Highway",
-        "source": "NASA Global Landslide Catalog (GLC) / State Disaster Management",
-        "source_type": "DEMO_SEED",
-        "landslide_volume_m3": 24000
-    },
-    {
-        "incident_id": "GSI-NLSM-NAG-2021-003",
-        "location_name": "Kohima-Zubza Hill Cut (NH-29)",
-        "district": "Kohima",
-        "state": "Nagaland",
-        "latitude": 25.6701,
-        "longitude": 94.1077,
-        "event_date": "2021-08-04",
-        "event_type": "Translational Rock & Soil Slide",
-        "trigger": "Prolonged rainfall on steep Disang shale formation",
-        "fatalities": 1,
-        "injuries": 3,
-        "road_blocked": "NH-29 Dimapur-Kohima Ghats",
-        "source": "Geological Survey of India (GSI) NLSM Inventory",
-        "source_type": "DEMO_SEED",
-        "landslide_volume_m3": 19500
-    },
-    {
-        "incident_id": "GSI-NLSM-MEG-2024-002",
-        "location_name": "Byrnihat Industrial Foothills",
-        "district": "Ri Bhoi",
-        "state": "Meghalaya",
-        "latitude": 26.0500,
-        "longitude": 91.8500,
-        "event_date": "2024-05-29",
-        "event_type": "Slump & Toe Instability",
-        "trigger": "Pre-Monsoon Cyclone Remnants",
-        "fatalities": 0,
-        "injuries": 0,
-        "road_blocked": "Byrnihat-Killing Road",
-        "source": "Geological Survey of India (GSI) NLSM Inventory",
-        "source_type": "DEMO_SEED",
-        "landslide_volume_m3": 4500
-    }
-]
+_GLC_SOURCE = "NASA Global Landslide Catalog"
+_GLC_URL = "https://catalog.data.gov/dataset/global-landslide-catalog-export"
+_GLC_RECORDS: Optional[List[Dict[str, Any]]] = None
+
+
+def _glc_records() -> List[Dict[str, Any]]:
+    """Indian events from the NASA Global Landslide Catalog (2007-2016), newest first."""
+    global _GLC_RECORDS
+    if _GLC_RECORDS is None:
+        try:
+            with open(_GLC_PATH, newline="", encoding="utf-8") as f:
+                rows = list(csv.DictReader(f))
+        except OSError:
+            rows = []
+        _GLC_RECORDS = sorted((
+            {
+                "incident_id": f"GLC-{r['event_id']}",
+                "location_name": r.get("title") or "Unnamed location",
+                "state": r.get("state") or "",
+                "district": "",
+                "latitude": float(r["latitude"]),
+                "longitude": float(r["longitude"]),
+                "event_date": r.get("event_date"),
+                "trigger": (r.get("trigger") or "unknown").replace("_", " "),
+                "location_accuracy": r.get("location_accuracy"),
+                "source": _GLC_SOURCE,
+                "source_url": _GLC_URL,
+            }
+            for r in rows
+        ), key=lambda r: r["event_date"] or "", reverse=True)
+    return _GLC_RECORDS
 
 
 def get_historical_landslides(district: Optional[str] = None, state: Optional[str] = None) -> List[Dict[str, Any]]:
-    """Query historical landslide events with filters."""
-    results = GSI_HISTORICAL_LANDSLIDES
+    """Catalogued landslides, optionally filtered by state (the catalog has no district field)."""
+    results = _glc_records()
     if state:
         results = [r for r in results if r["state"].lower() == state.lower()]
-    if district:
-        results = [r for r in results if r["district"].lower() == district.lower()]
     return results
 
 
@@ -139,32 +79,9 @@ def get_historical_density_score(latitude: float, longitude: float, radius_km: f
 
 
 def get_nearest_catalogued_landslide(latitude: float, longitude: float) -> Optional[Dict[str, Any]]:
-    """Identifies the closest verified catalogued landslide event and computes spatial proximity in km."""
-    if not GSI_HISTORICAL_LANDSLIDES:
+    """Closest event in the NASA catalog and its distance in km."""
+    records = _glc_records()
+    if not records:
         return None
-
-    closest_event = None
-    min_dist = float("inf")
-
-    for h in GSI_HISTORICAL_LANDSLIDES:
-        dist = _haversine_km(latitude, longitude, h["latitude"], h["longitude"])
-        if dist < min_dist:
-            min_dist = dist
-            closest_event = h
-
-    if closest_event is None:
-        return None
-
-    return {
-        "incident_id": closest_event["incident_id"],
-        "location_name": closest_event["location_name"],
-        "district": closest_event["district"],
-        "state": closest_event["state"],
-        "distance_km": round(min_dist, 1),
-        "event_date": closest_event.get("event_date"),
-        "event_type": closest_event.get("event_type"),
-        "trigger": closest_event.get("trigger"),
-        "source": closest_event.get("source"),
-        "source_type": "GSI_NLSM_NASA_CATALOG_RECORD"
-    }
-
+    closest = min(records, key=lambda h: _haversine_km(latitude, longitude, h["latitude"], h["longitude"]))
+    return {**closest, "distance_km": round(_haversine_km(latitude, longitude, closest["latitude"], closest["longitude"]), 1)}

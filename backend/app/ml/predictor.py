@@ -50,15 +50,15 @@ def categorize_risk_level(score: float) -> str:
 
 
 def get_recommended_action(level: str, primary_driver: str) -> str:
-    """Generates authoritative early-warning advisory based on validated risk tier and primary driver."""
+    """Plain advice for the public, by risk level."""
     if level == "CRITICAL":
-        return f"IMMEDIATE EVACUATION & HIGHWAY CLOSURE: Severely elevated instability driven by {primary_driver}. Halt vehicular movement along vulnerable cuts and activate SDRF rapid extraction."
+        return "Avoid this area. Do not travel through hill roads here and follow local authority instructions."
     elif level == "HIGH":
-        return f"HIGH ALERT: Deploy automated ground inclinometers, issue heavy transport diversions, and alert disaster control rooms regarding elevated {primary_driver}."
+        return "Avoid travel at night and on steep road cuts. Watch for cracks, falling stones or muddy water on slopes."
     elif level == "MODERATE":
-        return f"WATCH & ADVISORY: Restrict night travel across vulnerable mountain corridors. Monitor culvert drainage and slope saturation influenced by {primary_driver}."
+        return "Travel with care. Watch for loose debris on sharp turns and water running off slopes."
     else:
-        return "ROUTINE MONITORING: Terrain and hydrological parameters remain within standard stability thresholds. Maintain standard telemetry."
+        return "No action needed. Keep an eye on local weather warnings."
 
 
 def compute_tree_attribution_and_confidence(
@@ -135,100 +135,57 @@ def explain_prediction(
     risk_level: str
 ) -> Dict[str, Any]:
     """
-    Synthesizes exact mathematical tree feature contributions into user-facing,
-    physically grounded XAI explanations for SIH evaluation.
+    Turns the per-feature tree contributions (Saabas path attribution) into the factors the UI shows.
+    Only real model inputs are listed; engineered features are folded into the input they come from.
     """
-    slope = features.get("slope_deg", 15.0)
-    rain_24 = features.get("rainfall_24h", 0.0)
-    rain_72 = features.get("rainfall_72h", 0.0)
-    moisture = features.get("soil_moisture", 0.30)
-    ndvi = features.get("ndvi", 0.50)
-    history = int(features.get("historical_incidents", 0))
+    slope = features.get("slope_deg")
+    rain_24 = features.get("rainfall_24h")
+    rain_72 = features.get("rainfall_72h")
+    moisture = features.get("soil_moisture")
+    history = int(features.get("historical_incidents") or 0)
+    elev = features.get("elevation_amsl")
 
-    # Group engineered feature contributions back into primary domain drivers
-    c_slope = raw_contribs.get("slope_deg", 0.0) + (raw_contribs.get("pore_slope_interaction", 0.0) * 0.55)
+    c_slope = raw_contribs.get("slope_deg", 0.0) + raw_contribs.get("pore_slope_interaction", 0.0) * 0.5
     c_rain = (
         raw_contribs.get("rainfall_24h", 0.0) +
         raw_contribs.get("rainfall_72h", 0.0) +
         raw_contribs.get("antecedent_rain_index", 0.0)
     )
-    c_moisture = raw_contribs.get("soil_moisture", 0.0) + (raw_contribs.get("pore_slope_interaction", 0.0) * 0.45)
-    c_ndvi = raw_contribs.get("ndvi", 0.0) + raw_contribs.get("vegetation_slope_defense", 0.0)
+    c_moisture = raw_contribs.get("soil_moisture", 0.0) + raw_contribs.get("pore_slope_interaction", 0.0) * 0.5
     c_history = raw_contribs.get("historical_incidents", 0.0)
     c_elev = raw_contribs.get("elevation_amsl", 0.0)
 
-    # Convert to positive absolute relative impact weights for UI display
-    abs_weights = {
-        "Slope Gradient Angle": max(0.01, abs(c_slope)),
-        "24h / 72h Precipitation": max(0.01, abs(c_rain)),
-        "Soil Moisture Saturation": max(0.01, abs(c_moisture)),
-        "Historical Landslide Density": max(0.01, abs(c_history)),
-        "Vegetation Canopy (NDVI)": max(0.01, abs(c_ndvi))
-    }
-    total_abs = sum(abs_weights.values())
-
+    entries = [
+        ("Rain (24 h / 72 h)", c_rain, f"{rain_24:.1f} mm / {rain_72:.1f} mm"),
+        ("Soil moisture", c_moisture, f"{moisture * 100:.0f}%" if moisture is not None else "—"),
+        ("Slope", c_slope, f"{slope:.1f}°" if slope is not None else "—"),
+        ("Past landslides nearby", c_history, f"{history} recorded"),
+        ("Elevation", c_elev, f"{elev:.0f} m" if elev is not None else "—"),
+    ]
+    total_abs = sum(abs(c) for _, c, _ in entries) or 1.0
     factors = [
         {
-            "name": "Baseline Slope Angle",
-            "importance_pct": round((abs_weights["Slope Gradient Angle"] / total_abs) * 100, 1),
-            "rawValue": f"{slope:.1f}° (Copernicus 30m Baseline Profile)",
-            "value": f"{slope:.1f}°",
-            "net_delta": round(c_slope * 100, 2),
-            "color": "bg-red-500"
-        },
-        {
-            "name": "24h / 72h Precipitation",
-            "importance_pct": round((abs_weights["24h / 72h Precipitation"] / total_abs) * 100, 1),
-            "rawValue": f"{rain_24:.1f} mm / {rain_72:.1f} mm",
-            "value": f"{rain_24:.1f} mm / {rain_72:.1f} mm",
-            "net_delta": round(c_rain * 100, 2),
-            "color": "bg-amber-500"
-        },
-        {
-            "name": "Volumetric Soil Moisture",
-            "importance_pct": round((abs_weights["Soil Moisture Saturation"] / total_abs) * 100, 1),
-            "rawValue": f"{moisture:.2f} m³/m³ ({int(round(moisture * 100))}% v/v)",
-            "value": f"{moisture:.2f} m³/m³",
-            "net_delta": round(c_moisture * 100, 2),
-            "color": "bg-sky-500"
-        },
-        {
-            "name": "Vegetation Canopy (NDVI)",
-            "importance_pct": round((abs_weights["Vegetation Canopy (NDVI)"] / total_abs) * 100, 1),
-            "rawValue": f"{ndvi:.2f} (Regional Climatological Estimate)",
-            "value": f"{ndvi:.2f}",
-            "net_delta": round(c_ndvi * 100, 2),
-            "color": "bg-emerald-500"
-        },
-        {
-            "name": "Historical Recorded Incidents",
-            "importance_pct": round((abs_weights["Historical Landslide Density"] / total_abs) * 100, 1),
-            "rawValue": f"{history} event{'s' if history != 1 else ''} (Disaster Catalog Record)",
-            "value": f"{history} event{'s' if history != 1 else ''}",
-            "net_delta": round(c_history * 100, 2),
-            "color": "bg-neutral-500"
+            "name": name,
+            "importance_pct": round(abs(c) / total_abs * 100, 1),
+            "value": value,
+            "rawValue": value,
+            "net_delta": round(c * 100, 2),  # points this input moved the score (+ raises, - lowers)
         }
+        for name, c, value in entries
     ]
     factors.sort(key=lambda x: x["importance_pct"], reverse=True)
 
-    top_drivers = [f["name"] for f in factors[:2]]
-    primary_driver = " and ".join(top_drivers).lower()
-
-    if risk_score > 60:
-        summary = (
-            f"{top_drivers[0]} ({factors[0]['value']}) and {top_drivers[1]} ({factors[1]['value']}) "
-            f"are the primary physical drivers elevating landslide probability to {risk_score:.1f}% ({risk_level})."
-        )
-    elif risk_score > 30:
-        summary = (
-            f"Moderate slope gradient with cumulative soil saturation indicates threshold equilibrium. "
-            f"Primary monitoring factor: {top_drivers[0]}."
-        )
+    raising = [f["name"].lower() for f in factors if f["net_delta"] > 0][:2]
+    lowering = [f["name"].lower() for f in factors if f["net_delta"] < 0][:2]
+    if raising:
+        summary = f"Score raised mainly by {' and '.join(raising)}."
+        if lowering:
+            summary += f" Lowered by {' and '.join(lowering)}."
+    elif lowering:
+        summary = f"Score kept low mainly by {' and '.join(lowering)}."
     else:
-        summary = (
-            "Terrain stability parameters are within safe equilibrium. "
-            "Vegetative canopy and moderate slope angles provide robust resistance against shear failure."
-        )
+        summary = "No single input stands out."
+    primary_driver = (raising or lowering or ["no single input"])[0]
 
     action = get_recommended_action(risk_level, primary_driver)
 
@@ -249,18 +206,25 @@ def predict_landslide_risk(input_data: Dict[str, Any]) -> Dict[str, Any]:
     """
     model, metadata = get_model()
 
-    raw_r24 = input_data.get("rainfall_24h")
-    # Strict Prediction Validity Gate: Do not silently coerce missing/unavailable precipitation to 0.0
-    if raw_r24 is None or (isinstance(raw_r24, float) and np.isnan(raw_r24)):
+    # Validity gate: every model input must be real. Missing values are never filled with
+    # made-up defaults; the score is withheld and the missing inputs are named instead.
+    def _missing(v):
+        return v is None or (isinstance(v, float) and np.isnan(v))
+    labels = {"rainfall_24h": "24 h rain", "rainfall_72h": "72 h rain", "slope_deg": "slope",
+              "soil_moisture": "soil moisture", "historical_incidents": "landslide history",
+              "elevation_amsl": "elevation"}
+    missing = [k for k in labels if _missing(input_data.get(k))]
+    if missing:
         return {
             "status": "DATA_INSUFFICIENT",
             "risk_score": None,
             "risk_level": "DATA_INSUFFICIENT",
             "baseline_ml_level": "DATA_INSUFFICIENT",
             "inference_status": "PAUSED_DATA_UNAVAILABLE",
-            "unavailability_reason": "Precipitation telemetry is unavailable (HTTP 429 / timeout / missing). Inference paused to avoid false safety assessment.",
+            "unavailability_reason": "Missing input: " + ", ".join(labels[k] for k in missing) + ". No score is given without it.",
+            "missing_inputs": missing,
             "features": {
-                "rainfall_24h": None,
+                "rainfall_24h": input_data.get("rainfall_24h"),
                 "rainfall_72h": input_data.get("rainfall_72h"),
                 "slope_deg": input_data.get("slope_deg"),
                 "soil_moisture": input_data.get("soil_moisture"),
@@ -270,15 +234,15 @@ def predict_landslide_risk(input_data: Dict[str, Any]) -> Dict[str, Any]:
             },
             "xai": {
                 "factors": [],
-                "summary": "Model inference paused: Critical meteorological inputs (24h precipitation) are unavailable. LandSafe refuses to silently substitute 0.0 mm rainfall.",
-                "recommended_action": "AWAIT METEOROLOGICAL TELEMETRY: Inference paused until precipitation data is restored.",
-                "primary_driver": "unavailable precipitation",
+                "summary": "No score: " + ", ".join(labels[k] for k in missing) + " not available right now.",
+                "recommended_action": "Check again shortly.",
+                "primary_driver": "missing data",
                 "base_hazard_bias": None,
                 "raw_tree_contributions": {}
             },
             "model_confidence": None,
             "tree_variance": None,
-            "data_quality": "UNAVAILABLE (Missing Precipitation Telemetry)",
+            "data_quality": "UNAVAILABLE",
             "global_feature_importances": metadata.get("feature_importances") if metadata else {},
             "model_metadata": {
                 "model_type": metadata.get("model_type", "RandomForestClassifier"),
@@ -292,18 +256,17 @@ def predict_landslide_risk(input_data: Dict[str, Any]) -> Dict[str, Any]:
             "precision_context": {
                 "status": "DATA_INSUFFICIENT",
                 "inference_paused": True,
-                "reason": "Missing precipitation telemetry"
+                "reason": "Missing inputs"
             }
         }
 
-    rain_24 = float(raw_r24)
-    raw_r72 = input_data.get("rainfall_72h")
-    rain_72 = float(raw_r72) if raw_r72 is not None and not (isinstance(raw_r72, float) and np.isnan(raw_r72)) else rain_24 * 1.8
-    slope = float(input_data.get("slope_deg", 18.0))
-    moisture = float(input_data.get("soil_moisture", 0.35))
-    ndvi = float(input_data.get("ndvi", 0.55))
-    history = int(input_data.get("historical_incidents", 1))
-    elev = float(input_data.get("elevation_amsl", 850.0))
+    rain_24 = float(input_data["rainfall_24h"])
+    rain_72 = float(input_data["rainfall_72h"])
+    slope = float(input_data["slope_deg"])
+    moisture = float(input_data["soil_moisture"])
+    ndvi = float(input_data.get("ndvi") or 0.0)  # not a model input; kept only for the legacy column
+    history = int(input_data["historical_incidents"])
+    elev = float(input_data["elevation_amsl"])
 
     # Feature engineering aligned with training pipeline
     slope_rad = np.radians(np.clip(slope, 0.0, 85.0))
@@ -346,6 +309,8 @@ def predict_landslide_risk(input_data: Dict[str, Any]) -> Dict[str, Any]:
 
     # 4. Integrate Advanced Precision, Data Quality, Geotechnical Physics & Risk Fusion Engines
     try:
+        if input_data.get("latitude") is None or input_data.get("longitude") is None:
+            raise ValueError("no coordinates given")
         from backend.app.services.data_quality_service import assess_data_quality
         from backend.app.services.rainfall_trigger_service import evaluate_rainfall_trigger
         from backend.app.services.geotechnical_physics_service import calculate_factor_of_safety
@@ -358,16 +323,16 @@ def predict_landslide_risk(input_data: Dict[str, Any]) -> Dict[str, Any]:
             rainfall_72h=rain_72,
             slope_deg=slope,
             soil_moisture=moisture,
-            lat=float(input_data.get("latitude", 31.95)),
-            lon=float(input_data.get("longitude", 77.10)),
+            lat=float(input_data["latitude"]),
+            lon=float(input_data["longitude"]),
             state=input_data.get("state", "")
         )
         geotech_result = calculate_factor_of_safety(
             slope_deg=slope,
             rainfall_72h=rain_72,
             soil_moisture=moisture,
-            lat=float(input_data.get("latitude", 31.95)),
-            lon=float(input_data.get("longitude", 77.10)),
+            lat=float(input_data["latitude"]),
+            lon=float(input_data["longitude"]),
             site_cohesion_kpa=input_data.get("site_cohesion_kpa"),
             site_friction_deg=input_data.get("site_friction_deg")
         )
@@ -401,15 +366,15 @@ def predict_landslide_risk(input_data: Dict[str, Any]) -> Dict[str, Any]:
         calculated_confidence = conf_result["confidence_score"]
         calculated_data_quality_label = f"{dq_result['level']} ({dq_result['overall_score']}/100)"
         
-        # If a safety override occurred (e.g. Factor of Safety < 1.0), adopt fused alert level
-        effective_risk_level = fusion_result["final_alert_class"]
+        # The level shown always matches the score (no separate override).
+        effective_risk_level = risk_level
     except Exception as e:
         precision_context = {
             "error": str(e),
             "status": "graceful_fallback"
         }
         calculated_confidence = model_confidence
-        calculated_data_quality_label = "HIGH (WMO / Copernicus DEM Calibrated)"
+        calculated_data_quality_label = None
         effective_risk_level = risk_level
 
     return {

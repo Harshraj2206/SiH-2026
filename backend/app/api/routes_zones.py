@@ -1,6 +1,6 @@
 """
 LANDSLIDEGUARD SIH26001 - Real-Time Dynamic Risk Zones API
-Evaluates authentic live precipitation and satellite soil moisture for every monitored zone.
+Scores monitored zones from live rainfall, soil moisture and terrain.
 """
 
 from typing import List, Optional
@@ -27,8 +27,9 @@ def list_risk_zones(
 
     # Ingest real-time meteorology concurrently for monitored zones (bounded workers to prevent rate-limiting)
     with concurrent.futures.ThreadPoolExecutor(max_workers=6) as executor:
-        zones = list(executor.map(refresh_zone, zones))
+        list(executor.map(refresh_zone, zones))
     db_store.refresh_fusion_and_alerts()
+    zones = db_store.get_scored_zones()  # zones still waiting for live data are not shown
 
     if level:
         zones = [z for z in zones if z["risk_level"] == level.upper()]
