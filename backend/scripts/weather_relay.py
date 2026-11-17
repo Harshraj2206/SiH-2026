@@ -38,10 +38,13 @@ def main():
         if urlparse(t["url"]).hostname != "api.open-meteo.com":
             print(f"Skipping unexpected URL {t['url']}")
             continue
-        try:
-            items.append({"latitude": t["latitude"], "longitude": t["longitude"], "payload": http(t["url"])})
-        except Exception as e:
-            print(f"Open-Meteo failed for {t['latitude']},{t['longitude']}: {e}")
+        for attempt in range(3):  # Open-Meteo sometimes times out; retry before giving up
+            try:
+                items.append({"latitude": t["latitude"], "longitude": t["longitude"], "payload": http(t["url"])})
+                break
+            except Exception as e:
+                print(f"Open-Meteo failed for {t['latitude']},{t['longitude']} (try {attempt + 1}): {e}")
+                time.sleep(5)
         time.sleep(0.5)
 
     if not items:
