@@ -1,65 +1,66 @@
 {
   "model_type": "RandomForestClassifier",
-  "calibration": "Calibrated Probability Regressor (0 - 100%)",
-  "training_dataset": "GSI NLSM & NASA Global Landslide Catalog Empirical Dataset",
-  "dataset_size": 1400,
-  "train_samples": 1120,
-  "test_samples": 280,
-  "n_estimators": 150,
+  "constraints": "score never decreases as rainfall, soil moisture or slope increase",
+  "training_dataset": "NASA Global Landslide Catalog (India, rain-triggered) + ERA5 rainfall/soil moisture + Copernicus DEM",
+  "dataset_size": 1970,
+  "positives": 669,
+  "negatives": 1301,
+  "negative_sampling": "temporal (same place, same season, other year) and spatial (same day, 15-60 km away), both with no catalogued landslide nearby",
   "features": [
     "rainfall_24h",
     "rainfall_72h",
     "slope_deg",
     "soil_moisture",
-    "ndvi",
     "historical_incidents",
     "elevation_amsl",
     "antecedent_rain_index",
-    "pore_slope_interaction",
-    "vegetation_slope_defense"
+    "pore_slope_interaction"
   ],
   "base_features": [
     "rainfall_24h",
     "rainfall_72h",
     "slope_deg",
     "soil_moisture",
-    "ndvi",
     "historical_incidents",
     "elevation_amsl"
   ],
   "engineered_features": [
     "antecedent_rain_index",
-    "pore_slope_interaction",
-    "vegetation_slope_defense"
+    "pore_slope_interaction"
   ],
+  "not_used": {
+    "ndvi": "historical NDVI per sample not available; shown for context only"
+  },
+  "score_meaning": "Model probability x 100 from a 1:2 landslide:non-landslide training set; a relative risk score, not a calibrated real-world probability.",
   "metrics": {
-    "accuracy": 83.93,
-    "precision": 85.14,
-    "recall": 88.69,
-    "f1_score": 86.88,
-    "roc_auc": 0.8672,
-    "false_negative_rate": 11.31,
-    "cv_f1_mean": 89.21,
-    "cv_f1_std": 1.72,
+    "evaluation": "5-fold spatial cross-validation (1-degree grid cells held out)",
+    "roc_auc": 0.6491,
+    "pr_auc": 0.4675,
+    "precision": 43.64,
+    "recall": 67.71,
+    "f1_score": 53.08,
+    "false_negative_rate": 32.29,
     "confusion_matrix": {
-      "true_positive": 149,
-      "false_positive": 26,
-      "true_negative": 86,
-      "false_negative": 19
+      "true_positive": 453,
+      "false_positive": 585,
+      "true_negative": 716,
+      "false_negative": 216
     }
   },
-  "feature_importances": {
-    "rainfall_24h": 0.0324,
-    "rainfall_72h": 0.0405,
-    "slope_deg": 0.2715,
-    "soil_moisture": 0.0368,
-    "ndvi": 0.0391,
-    "historical_incidents": 0.0969,
-    "elevation_amsl": 0.0915,
-    "antecedent_rain_index": 0.034,
-    "pore_slope_interaction": 0.293,
-    "vegetation_slope_defense": 0.0642
+  "mean_oof_score_by_sample_kind": {
+    "positive": 53.1,
+    "temporal_negative": 42.7,
+    "spatial_negative": 49.4
   },
-  "trained_date": "2026-09-11",
-  "description": "Technically Defensible Random Forest for SIH26001 Landslide Early Warning System"
+  "feature_importances": {
+    "rainfall_24h": 0.1303,
+    "rainfall_72h": 0.137,
+    "slope_deg": 0.0254,
+    "soil_moisture": 0.0236,
+    "historical_incidents": 0.2325,
+    "elevation_amsl": 0.2734,
+    "antecedent_rain_index": 0.1432,
+    "pore_slope_interaction": 0.0346
+  },
+  "trained_date": "2026-11-17"
 }

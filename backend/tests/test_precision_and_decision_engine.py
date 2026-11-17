@@ -19,7 +19,7 @@ from backend.app.services.risk_fusion_engine import fuse_risk_decision
 from backend.app.ml.predictor import predict_landslide_risk, MODEL_PATH
 
 
-BASELINE_MODEL_HASH = "6a579e8b53c12a37ca9f9b21429fa075bfba911ec6e5f25c1265ce96aefd0472"
+BASELINE_MODEL_HASH = "864e03c77da1b26cc4a924d511b1c5c289605b3b68e7fd9840babc9a1d62a717"
 
 
 def test_model_joblib_immutability():

@@ -1,0 +1,1266 @@
+event_id,event_date,latitude,longitude,trigger,location_accuracy,state,title
+35,2007-03-12,34.0935,74.9112,rain,50km,Kashmir,Jammu-Srinagar highway
+37,2007-03-19,33.8778,74.3333,rain,25km,Kashmir,Doba
+43,2007-03-23,33.9659,74.3313,downpour,50km,Kashmir,"Doba Sayedan, Kashmir"
+57,2007-04-11,27.4459,88.6193,downpour,5km,,"Sikkim, 13 km north of Gangtok"
+73,2007-05-08,33.242,75.231,rain,50km,Kashmir,"Jammu-Srinagar hwy, Samarouli in Ramban district"
+78,2007-05-23,27.3383,88.6069,rain,50km,Sikkim,"Pangthang, on road b/t Gangtok and North Sikkim"
+93,2007-06-13,26.7324,88.4089,rain,25km,Bengal,"Indira Bypass, Amdo Golai"
+94,2007-06-15,26.8096,88.526,rain,25km,Bengal,National Highway 31A at Sevoke
+100,2007-06-25,11.2738,75.8275,rain,50km,Kerala,Kozhikode
+98,2007-06-25,18.431,79.1492,rain,25km,Andhra Pradesh,Karimnagar
+102,2007-06-25,15.8294,78.0501,rain,25km,Andhra Pradesh,Kurnool
+101,2007-06-25,11.7095,76.074,monsoon,50km,Kerala,Wayanad
+104,2007-06-25,16.6252,80.6128,rain,unknown,Andhra Pradesh,Prakasam
+103,2007-06-25,14.4702,78.8205,rain,25km,Andhra Pradesh,Cuddappa
+97,2007-06-25,16.9648,73.5189,rain,25km,Maharashtra,Ratnagiri
+99,2007-06-25,19.0298,72.9104,rain,25km,Maharashtra,Mumbai
+111,2007-07-02,33.2443135,75.22742083,downpour,25km,Kashmir,Jammu-Srinagar highway between Ramban and Srinagar
+126,2007-07-16,27.1499,88.38,rain,25km,Sikkim,Bardang near Singtam
+130,2007-07-19,26.1699,91.7986,rain,25km,Assam,Guwahati
+131,2007-07-20,11.855,75.361,downpour,10km,Kerala,4 locations in the Kannur district
+133,2007-07-21,23.9304,88.2374,rain,50km,Bengal,Beldanga
+141,2007-07-26,25.38,91.88,rain,50km,Meghālaya,Singtam
+142,2007-07-27,25.5212,90.232,rain,10km,Meghālaya,Tura
+143,2007-07-28,15.4014,73.8277,rain,5km,Goa,Vasco
+147,2007-07-30,22.533,92.899,downpour,25km,Mizoram,Lawngtlai
+148,2007-07-30,22.479,92.967,downpour,25km,Mizoram,Saiha
+149,2007-07-30,30.557,79.56,downpour,50km,Uttarakhand,Joshimath
+150,2007-07-30,30.4,79.349,downpour,50km,Uttarakhand,Chamoli
+146,2007-07-30,30.733,78.439,downpour,50km,Uttarakhand,Uttarkashi district
+151,2007-08-02,26.8905,88.2789,rain,25km,Bengal,Kurseong
+157,2007-08-06,33.2451,75.2257,rain,25km,Kashmir,"Srinagar-Jammu Highway, Rāmban District"
+162,2007-08-07,15.0296,74.0253,rain,10km,Goa,Canacona
+166,2007-08-09,12.8733,74.8481,rain,10km,Karnataka,Mangalore
+173,2007-08-11,30.0702,78.3027,rain,unknown,Uttarakhand,Rishikesh
+178,2007-08-12,32.0985,76.2665,rain,25km,Himachal Pradesh,Kangra
+177,2007-08-12,32.7334,77.5914,rain,unknown,Himachal Pradesh,"Himachal Pradesh, all over"
+181,2007-08-13,17.3895,78.499,rain,5km,Andhra Pradesh,Koti railway station
+183,2007-08-14,26.2208,73.6106,downpour,50km,Rajasthan,"Himachal Pradesh, Shimla district, Ghanvi village"
+210,2007-08-25,27.0713,88.4308,rain,25km,Bengal,"Hattisurey in Kalimpong, on National Highway 31A"
+212,2007-08-26,25.5576,91.8506,rain,unknown,Meghālaya,National Highway No 44 at Sonarpur in Meghalaya
+213,2007-08-26,25.2946,92.8339,rain,unknown,Assam,Shillong Road at Kuliang in the Jaintia Hills
+211,2007-08-26,24.9667,93.55,continuous_rain,5km,Manipur,Tamenglong
+215,2007-08-28,25.7428,93.9136,rain,50km,Nāgāland,Phesema area at National Highway 39
+218,2007-08-29,27.0096,88.2548,rain,10km,Bengal,"Ghayabari-Tindharia on National Highway 55, near Darjeeling hills"
+221,2007-08-31,22.6461,88.3403,rain,10km,Bengal,between Bally Halt and Rajchandrapur stations in Kolkata
+220,2007-08-31,25.1333,93.9667,rain,25km,Manipur,"Velnal village, Tamei sub-division and Toribari village (3 kilometer toward Tamei from Kangpokpi)"
+222,2007-09-01,17.2634,73.5446,rain,unknown,Maharashtra,Maharashta on Konkan Railway between Nivsur and Ratnagiri
+234,2007-09-05,33.1662,75.3098,rain,50km,Kashmir,Panthal in Jammu’s Ramban district on Srinagar-Jammu Highway
+231,2007-09-05,27.06826195,88.28121204,rain,5km,Bengal,Darjeeling Hills (Lebong - 10 km from Darjeeling
+237,2007-09-06,29.5833,80.2167,rain,25km,Uttarakhand,Pithoragarh
+241,2007-09-07,27.201,88.4883,rain,25km,,"National Highway 31A between Rangpo and Tarkhola, in East Sikkim"
+242,2007-09-07,26.8833,88.2833,rain,25km,Bengal,"Darjeeling Hills, multiple villages in area (Kurseong, Kalimpong, Bhalukopa, Kukhleinkhani)"
+240,2007-09-07,15.5063,73.8362,rain,5km,Goa,"NH-17, Panaji to Mapusa on Old Mandovi bridge, Goa"
+247,2007-09-08,25.0604,93.9877,rain,50km,Manipur,"Lower Shajouba village near Tadubi along NH 39, Manipur "
+251,2007-09-09,27.1667,88.35,rain,50km,Sikkim,Hingdam village in South Sikkim
+252,2007-09-09,25.4993,94.1192,rain,25km,Nāgāland,"Mao in Manipur, Phipema and Chunikhudima in Nagaland"
+256,2007-09-10,27.3425,88.6236,rain,10km,Sikkim,Rhodong village near Rhey in East Sikkim
+255,2007-09-10,24.2451,94.0691,rain,25km,Manipur,Wamkhu village along the Tengnoupal-Joupi road in Chandel district
+258,2007-09-11,24.4279,94.0564,rain,50km,Manipur,"NH-39 at Imphal-Moreh section, Lokchao largest event"
+260,2007-09-11,27.2084,88.4909,rain,5km,,"National Highway 31A, between Singtam and Rangpo"
+259,2007-09-11,25.52,91.27,rain,unknown,Meghālaya,"Assam-Agartala National Highway, Sonarpur in Jayantiya hills of Meghalaya"
+264,2007-09-13,26.1833,91.8,rain,10km,Assam,Guwahati
+269,2007-09-18,27.2872,88.2816,rain,50km,Sikkim,Geyzing-Jorethang road and Naya Bazar-Legship road
+274,2007-09-20,27.0875,88.4572,rain,50km,Bengal,"Multiple places along 31A, Tarkhola area in Kalimpong district and Sevoke in WB"
+279,2007-09-23,21.464,83.9462,rain,25km,Orissa,"NH6, Sambalpur town before Mahanadi bridge"
+285,2007-09-29,24.1293,92.6921,rain,50km,Mizoram,"National Highway, 45 Aizwal (Mizoram)"
+313,2007-10-16,25.7055,94.0132,rain,5km,Nāgāland,"NH-39 at Piphema,  6 km towards Dimapur from Kohima in Nagaland"
+319,2007-10-19,25.4379,94.1162,rain,50km,Nāgāland,"Maram-Purul Road, Karong Assembly Constituency of Senapati district, Manipur"
+322,2007-10-21,24.75,93.4333,rain,25km,Assam,National Highway 53 at Nungba in Tamenglong district of Manipur
+324,2007-10-25,11.7792,78.2034,rain,25km,Tamil Nādu,Salem - Yercaud ghat road
+326,2007-10-26,11.4046,76.6953,rain,25km,Tamil Nadu,"Nilgiri, Nondimedu on the Ooty-Coonoor road"
+336,2007-10-30,11.2777,77.1236,rain,unknown,Tamil Nadu,"bridge between Coonoor and Barliar, Tamil Nadu"
+395,2007-12-16,34.93977198,76.83270934,rain,25km,Kashmir,2 Soldiers Killed
+410,2008-01-06,33.1517,75.5464,rain,25km,Kashmir,"Kandi Canal Project, Gandoh area, Doda district, Kashmir"
+416,2008-01-07,33.4341,75.1923,rain,25km,Kashmir,"between Banihal and Batote, Udhampur, National Highway, Jammu"
+419,2008-01-09,33.23738085,75.24528226,rain,25km,Kashmir,"Panthihal near Ramban,  Srinagar-Jammu highway"
+428,2008-01-16,33.2537,75.2006,snowfall_snowmelt,50km,Kashmir,"Panthihal, Srinagar-Jammu highway"
+443,2008-02-03,33.33280503,75.21320384,downpour,5km,Kashmir,Landslides stop traffic
+448,2008-02-08,12.9752,77.6092,rain,25km,Karnātaka,Kodaikanal
+451,2008-02-13,11.3484,76.7937,rain,10km,Tamil Nadu,Alwarpet in Coonoor
+452,2008-02-13,33.2418,75.242,rain,10km,Kashmir,"Ramban, near Sringar-Jammu highway"
+481,2008-03-17,32.2862,77.1613,snowfall_snowmelt,25km,Himachal Pradesh,"Nehrukund in Manali, Himachal Pradesh"
+488,2008-03-30,34.219,77.2665,rain,50km,Kashmir,Biama area of Khalsi tehsil in Leh district
+492,2008-04-05,33.9337,74.9985,rain,50km,Kashmir,"Panthial, 170 kilometres from Jammu, Jammu-Srinagar highway"
+516,2008-05-01,33.1463,75.7454,unknown,25km,Kashmir,"Kishtwar-Chatroo road, Kishtwar region of Jammu and Kashmir"
+523,2008-05-05,33.9513,74.9845,downpour,50km,Kashmir,Srinagar-Leh highway at Gomri
+540,2008-05-18,19.5178,83.1809,mining,unknown,Orissa,"Kalahandi district of Orissa, Depur village"
+545,2008-05-20,24.9849,92.8411,mining,50km,Assam,"A Cachar District village, near village of Srinager, Assam"
+554,2008-05-28,9.7327,76.8403,downpour,5km,Kerala,"Periyanmala, Kottayam district, Kerala, India"
+568,2008-06-03,31.2077,77.193,rain,25km,Himachal Pradesh,Hindustan-Tibet National Highway near Matiana village
+571,2008-06-06,15.3925,73.8377,rain,50km,Goa,"Jetty, Desterovaddo, Bharatline-Tarivaddo and Harbour, Vasco, Goa"
+580,2008-06-09,24.6596,93.9784,monsoon,unknown,Manipur,"near Kuloor church, in Manipur along National Highway"
+585,2008-06-14,27.0998,93.6287,rain,25km,Arunāchal Pradesh,"Itanagar-Naharlagun, Arunachal Pradesh"
+587,2008-06-15,27.2298,94.0989,downpour,25km,Assam,"Lakhimpur district, Bihpuria, Assam"
+588,2008-06-15,32.5659,75.0944,rain,50km,Kashmir,"Charan Padika, Jammu"
+592,2008-06-18,32.3712,77.2466,rain,25km,Himachal Pradesh,"Manali-Leh road, Gulaba near Rohtang Pass"
+594,2008-06-19,24.9336,93.8275,monsoon,25km,Manipur,"Namkaoluang village, Tamenglong-Sangrung (Khongsang) road, NH-53, Manipur"
+595,2008-06-20,26.885,88.2778,rain,25km,Bengal,Kurseong sub division
+609,2008-06-25,11.41,76.69,downpour,25km,Tamil Nadu,Udhagamandalam
+614,2008-06-29,26.89,88.28,unknown,5km,Bengal,"Kurseong sub division, Mamring"
+620,2008-06-30,27.0771,88.482,downpour,5km,Bengal,Kalimpong
+653,2008-07-18,29.33,80.1,rain,5km,Uttarakhand,Sukhidhang area of Champawat district in Uttarakhand 
+692,2008-08-07,25.705,94.04,downpour,10km,Nāgāland,"National Highway-39, Dimapur-Imphal road and another under Kiphire district of Nagaland"
+697,2008-08-08,31.13,77.09,rain,25km,Himachal Pradesh,"Barog, Shimla; Chandigarh-Shimla national highway"
+703,2008-08-09,15.15,74.11,rain,25km,Goa,"Goa-Karnataka link, near Dudhsagar waterfall"
+705,2008-08-10,18.72,73.47,rain,unknown,Maharashtra,"Monkey Hill and Khandala, Maharashtra"
+704,2008-08-10,12.6445,75.605,downpour,50km,Karnataka,Edakumeri near Subrahmanya
+706,2008-08-10,25.08,75.72,rain,50km,Rajasthan,"Gaiparnath Mahadev temple, foothills of Chambal ravines"
+710,2008-08-12,13.986,75.452,downpour,10km,Karnataka,"Ayanur near Neriya, Karnataka"
+711,2008-08-12,14.229,74.8122,rain,5km,Karnataka,"Jog Falls, Karnataka"
+709,2008-08-12,12.845,75.66,rain,50km,Karnataka,Yedakumeri-Shiribagilu in the Hassan-Mangalore section of the line.
+715,2008-08-14,31.0,77.12,monsoon,unknown,Himachal Pradesh,"Shimla, Mandi, Solan and Sirmaur districts"
+714,2008-08-14,27.163,94.0,rain,50km,Assam,"Kimin-Ziro road in Papum Pare district, road between Doimukh and Sagalee, Doimukh-Hoj road; Arunachal Pradesh"
+717,2008-08-15,33.0,74.9277,downpour,25km,Kashmir,Riasi district of Jammu and Kashmir
+725,2008-08-17,31.1,77.16,rain,25km,Himachal Pradesh,Shimla district
+731,2008-08-19,26.138,94.25,downpour,50km,Nāgāland,"Akuk village, Wokha District, Nagaland"
+755,2008-08-28,27.337,88.609,downpour,25km,Sikkim,"Ranka, Sikkim and Louing road"
+760,2008-08-29,25.67,94.1066,downpour,25km,Nāgāland,"Kohima, Nagaland"
+785,2008-09-10,15.323,73.974,rain,5km,Goa,"Solva, Raia"
+798,2008-09-19,31.587,78.315,downpour,50km,Himachal Pradesh,"NH 22, Kinnaur district"
+797,2008-09-19,31.1,77.1645,downpour,10km,Himachal Pradesh,"Rohru,Theog and Chopal sub-divisions, Shimla, Himachal Pradesh"
+796,2008-09-19,30.56,77.3,downpour,10km,Himachal Pradesh,Anni and Nahan
+804,2008-09-22,30.7,77.08,rain,25km,Haryana,"Ghaggar, Morni, Panchkula"
+840,2008-10-12,27.0167,78.1333,rain,25km,Uttar Pradesh,Lehrakapura village near Shamsabad town
+858,2008-10-22,33.6549,74.6326,downpour,50km,Kashmir,Mughal Road at Lal Ghulam Pahari (25 km from Shopian)
+870,2008-10-29,27.4,92.35,downpour,50km,Arunāchal Pradesh,"West Kameng, Arunachal Pradesh"
+869,2008-10-29,27.2333,94.1167,downpour,50km,Assam,North Lakhimpur 
+868,2008-10-29,26.3333,91.25,downpour,50km,Assam,"Kamrup, and Sonitpur, Assam"
+940,2008-12-20,33.245,75.247,rain,25km,Kashmir,"Panthal in Ramban district, National Highway 1; 174 km from Jammu"
+942,2008-12-21,30.895,77.089,unknown,25km,Himachal Pradesh,"Kalka-Shimla rail line, 1 km from Dharampur railway station at Tunnel No. 27"
+1032,2009-05-26,27.0095,88.2592,tropical_cyclone,5km,Bengal,"Rangiabong (Jorbungalow), Darjeeling, West Bengal"
+1031,2009-05-26,26.8836,88.2791,tropical_cyclone,5km,Bengal,"Kurseong, Darjeeling, West Bengal"
+1030,2009-05-26,27.04357147,88.26522126,tropical_cyclone,25km,Bengal,"Darjeeling Sadar, Darjeeling West Bengal"
+1037,2009-06-17,26.89,88.47,downpour,5km,Bengal,"Sevoke, 20km from Siliguri, North Eastern, India (Highway NH31A:Coronation Bridge to the Sevoke police outpost section blocked)"
+1043,2009-06-29,18.7591,73.3852,continuous_rain,1km,Maharashtra,"Adoshi tunnel,  Khandala Ghat, on Pune-Mumbai Expressway "
+1061,2009-07-01,27.478,88.527,downpour,1km,,Bridge destroyed at 4th Mile
+1050,2009-07-03,26.87324244,88.29184021,rain,10km,Bengal,Darjeeling (between Tin Dharia and Rongtong)
+1055,2009-07-22,26.8826,88.2788,downpour,10km,Bengal,"Kerseong, West Bengal "
+1054,2009-07-22,26.8572,88.3143,downpour,10km,Bengal,"Gayabari,  West Bengal "
+1056,2009-07-22,27.04,88.264,downpour,10km,Bengal,"Darjeeling, West Bengal "
+1072,2009-08-08,29.5885,80.2098,downpour,10km,Uttarakhand,"Bala, Pithoragarh, Uttarakhand (450Km from Deheradun)"
+1084,2009-08-12,27.7,92.8,downpour,5km,Arunāchal Pradesh,"Upper Subansiri District, Arunanchal Pradesh"
+1094,2009-08-16,27.15977181,88.63411246,downpour,exact,Bengal,"Katare village, 80 km from Kalimpong"
+1091,2009-08-16,27.02459801,88.43849551,downpour,25km,Bengal,"Kalimpong, Darjeeling, West Bengal"
+1089,2009-08-16,26.7914,88.363,downpour,10km,Bengal,"Gourishankar tea estate premises, Darjeeling, West Bengal"
+1092,2009-08-16,26.74452462,88.40011959,downpour,5km,Bengal,near the Rohini-Sirubari road
+1088,2009-08-16,26.8867642,88.28044714,downpour,5km,Bengal,"Kerseong, Sub-division, Siliguri district, West Bengal"
+1090,2009-08-16,26.9599,88.268,downpour,5km,Bengal,"Malutar tea estate, Darjeeling, West Bengal"
+1093,2009-08-16,26.88211522,88.3195318,downpour,5km,Bengal,"Phagutar near Mahanadi, 12km from Kurseong, Siliguri district, Darjeeling"
+1097,2009-08-17,29.4085,80.1327,continuous_rain,25km,Uttarakhand,Pithoragarh district
+1102,2009-08-19,27.2644,88.1365,downpour,10km,,"Sombaria, West Sikkim"
+1109,2009-08-20,25.5215,93.1645,downpour,25km,Assam,Lumding-Badarpur section in North Cachar Hills district
+1112,2009-08-20,27.1761,88.5287,downpour,25km,Sikkim,"NH31A, Mile 27 near Rambi"
+1108,2009-08-20,24.9925,93.5,downpour,10km,Assam,"Tamei, Tamenglong district on Imphal-Tamenglong (IT) road"
+1111,2009-08-20,27.1344,88.4575,downpour,5km,Bengal,"Melli Chalisey, Sikkim"
+1107,2009-08-20,27.0736,88.4779,continuous_rain,25km,Bengal,"Geetkolbong, Kalimpong sub-division, Darjeeling, West Bengal"
+1110,2009-08-20,26.88405686,88.28087032,continuous_rain,10km,Bengal,"Kurseong, Darjeeling, West Bengal"
+1106,2009-08-20,26.8992,88.1667,continuous_rain,1km,Bengal,"(Okai Tea Garden) Mirik, Darjeeling, West Bengal"
+1125,2009-08-26,27.3746,88.7648,rain,25km,Sikkim,"17th Mile towards Tsomgo Lake, near Kyongsala, Sikkim "
+1127,2009-08-27,25.1718,93.123,downpour,10km,Assam,between Mahur and Phaiding railway stations on Barail hills (Mahur and Barail hills located)
+1129,2009-08-30,24.8628,94.4182,downpour,50km,Manipur,"Road stretch from Gammom to Chamu village, under Kamjong block, Ukhrul district, Manipur"
+1130,2009-09-01,29.7036,78.5658,downpour,5km,Uttarakhand,Chinona area in Almora district
+1133,2009-09-03,19.0949,72.8899,downpour,10km,Maharashtra,"Saki Naka in Andheri area, Mumbai suburb/slum (Sakinaka is around 23 miles (35 kilometers) from downtown Mumbai)"
+1134,2009-09-03,32.351,77.2234,rain,10km,Himachal Pradesh,Marhi region of Himachal Pradesh
+1149,2009-09-09,31.5494,76.9001,downpour,5km,Himachal Pradesh,"Bilaspur and Mandi towns, Chandigarh-Manali National Highway-21, Himachal Pradesh"
+1153,2009-09-10,31.8833,78.6167,downpour,5km,Himachal Pradesh,"Kaza-Kinnaur highway near Nako, Spiti Valley, Himachal Pradesh"
+1154,2009-09-10,32.4035,77.5796,downpour,5km,Himachal Pradesh,"Manali Kaza-Manali Road near Kunzum Pass, Spiti Valley, Himachal Pradesh"
+1157,2009-09-12,31.1032,77.1625,downpour,5km,Himachal Pradesh,Kalka-Shimla toy train track near Kaithlighat
+1156,2009-09-12,8.742,76.8902,rain,1km,Kerala,"Vamanapuram, Thiruvananthapuram district in the state of Kerala"
+1168,2009-09-17,27.1954,88.6115,rain,5km,Sikkim,"4th Mile on road between Rongli, Rhenock and Rangpo in East Sikkim."
+1170,2009-09-18,26.8342,88.2798,rain,50km,Bengal,Tindharia and Rong Tong
+1172,2009-09-19,11.2695,76.2227,downpour,1km,Kerala,"Nilambur, Malappuram, Kerala State"
+1204,2009-10-01,16.656,73.5178,downpour,5km,Maharashtra,"Vadad-Hasol village near Rajapur in Ratnagiri district, Maharastra"
+1210,2009-10-02,14.9935,74.0478,rain,5km,Karnataka,Konkan railway route in southern village Canacona in Goa
+1209,2009-10-02,14.7395,74.2566,downpour,25km,Karnataka,National Highway 17 between Karwar and Ankola (
+1208,2009-10-02,14.7812,74.499,downpour,10km,Karnataka,"Madibag near Kadwad village, Uttara Kannada district, North Karnataka"
+1213,2009-10-03,11.4816,75.9957,downpour,10km,Kerala,"Puddipadi, Kozhikode, Kerala "
+1212,2009-10-03,11.4477,75.8289,downpour,10km,Kerala,"Balussery, Kozhikode, Kerala"
+1222,2009-10-05,23.73478778,92.72124394,downpour,5km,Mizoram,"Chhinga Veng, Aizawl"
+1289,2009-11-08,10.3018,77.1711,downpour,5km,Tamil Nadu,"Marayoor in Idukki district, Kerala"
+1291,2009-11-09,11.4098,76.6939,downpour,25km,Tamil Nadu,"Ooty and Coonoor, Tamil Nadu"
+1315,2009-11-20,23.0396,72.566,construction,10km,Gujarāt,"Parimal underpass near Juta Bazaar, Ahmedabad, Gujrat State"
+1384,2010-01-03,33.0289,74.9489,downpour,5km,Kashmir,Vaishnodevi in Trikuta hills of Reasi district
+1475,2010-02-06,33.1595,75.8011,downpour,25km,Kashmir,"Srinagar-Jammu highway near Asar, Doda and Kishtwar districts"
+1487,2010-02-08,34.0876,74.0225,downpour,10km,Kashmir,"Narundi area of Uri, Jammu and Kashmir "
+1498,2010-02-10,34.151,74.1213,rain,25km,Kashmir,"Road between Srinagar and Muzaffarabad near Kaman post in Baramulla district, Kashmir"
+1521,2010-02-23,30.383,78.5094,downpour,25km,Uttarakhand,Tehri : Two children were killed and another injured when landslides triggered by heavy rains demolished a house at Tangadia village in Tehri distric*
+1526,2010-02-26,33.0097,74.9402,downpour,5km,Kashmir,"Hathi Matha, between Katra and Vaishno Devi cave shrine in Trikuta hills, Reasi District"
+1596,2010-03-27,24.7339,93.9161,downpour,5km,Manipur,"LangthAbal Khoupum, Imphal, Manipur"
+1611,2010-04-01,25.1553,93.028,downpour,25km,Assam,"Paglanala village, Dholai Block, near Dwarbandh locality of the district, Cachar district (could only find district) 45 km from Silchar, Assam"
+1613,2010-04-02,27.8997,93.3497,downpour,1km,Arunāchal Pradesh,"Koloriang, Kuring Kumey district, Arunachal Pradesh"
+1755,2010-04-17,27.3341,88.6083,downpour,5km,Sikkim,"Natl. Highway 31-A at Pani House(?), Gangtok"
+1756,2010-04-17,27.322,88.6087,downpour,1km,Sikkim,"Nam Nang, Gangtok"
+1771,2010-04-20,26.1978,91.7665,downpour,exact,Assam,"Raj Bhavan Guwahati, Assam"
+1770,2010-04-20,26.1965,91.763,downpour,1km,Assam,"Kharghuli, Guwahati, Assam"
+1769,2010-04-20,34.38667467,76.34149164,downpour,unknown,Kashmir,"India Gate(?), Srinagar-Leh highway, Kashmir"
+1768,2010-04-20,34.38663064,76.34158851,downpour,unknown,Kashmir,"Kanipathri(?), Srinagar-Leh highway, Kashmir"
+1775,2010-04-21,27.8965,96.1779,downpour,unknown,Arunāchal Pradesh,Arunachal Pradesh 
+1776,2010-04-21,25.3612,92.2845,downpour,25km,Meghālaya,Shillong-Jowai(Jwai)-Badarpur National Highway(NH 44) at Sunapur village in Jaintia Hills District
+1857,2010-05-11,25.3433,92.2897,downpour,25km,Meghālaya,"National highway 44 at Sunapur and Tongseng in Jaintia Hills district, eastern Meghalaya"
+1871,2010-05-17,34.3951,75.6233,downpour,50km,Kashmir,"Srinagar-Leh national highway, Captain Mode, Kashmir valley"
+1884,2010-05-20,16.5121,80.6296,tropical_cyclone,25km,Andhra Pradesh,Vijaywada(Vijayawada)
+1901,2010-05-25,34.09,74.0256,downpour,25km,Kashmir,"Chadiyan(?) village near Uri, Baramulla district, Jammu and Kashmir"
+1908,2010-05-27,34.5628,77.6001,rain,50km,Kashmir,"Tyakshi(?) village near Turtuk(Nubra Valley) on Leh-Saichen(Siachan) rd, Jammu and kashmir"
+1930,2010-05-31,28.4298,95.8776,downpour,50km,Arunāchal Pradesh,"Anini-Roing road,  Dibang Valley,  Arunachal Pradesh "
+1929,2010-05-31,27.3543,88.6428,downpour,5km,Sikkim,"North Sikkiim Highway, periphery of Gangtok, Sikkim East district"
+1935,2010-06-03,23.8986,91.7599,downpour,5km,Tripura,"atharamura hills, Highway 44, Tripura"
+1934,2010-06-03,24.6005,92.3814,downpour,25km,Assam,Rongpur village under Bhairabhnagar panchayat in Karimganj district
+1946,2010-06-05,34.0901,74.0256,downpour,25km,Kashmir,"Laghama(?), Uri Sector, Baramulla district,Jammu and Kashmir"
+1954,2010-06-07,24.7543,93.5039,rain,50km,Manipur,"Irang(?) and Barak(?) and Makru(?) on highway 53 between Imphal and Jiribam, Manipur"
+1959,2010-06-08,19.1646,72.9325,monsoon,1km,Maharashtra,"Khindipada area, near the BMC pipeline at Bhandup-west"
+1958,2010-06-08,19.0176,72.8562,monsoon,5km,Maharashtra,"Kamraj Nagar slum at Sion-Koliwada, Antop Hill, Mumbai"
+1961,2010-06-09,25.8833,91.2,downpour,50km,Meghālaya,"Ishok Chingphu(?), Bishnupur, Assam"
+1962,2010-06-09,31.09907494,77.1723589,downpour,unknown,Himachal Pradesh,"Shimla district, Himachal Pradesh"
+1963,2010-06-11,26.944,88.4441,downpour,10km,Bengal,"near Sevok(Sevoke), Highway 31A to Sikkimand Kalimpong, Hatisura(?), Darjeeling"
+1988,2010-06-15,18.7624,73.3747,downpour,5km,Maharashtra,"Khandala, on Mumbai-Pune Expressway"
+1986,2010-06-15,26.3335,94.5512,downpour,1km,Nāgāland,"Fazl Ali College, Mokokchung, Nagaland"
+1987,2010-06-15,25.2269,93.1658,downpour,25km,Assam,"rails between Mahur and Wadringdisa(?), Assam"
+1993,2010-06-16,26.8073,88.3162,downpour,10km,Bengal,"Kurseong sub-division, Road between Kurseong and New Jalpaiguri"
+1995,2010-06-16,27.0765,88.4808,rain,10km,Bengal,Tripi (Tirpai?) road of Upper Gumfa area in Kalimpong
+1994,2010-06-16,25.0633,92.8025,downpour,25km,Assam,"rails between Jatinga and Longrangjao(?), Assam"
+1996,2010-06-17,26.4333,94.8833,downpour,25km,Nāgāland,"Shayoung Ward(?), Longleng, Nagaland"
+2003,2010-06-19,17.8975,73.2961,downpour,50km,Maharashtra,"Harne(?) village, near Dapoli, Ratnagiri district, Maharashtra"
+2015,2010-06-25,19.069,72.8703,downpour,5km,Maharashtra,"hill(?) in Valmik Nagar, Kurla (Valmikinagar), Mumbai"
+2014,2010-06-25,19.153,72.9266,downpour,1km,Maharashtra,"Sewri(?), New Shivaji Nagar, Mumbai"
+2016,2010-06-25,19.1095,72.8929,downpour,5km,Maharashtra,"Jeevandaya lane(?), Vijay Nagar, Ghatopar(Ghatkopar)"
+2017,2010-06-25,12.89163444,74.88548779,downpour,5km,Karnataka,"tracks near Kulshekar, between Padil and Thokur, Mangalore to Mumbai"
+2022,2010-06-27,12.89307458,74.88567317,downpour,5km,Karnataka,"again on tracks near Kulshekar, Mangalore"
+2025,2010-06-28,25.5728,91.885,downpour,5km,Meghālaya,"Police CID complex(?), Shillong, Meghalaya"
+2026,2010-06-28,25.4916,91.2698,downpour,50km,Meghālaya,"Borsorsa(?), West Khasi Hills, Meghalaya"
+2034,2010-07-04,26.8712,88.3052,rain,exact,Bengal,"Toy Train rails between Siliguri and Darjeeling, West Bengal"
+2045,2010-07-06,26.2363,94.8133,monsoon,5km,Nāgāland,"Tuensang, Nagaland"
+2044,2010-07-06,25.8877,94.7861,monsoon,5km,Nāgāland,"Kiphire,  Nagaland"
+2042,2010-07-06,26.0093,94.5238,monsoon,5km,Nāgāland,"Zunheboto, Nagaland"
+2041,2010-07-06,30.2485,78.8847,downpour,10km,Uttarakhand,"highway to Rudraprayag district, Uttarakhand"
+2040,2010-07-06,30.638,78.3297,downpour,25km,Uttarakhand,"highway to Uttarkashi district, Uttarakhand"
+2043,2010-07-06,26.7225,95.0281,monsoon,5km,Nāgāland,"Mon, Nagaland"
+2051,2010-07-07,31.1011,77.1793,downpour,5km,Himachal Pradesh,"upper Shimla, Himachal Pradesh"
+2049,2010-07-07,31.5041,77.9521,downpour,50km,Himachal Pradesh,"NH-22 between Rampur and Recong-Peo(Reckong Peo), Himachal Pradesh"
+2048,2010-07-07,32.6598,76.853,downpour,25km,Himachal Pradesh,"Kala Nalah(?), Keylong-Udaipur rd, Himachal Pradesh"
+2047,2010-07-07,32.219,78.072,downpour,50km,Himachal Pradesh,"Chhatru(?), Gramphu(?)-Kaza rd, Himachal Pradesh"
+2050,2010-07-07,31.645,78.4354,downpour,25km,Himachal Pradesh,"NH-22 beyond Recong-Peo(Reckong Peo),  Himachal Pradesh"
+2046,2010-07-07,32.3733,77.2498,downpour,25km,Himachal Pradesh,"near Rohtang Pass, Manali-Keylong rd, Himachal Pradesh"
+2056,2010-07-11,32.304,77.2106,downpour,10km,Himachal Pradesh,roads from Manali to Rohtang pass
+2091,2010-07-17,30.6358,77.5435,downpour,50km,Himachal Pradesh,"Lana Mashoor(?) and Lana Polar(?) and Sewn(?) villages, Sirmaur district"
+2098,2010-07-19,26.7215,95.0283,downpour,5km,Nāgāland,"Jahjon ward(?), Mon town, Nagaland"
+2106,2010-07-20,26.8716,94.9921,downpour,25km,Nāgāland,"road to Oting near Longlam village, 13 km from Tizit subdivision, Mon district, Nagaland"
+2104,2010-07-20,29.36,80.126,downpour,50km,Uttarakhand,"Tanakupur-Pitoragarh highway, Kumaon(Kumaun) region, Uttarakhand"
+2105,2010-07-20,29.3576,79.5519,downpour,10km,Uttarakhand,"Bhimtal area, Naintal district, Uttarakhand"
+2103,2010-07-20,29.9862,78.6115,downpour,50km,Uttarakhand,"Badrinath and Yamunotri shrines(?), Garhwal region, Uttarakhand"
+2113,2010-07-21,27.3773,88.559,downpour,25km,Sikkim,"Singtam-Mangan rd, Sikkim"
+2112,2010-07-21,27.5509,88.6475,downpour,unknown,,"Zang(?), east Sikkim"
+2111,2010-07-21,12.8277,75.0772,downpour,10km,Karnataka,"Peruvai-Kadengodlu rd(?) between Vittal and Manila(Mani?), Bantwal tuluk, Karnataka"
+2118,2010-07-22,33.3893,75.203,downpour,10km,Kashmir,"near Panthal, between Ramban and Ramsu(?), on Jammu-Srinagar hwy, Jammu and Kashmir"
+2120,2010-07-22,29.6095,79.6628,downpour,10km,Uttarakhand,"Patlot-Aghora road, Almora District "
+2119,2010-07-22,16.5676,73.6608,downpour,25km,Maharashtra,Rajapur-Vaibhavwadi section of the Konkan railway
+2018,2010-07-22,19.17377751,72.88274367,continuous_rain,1km,Maharashtra,New Mhada Complex in Dindoshi
+2132,2010-07-24,16.93911427,73.4745894,downpour,25km,Maharashtra,"Konkan railway near Adavli Station, Maharashtra"
+2136,2010-07-25,30.904,77.0969,downpour,25km,Himachal Pradesh,Solan roads
+2135,2010-07-25,32.2067,76.3641,downpour,10km,Himachal Pradesh,Dharamsala roads
+2139,2010-07-25,31.1054,77.1727,downpour,5km,Himachal Pradesh,Ruldu Bhatta locality near Lakkar Bazaar
+2134,2010-07-25,16.94054188,73.46485294,downpour,5km,Maharashtra,Nivsar area
+2140,2010-07-25,25.0477,92.801,downpour,25km,Assam,"road between Halfong and Redzol(?) or Silchar, Assam"
+2138,2010-07-25,31.0931,77.1675,downpour,5km,Himachal Pradesh,"Kanlog, Shimla, Himachal Pradesh"
+2137,2010-07-25,30.5589,77.2889,downpour,5km,Himachal Pradesh,Nahan roads
+2145,2010-07-26,16.94057232,73.46476377,downpour,5km,Maharashtra,"Nivsar, Maharashtra"
+2164,2010-07-29,25.3098633,94.48214677,downpour,25km,Manipur,"Chingai-Kuingai(Quingai) route (16 kms), Chingai subdivision, Ukhrul district, Manipur"
+2161,2010-07-29,30.7467,78.4517,downpour,10km,Uttarakhand,"Uttarkāshi : Landslips, triggered by heavy rain, blocked two key highways connecting Rishikesh, Gangotri and Badrinath in Uttarakhand on Thursday, le*"
+2165,2010-07-29,12.896,74.8735,downpour,10km,Karnataka,"Shakthinagar, Mangalore"
+2166,2010-07-29,24.9786,93.5027,downpour,10km,Assam,"Highway 53 at Tupul, Tamenglong district"
+2162,2010-07-29,30.4054,79.3426,downpour,10km,Uttarakhand,"Pīpalkoti : Landslips, triggered by heavy rain, blocked two key highways connecting Rishikesh, Gangotri and Badrinath in Uttarakhand on Thursday, lea*"
+2163,2010-07-29,25.4196,94.1054,downpour,5km,Nāgāland,"Maram area in Senapati district, National Highway 39"
+2177,2010-07-30,15.949,73.9667,downpour,5km,Maharashtra,"Amboli ghat in Sindhdurg, Konkan"
+2176,2010-07-30,15.9517,73.9958,rain,5km,Maharashtra,"Amboli, Belagum, 1.5 km from main waterfalls"
+2182,2010-07-31,24.9356,93.8443,rain,25km,Manipur,Dimapur-Imphal highway (NH 39) near Manipur
+2180,2010-07-31,12.8715,74.8862,downpour,5km,Karnataka,"Padil, NH - 48"
+2183,2010-07-31,31.0655,77.1325,downpour,10km,Himachal Pradesh,NH-22 near Taradevi
+2181,2010-07-31,19.1287,72.8889,downpour,1km,Maharashtra,"Milimd Nagar slum, Ghatkopar area in suburban Mumbai"
+2198,2010-08-04,32.7571,77.4138,downpour,10km,Himachal Pradesh,"Baralacha La and Rahni Nallah, Himachal Pradesh along Manali – Leh highway"
+2202,2010-08-05,30.4068,79.3351,downpour,25km,Uttarakhand,"Basantpur or Gouchar village (two conflicting sources), Chamoli district"
+2201,2010-08-05,27.0366,88.263,downpour,5km,Bengal,"Darjeeling district, West Bengal, Toy Train route"
+2206,2010-08-06,34.1416,77.4871,downpour,50km,Kashmir,"villages Shapoo(?), Bazgo(?) and wide area around Leh, Ladakh, Jammu and Kashmir"
+2210,2010-08-06,34.1619,77.5528,downpour,5km,Kashmir,"Leh airport, Ladakh, Jammu and Kashmir"
+2215,2010-08-06,32.371,77.2468,downpour,25km,Himachal Pradesh,Manali-Chandigarh highway
+2209,2010-08-06,34.208,77.5101,downpour,5km,Kashmir,"Phyang village, Leh, Ladakh, Jammu and Kashmir"
+2214,2010-08-06,27.0375,88.2627,downpour,25km,Bengal,Dārjiling : The traffic along the National Highway 55 was disrupted on Friday following a heavy rainfall that triggered landslide in the Darjeeling H*
+2213,2010-08-06,34.1114,77.5874,downpour,5km,Kashmir,"Choglamsar(Choklamsar) village, Jammu and Kashmir"
+2211,2010-08-06,34.3061,77.3265,downpour,5km,Kashmir,"Ney village, Ladakh, Jammu and Kashmir"
+2212,2010-08-06,34.1482,77.5971,downpour,5km,Kashmir,"eastern edge of Leh city, Ladakh, Jammu and Kashmir"
+2207,2010-08-06,34.1481,77.6538,downpour,5km,Kashmir,"Sabu(Saboo) village, Leh, Ladakh, Jammu and Kashmir"
+2208,2010-08-06,34.2116,77.3504,downpour,5km,Kashmir,"Nimoo(Nimu)(Nimmoo) village, Leh, Ladakh, Jammu and Kashmir"
+2205,2010-08-06,23.7365,92.7146,downpour,1km,Mizoram,"Dawrpui Vengthar cemetary, Aizwal, Mizoram"
+2226,2010-08-09,33.334,75.7627,downpour,5km,Kashmir,Kishtwār : One person was killed and seven others were injured in a landslide triggered by heavy rains in the remote area of Kishtwar district in Jam*
+2227,2010-08-09,30.6463,79.5306,downpour,50km,Uttarakhand,"Nirgaddu about 4 km from Tapovan on Rishikesh - Badrinath route, Uttarakhand "
+2228,2010-08-09,30.6785,78.3475,downpour,25km,Uttarakhand,"Dharasu and Nalupani near Uttarkashi on Rishikesh – Gangotri highway, Uttarakhand "
+2229,2010-08-09,30.5151,78.3684,downpour,50km,Uttarakhand,"Menagarh near Sukki on Rishikesh – Gangotri highway, Uttarakhand "
+2234,2010-08-11,31.958,77.1104,downpour,10km,Himachal Pradesh,"Kullu, Himachal Pradesh"
+2241,2010-08-13,30.80200029,78.61786282,downpour,5km,Uttarakhand,"Gangotree national highway near Bhatvaree, Uttarkashi district"
+2243,2010-08-13,25.70223725,94.04619681,downpour,5km,Nāgāland,"NH-39 near Kohima Municipality Council(KMC) dumping ground, between Zubza(Sechu) and Kohima, Nagaland"
+2242,2010-08-13,30.8522,76.991,rain,5km,Himachal Pradesh,"Chandigarh-Shimla national highway (NH 22), near Parwanoo, Himachal pradesh"
+2249,2010-08-14,26.0814,94.803,downpour,25km,Nāgāland,"Kiphire-Tuensang rd, Nagaland"
+2248,2010-08-14,26.222,94.9152,downpour,25km,Nāgāland,"Noklak-Tuensang road, Nagaland"
+2246,2010-08-14,30.9012,77.0958,downpour,5km,Himachal Pradesh,"Solan : Zhang Cheng felt lucky he did not take a nap as usual when the landslide destroyed his home in Nanyue village in Dujiangyan, Sichuan province*"
+2247,2010-08-14,26.148,94.8422,downpour,10km,Nāgāland,"Tuensang-Shamatore(Sampurre) rd, Nagaland"
+2253,2010-08-15,25.31006064,94.48265093,downpour,25km,Manipur,"Chingai-Kuingai(Quingai) route (16 kms), Chingai subdivision, Ukhrul district, Manipur"
+2257,2010-08-16,30.7284,79.4971,downpour,25km,Uttarakhand,"badrinath route, Lambagarh(?), Uttarakhand"
+2261,2010-08-17,26.9435,88.4445,downpour,10km,Bengal,"Hatisur(?), Sevok(Sevoke), Kalimpong sub-division, NH 31A between Siliguri and Gangtok, Sikkim"
+2260,2010-08-17,19.0997,72.8974,downpour,5km,Maharashtra,"Rajeev Nagar(?) or Narayan Nagar, Asalfa village, between Ghatkopar and Saki Naka area, somewhere near Lal Bahadur Shastri, Andheri Suburb. Mumbai urb"
+2262,2010-08-17,19.1993,73.0109,downpour,5km,Maharashtra,"Sonabai Niwas(?), Kalwa, Mumbai"
+2263,2010-08-17,26.2753,94.6654,downpour,25km,Nāgāland,"Dikhu bridge(?), Mokokchung-Tuensang road, Nagaland"
+2267,2010-08-18,17.0661,73.5027,downpour,25km,Maharashtra,"Pomendi Hill(?), Goa-Mumbai Konkan railway, both sides of Ratnagiri, Maharashtra"
+2268,2010-08-18,30.0134,79.9261,downpour,10km,Uttarakhand,"Saraswati Shishu Mandir school(?), Sumgarh(Sumgad) village(?), Bageshwar-Pindari glacier rd 45 km from Bageshwar, Kapkot, Bageshwar, Uttarakhand"
+2282,2010-08-19,26.1984,94.8158,downpour,1km,Nāgāland,"Tuensang-Kohima rd, 3 km outside Tuensang, Nagaland"
+2283,2010-08-19,24.8961,93.4957,downpour,5km,Manipur,"2 km from Khongsang village(?), road between Tamenglong and Imphal or Nungba, Manipur"
+2281,2010-08-19,25.61560252,94.11603493,downpour,5km,Nāgāland,"Kisima, Nagaland"
+2280,2010-08-19,19.1935,73.0114,downpour,1km,Maharashtra,"Eknath(?) Chawl, Sainic Nagar(?), below Mumbra Hill, Mumbra, near Mumbai, Maharashtra"
+2279,2010-08-19,26.9722,88.4481,downpour,10km,Bengal,"NH 31A at Likhuvir(?), near Teesta Bazar, 42nd Km marker(?), Kalimpong, West Bengal cutting off Sikkim and Kalimpong"
+2293,2010-08-20,30.7221,78.6437,downpour,50km,Uttarakhand,"Nalupani(?), Rishikesh-Gangotri highway, Uttarkhand"
+2291,2010-08-20,30.966,78.4151,downpour,10km,Uttarakhand,"Ranachatti(?), route to Yamunotri, Garwhal division, Uttarakhand"
+2296,2010-08-20,27.167,88.3652,downpour,10km,Sikkim,"many locations around Namchi, Sikkim"
+2292,2010-08-20,30.8183,78.6186,downpour,5km,Uttarakhand,"Bhatwari, Rishikesh-Gangotri highway, Uttarkhand"
+2290,2010-08-20,30.6509,79.0264,downpour,5km,Uttarakhand,"Gaurikund, road to Kedarnath, Garwhal division, Uttarakhand"
+2294,2010-08-20,30.3846,78.8371,downpour,unknown,Uttarakhand,"Lambagad(?), Rishikesh-Badrinath highway, Uttarakhand"
+2305,2010-08-21,31.5304,77.7755,downpour,25km,Himachal Pradesh,"Jeori-Ganvi(?) rd, Kinnuar(Kinnaur) district, Himachal Pradesh"
+2304,2010-08-21,25.5718,94.1211,downpour,10km,Nāgāland,"NH 39 at Kigwema(?), between Mao Gate and Kohima, Nagaland"
+2310,2010-08-22,30.4084,77.0666,downpour,unknown,Haryana,"Srinagar-Garhwal area of Pauri district, Uttarakhand, Uttranchal"
+2309,2010-08-22,30.4238,79.6724,downpour,25km,Uttarakhand,"Chandoli(?) and Karchuna(?) vilalges, Pokkhri, Chamoli, Uttarakhand, Uttranchal"
+2339,2010-08-26,30.365,78.0641,downpour,50km,Uttarakhand,"Matak Mahari(?), near Dehradun, Uttarakhand"
+2340,2010-08-26,32.7029,75.9568,downpour,25km,Himachal Pradesh,"Koti bridge(?), Chamba-Langera-Bhadarwah border road connecting Doda district of Jammu and Kashmir with Himachal Pradesh"
+2338,2010-08-26,16.5141,80.6053,downpour,1km,Andhra Pradesh,"ghat road leading to Sri Kanakadurga(Kanaka Durga) temple, Indrakeeladri hill, Vijayawada city, Andhra Pradesh"
+2341,2010-08-26,27.2319,88.497,downpour,10km,,"NH-31A at Topakhani tunnel(?) and fruit preservation factory(?) and Chisopani bridge(?), near Singtam and Gangtok and Rangpo, Sikkim"
+2344,2010-08-27,24.7505,93.4221,downpour,5km,Assam,"NH-53 at Nungba police station, Kambirong(?), Manipur"
+2343,2010-08-27,25.4786,94.1327,downpour,5km,Nāgāland,"NH-39 at Ekai village(?), 2 km for Tadubi, Manipur"
+2345,2010-08-27,27.3392,88.6188,downpour,5km,Sikkim,"Daragaon(?), Gangtok city, Sikkim"
+2364,2010-08-30,19.2179,73.1694,downpour,10km,Maharashtra,"Ambedkar Nagar slum(?), Ulhasnagar city, Thane district, Maharashtra"
+2369,2010-08-31,16.5332,80.6103,downpour,1km,Andhra Pradesh,"Chittinagar, Vijayawada city, Andhra Pradesh"
+2368,2010-08-31,16.5157,80.6525,downpour,1km,Andhra Pradesh,"Brahmananda Reddy Nagar(?), Machavaram, Vijayawada city, Andhra Pradesh"
+2379,2010-09-03,30.2851,78.9829,downpour,10km,Uttarakhand,"Rudraprayag, Rishikesh-Badrinath hwy"
+2380,2010-09-03,30.4008,79.0278,downpour,5km,Uttarakhand,"Bhatwari, Rishikesh-Gangotri hwy"
+2378,2010-09-03,30.135,78.3896,downpour,5km,Uttarakhand,"Shivpuri, Rishikesh-Badrinath hwy"
+2391,2010-09-04,30.8987,78.3399,downpour,25km,Uttarakhand,"Ranachatti(?), on road to Yamunotri"
+2392,2010-09-04,27.3702,88.7334,downpour,10km,Sikkim,"17th mile(?), Jawaharlal Nehru Marg hwy, between Gangtok and Nathu La, Sikkim"
+2390,2010-09-04,30.796,78.623,downpour,50km,Uttarakhand,"Karmkund(?), on Rishikesh-Gangotri hwy"
+2389,2010-09-04,30.5004,79.3888,downpour,50km,Uttarakhand,"Chhinka area(?), on Rishikesh-Badrinath hwy"
+2397,2010-09-06,32.0987,77.1495,downpour,25km,Himachal Pradesh,"road to Manali, Himachal Pradesh"
+2405,2010-09-09,28.3036,95.4112,downpour,unknown,Arunāchal Pradesh,"Mossing(Mosing) village(?), Upper Siang district, Arunachal Pradesh"
+2411,2010-09-10,27.0011,93.7273,downpour,unknown,Arunāchal Pradesh,"districts Lakhimpur, Dhemaji, Golaghat, and Sonitpur, Assam province"
+2414,2010-09-11,30.7059,76.9844,downpour,5km,Haryana,"Mandana(Madana) village(?), Panchkula-Morni rd, 20 km from Panchkula, Haryana"
+2416,2010-09-12,30.7333,78.4403,downpour,5km,Uttarakhand,"Uttarkashi town, Uttarakhand"
+2415,2010-09-12,25.63961883,94.11112157,downpour,25km,Nāgāland,power lines 5 km from Kohima
+2424,2010-09-13,23.591,92.9296,downpour,25km,Mizoram,"near Tuivawl(?), Aizawl-Champhai rd, Aizawl district, Mizoram"
+2421,2010-09-13,23.75406693,92.74128531,downpour,1km,Mizoram,"road to Muanna Godown, Zuangtui, Mizoram"
+2427,2010-09-13,32.3109,77.2195,downpour,10km,Himachal Pradesh,"near Rahni Nullah(?), on Manali-Rohtang hwy, Himachal Pradesh"
+2422,2010-09-13,23.74182634,92.7141905,downpour,1km,Mizoram,"Hunthar Veng, Mizoram"
+2426,2010-09-13,22.7176,92.8416,downpour,25km,Mizoram,"Hual(Hu) village(?), Lunglei-Lawngtlai rd, Mizoram"
+2423,2010-09-13,23.73504471,92.71060943,downpour,1km,Mizoram,"road to Kanan Veng from Hunthar Veng, Mizoram"
+2425,2010-09-13,23.3439,93.0748,downpour,25km,Mizoram,"near Tuichang(?) on Tuichang river, Aizawl-Champhai rd, Mizoram"
+2420,2010-09-13,23.72988966,92.71495623,downpour,1km,Mizoram,"Tuikual 'C', Aizawl, Mizoram"
+2432,2010-09-15,31.4135,77.895,downpour,50km,Himachal Pradesh,"road to Sangla and Bhaba and Sorang(?) valleys, Kinnaur, Himachal Pradesh"
+2436,2010-09-16,24.3069,93.125,downpour,5km,Mizoram,"Taithu village, Churanchandpur district, Mizoram, Manipur"
+2437,2010-09-16,23.7527,92.694,downpour,5km,Mizoram,"Aizawl-Lengpui rd 3km from Aizawl, Mizoram, Manipur"
+2439,2010-09-17,16.5141,80.6055,downpour,1km,Andhra Pradesh,"Indrakeeladri ghat rd, Vijayawada, Andhra Pradesh"
+2440,2010-09-17,30.75402442,79.49970189,downpour,50km,Uttarakhand,"Maletha village, near Badrinath"
+2444,2010-09-18,29.2484,79.5371,downpour,50km,Uttarakhand,"Nainital district, Uttarakhand"
+2445,2010-09-18,30.1454,78.6007,downpour,10km,Uttarakhand,"near Devprayag, Rishikesh-Badrinath hwy, "
+2443,2010-09-18,29.6042,79.5343,downpour,50km,Uttarakhand,"villages Pilkha(?), Devali(?), and Balta(?), Avalbagh block(?), Almora(Almorah) district, Uttarakhand"
+2460,2010-09-19,31.9843,77.1889,downpour,50km,Himachal Pradesh,"roads to Manali, Himachal Pradesh"
+2464,2010-09-19,30.9544,77.5063,downpour,25km,Himachal Pradesh,"road to Chopal, Himachal Pradesh"
+2467,2010-09-19,30.7198,77.1695,downpour,25km,Himachal Pradesh,"Kumarhatti-Nahan road, Himachal Pradesh"
+2454,2010-09-19,30.9013,79.5322,downpour,10km,Uttarakhand,"near Mt. Kamet and Ghastoli village, near Mana pass, Chamoli district, Uttarakhand"
+2468,2010-09-19,30.9035,77.0965,downpour,25km,Himachal Pradesh,"Pulbhal(?)-Solan rd, Himachal Pradesh"
+2461,2010-09-19,31.4582,78.2114,downpour,5km,Himachal Pradesh,"Karcham-Sangla rd, Himachal Pradesh"
+2458,2010-09-19,30.9015,78.7756,downpour,25km,Uttarakhand,"roads to Gangotri, Uttarakhand"
+2466,2010-09-19,30.8741,76.9576,downpour,5km,Himachal Pradesh,"Kasauli-Parwanoo rd, Himachal Pradesh"
+2470,2010-09-19,30.4326,78.0767,downpour,5km,Uttarakhand,"Dehradun-Mussoorie rd, Himachal Pradesh"
+2465,2010-09-19,31.4161,77.4153,downpour,25km,Himachal Pradesh,"Karsog-Rampur rd, Himachal Pradesh"
+2455,2010-09-19,30.1035,78.4265,downpour,10km,Uttarakhand,"road to Shivpur(Shivpuri), Pauri Garhwal district, Uttarakhand"
+2469,2010-09-19,30.9009,77.4668,downpour,25km,Himachal Pradesh,"Rajgarh-Habban road, Himachal Pradesh"
+2459,2010-09-19,29.5477,79.3211,downpour,50km,Uttarakhand,"roads to Rani Khet(Ranikhet) and Jolle Kote(?), Uttarakhand"
+2462,2010-09-19,30.9086,77.1103,downpour,5km,Himachal Pradesh,"near Solan, Kalka-Shimla hwy, Himachal Pradesh"
+2471,2010-09-19,29.7911,80.058,downpour,50km,Uttarakhand,"roads above Pithoragarh, Uttranchal"
+2453,2010-09-19,29.6131,79.494,downpour,50km,Uttarakhand,"near Chausali village(?), Almora district, Uttarakhand"
+2452,2010-09-19,30.1977,77.9137,downpour,5km,Uttarakhand,"near Mohand, Dehradun-Delhi hwy, Uttar Pradesh"
+2457,2010-09-19,31.563,77.9796,downpour,5km,Himachal Pradesh,"Nathpa Jhulla, between Rampur and Peo, Kinnaur, Himachal Pradesh"
+2463,2010-09-19,31.1191,77.5092,downpour,25km,Himachal Pradesh,"Theog-Kotkhai-Jubbal road, Himachal Pradesh"
+2456,2010-09-19,30.7991,79.4356,downpour,25km,Uttarakhand,"near Bagri Glacier(?), Gopeswar(Gopeshwar), Chamoli district, Uttarakhand"
+2478,2010-09-20,30.7332,78.4401,downpour,25km,Uttarakhand,"roads around Uttarkashi, Uttarakhand"
+2479,2010-09-20,31.5699,78.2844,downpour,5km,Himachal Pradesh,"Pangi, NH-22, Himachal Pradesh"
+2480,2010-09-20,31.944,77.1179,downpour,5km,Himachal Pradesh,"Kullu village(or district?) below agricultural lands, Himachal Pradesh"
+2476,2010-09-20,29.3987,79.4841,downpour,10km,Uttarakhand,"NH-87 near Naintital, Uttarakhand"
+2475,2010-09-20,31.1581,77.7155,downpour,10km,Himachal Pradesh,"roads between Jubbal and Rohru, Shimla, Himachal Pradesh"
+2488,2010-09-22,31.0215,77.1038,downpour,5km,Himachal Pradesh,"between Kathalighat(Kathleeghat) and Knoh(?) stations, rail line between Solan and Shimla 15 km form Shimla, Himachal Pradesh"
+2492,2010-09-23,33.27140108,75.17707406,downpour,25km,Kashmir,"Jammu-Srinagar hwy, Magarkote area, Ramban district, Jammu and Kashmir"
+2495,2010-09-24,9.8988,76.3902,downpour,5km,Kerala,"rail line between Mulanthuruthy and Piravom near Mulanthruth, Kerala"
+2502,2010-09-25,33.241,75.2382,downpour,25km,Kashmir,"Dharam-Tharad area(?), Ramban district"
+2537,2010-10-03,12.9711,76.2728,rain,unknown,Karnataka,"Channarāyapatna : The train services between the city and Bangalore, which were disrupted due to the landslide between Yedakumeri and Siribagilu stat*"
+2536,2010-10-03,12.7796,75.5844,unknown,50km,Karnataka,Sakleshpur : A landslide at Sirivagilu near Subramanya forced cancellation of Kannur-Yeshwanthpur train on Sunday evening. A retaining wall built nea*
+2538,2010-10-03,30.9141,76.818,continuous_rain,25km,Himachal Pradesh,"road from Pinjore(Pinjaur), Haryana to Nalagarh, Himachal Pradesh"
+2539,2010-10-03,28.3092,95.4149,downpour,25km,Arunāchal Pradesh,"Mosing village, Upper Siang district, Arunachal Pradesh"
+2546,2010-10-04,30.9546,77.1792,downpour,25km,Himachal Pradesh,"Roads between Sunnu Pal and Chail, Himachal Pradesh"
+2566,2010-10-08,25.4769,94.1351,downpour,5km,Nāgāland,"Sahong, Tabu and Pani village under Tadubi police station of Senapati district, NH-39"
+2567,2010-10-08,25.6633,94.4703,downpour,5km,Manipur,"Phek, Manipur"
+2570,2010-10-08,24.837,93.9128,downpour,5km,Manipur,"Tharon(?) and Langol Tarung villages, Thangmeiband constituency, Imphal, Manipur"
+2569,2010-10-08,25.2745,94.0212,downpour,5km,Nāgāland,"Bungte Chiru village(?), Senapati district, Manipur"
+2568,2010-10-08,24.7679,93.4108,downpour,25km,Assam,"Nungba, Tamenglong, Manipur"
+2578,2010-10-09,25.3179,94.0462,downpour,5km,Nāgāland,"NH-39 in Karong area, Manipur"
+2575,2010-10-09,25.5242,92.9914,downpour,50km,Assam,"road between Haflong and Lanka, Assam"
+2577,2010-10-09,25.5265,93.8673,downpour,50km,Nāgāland,"NH-39 near Khongnem(?) village, between Imphal and Dimapur, Manipur"
+2576,2010-10-09,25.4788,94.1399,downpour,10km,Nāgāland,"NH-39 at Tobio village(?), 7 km form Tadubi, Manipur"
+2579,2010-10-09,25.682,94.1076,downpour,1km,Nāgāland,"Lower Pezielietsie(Tinpati), Kohima, Manipur"
+2573,2010-10-09,25.1796,93.0083,downpour,5km,Assam,"Haflong, Assam"
+2574,2010-10-09,25.4749,93.1477,downpour,50km,Assam,"between Mahur and Maigrandisa(?) or Lumding, Assam"
+2587,2010-10-10,25.6623,94.1072,downpour,1km,Nāgāland,"Lower Chandmari area, PWD department, Kohima, Manipur"
+2590,2010-10-11,16.5141,80.6058,downpour,1km,Andhra Pradesh,"ghat road of the Kanaka Durga temple, Vijayawada district"
+2594,2010-10-12,33.1847,75.8062,downpour,25km,Kashmir,"Kulgadi, Doda-Kishtwar highway (NH-1B)"
+2596,2010-10-14,31.5158,78.2619,rain,25km,Himachal Pradesh,road linking Sangla Valley with Recong-Peo of Kinnaur district  at Kupaa
+2645,2010-10-21,34.0887,74.0227,downpour,25km,Kashmir,"Tikri village(?) near LoC, Uri sector, Baramulla district, Jammu and Kashmir"
+2648,2010-10-22,33.0107,74.9397,downpour,5km,Kashmir,"near Himkoti(?), on road to Bhawan(Vaishno Devi temple) at Katra, Jammu and Kashmir"
+2654,2010-10-27,9.8678,76.7705,downpour,25km,Kerala,"Poochapra(?), near Thodupuzha, Kattappana, Kerala"
+2676,2010-10-31,18.2733,83.0645,downpour,5km,Andhra Pradesh,"railroad between Chimidipalli and Borra caves stations, Andhra Pradesh"
+2709,2010-11-08,14.7822,74.2279,downpour,10km,Karnataka,rails between Amdalli(?) and near Thodor(Todur) stations bordering Ankola and Karwar talukas in Uttar Kanara district of neighbouring Karnataka
+2711,2010-11-11,12.8806,75.0327,downpour,5km,Karnataka,"Bantwal Cross (BC) road flyover, NH48, between Mangalore and Beltangady(Belthangady) and Puttur, Bantwal, Karnataka"
+2729,2010-11-16,10.3184,77.5277,downpour,10km,Tamil Nadu,"road near Saverikadu village(?), between Palani and Kodaikanal, Tamil Nadu province"
+2743,2010-11-22,27.5798729,91.85672387,unknown,1km,Arunāchal Pradesh,"Tawang Monastery, Arunachal Pradesh"
+2745,2010-11-23,10.2462,77.582,downpour,10km,Tamil Nadu,"Kodaikanal-Thandigudi(Thandikudi)-Batlagundu hill road, Tamil Nadu province"
+2798,2010-12-09,8.3295,77.1963,downpour,10km,Tamil Nadu,Kuzhithura-Erannial(Erani)(?) section of Nagercoil-Thiruvananthapuram railway
+2963,2011-01-11,15.4838,73.8164,construction,5km,Goa,"St Inez construction site, Panaji"
+3097,2011-02-07,33.35406635,75.17240669,downpour,25km,Kashmir,"Jammu-Srinagar highway, Pathal area, Ramban district, Jammu and Kashmir"
+3116,2011-02-13,33.33875958,75.1921061,rain,25km,Kashmir,"Srinagar-Jammu Natl. Hwy., at Panthal, Srinagar, Jammu and Kashmir"
+3115,2011-02-13,33.3037,75.1827,snowfall_snowmelt,5km,Kashmir,"Srinagar-Jammu Natl. Hwy., at Digdole(Digdol)(9 km south of Panthal), Srinagar, Jammu and Kashmir"
+3114,2011-02-13,33.1804,75.8101,snowfall_snowmelt,5km,Kashmir,"Batote-Doda-Kishtwar road, at Jathi(?) and Drabshalla, Jammu and Kashmir"
+3117,2011-02-13,33.0165,74.9437,downpour,5km,Kashmir,"trail between Adh Kuwari(Adhkuwari) temple and Shri Mata Vaishno Devi Cave Shrine, Trikuta Hills(?), near Katra, Reasi, Jammu and Kashmir"
+3113,2011-02-13,33.577,74.1872,downpour,25km,Kashmir,"road between Rajouri(Rajauri) and Poonch(Punch), Jammu and Kashmir"
+3128,2011-02-16,33.2609,75.244,downpour,25km,Kashmir,"near Ramban, Jammu-Srinagar hwy, Jammu and Kashmir"
+3127,2011-02-16,33.3308,75.1774,downpour,5km,Kashmir,"near Digdol, Jammu-Srinagar hwy, Jammu and Kashmir"
+3141,2011-02-23,30.4749,79.2293,downpour,50km,Uttarakhand,"Rishikesh-Badrinath national highway to Rudraprayag, Chamoli, and Badrinath, Uttarakhand"
+3143,2011-02-24,33.3307,75.1772,downpour,5km,Kashmir,"Jammu-Srinagar National Highway, Digdol area, Jammu and Kashmir"
+3146,2011-02-25,32.2338,77.1784,continuous_rain,10km,Himachal Pradesh,"road near Manali, Kullu"
+3159,2011-03-01,33.2477,75.1919,downpour,50km,Kashmir,"Shetani Nallah(?), Jammu-Srinagar National Highway, Jammu and Kashmir"
+3171,2011-03-03,33.2257,75.6695,downpour,25km,Kashmir,"Srawan village(?), Batote-Doda-Kishtwar road, Kishtwar district"
+3174,2011-03-05,32.0996,77.1586,downpour,25km,Himachal Pradesh,"Kullu-Manali rd, Himachal Pradesh"
+3250,2011-03-19,33.3308,75.1773,downpour,5km,Kashmir,"Jammu-Srinagar hwy, Digdol, Ramban, Jammu and Kashmir"
+3251,2011-03-19,33.3390327,75.1916877,downpour,25km,Kashmir,"Jammu-Srinagar hwy, Panthal, Ramban, Jammu and Kashmir"
+3252,2011-03-19,33.2466,75.1611,downpour,50km,Kashmir,"Jammu-Srinagar hwy, Sheeri(?), Ramban, Jammu and Kashmir"
+3269,2011-03-22,28.0791,96.5242,downpour,10km,Arunāchal Pradesh,"road from other districts to Hawai(Tawai?) which is  on Lojit river, near Hayuliang,  Anjaw district, Arunachal Pradesh"
+3342,2011-04-06,34.2101,74.3445,downpour,25km,Kashmir,"Latiefabad(?) and Khawar(Kawhar)(?) hamlets, Sheeri(?) area, Baramulla district"
+3374,2011-04-17,34.1802,74.2718,downpour,10km,Kashmir,"Khadpora(?), Kandi area(?) on the outskirts of the Baramulla town, Jammu and Kashmir"
+3376,2011-04-17,33.1488,75.5526,downpour,unknown,Kashmir,"Kundial village(?) or Bopa Pull(?) of Kashtigarh(Kastigarh )(?) or Bhogal village(?), Doda district, Jammu"
+3373,2011-04-17,33.3645,75.1999,downpour,5km,Kashmir,"Jammu and Srinagar Natl. Hwy., Panthal, Ramban"
+3375,2011-04-17,33.2599,75.8886,downpour,unknown,Kashmir,"Shanna(?), Jammu province"
+3380,2011-04-19,33.5808,74.9035,downpour,25km,Kashmir,"Gudder village(?), Kulgam district, Jammu and Kashmir"
+3525,2011-05-22,25.0672,93.4093,downpour,25km,Assam,"Kaiphundai(?)-Tousem(in Assam) road, Tamenglong district, Manipur"
+3532,2011-05-24,25.0888,92.8551,downpour,10km,Assam,"Silchar-Haflong rd., at Reko(Rekha )(?), near Harangajao, Barail Hills, Assam"
+3560,2011-05-31,24.8286,93.5935,downpour,50km,Manipur,"Gaoilung(Gadailong) village(?), Ward 4(?), Tamenglong, Manipur"
+3559,2011-05-31,30.4783,78.2741,rain,50km,Uttarakhand,"Chhatanga(?) village on Rishikesh-Yamunotri highway, Uttarkashi "
+3557,2011-05-31,9.8012,76.9006,downpour,10km,Kerala,"Kulamavu region, Kerala"
+3558,2011-05-31,30.9206,78.3276,rain,25km,Uttarakhand,"road to Yamunotri shrine, Uttarakashi"
+3556,2011-05-31,25.1555,93.8474,continuous_rain,25km,Manipur,"Roads between Tamei(Tamma?), Kangpokpi and Chalwa, Manipur"
+3562,2011-06-01,9.6326,76.9792,downpour,5km,Kerala,"Kottayam-Kattapana road, at Ellapara(Elappara) village, Idukki, Kerala"
+3568,2011-06-02,9.8721,76.7046,downpour,25km,Kerala,"Thodpuzha(Thodupuzha) municipality, Idukki, Kerala"
+3567,2011-06-02,9.5207,77.0198,downpour,10km,Tamil Nadu,"Peermade(Pīrmed), Idukki district, Kerala"
+3565,2011-06-02,9.8306,76.9408,downpour,25km,Kerala,"Idukki taluk, Kerala"
+3566,2011-06-02,10.0838,77.0696,downpour,10km,Kerala,"Munnar, Idukki district, Kerala"
+3578,2011-06-07,30.2414,78.908,downpour,5km,Uttarakhand,"Rishikesh-Badrinath hwy., near Sirobgarh(Sirobagad), Rudraprayag district, Uttarakhand"
+3577,2011-06-07,30.5319,79.3541,downpour,50km,Uttarakhand,"road to Badrinath shrine, Uttarakhand"
+3579,2011-06-08,33.1289,75.4325,downpour,25km,Kashmir,"Batote-Doda Highway, Ramgarh(?), Baggar(Bagger)(?) area, Doda district, Jammu and Kashmir"
+3581,2011-06-09,33.1617,75.3278,downpour,5km,Kashmir,"Baglihar Dam, on river Chenab, Chanderkote in Banihal, Ramban , Jammu and Kashmir"
+3609,2011-06-14,14.0354,74.6624,downpour,unknown,Karnataka,Coastal Karnataka
+3610,2011-06-14,15.5935,73.9434,downpour,5km,Goa,"Narvem-Pilgao Road, Bicholim"
+3611,2011-06-14,32.3709,77.2466,downpour,5km,Himachal Pradesh,"The Leh-Manali hwy, Himachal Pradesh"
+3614,2011-06-16,11.2993,76.9354,rain,25km,Tamil Nadu,Munjur near Mettupalayam
+3618,2011-06-17,31.5639,77.9798,downpour,5km,Himachal Pradesh,"Nathpa village, Kinnaur District, Himachal Pradesh"
+3621,2011-06-17,26.88,88.28,downpour,5km,Bengal,"St Mary's Hill, 3 km from Kurseong, West Bengal"
+3616,2011-06-17,15.5931,73.8119,rain,5km,Goa,"Angod, Mapusa"
+3619,2011-06-17,27.4885,88.4451,rain,unknown,,"National HWY 31A, Birik (cut off Sikkim)"
+3617,2011-06-17,26.84850975,88.26181745,continuous_rain,5km,Bengal,Pankhabari and Rohini routes in Kurseong
+3620,2011-06-17,17.0032,73.3572,downpour,10km,Maharashtra,Near Nivar station in the Ratnagiri district of Maharashtra
+3629,2011-06-19,15.2932,74.1447,downpour,5km,Goa,"Cuddegal in Sanvordem, outside the mining lease area"
+3632,2011-06-20,27.0638,88.4659,rain,5km,Bengal,"Birik on NH31A, Kalimpong"
+3633,2011-06-20,26.3186,94.5121,downpour,5km,Nāgāland,Mokokchung
+3637,2011-06-21,25.51614662,94.2341227,rain,1km,Nāgāland,"Lasumi village in Phek district, Kohima"
+3643,2011-06-23,27.2879,88.2579,downpour,5km,,Villages surrounding the West Sikkim district of 
+3659,2011-06-27,12.6771,75.2565,rain,unknown,Karnataka,Madikeri-Mangalore highway
+3660,2011-06-27,12.9141,74.856,downpour,5km,Karnataka,"Karnataka coast, Mangalore"
+3663,2011-06-28,25.6682,94.1099,downpour,50km,Nāgāland,"Ruzapfu valley, Kikruma Village, Phek District, Nagaland"
+3662,2011-06-28,25.03561729,94.0144205,rain,25km,Manipur,"Ikou-Gangpijang road, near: Ikou, Saikul, and Gangpijang; Imphal India"
+3669,2011-06-29,30.7666,78.7963,downpour,50km,Uttarakhand,"National Highway leading to Gangotri, from Dehradun"
+3672,2011-06-29,25.5125,93.3613,downpour,unknown,Assam,"Portions of NH 39, Connectin Manipur with Assam via Nagaland"
+3668,2011-06-29,29.607,79.9298,downpour,unknown,Uttarakhand,"Almora-Pithoragarh road, between Makrau and Thiari"
+3674,2011-06-29,30.0667,79.0193,downpour,5km,Uttarakhand,Several roads in Uttarakhand
+3671,2011-06-29,30.81507336,78.2242533,downpour,unknown,Uttarakhand,National Highway leading to Yamunotri from Dehradun
+3666,2011-06-29,32.4318,77.2147,continuous_rain,25km,Himachal Pradesh,"Manali-Leh road, between Mari and Rohtang"
+3673,2011-06-29,30.2416,78.8996,downpour,10km,Uttarakhand,"Rishikesh-Kedarnath national highway, Sirobagad"
+3670,2011-06-29,30.67629482,79.04191791,downpour,25km,Uttarakhand,National highway leading to Kedarnath
+3667,2011-06-29,32.2282,77.1898,continuous_rain,25km,Himachal Pradesh,"Manali-Rohtang road, at Raninalah, Himachal Pradesh"
+3678,2011-06-30,30.15,78.7753,downpour,50km,Uttarakhand,"Pauri-Safdarkhal road, blocked at Khundadhar"
+3683,2011-07-01,25.8782,94.1739,downpour,10km,Nāgāland,NH-61 between Botsa and Chiechama
+3696,2011-07-02,13.1819,76.1147,rain,unknown,Karnataka,"National Highway 66, connecting Kerala and Karnataka"
+3707,2011-07-03,34.1601,75.496,rain,25km,Kashmir,Blocked the track between Railpathri and Baltal
+3708,2011-07-03,34.1491,76.826,downpour,unknown,Kashmir,South of Kashmir
+3738,2011-07-06,24.8063,93.9482,downpour,50km,Manipur,"National Highway 53, Sinam Khul (near Kotlen; ~25 km from Imphal)"
+3737,2011-07-06,30.3214,78.0319,downpour,50km,Uttarakhand,"Gangortri-Rishikesh highway, at Narendranagar in Tehri district of Uttarakhand"
+3741,2011-07-07,25.4191,94.1079,rain,5km,Nāgāland,Maram (80 km north of Imphal)
+3746,2011-07-08,30.6509,79.5192,downpour,10km,Uttarakhand,Lambagad
+3747,2011-07-08,32.3237,77.1935,rain,50km,Himachal Pradesh,Manali-Leh highway
+3745,2011-07-08,30.9209,77.0206,rain,unknown,Himachal Pradesh,Between Manali and Rohtang
+3750,2011-07-09,30.7652,78.5925,downpour,50km,Uttarakhand,Gangotri
+3751,2011-07-09,30.7331,79.0685,downpour,25km,Uttarakhand,Kedarnath
+3752,2011-07-09,31.0188,78.4129,downpour,25km,Uttarakhand,Yamunotri
+3749,2011-07-09,30.7412,79.4929,downpour,25km,Uttarakhand,Badrinath
+3757,2011-07-10,30.7333,78.4399,downpour,10km,Uttarakhand,Nalupani area in Uttarkashi district
+3756,2011-07-10,31.7099,76.933,downpour,5km,Himachal Pradesh,Mandi district
+3759,2011-07-11,30.506,79.1127,downpour,50km,Uttarakhand,Highways leading to Badrinath and Gangotri
+3760,2011-07-11,25.6703,94.1095,downpour,25km,Nāgāland,"NH-61, 1 km before reaching Botsa"
+3764,2011-07-12,19.6699,73.5111,rain,5km,Maharashtra,Between Kasara and Igatpuri
+3763,2011-07-12,31.10587659,77.17798485,downpour,1km,Himachal Pradesh,the Ridge in downtown Shimla
+3777,2011-07-15,32.3491,77.2181,downpour,5km,Himachal Pradesh,Rahni
+3776,2011-07-15,27.125,93.7145,downpour,5km,Arunāchal Pradesh,Itanagar/Naharlagur/Nirjuli
+3789,2011-07-16,27.2743,92.9064,downpour,10km,Arunāchal Pradesh,Mebua (8 km from Seppa)
+3794,2011-07-17,26.99195749,88.42280921,rain,5km,Sikkim,West Bengal-Sikkim at highway Rambi
+3793,2011-07-17,15.8513,73.8161,downpour,25km,Maharashtra,At the Talgaon cutting between Sindhudurg and Kudal section of the Konkan Railway
+3806,2011-07-19,27.1032,93.6884,downpour,10km,Arunāchal Pradesh,"Itanagar (one near Pachali power house, one near Heema Hospital, and one nearRomik Colony at P Sector)"
+3805,2011-07-19,27.05374234,88.42572376,rain,1km,Sikkim,200 meters from Teesta Bridge towards Siliguri
+3807,2011-07-19,33.6917,76.0412,rain,10km,Kashmir,Kishtwar
+3813,2011-07-20,27.1141,88.4658,rain,25km,Bengal,National Highway 31A in West Bengal's Darjeeling district
+3821,2011-07-21,29.7334,79.6367,rain,25km,Uttarakhand,"Kumaon, Uttarakhand"
+3819,2011-07-21,30.4043,79.3318,rain,25km,Uttarakhand,"Chamoli , Uttarakhand"
+3820,2011-07-21,30.1665,78.1123,rain,25km,Uttarakhand,"Garhwal, Uttarakhand"
+3830,2011-07-22,24.3527,94.3429,downpour,10km,Manipur,Manipur
+3829,2011-07-22,16.1078,73.7167,downpour,50km,Maharashtra,"Konkan Railway, between Sindhudurg and Kudal"
+3831,2011-07-22,24.7992,93.948,downpour,unknown,Manipur,Heibok Hills
+3837,2011-07-24,26.5836,93.0038,downpour,50km,Assam,NH 37
+3840,2011-07-25,24.6869,93.9157,downpour,50km,Manipur,Manipur
+3839,2011-07-25,32.1896,77.187,downpour,10km,Himachal Pradesh,"Manali-Leh road, rohtang Pass"
+3860,2011-07-29,25.4192,94.108,rain,10km,Nāgāland,"Maram, Manipur"
+3861,2011-07-29,27.5862,80.1306,downpour,unknown,Uttar Pradesh,Uttar Pradesh
+3859,2011-07-29,30.012,78.197,downpour,50km,Uttarakhand,Kedarnath yatra
+3881,2011-08-05,27.1034,93.6885,downpour,5km,Arunāchal Pradesh,Itanagar
+3886,2011-08-06,9.4237,76.9371,downpour,unknown,Kerala,"Pallippady in Koruthode panchayat, Cholathadam in Poonjar Thekkekkara Pallippady in Koruthode panchayat and Cholathadam in Poonjar Thekkekkara panchay"
+3884,2011-08-06,31.69137979,77.13222306,continuous_rain,5km,Himachal Pradesh,Manali highway near Hanogi temple in Mandi
+3885,2011-08-06,9.497393176,76.8696375,downpour,5km,Kerala,Kanamala in Erumeli Panchayat
+3895,2011-08-07,31.0766,77.3913,rain,5km,Himachal Pradesh,"The Rishikesh-Gangotri national highway, Sainj"
+3894,2011-08-07,31.0766,77.3916,downpour,1km,Himachal Pradesh,"Sainj, Rishikesh-Gangotri National Highway"
+3888,2011-08-07,31.2403,77.9258,downpour,5km,Himachal Pradesh,Gumma on Pathankot-Mandi national highway
+3896,2011-08-07,9.5988,76.5289,downpour,5km,Kerala,Kottayam
+3893,2011-08-07,15.7067,73.9551,downpour,5km,Goa,Rishikesh- Gangotri national highway in Maneri area of Uttarkashi district
+3889,2011-08-07,31.7083,76.9316,downpour,50km,Himachal Pradesh,On the Manali highway near Mandi
+3891,2011-08-07,33.4406,75.1996,downpour,unknown,Kashmir,"Digdol, Jammu-Srinagar National Highway, between Kashmir and the rest of the country"
+3892,2011-08-07,33.0271,75.0018,downpour,5km,Kashmir,"Panthal, Jammu-Srinagar National Highway, between Kashmir and the rest of the country"
+3890,2011-08-07,31.71456806,77.02239366,downpour,5km,Himachal Pradesh,Manali highway near Shambal village
+3899,2011-08-08,30.2258,78.3755,downpour,unknown,Uttarakhand,"Chhatanga area; Helkugad; and Netala, all on the Rishikesh-Yamunotri National Highway"
+3900,2011-08-08,30.6521,79.5566,downpour,5km,Uttarakhand,"Govindghat, on the Rishikesh-Badrinath highway"
+3902,2011-08-09,24.5958,72.7169,downpour,5km,Rajasthan,"Mount Abu, Harna Hanuman temple"
+3905,2011-08-10,30.2828,78.3041,rain,50km,Uttarakhand,Chardham yatra
+3907,2011-08-11,32.7327,74.8556,downpour,50km,Kashmir,Jammu-Srinagar National Highway in Jammu City
+3908,2011-08-11,32.737,74.876,rain,1km,Kashmir,On circular road near Panjtirthi
+3913,2011-08-12,29.9121,78.1723,rain,25km,Uttarakhand,"The Chardham yatra, shrines of Badrinath, Kedarnath, Gangotri, and Yamunotri"
+3914,2011-08-12,28.8665,79.5682,rain,unknown,Uttarakhand,Uttarakhand and the Uttar Pradesh
+3912,2011-08-12,27.44,92.2833,rain,50km,Arunāchal Pradesh,East Kameng district in Arunachal Pradesh bordering China
+3917,2011-08-13,31.7077,76.9313,downpour,5km,Himachal Pradesh,"Manali-Leh highway, Rohtang pass"
+3916,2011-08-13,25.7713,93.8067,downpour,10km,Assam,"Chumukedima, Dimapur"
+3925,2011-08-15,27.4888,93.0153,downpour,50km,Arunāchal Pradesh,"East Kameng, Arunachal Pradesh"
+3927,2011-08-16,25.5144,90.2167,downpour,unknown,Meghālaya,"Garo Hills, Tura"
+3932,2011-08-18,25.83,94.13,monsoon,exact,Nāgāland, Botsa  and Chiechama
+3943,2011-08-23,27.13862165,88.22551799,downpour,10km,,"Samathang, Sikkim"
+3944,2011-08-25,27.7344,88.633,downpour,10km,,"Hee-Khola, Sikkim"
+6567,2011-08-27,32.5764,75.8466,downpour,50km,Kashmir,Basohli-Bani road
+3947,2011-08-27,28.6809,77.1958,downpour,1km,NCT,"Shakti Nagar, New Delhi"
+6566,2011-08-27,32.6188,75.3504,downpour,1km,Kashmir,Kathua-Billawar road
+6569,2011-08-28,19.1355,72.9981,continuous_rain,5km,Maharashtra,Rabale
+3951,2011-08-29,18.9774,72.8102,downpour,1km,Maharashtra,the 10-storeyed Hill View building the 10-storeyed Hill View building
+6570,2011-08-30,17.4303,73.5097,continuous_rain,50km,Maharashtra,Pomendi cutting near Ratnagiri
+3963,2011-09-04,17.9031,73.4361,rain,5km,Maharashtra,"Kashedi ghat,  Raigad  Maharashtra (used Raigad Fort for lat lon)"
+3965,2011-09-06,24.808,93.117,rain,1km,Assam,NH 37 at Awang Khul 
+3983,2011-09-23,26.1548,91.7351,downpour,unknown,Assam,"Maighuli, Guwahati, Meghalaya"
+3986,2011-09-25,27.0605,88.255,downpour,1km,Bengal,"Singamari, Darhelling, West Bengal"
+6782,2011-09-28,26.8545,88.3372,rain,exact,West Bengal,NH55 at Tindharia
+3997,2011-09-30,27.5161,88.5575,unknown,10km,,Mangan : The slide which occurred at Thingchim around 18 kilometers from Mangan towards Gangtok has disrupted the Mangan-Gangtok traffic again. The s*
+4015,2011-10-15,10.4497,77.5206,downpour,1km,Tamil Nadu,"Palani, Dindigul district"
+4019,2011-10-17,9.9903,76.7898,downpour,5km,Kerala,"Vannappuram, Kerala,"
+4033,2011-11-03,10.2445,77.5146,downpour,5km,Tamil Nadu,"Palani-Kodaikanal Ghat road, Kodaikanal"
+4090,2011-12-10,29.913,79.3532,downpour,10km,Uttarakhand,Uttarakhand 
+4139,2012-01-12,33.2407,75.2373,downpour,10km,Kashmir,"Shatani Nallah, Ramban District"
+4140,2012-01-13,33.4209,75.2045,downpour,10km,Kashmir,"Banihal, Srinagar-Jammu highway"
+4183,2012-02-04,33.2424,75.2381,downpour,25km,Kashmir,"Jawahar Tunnel-Patnitop stretch in Ramban district, Jammu-Srinagar highway"
+4198,2012-02-15,32.3682,75.5227,downpour,25km,Kashmir,Surjan village in Bani mountainous belt in Kathua district (
+4202,2012-02-16,32.5655,76.1201,downpour,10km,Himachal Pradesh,"Tawari bridge, Chamba district of Himachal Pradesh"
+4210,2012-02-19,33.2361,75.2441,unknown,10km,Kashmir,"Khooni Nullah on the Srinagar-Jammu Highway, Ramban District"
+4218,2012-02-22,33.241,75.234,downpour,25km,Kashmir,"Ramban district, Srinagar-Jammu Highway (Khooni Nallah, Higni and Panthal)"
+4241,2012-03-04,25.1604,93.6795,unknown,25km,Manipur,Tamei constituency in Tamenlong district
+4240,2012-03-04,29.5798,80.2123,unknown,10km,Uttarakhand,"Pithoragarh district, Uttarakhand"
+4277,2012-03-19,34.6507,74.7362,rain,10km,Kashmir,"Gurez, Kashmir"
+4313,2012-04-08,28.4659,95.86,downpour,50km,Arunāchal Pradesh,"Endulin Nallah, Mayodia, 17-camp, 83-camp"
+4325,2012-04-16,33.1467,75.5488,unknown,10km,Kashmir,"Gandoh, Doda district, Jammu "
+4335,2012-04-24,33.2413,75.2381,downpour,5km,Kashmir,"Srinagar-Jammu Highway, Ramban, jammu"
+4373,2012-05-30,26.876,75.8101,downpour,5km,Rajasthan,Jawaharlal Nehru Marg
+4377,2012-06-02,26.1475,91.7356,downpour,5km,Assam,"Guwahati, Assam"
+4378,2012-06-02,28.8254,96.1517,downpour,50km,Arunachal Pradesh,"Arunachal Pradesh, Dibang,"
+4382,2012-06-03,25.1175,92.8573,downpour,5km,Assam," between Harangajao and Mailongdisa, Assa,"
+4385,2012-06-03,27.7167,88.5577,downpour,5km,,"lachen, Sikkim"
+4384,2012-06-03,25.1775,93.0123,downpour,5km,Assam,"between Haflong and  Bagetar, Assam"
+4383,2012-06-03,25.3056,93.1265,downpour,5km,Assam,"between Maibang and Daotohaja, Assam"
+4394,2012-06-07,27.1748,88.6458,rain,25km,Sikkim,"Rolep, South Sikkim( Mapping to Rhenock 12 miles from Rolep)"
+4393,2012-06-07,27.7565,88.632,downpour,25km,,"Nathang Maong, Sikkim"
+4396,2012-06-08,34.1534,77.5768,downpour,5km,Kashmir,"Khardung la Pass, Leh district"
+4403,2012-06-10,24.8142,93.5444,downpour,50km,Manipur,"Imphal-Jiribam section of NH-37 , Manipur"
+4407,2012-06-13,25.0951,92.3567,downpour,50km,Assam,"NH44, Malidhor area,  Baleswar"
+4408,2012-06-13,25.5498,92.0757,downpour,unknown,Meghālaya,"NH44, Kuliang"
+4411,2012-06-14,27.339,88.6065,downpour,5km,Sikkim,"Tathangchen, Gangtok, Sikkim "
+4424,2012-06-20,26.149,91.7351,downpour,1km,Assam,"Lalunggaon, Guwahati,  Assam"
+4423,2012-06-20,20.855,77.7274,downpour,10km,Maharashtra,"Hwy 123, Badnera, Maharashtra,"
+4426,2012-06-22,26.1226,91.7162,downpour,5km,Assam,Lalunggaon near Gorchuk area
+4435,2012-06-25,27.174,95.8011,downpour,10km,Arunāchal Pradesh,"Tirap , Arunachal Pradesh"
+4436,2012-06-25,26.9986,95.4993,downpour,50km,Arunāchal Pradesh,"Khonsa, Arunachal Pradesh"
+4434,2012-06-25,26.1049,91.7369,downpour,1km,Assam,"Sonaighuli area near Kahilipara, Guwahati City, Assam"
+4445,2012-07-05,30.1281,78.3221,downpour,1km,Uttarakhand,"Badrinath Rd,  Rishikesh, Uttarakhand"
+4447,2012-07-05,31.1066,77.209,downpour,5km,Himachal Pradesh,"Dhalli, Himachal Pradesh"
+4446,2012-07-05,28.9986,94.8885,downpour,5km,Arunachal Pradesh,"Tuting, Upper Siang , Arunachal Pradesh"
+4452,2012-07-07,34.0123,77.9988,downpour,10km,Kashmir,"Ladakh, Leh"
+6783,2012-07-19,26.8546,88.3373,monsoon,exact,West Bengal,Tindharia railway maintenance shed
+4468,2012-07-22,11.405,76.0376,downpour,5km,Kerala,"Pulloorampara, Kerala"
+6310,2012-08-05,30.4876,78.0366,unknown,1km,Uttarakhand,Kempty falls
+4472,2012-08-14,30.7362,78.44,downpour,10km,Uttarakhand,"Uttarkashi, Uttarakhand,"
+4486,2012-08-17,9.7285,76.803,downpour,unknown,Kerala,"Chonamala, Periyamata, Vellampatta"
+4481,2012-08-17,30.6594,79.5605,downpour,5km,Uttarakhand,"Chamoli, Uttarakhand"
+4482,2012-08-17,10.0604,76.635,downpour,5km,Kerala,"Ernakulam, Kerala (Monsoon)"
+4485,2012-08-17,9.7268,76.8081,downpour,5km,Kerala,"Palomala, Thaland"
+4483,2012-08-17,10.007,76.7105,downpour,5km,Kerala,"Paingottoor, kerala, "
+4487,2012-08-17,30.6179,78.3233,downpour,25km,Uttarakhand,"Gangotri-Rishikesh hwy, Uttarakhand (mid-point of road -exact location unknown)"
+4489,2012-08-17,9.8232,77.1498,downpour,10km,Tamil Nadu,"Idukki-Kattappana Rd, kerala (Mid-point of rd)"
+4484,2012-08-17,9.6991,76.8168,downpour,1km,Kerala,"(Thalanadu - Teekoy hwy), Erattupetta, Kottayam (Thalanadu - Teekoy hwy)"
+4488,2012-08-17,9.5527,76.9299,downpour,5km,Kerala,"Pullupara, Perunanthanam, kerala"
+4480,2012-08-17,10.0011,76.7416,downpour,1km,Kerala,"Kadavoor, Erakulam, Kerala"
+4498,2012-08-18,32.1797,77.1947,downpour,25km,Himachal Pradesh,Kullu-Manali-Rohtang
+4497,2012-08-18,32.2278,78.071,downpour,5km,Himachal Pradesh,"Kaza, Himachal Pradesh"
+4501,2012-08-20,33.0829,74.8333,downpour,1km,Kashmir,"Reasi, kashmir"
+4504,2012-08-21,34.6113,74.9499,downpour,5km,Kashmir,"Barnoi, Bandipora, Kashmir"
+4507,2012-08-22,33.2412,75.2382,downpour,1km,Kashmir,"Jammu-Sringar Hwy, between Sri and Ramban, kerala"
+4514,2012-08-24,31.709,76.9312,downpour,5km,Himachal Pradesh,"Mandi, Himachal Pradesh,"
+4516,2012-08-24,30.9044,77.0969,downpour,5km,Himachal Pradesh,"Solan, Himachal Pradesh,"
+4515,2012-08-24,30.7395,77.2847,downpour,5km,Himachal Pradesh,"Sirmaur, Himachal Pradesh,"
+4513,2012-08-24,32.1002,76.2699,downpour,5km,Himachal Pradesh,"Kangra,  Himachal Pradesh"
+4523,2012-08-29,33.775,74.0934,downpour,5km,Kashmir,"Poonch, Kashmir"
+4528,2012-09-01,15.3826,73.9239,downpour,1km,Goa,"Toyota Showroom, Goa, India"
+4535,2012-09-03,19.0397,72.907,downpour,5km,Maharashtra,"Chembur, Mumbai, Maharashtra"
+4536,2012-09-04,19.6241,72.9084,downpour,1km,Maharashtra," Varai, Maharashtra"
+4552,2012-09-14,27.0377,88.3603,downpour,5km,Sikkim,"Takdah, West Bengal"
+4551,2012-09-14,29.841,79.7758,downpour,5km,Uttarakhand,"Bageshwar, Uttarakhand"
+4550,2012-09-14,30.2853,78.9829,downpour,5km,Uttarakhand,"Rudraprayag, Uttarakhand"
+4555,2012-09-15,32.9295,75.1432,downpour,50km,Kashmir,"Dhar-Udhampur rd, Moda Dadda, Udhampur"
+4556,2012-09-16,27.1675,88.3651,downpour,5km,Sikkim,"Namchi to Phongla, Namchi to Melli ,Namchi to Sumbuk"
+4557,2012-09-16,33.303,77.8876,downpour,50km,Kashmir,"Manali-Leh hwy, Kullu"
+4559,2012-09-17,33.9639,74.9597,downpour,unknown,Kashmir,"Srinagar-Jammu Hwy, between Sheeri and Banihal,  Jammu and Kashmir(midpoint)"
+4565,2012-09-18,31.0226,77.1029,downpour,1km,Himachal Pradesh,"Jatog and Kaithlighat railway stations, Kaithleeghat, Himachal Pradesh"
+4569,2012-09-19,27.8385,88.556,downpour,10km,,"North Skkimm Hwy between, Chungthang and Mangan, North Skimm (9 landslides)"
+4571,2012-09-19,27.6558,88.605,downpour,10km,," Chungthang and Pegong. Houses, between Rangma and Chungthang "
+4570,2012-09-19,27.8458,95.2253,downpour,1km,Arunāchal Pradesh, Arunachal Pradesh 
+4590,2012-10-21,11.338,76.8806,rain,10km,Tamil Nadu,(Rail track between Kallar and Burliar)Tamil Nadu
+4592,2012-10-22,10.077,76.322,rain,1km,Kerala,"(between Burliar and Kallar) Nilgiris, Tamil Nadu,"
+4610,2012-11-11,23.7705,92.5217,downpour,5km,Mizoram,"Dapchhuah, Mamit, Mizoram"
+4658,2012-12-11,32.9522,75.1533,rain,25km,Kashmir,"Kashimir Valley, Jammu and kashmir"
+4757,2013-02-18,28.1193,95.1645,rain,5km,Arunāchal Pradesh,"East Siang, Arunachal Pradesh"
+4764,2013-02-22,33.4372,75.2027,snowfall_snowmelt,unknown,Kashmir,Jammu Srinagar Roadways - Between Banihal And Patnitop
+4798,2013-04-07,28.8254,96.1509,rain,unknown,Arunachal Pradesh,"Dibang Valley, Arunachal Pradesh"
+4823,2013-04-26,34.2946,75.4832,rain,5km,Kashmir,"Zojila, India (Srinagar-Kargil Road)"
+4845,2013-05-07,24.2315,92.6755,rain,50km,Mizoram,"Kolasib, Saiha, Mizoram,"
+4848,2013-05-08,24.0896,91.4663,rain,5km,Tripura,"Purba Simna, Tripura"
+4858,2013-05-11,26.1662,91.7138,rain,50km,Assam,"Nursery, North Guwahati, Guwahati, Assam,"
+4859,2013-05-11,26.1771,91.7599,rain,5km,Assam,"Sarania Hills, North Guwahati, Guwahati, Assam,"
+4857,2013-05-11,23.7281,92.7175,rain,25km,Mizoram,"Laipuitland , Aizawl, Mizoram"
+4860,2013-05-11,26.1016,91.6906,rain,5km,Assam,"Boragaon, North Guwahati, Guwahati, Assam,"
+4861,2013-05-12,24.9926,93.4946,rain,25km,Assam,"Khongsang, Tamenglong, Manipur,"
+4875,2013-05-26,28.758,77.15,downpour,unknown,NCT, Jammu-Srinagar
+4892,2013-06-01,27.8776,94.25,downpour,50km,Arunāchal Pradesh,Upper Subansiri
+4906,2013-06-07,26.0977,94.7499,unknown,10km,Nāgāland,"Helipong-Chessore Road, Nagaland"
+4905,2013-06-07,26.0977,94.7031,unknown,25km,Nāgāland,"Kuthur – Huker Road Via Y Anner, Chessore, Nagaland"
+4908,2013-06-08,27.3721,88.708,downpour,25km,Sikkim,"15 Km From Gangtok, Himalayans"
+4912,2013-06-11,31.4898,76.7043,downpour,25km,Himachal Pradesh,"Holy Cave Shrine, Mata Vaishno Devi, Trikuta Hills, Reasi District, Near Panchi Morh In Sanjichat Area En Route Mata Vaishno Devi"
+4913,2013-06-11,31.4881,76.6702,rain,unknown,Himachal Pradesh,"Srinagar-Jammu Highway, Ramban District"
+4914,2013-06-12,30.7394,78.5306,downpour,5km,Uttarakhand,"Rishikesh-Gangotri National Highway Near Mari Sainji Village, Uttarkashi, Uttarakhand"
+4917,2013-06-12,32.5552,76.1249,downpour,10km,Himachal Pradesh,"Village In Pangi Valley, Chamba District"
+4916,2013-06-12,32.2108,76.2833,downpour,1km,Himachal Pradesh,"Gharao Village, Near Holi Township"
+4920,2013-06-15,31.5168,78.0976,downpour,1km,Himachal Pradesh,"Tapri Near Rekong Peo, Kinnaur District"
+4929,2013-06-16,30.4954,78.3881,rain,50km,Uttarakhand,"Rishikesh-Joshimath-Mana Road, Uttarakhand"
+4930,2013-06-16,30.885,78.6695,rain,50km,Uttarakhand,"Dharasu-Gangotri Road, Uttarakhand"
+4931,2013-06-16,29.7986,80.417,rain,50km,Uttarakhand,"Pithoragarh-Ghatiabgarh Road, Uttarakhand"
+4928,2013-06-16,30.4619,79.0765,rain,25km,Uttarakhand,"Rudraprayag-Gaurikund Road, Uttarakhand"
+4933,2013-06-16,31.5986,78.4384,downpour,50km,Himachal Pradesh,"Kinnaur District, Himachal Pradesh"
+4927,2013-06-16,30.5728,77.6521,rain,25km,Himachal Pradesh,"National Highway 72-B, Between Paonta Sahib And Sillai, Sirmaur District, Himachal Pradesh"
+4926,2013-06-16,30.6738,77.3544,rain,25km,Himachal Pradesh,"Sirmaur District, Himachal Pradesh"
+4924,2013-06-16,30.7351,79.0666,downpour,1km,Uttarakhand,"Kedarnath (Hindu Shrine), Near Kedarnath Dome (Mountain), Uttarakhand"
+4925,2013-06-16,31.4551,78.1996,rain,25km,Himachal Pradesh,"Road To Sangla Valley, Near Kupa Village, Kinnaur District, Himachal Pradesh"
+4932,2013-06-16,31.348,77.4614,downpour,unknown,Himachal Pradesh,"7 Km Of Road, Between Kasang And Akpa"
+4936,2013-06-17,30.6945,79.0544,downpour,1km,Uttarakhand,"Rambara District, Uttarakhand"
+4946,2013-06-17,31.6223,78.0193,downpour,50km,Himachal Pradesh,"Chagoan Village Near Tapri, 220 Km From The State Capital Shimla, Kinnaur District, Himachal Pradesh"
+4940,2013-06-17,30.3069,78.0169,rain,25km,Uttarakhand,"Dehradun, Uttarakhand"
+4943,2013-06-17,29.5987,79.6592,downpour,5km,Uttarakhand,"Almora, Uttarakhand"
+4949,2013-06-18,30.3797,78.5017,rain,5km,Uttarakhand,Road Near Tipri To Kedarnath
+4947,2013-06-18,19.0811,73.0226,continuous_rain,5km,Maharashtra,"Sainath Stone Quarry, Rikunda Village, Turbhe, Navi Mumbai, Maharashtra"
+4950,2013-06-18,12.8446,75.2476,rain,unknown,Karnataka,"Tottilagundi, Dakshina Kannada District"
+4966,2013-06-19,29.5935,79.6805,rain,5km,Uttarakhand,"Almora, Uttarakhand"
+4978,2013-06-24,30.4542,78.3911,downpour,50km,Uttarakhand,"Rishikesh-Uttarkashi Route, Uttarakhand"
+4975,2013-06-24,30.2524,78.9228,downpour,10km,Uttarakhand,"Sirobhgarh Bend, Srinagar-Rudraprayag Highway, Uttarakhand, Northern India"
+4974,2013-06-24,30.4091,79.0579,rain,25km,Uttarakhand,"Between Rudaprayag And Guptkashi, Uttarakhand (2 Landslides)"
+4982,2013-06-25,10.9628,77.5947,downpour,unknown,Tamil Nādu,"Thenpara, Kerala-Tamil Nadu Inter-State Highway, Nadukani Ghat Road Connecting Nilambur With Gudallur In Tamilnadu"
+4983,2013-06-25,10.9628,77.5947,downpour,unknown,Tamil Nādu,"Jaram, Kerala-Tamil Nadu Inter-State Highway, Nadukani Ghat Road Connecting Nilambur With Gudallur In Tamilnadu"
+4981,2013-06-25,10.9628,77.5947,downpour,unknown,Tamil Nadu,"First Hairpin Bend, Kerala-Tamil Nadu Inter-State Highway, Nadukani Ghat Road Connecting Nilambur With Gudallur In Tamilnadu"
+4984,2013-06-25,11.4991,76.4949,downpour,1km,Tamil Nadu,"Gudalur Town, Nilgiris, Tamil Nadu"
+4979,2013-06-25,16.9214,73.593,monsoon,5km,Maharashtra,"Konkan Railway Tracks Close To Adavali Station, Ratnagiri, Maharashtra"
+4990,2013-06-27,27.3765,88.7628,downpour,1km,Sikkim,"Near Changu Lake, 15Km Away From Nathu La, On India-China Border In Eastern Sikkim"
+5006,2013-07-01,26.1147,94.3864,downpour,1km,Nāgāland,"Thillong Village, Doyang Along State Highway 1, Wokha To Merapani Road"
+5005,2013-07-01,26.72,95.029,downpour,5km,Nāgāland,"Walo Ward, Mon Town, Wokha District, Nagaland"
+5013,2013-07-02,31.0722,77.1402,downpour,5km,Himachal Pradesh,"Press Colony, Near Taradevi, Himachal Pradesh"
+5017,2013-07-03,15.4123,74.2664,downpour,25km,,"Anmod Ghat Road, Goa-Karnataka Border"
+5023,2013-07-04,30.0712,80.2386,continuous_rain,unknown,Uttarakhand,"Munsari Tehsil, Uttarakhand"
+5022,2013-07-04,29.58,80.2214,downpour,25km,Uttarakhand,"Pithoragarh Tehsil, Uttarakhand"
+5024,2013-07-04,30.1719,80.8576,continuous_rain,50km,Uttarakhand,"Gunji, Uttarakhand"
+5036,2013-07-05,33.0852,74.8799,downpour,50km,Kashmir,"Reasi District, Jammu And Kashmir"
+5044,2013-07-06,31.1628,77.7241,downpour,50km,Himachal Pradesh,"Rohru-Shimla Road At Dochi, Himachal Pradesh"
+5043,2013-07-06,31.9906,76.7907,downpour,1km,Himachal Pradesh,"Jogindernagar, Himachal Pradesh"
+5053,2013-07-07,31.9671,76.8521,downpour,1km,Himachal Pradesh,"Mandi-Pathankot Highway At Gumma In Mandi, Himachal Pradesh"
+5050,2013-07-07,31.703,76.936,rain,unknown,Himachal Pradesh,"Mandi-Shimla Highway In Mandi, Himachal Pradesh"
+5054,2013-07-07,31.7018,76.9424,downpour,1km,Himachal Pradesh,"Mandi Gurdwara, Himachal Pradesh"
+5047,2013-07-07,31.8795,76.9161,downpour,1km,Himachal Pradesh,"Mandi-Pathankot Highway At Paddar, Himachal Pradesh"
+5049,2013-07-07,31.5596,77.1679,downpour,5km,Himachal Pradesh,"Mandi-Janjheli Road At Odidhar Thunag, Himachal Pradesh"
+5051,2013-07-07,31.7017,76.973,downpour,50km,Himachal Pradesh,"Mandi-Kullu Highway In Mandi, Himachal Pradesh"
+5052,2013-07-07,31.7093,76.9297,downpour,1km,Himachal Pradesh,"A Nullah Near The Government Hospital In Mandi, Himachal Pradesh"
+5062,2013-07-08,33.3118,75.7525,downpour,10km,Kashmir,"Mundral In Kishtwar District, Jammu And Kashmir"
+5068,2013-07-10,30.3629,79.2143,rain,5km,Uttarakhand,"Bhikona Village, Pokhri Block, Chamoli Village, Uttarakhand"
+5074,2013-07-10,19.0263,72.8676,downpour,5km,Maharashtra,"Antop Hill, Mumbai"
+5073,2013-07-10,19.0222,72.8663,downpour,1km,Maharashtra,"Debram Chawl, Antop Hill Near Sheikh Mistry Dargah Road, Central Mumbai"
+5079,2013-07-11,26.9734,87.3412,continuous_rain,10km,Jharkhand,Dhankuta
+5084,2013-07-12,25.616,94.1167,downpour,10km,Nāgāland,"National Highway 2 Near Phesama Village Close To Kisama Naha Heritage Site, Kohima District, Nagaland"
+5087,2013-07-12,25.6269,94.1139,downpour,10km,Nāgāland,"National Highway 29 Near Phesama Village, Nagaland"
+5088,2013-07-12,29.3802,79.4633,downpour,5km,Uttarakhand,"Lohardobha Billage, Dhari, Nainital"
+5086,2013-07-12,29.3802,79.4633,rain,5km,Uttarakhand,"Nainital District, Uttarakhand"
+5097,2013-07-14,31.4711,77.6746,downpour,10km,Himachal Pradesh,"Near Rampur, Himachal Pradesh"
+5099,2013-07-14,30.6738,77.3544,rain,25km,Himachal Pradesh,"Sirmaur District, Himachal Pradesh"
+5098,2013-07-14,32.17,77.1788,downpour,unknown,Himachal Pradesh,"Mehaskwal Village, Himachal Pradesh"
+5100,2013-07-14,31.673,76.5338,rain,5km,Himachal Pradesh,"Shimla-Nahan Highway, Dosarka, Himachal Pradesh"
+5107,2013-07-15,25.6269,94.1139,rain,10km,Nāgāland,"National Highway 29 Near Phesama Village, Nagaland"
+5122,2013-07-17,25.7658,93.9413,rain,50km,Nāgāland,"National Highway 29 Between Patkai Bridge And Kukidolong, Nagaland"
+5123,2013-07-17,25.7131,94.0885,rain,50km,Nāgāland,"National Highway 2 Near Meriema Village, 10 Km Away From Kohima"
+5130,2013-07-18,30.7314,78.4347,downpour,5km,Uttarakhand,"Netali Maneri Marg, Uttarkashi District, Uttarakhand"
+5129,2013-07-18,30.4043,79.3308,downpour,1km,Uttarakhand,"Chamoli District, Uttarakhand"
+5139,2013-07-19,30.0718,80.2369,downpour,5km,Uttarakhand,"Munsyari Area, Pithoragarh, Uttarakhand"
+5177,2013-07-23,30.2902,79.151,downpour,5km,Uttarakhand,"Gauchar, Chamoli District, Uttarakhand"
+5176,2013-07-23,30.1944,79.1939,downpour,1km,Uttarakhand,"Deval, Chamoli District, Uttarakhand"
+5171,2013-07-23,10.0533,76.4788,unknown,5km,Kerala,"Vengola, Kerala"
+5179,2013-07-24,30.262,79.2191,downpour,5km,Uttarakhand,"Karnaprayag, Uttarakhand"
+5180,2013-07-24,19.1711,73.0207,downpour,5km,Maharashtra,"National Highway 4, Navi Mumbai, Maharashtra"
+5182,2013-07-24,30.301,79.3628,downpour,5km,Uttarakhand,"Thirpak, Uttarakhand"
+5183,2013-07-24,30.3056,79.3286,downpour,1km,Uttarakhand,"Tefana, Uttarakhand"
+5181,2013-07-24,30.2733,79.233,downpour,unknown,Uttarakhand,"Rishikesh-Badrinath Highway, Uttarakhand"
+5184,2013-07-24,30.9058,78.0906,downpour,1km,Uttarakhand,"Sunali, Uttarakhand"
+5178,2013-07-24,30.4605,79.4774,continuous_rain,unknown,Uttarakhand,"Chamoli, Uttarakhand"
+5197,2013-07-25,30.8203,78.6185,continuous_rain,5km,Uttarakhand,"Ganga Vihar Colony In Bhatwadi Area, Uttarkashi, Uttarakhand"
+5200,2013-07-25,11.3192,76.5959,downpour,5km,Tamil Nadu,"Avalanche, Nilgiris, Tamil Nadu"
+5187,2013-07-25,19.3379,73.7767,downpour,5km,Maharashtra,"Malshej Ghat, Maharashtra"
+5196,2013-07-25,30.8928,78.48,continuous_rain,unknown,Uttarakhand,"Uttarkashi, Uttarakhand"
+5199,2013-07-25,30.7866,78.6171,continuous_rain,1km,Uttarakhand,"Malla, Uttarkashi, Uttarakhand"
+5189,2013-07-25,19.3379,73.7767,downpour,5km,Maharashtra,"Malshej Ghat, Maharashtra"
+5195,2013-07-25,30.4041,79.3276,continuous_rain,unknown,Uttarakhand,"Alaknanda Valley Of Chamoli District, Uttarakhand"
+5198,2013-07-25,30.8928,78.48,continuous_rain,unknown,Uttarakhand,"Quaritok, Uttarkashi, Uttarakhand"
+5208,2013-07-26,30.2835,79.2498,rain,5km,Uttarakhand,Rishikesh-Badrinath Highway Near Kaleshwar
+5209,2013-07-26,30.6539,78.3366,rain,25km,Uttarakhand,Rishikesh-Gangotri Highway Near Dharasu-Nalupani
+5215,2013-07-27,30.4521,78.754,rain,5km,Uttarakhand,Balsori Villages In The Akhrori Area
+5214,2013-07-27,31.8931,78.63,mining,10km,Himachal Pradesh,"Malling, Himachal Pradesh"
+5213,2013-07-27,24.3599,85.6179,downpour,1km,Jharkhand,Paharpur Locality In Koderma
+5225,2013-07-28,30.819,78.6149,downpour,5km,Uttarakhand,"Bhatwari Area Of Uttarkashi Districti, Uttarakhand"
+5224,2013-07-28,29.9964,80.201,downpour,10km,Uttarakhand,"Samkot Village Of Pithoragarhi, Uttarakhand"
+5234,2013-07-29,32.9918,75.1945,rain,1km,Kashmir,"Samroli, Udhampur District, Kashmir"
+5233,2013-07-29,32.9918,75.1945,rain,1km,Kashmir,"Samroli, Udhampur District, Kashmir"
+5240,2013-07-31,30.3822,78.0949,downpour,10km,Uttarakhand,"Dehradun, Uttarakhand"
+5241,2013-07-31,29.5952,79.6625,downpour,unknown,Uttarakhand,"Salut, Almora, Uttarakhand"
+5244,2013-08-01,34.4332,76.2851,downpour,5km,Kashmir,"Pushkum In Kargil, Kashmir"
+5250,2013-08-01,27.8837,93.0515,rain,10km,Arunachal Pradesh,"Polo River At Polosang, Arunachal Pradesh"
+5252,2013-08-02,32.5282,75.1199,continuous_rain,10km,Kashmir,Jammu-Pathankot Route Near Samba
+5271,2013-08-04,26.284,94.5808,continuous_rain,5km,Nāgāland,"Nanga, Nagaland"
+5268,2013-08-04,26.0137,94.5163,continuous_rain,25km,Nāgāland,"Zunheboto, Nagaland"
+5263,2013-08-04,9.9995,77.0309,monsoon,5km,Kerala,"Kunjuthanni, Idukki, Kerala"
+5269,2013-08-04,25.8376,94.5234,continuous_rain,unknown,Nāgāland,"Tizu, Nagaland"
+5270,2013-08-04,26.0481,94.4619,continuous_rain,unknown,Nāgāland,"Phizo, Nagaland"
+5273,2013-08-04,26.1807,94.5497,monsoon,5km,Nāgāland,"Zhekuto, Nagaland"
+5265,2013-08-04,9.9147,77.011,continuous_rain,unknown,Kerala,"Idukki, Kerala"
+5272,2013-08-04,26.2083,94.5438,monsoon,1km,Nāgāland,"Longsa, Nagaland"
+5274,2013-08-04,26.0838,94.564,rain,25km,Nāgāland,"Suruhuto Town, Nagaland"
+5275,2013-08-04,26.1498,94.6055,monsoon,10km,Nāgāland,"Suruhuto Town, Nagaland"
+5264,2013-08-04,10.3228,76.4319,downpour,unknown,Kerala,Kerala
+5285,2013-08-05,29.5659,80.3657,monsoon,10km,Uttarakhand,"Jhulaghat Area Of Pithoragarh District, Uttarakhand"
+5278,2013-08-05,10.0539,76.8298,monsoon,1km,Kerala,"Cheeyappara Waterfalls, Ernakulam, Kerala"
+5284,2013-08-05,10.3228,76.4319,monsoon,unknown,Kerala,"Nairpara, Kerala"
+5282,2013-08-05,9.8957,76.9346,monsoon,5km,Kerala,"Maniyarankudy, Kerala"
+5283,2013-08-05,9.8539,76.9468,monsoon,5km,Kerala,"Painavu, Kerala"
+5277,2013-08-05,10.0539,76.8294,monsoon,1km,Kerala,"Cheeyapara Near Neriyamangalam, Kerala"
+5281,2013-08-05,10.0486,76.7606,unknown,5km,Kerala,"Villanchira, Near Neryamangalam"
+5280,2013-08-05,9.879,76.9683,monsoon,1km,Kerala,"Thadiyambadu Near Painavu, Kerala"
+5287,2013-08-06,32.8363,75.1489,downpour,50km,Kashmir,Tunnel Number 16 On The Jammu-Udhampur Section
+5290,2013-08-07,32.2322,76.3037,downpour,5km,Himachal Pradesh,"Tirah Lines Which Is Almost 5 Kms From Dharamshala, Himachal Pradesh"
+5291,2013-08-07,10.0606,76.6331,monsoon,1km,Kerala,Kozhipilly In Velliyamattom Village Under Thodupuzha Taluk
+5293,2013-08-07,32.9913,75.1915,unknown,10km,Kashmir,"Samroli, Udhampur District, Kashmir"
+5292,2013-08-07,9.835,76.8661,monsoon,5km,Kerala,"Naliyani, Near Thodupuzha Town"
+5294,2013-08-07,10.3031,76.7604,monsoon,25km,Kerala,Ambalappara In Thrissur
+5300,2013-08-09,25.318,94.0441,downpour,50km,Nāgāland,"Senapati, Manipur"
+5309,2013-08-10,21.786,83.8847,downpour,25km,Orissa,A Coal Mine In Sundergarh District Of Odisha
+5312,2013-08-11,26.7103,94.693,downpour,10km,Assam,Kangtsung Village
+5320,2013-08-13,30.6014,78.3449,downpour,5km,Uttarakhand,"Kot Village Of Tehri District, Uttarakhand"
+5323,2013-08-13,34.2601,75.4466,downpour,50km,Kashmir,Zojila Pass
+5332,2013-08-14,33.7705,74.0967,downpour,50km,Kashmir,Khanater Village Near Poonch
+5329,2013-08-14,32.9913,75.1915,downpour,10km,Kashmir,"Samroli, Udhampur District, Kashmir"
+5328,2013-08-14,33.3018,75.1793,downpour,50km,Kashmir,"Ramban District, Kashmir"
+5331,2013-08-14,33.0498,74.6264,downpour,25km,Kashmir,Jammu-Poonch Highway Near Kalidhar
+5327,2013-08-14,33.4431,75.1915,downpour,25km,Kashmir,"Banihal, Ramban District, Kashmir"
+5333,2013-08-14,33.7706,74.0967,downpour,50km,Kashmir,"Sanjiote Near Poonch, Kashmir"
+5330,2013-08-14,33.3216,75.1984,downpour,10km,Kashmir,"Panthal Area, Ramban District, Kashmir"
+5427,2013-08-15,25.3833,94.1884,downpour,5km,Nāgāland,"Koide Government High School, Senapati, Manipur"
+5334,2013-08-15,32.3573,77.3052,downpour,10km,Himachal Pradesh,"Manali-Spiti Road Between Gramphu And Chhatru, Himachal Pradesh"
+5338,2013-08-16,26.8727,94.9275,rain,25km,Assam,"Longlem, Nagaland"
+5337,2013-08-16,26.4205,94.9731,rain,5km,Nāgāland,"Yakshu, Nagaland"
+5336,2013-08-16,26.3897,94.9439,rain,10km,Nāgāland,"Tobu, Nagaland"
+5343,2013-08-17,24.7625,93.4341,continuous_rain,10km,Assam,The Imphal-Jiribam Section Of Nh-37 In Tamenglong District
+5341,2013-08-17,15.5419,73.9214,downpour,25km,Goa,Pilgao-Narvem
+5346,2013-08-17,31.0343,78.7248,rain,5km,Uttarakhand,"Harsil, Uttarakhand"
+5347,2013-08-17,30.7292,78.4396,rain,5km,Uttarakhand,"Uttarkashi, Uttarakhand"
+5360,2013-08-18,30.3642,79.3158,rain,5km,Uttarakhand,"Chamoli District, Uttarakhand"
+5359,2013-08-18,30.742,78.4543,rain,unknown,Uttarakhand,Rishikesh-Gangotri Highway
+5361,2013-08-18,31.0826,78.066,unknown,25km,Himachal Pradesh,"Nuranoo, Uttarkashi, Uttarakhand"
+5358,2013-08-18,30.6639,78.0574,rain,unknown,Uttarakhand,Rishkesh-Yamunotri Highway
+5377,2013-08-19,34.0942,74.0226,tropical_cyclone,25km,Kashmir,Dara Gutli Village Of Uri Sector In North Kashmir'S Baramulla District
+5365,2013-08-19,30.6293,78.3303,downpour,unknown,Uttarakhand,"Nalupani Area Of Uttarkashi District, Uttarakhand"
+5382,2013-08-21,31.5375,77.3737,downpour,25km,Himachal Pradesh,Kullu-Anni Highway
+5384,2013-08-22,19.0402,72.9089,continuous_rain,1km,Maharashtra,Panjarpol On The Eastern Freeway
+5399,2013-08-25,18.2807,83.0394,other,1km,Andhra Pradesh,"Borra Caves, Andhra Pradesh"
+5410,2013-08-28,29.9531,78.1514,downpour,25km,Uttarakhand,Haridwar In Uttarakhand Province
+5421,2013-08-30,26.4205,94.9731,unknown,5km,Nāgāland,"Yakshu, Nagaland"
+5431,2013-09-01,24.9829,93.5063,continuous_rain,5km,Assam,"Tamenglong, Manipur"
+5430,2013-09-01,24.9037,93.487,continuous_rain,25km,Manipur,"Tamenglong- Khongsang Road, Manipur"
+5429,2013-09-01,27.3425,88.2426,downpour,50km,Sikkim,Tamabong Village In Sikkim State
+5442,2013-09-02,27.1614,93.7525,downpour,unknown,Arunāchal Pradesh,Arunachal Pradesh
+5441,2013-09-02,28.611,94.9829,downpour,5km,Arunāchal Pradesh,"Gosang Village Under Jengging Circle, Arunachal Pradesh"
+5476,2013-09-07,27.3736,88.7323,rain,25km,Sikkim,14 Milestone Of J N Marg Near Kyangnosola (East Sikkim)
+5485,2013-09-08,27.6047,88.6463,rain,50km,,"Chungthang, Sikkim"
+5533,2013-09-16,27.0599,88.4674,downpour,5km,Bengal,"Kalimpong, West Bengal"
+5552,2013-09-24,25.0985,94.3619,unknown,5km,Manipur,"Ukhrul, Manipur"
+5554,2013-09-25,21.6989,74.172,downpour,unknown,Maharashtra,"Taloda, Nandurbar, Maharashtra"
+5567,2013-09-30,30.6004,78.3154,unknown,25km,Uttarakhand,"Dharasu, Uttarkashi, Uttarakhand"
+5565,2013-09-30,15.7156,73.8049,unknown,1km,Goa,"Pernem, Goa"
+5575,2013-10-05,25.8266,94.1497,continuous_rain,5km,Nāgāland,"Chiechama, Nagaland"
+5583,2013-10-06,15.6365,74.1158,downpour,5km,,"Ponsuli, Goa"
+5582,2013-10-06,26.1309,91.8383,downpour,5km,Assam,"Batahguli, Guwahati, Assam"
+5584,2013-10-06,26.1665,91.7049,downpour,5km,Assam,"Nilachal Hill, Guwahati, Assam"
+5598,2013-10-11,32.3665,77.0857,downpour,5km,Himachal Pradesh,"Shetidhar Peak, Himachal Pradesh"
+5603,2013-10-13,25.426,94.6024,downpour,5km,Manipur,"Tusom, Manipur"
+5608,2013-10-16,30.5345,79.0853,unknown,25km,Uttarakhand,"National Highway 109, Uttarakhand"
+5611,2013-10-18,30.5345,79.0853,rain,25km,Uttarakhand,"National Highway 109, Uttarakhand"
+5617,2013-10-25,16.5175,80.6117,rain,10km,Andhra Pradesh,"Chrsiturajupuram, Vijayawada, Andhra Pradesh"
+5635,2013-11-13,8.4557,77.009,downpour,5km,Kerala,"Karakkamandapam, Kerala"
+5638,2013-11-13,8.1747,77.444,downpour,10km,Tamil Nadu,"Nagercoil, Tamil Nadu"
+5633,2013-11-13,8.4951,76.921,downpour,5km,Kerala,"Valiyasalai, Thiruvananthapuram, Kerala"
+5637,2013-11-13,8.4863,76.9517,downpour,1km,Kerala,"Thampanoor, Thiruvananthapuram, Kerala"
+5636,2013-11-13,18.7654,73.364,downpour,unknown,Maharashtra,Maharashtra
+5650,2013-11-17,13.6529,79.3439,downpour,5km,Andhra Pradesh,"Tirumala, Andhra Pradesh"
+5652,2013-11-20,20.0014,73.7917,unknown,50km,Maharashtra,"Kazigadi Near Nashik, Maharashtra"
+5660,2013-11-24,11.344,76.8691,downpour,10km,Tamil Nadu,"Kallar, Tamil Nadu"
+5683,2013-12-10,15.7051,74.2197,mining,1km,,"Kankumbi, Karnataka"
+5864,2014-02-12,31.8246,77.4702,snowfall_snowmelt,10km,Himachal Pradesh,"Siund - Neuli Rd, Neuli Shanshar, Himachal Pradesh 175123"
+5897,2014-02-23,33.2359,75.244,unknown,5km,Kashmir, Ramban district of Jammu and Kashmir
+5940,2014-03-10,33.2359,75.2439,snowfall_snowmelt,5km,Kashmir,Jammu and Kashmir
+5943,2014-03-11,34.0823,74.056,continuous_rain,25km,Kashmir,Azad Jammu and Kashmir
+5970,2014-03-20,33.2355,75.2449,unknown,5km,Kashmir,Ramban
+5994,2014-04-15,34.209,74.3524,unknown,5km,Kashmir,"Patan, Baramulla District"
+6011,2014-05-04,11.3403,76.8267,rain,10km,Tamil Nadu,Adderlie near Coonoor
+6014,2014-05-07,18.5158,73.1822,rain,25km,Maharashtra,"Raigad District, Maharashtra"
+6015,2014-05-08,27.9032,96.174,rain,1km,Arunachal Pradesh,Lohit District of Arunachal Pradesh
+6016,2014-05-09,24.8669,92.3576,rain,1km,Assam,"Satgarakul Village, Karimganj, Assam State"
+6022,2014-05-12,34.0893,74.0241,rain,5km,Kashmir,Srinagar Muzafarabad Road
+6024,2014-05-14,33.2394,75.2405,rain,1km,Kashmir,Ramban
+6036,2014-05-22,15.4951,73.8288,downpour,1km,Goa,"Altinho, Goa"
+6084,2014-06-22,9.9983,76.7329,rain,5km,Kerala,"Kadavoor, Kerala"
+6105,2014-06-26,28.9205,95.3429,continuous_rain,unknown,Arunachal Pradesh,Arunachal Pradesh
+6106,2014-06-26,26.1407,91.7645,continuous_rain,5km,Assam,Narakasur
+6107,2014-06-26,26.1844,91.7896,continuous_rain,5km,Assam,Bamunimaidam
+6110,2014-06-27,26.1619,91.7697,rain,exact,Assam,"Bhangagarh, Assam"
+6112,2014-06-28,26.1964,91.7652,rain,exact,Assam,"Kharghuli Hills, Assam"
+6143,2014-07-14,23.7327,92.7463,downpour,5km,Mizoram,"Zembabawk, Aizawl"
+6146,2014-07-15,27.059,88.4694,rain,1km,West Bengal,"Kalimpong, West Bengal"
+6162,2014-07-19,30.4305,78.0803,rain,10km,Uttarakhand,"Mussoorie, Uttarakhand"
+6167,2014-07-20,30.6326,78.9953,continuous_rain,1km,Uttarakhand,"Sonprayag, Uttarakhand"
+6174,2014-07-22,33.2395,75.2406,rain,1km,Kashmir,"Ramban, Kashmir"
+6177,2014-07-23,29.1585,79.1464,continuous_rain,1km,Uttarakhand,"Bazpur, Uttarakhand"
+6184,2014-07-28,29.5829,80.2182,continuous_rain,1km,Uttarakhand,"Pithauragadh, Uttarakhand"
+6462,2014-07-30,19.678,73.5036,construction,10km,Maharashtra,a hillock between Kasara and Igatpuri
+6186,2014-07-30,19.162,73.6873,continuous_rain,1km,Maharashtra,"Malin, Pune, Maharashtra"
+6188,2014-08-02,9.9431,76.3738,continuous_rain,50km,Kerala,"Thiruvankulam, Kerala"
+6189,2014-08-03,19.1497,83.6299,continuous_rain,25km,State of Odisha,"Rayagada, Odisha"
+6432,2014-08-04,30.709,76.9834,downpour,10km,Haryana,Thana village
+7367,2014-08-08,32.2237,76.3369,unknown,1km,Himachal Pradesh,Chohla
+6460,2014-08-09,24.544,85.3492,unknown,50km,Bihar,Baskatwa in Gaya district
+6513,2014-08-14,23.0137,91.7174,downpour,5km,Tripura,Sabroom
+6510,2014-08-15,30.1176,78.7472,rain,unknown,Uttarakhand,Pauri district of Uttarakhand
+6197,2014-08-16,33.0272,74.9465,downpour,5km,Kashmir,Jammu and Kashmir between Adhkuwari and Bhawan at Devi Dwar
+6530,2014-08-17,34.5382,74.2493,downpour,50km,Kashmir,Rengpeth village
+6200,2014-08-17,27.0869,93.6086,downpour,10km,Arunachal Pradesh,Arunachal Pradesh/Itanagar
+6525,2014-08-18,30.9936,78.4594,downpour,50km,Uttarakhand,Yamunotri route
+6539,2014-08-20,20.5349,73.1703,rain,25km,Gujarat,Korwad village of Dharampur taluka in Valsad district
+6538,2014-08-20,31.5216,78.1346,unknown,5km,Himachal Pradesh,near Meeru on Chulling-Tapri road
+6544,2014-08-22,11.683,77.571,downpour,1km,Tamil Nadu,second hairpin bend near Varattupallam
+6552,2014-08-26,31.5593,77.9277,unknown,5km,Himachal Pradesh,a village near Bhavanagar
+6414,2014-09-02,19.2677,73.0618,continuous_rain,10km,Maharashtra,Gayatri Nagar
+6371,2014-09-03,33.1253,74.8288,downpour,50km,Kashmir,Kala Zar in Reasi district
+6369,2014-09-04,33.0086,74.9426,downpour,5km,Kashmir,Adhkuwari
+6370,2014-09-04,33.798,74.2562,rain,25km,Kashmir,Mandi belt along LoC
+6358,2014-09-06,32.8468,75.137,rain,1km,Kashmir,Rakha Jaganoo
+6339,2014-09-06,33.5405,74.3723,downpour,5km,Kashmir,Thanmandi area of Rajouri
+6294,2014-09-06,33.3551,74.5128,continuous_rain,10km,Kashmir,Dhok Bagla near Kotranka
+6359,2014-09-06,32.9148,75.0556,rain,50km,Kashmir,Rakh batla belt in Udhampur
+6225,2014-09-07,33.0677,75.1466,downpour,25km,Kashmir,Saddal village in Pancheri block
+6331,2014-09-08,25.9466,94.6279,unknown,25km,Nagaland,Kiphire-Seyochung road near Yangzitong village
+6337,2014-09-09,31.7766,76.9832,unknown,5km,Himachal Pradesh,Uhl river in Kamand area
+6341,2014-09-11,30.688,79.0478,downpour,10km,Uttarakhand,Gaurikund-Kedarnath pedestrian trek
+6340,2014-09-11,24.1965,73.703,continuous_rain,1km,Rajasthan,Parsad on NH-8
+6338,2014-09-11,33.2611,75.2138,unknown,50km,Kashmir,Ramban district
+6291,2014-09-21,25.7354,90.3852,continuous_rain,25km,Meghalaya,National Highway 51
+6288,2014-09-22,26.1985,91.7998,rain,5km,Assam,Noonmati
+6283,2014-09-22,26.1314,91.7548,rain,1km,Assam,Dakhingaon
+6286,2014-09-22,26.1044,91.7082,rain,5km,Assam,Garchuk
+6284,2014-09-22,26.1324,91.8342,rain,5km,Assam,Batahghuli
+6287,2014-09-22,26.1295,91.7056,rain,5km,Assam,Dhirenpara
+6285,2014-09-22,26.159,91.8178,rain,5km,Assam,VIP Road
+6282,2014-09-22,26.1097,91.7747,rain,5km,Assam,Lalmati
+6289,2014-09-22,26.1001,91.6849,rain,5km,Assam,Pamohi
+6292,2014-09-23,25.7238,89.9032,continuous_rain,5km,Assam,Hatsingimari
+6290,2014-09-23,25.5772,91.8666,continuous_rain,5km,Meghalaya,Mawbah under Mawprem area
+6213,2014-09-24,25.8143,90.5763,continuous_rain,unknown,Meghalaya,Meghalaya
+6263,2014-09-26,33.0365,74.4889,continuous_rain,unknown,Kashmir,Surankote in Jammu and Kashmir
+6222,2014-10-01,27.1249,93.7706,unknown,5km,Arunachal Pradesh,Karsingsa block point
+6214,2014-10-05,25.9702,91.8587,rain,5km,Meghalaya,Jorabat-Umiam route
+6237,2014-10-09,10.9654,76.5516,flooding,1km,Kerala,Carmel School in Palakkayam
+6264,2014-10-12,19.2046,84.1917,tropical_cyclone,5km,Odisha,Panikikata hill
+6250,2014-10-12,18.3297,82.9565,tropical_cyclone,50km,Andhra Pradesh,Medrasula village of Madula panchayat of Araku mandal
+6307,2014-10-12,19.1008,84.0502,tropical_cyclone,25km,Odisha,Putupadal gram panchayat in Nuagada block
+6247,2014-10-15,31.0164,77.0991,mining,25km,Himachal Pradesh,Kashmaari village in Solan district
+6293,2014-10-20,25.5006,90.0896,rain,50km,Meghalaya,South West Garo Hills
+6299,2014-10-26,33.1206,75.3142,unknown,25km,Kashmir,Batote
+6322,2014-10-27,10.2379,77.6377,downpour,25km,Tamil Nadu,Dum Dum Parai
+6374,2014-11-06,33.1261,75.4481,unknown,5km,Kashmir,"Chakwa bridge, 9 kilomters short of Doda"
+6356,2014-11-07,32.9411,75.0922,downpour,25km,Kashmir,Ramnagar railway station
+6730,2014-12-31,33.287,77.2853,unknown,1km,Kashmir,Tsarap River
+6631,2015-01-05,28.6363,77.3957,unknown,1km,Uttar Pradesh,Hindon River in Ghaziabad
+6734,2015-01-29,28.5714,77.2135,unknown,1km,NCT,construction site in East Kidwai Nagar
+6840,2015-02-05,33.7453,74.1794,unknown,25km,Kashmir,Kalsan village near Bagial Dhara
+6775,2015-02-14,26.1468,91.6469,mining,5km,Assam,Kailashpur hill
+6786,2015-02-19,24.6108,92.562,mining,5km,Assam,"Hailākāndi : Two labourers died while another was injured in a landslide in Assam's Hailakandi district, the police said today."
+6804,2015-02-26,33.3376,75.1922,unknown,50km,Kashmir,Ramsu
+6842,2015-03-02,33.3296,75.203,continuous_rain,1km,Kashmir,Magarkote
+6827,2015-03-05,34.2092,74.321,continuous_rain,25km,Kashmir,Srinagar-Muzaffarabad road near Dankhan area in Baramulla
+6841,2015-03-05,33.1213,75.2449,unknown,10km,Kashmir,Sanasar area of district Ramban
+6851,2015-03-10,32.5612,76.1238,downpour,5km,Himachal Pradesh,"2 MW Sal-II hydropower project, on the outskirts of Chamba"
+6873,2015-03-15,33.0809,75.2966,snowfall_snowmelt,50km,Kashmir,Kheri
+6891,2015-03-15,34.1327,74.5594,continuous_rain,1km,Kashmir,Shirpora
+6867,2015-03-15,33.8911,74.9781,continuous_rain,1km,Kashmir,"Sonrigund Malangpora, Pulwama"
+6872,2015-03-15,33.7732,74.1011,rain,25km,Kashmir,Poonch district
+6871,2015-03-15,33.6846,74.2453,snowfall_snowmelt,25km,Kashmir,Haari village of Poonch district
+6889,2015-03-15,34.0786,74.3836,continuous_rain,5km,Kashmir,Bandibala
+6890,2015-03-15,34.0968,74.4117,continuous_rain,1km,Kashmir,Hajibal
+6908,2015-03-15,33.0977,75.5787,unknown,5km,Kashmir,Doda-Bhaderwah highway
+7591,2015-03-19,25.0318,92.4584,rain,5km,Assam,Ratacherra
+6907,2015-03-21,33.1754,75.8103,continuous_rain,50km,Kashmir,Chena Bhati in Karara
+6874,2015-03-22,33.3343,75.1969,snowfall_snowmelt,50km,Kashmir,Jammu-Srinagar national highway
+6932,2015-03-23,34.0796,74.0357,continuous_rain,10km,Kashmir,Uri
+6931,2015-03-23,33.7099,74.7959,continuous_rain,25km,Kashmir,Shopian district
+6924,2015-03-28,33.9548314,74.79428356,downpour,50km,Kashmir,Chontinar village of central Kashmir Budgam district
+6925,2015-03-28,33.0186,75.2405,downpour,unknown,Kashmir,Srinagar-Jammu national highway
+6933,2015-03-30,33.9344,74.6566,continuous_rain,10km,Kashmir,Three houses had sunk
+6934,2015-03-30,34.0096,74.5915,continuous_rain,5km,Kashmir,Karewas sink
+7171,2015-03-30,33.9445,74.799,continuous_rain,5km,Kashmir,16 dead in Chadoora
+6928,2015-03-31,30.6145,79.8102,construction,25km,Uttarakhand,Joshimath-Mallari road
+7176,2015-04-02,34.1587,74.4725,continuous_rain,1km,Kashmir,Frasthar
+7178,2015-04-03,34.0604,74.4203,continuous_rain,10km,Kashmir,"Reshi Mohalla, Tangmarg"
+7177,2015-04-03,34.0978,74.4016,continuous_rain,1km,Kashmir,Nambilnar
+7172,2015-04-03,33.1445,75.5469,continuous_rain,5km,Kashmir,Diwalkund in Dessa belt of Doda district
+7185,2015-04-03,32.2934,77.1803,downpour,1km,Himachal Pradesh,"3km ahead of Palchan, Manali-Palchan"
+7174,2015-04-03,34.0886,74.0301,continuous_rain,5km,Kashmir,"Uri, Baramulla district"
+7175,2015-04-05,33.9243,74.6163,continuous_rain,25km,Kashmir,"Wadpora, Budgam near Vidyala School"
+7168,2015-04-07,34.2088,74.3279,continuous_rain,1km,Kashmir,Khanpora
+7167,2015-04-08,34.6609,73.9593,continuous_rain,1km,Kashmir,Keran
+7127,2015-04-22,12.8659,74.8852,downpour,1km,Karnataka,under the third and fourth Padil-Bajal under-bridge railway tracks
+7123,2015-04-26,16.5172,80.6024,unknown,1km,Andhra Pradesh,"Head Water Works, Kummaripalem, Vijayawada"
+7111,2015-04-28,30.5631,79.5765,continuous_rain,1km,Uttarakhand,"Vishnuprayag, Joshimath"
+7110,2015-04-30,30.5568,79.5541,continuous_rain,5km,Uttarakhand,Rishikesh-Badrinath National Highway near Joshimath
+7062,2015-05-14,33.6303,74.4838,downpour,1km,Kashmir,"Poshiana, 27 km point of road from Bafliaz"
+7031,2015-05-24,27.6163,88.6586,unknown,1km,Sikkim,"Bop, Sikkim"
+7026,2015-05-30,34.2607,75.4446,rain,1km,Kashmir,Zojila Pass
+6971,2015-06-09,27.0987,93.816,continuous_rain,5km,Arunachal Pradesh,"Itanagar, Arunachal Pradesh"
+6972,2015-06-12,19.1209,72.8406,downpour,1km,Maharashtra,"Gilbert Hill, Andheri West, Mumbai"
+6968,2015-06-13,25.463,92.2121,continuous_rain,5km,Meghalaya,"Ratacherra village along the NH-44 connecting to Barak Valley in Assam and Tripura, Meghalaya, Mizoramon"
+6967,2015-06-13,27.0165,88.2476,downpour,1km,West Bengal,"Darjeeling Heritage Railway, Darjeeling"
+6969,2015-06-16,25.5114,90.215,downpour,1km,Meghalaya,"Nakham Bazaar, Tura, Meghalaya"
+6970,2015-06-16,25.5084,90.2191,downpour,1km,Meghalaya,Akonggre
+6966,2015-06-17,26.9974,88.4314,downpour,50km,West Bengal,"National Highway 31A, Darjeeling Hills"
+6965,2015-06-17,27.0257,88.4301,downpour,50km,West Bengal,"National Highway 31A, Darjeeling Hills"
+6964,2015-06-17,27.0087,88.443,downpour,50km,West Bengal,"National Highway 31A, Darjeeling Hills"
+6962,2015-06-18,15.4465,73.927,continuous_rain,10km,Goa,Dhaktebhat in Dongri village of St Andre constituency
+6963,2015-06-19,23.7131,92.7362,rain,50km,Mizoram,"Muanna locality, Mizoram"
+6945,2015-06-19,25.16,93.686,monsoon,1km,Manipur,"amei to Kangpokpi via Imphal road, 0.5 km from Tamei, Tamenglang District"
+6973,2015-06-21,18.7833,73.4703,continuous_rain,exact,Maharashtra,"Ekvira Devi temple, Karla near Khandala"
+6947,2015-06-21,30.0261,78.6278,rain,25km,Uttarakhand,Satpuli-Kanskhet Road in Pauri Garhwal district
+6949,2015-06-22,17.5861,73.1742,downpour,5km,Maharashtra,Dabhol village of Maharashtra's Ratnagiri district
+6948,2015-06-22,18.7686,73.3678,monsoon,exact,Maharashtra,Mumbai-Pune Expressway near Khandala Tunnel
+6950,2015-06-22,19.029,73.311,continuous_rain,1km,Maharashtra,Village Mohechiwadi under Karjat taluka of Raigad district
+6990,2015-06-24,26.0319,94.5466,continuous_rain,5km,Nagaland,"New Land (""""New Colony"""")"
+7012,2015-06-25,30.6838,79.0479,downpour,5km,Uttarakhand,5 km from Kedarnath Temple
+7027,2015-06-25,34.6056,76.0539,downpour,250km,Kashmir,Srinigar-Ladakh highway
+7011,2015-06-25,34.141,74.6568,downpour,5km,Kashmir,"NH-1A, 7km from Srinigar"
+7021,2015-06-27,27.0076,88.251,downpour,1km,West Bengal,"Old Monastery Road, Ghum"
+7033,2015-06-29,27.0161,88.2478,downpour,1km,West Bengal,NH-55 at Merry Villa
+7035,2015-06-30,25.4243,88.2746,downpour,1km,West Bengal,Mahindra
+7034,2015-06-30,27.0875,88.6556,downpour,1km,West Bengal,"Lava, Kalimpong"
+7363,2015-06-30,26.8843,88.1835,downpour,25km,West Bengal,"Limbu Dhura, Tingling"
+7040,2015-07-01,26.9978,88.167,downpour,1km,West Bengal,Sukhiapokhari
+7037,2015-07-01,26.8811,88.2779,downpour,5km,West Bengal,Kurseong
+7038,2015-07-01,26.8781,88.2807,downpour,10km,West Bengal,"Khahare Khola, Kurseong"
+7039,2015-07-01,27.0678,88.456,downpour,1km,West Bengal,8 mile in Kalimpong
+7036,2015-07-01,26.8352,88.1881,downpour,5km,West Bengal,"Mahendra village, Thana Line, Tingling Garden village in Mirik"
+7076,2015-07-04,26.9282,88.4553,unknown,1km,West Bengal,near Kalijhora
+7084,2015-07-06,29.393,79.4525,downpour,5km,Uttarakhand,"Mall Rd, Nainital"
+7138,2015-07-07,27.0816,88.4397,continuous_rain,5km,Sikkim,"NH-10, Sepi Jhora, Kalimpong"
+7139,2015-07-07,26.8826,88.2806,continuous_rain,5km,West Bengal,Kurseong
+7141,2015-07-08,12.9455,75.7797,rain,50km,Karnataka,"Yedakumeri, Bengaluru-Mangaluru train"
+7156,2015-07-09,10.3448,77.5666,unknown,25km,Tamil Nadu,Kodaikanal-Palani Ghat Road
+7159,2015-07-10,29.3908,79.4552,continuous_rain,5km,Uttarakhand,"Baliyanala, Nainithal"
+7157,2015-07-10,34.0404,75.3156,continuous_rain,5km,Kashmir,Pahalgam
+7158,2015-07-11,32.9262,75.1447,continuous_rain,5km,Kashmir,"Srinigar-Jammu Highway, Gangroo, Udhampur"
+7161,2015-07-11,30.241,78.9,continuous_rain,5km,Uttarakhand,Sirobagad area of Rudraprayag
+7160,2015-07-11,30.3799,78.4862,continuous_rain,5km,Uttarakhand,Badrinath Highway near Mulygoan in Tihri
+7196,2015-07-12,33.2049,75.2845,continuous_rain,10km,Kashmir,Between Batote and Ramban
+7195,2015-07-12,33.2504,75.2102,continuous_rain,1km,Kashmir,Seri in Ramban along Jammu-Srinagar National Highway
+7215,2015-07-13,32.2473,78.037,continuous_rain,1km,Himachal Pradesh,"Spiti Valley, Himachal Pradesh"
+7249,2015-07-13,31.0851,77.1665,continuous_rain,5km,Himachal Pradesh,"Phase-III, Sector 5, New Shimla"
+7198,2015-07-14,12.8747,74.9566,continuous_rain,1km,Karnataka,Farangipete
+7214,2015-07-15,27.36,93.0385,monsoon,5km,Arunachal Pradesh,Type-IV Colony of Seppa in East Kameng
+7226,2015-07-18,32.2239,76.3226,monsoon,5km,Himachal Pradesh,Jheol village in Dharamsala subdivision
+7248,2015-07-18,24.0406,84.0696,continuous_rain,50km,Jharkhand,Kharganjuwa hill near Barki Lami pahar 30km from Daltonganj
+7221,2015-07-19,18.7632,73.347,continuous_rain,exact,Maharashtra,"Adoshi Tunnel, Mumbai-Pune Expressway"
+7227,2015-07-19,30.0705,80.2364,monsoon,1km,Uttarakhand,Sandrathi village of Munsiyari block of Pithoragarh district
+7238,2015-07-19,14.8937,74.5828,continuous_rain,5km,Karnataka,Talakebail in Vajralli gram panchayat in Yellapur
+7224,2015-07-19,30.73,78.4378,continuous_rain,5km,Uttarakhand,"Varunavat Mountain, Uttarkashi"
+7262,2015-07-21,33.7403,77.7559,continuous_rain,1km,Kashmir,"Miru, Manali-Leh highway"
+7251,2015-07-21,34.2689,75.1495,continuous_rain,5km,Kashmir,Kullan
+7261,2015-07-21,33.616,77.7652,continuous_rain,1km,Kashmir,Rumtse along the Manali-Leh highwa
+7263,2015-07-22,25.4477,94.0489,continuous_rain,1km,Manipur,"15 kms from Maram, National Highway-102/A (Maram Peren road)"
+7264,2015-07-22,25.4538,93.9827,continuous_rain,5km,Manipur,22 kms to 30 kms between Sangkungmai and Willong
+7253,2015-07-22,24.7979,92.9974,continuous_rain,5km,Assam,Lakhipur
+7265,2015-07-22,25.5007,93.9854,continuous_rain,5km,Manipur,Willong-Yangkhullen stretch
+7266,2015-07-22,25.5098,93.8794,continuous_rain,10km,Manipur,Yangkhullen-Tamphung road till Nagaland border
+7267,2015-07-22,25.3908,94.0926,continuous_rain,10km,Manipur,NH-2 between Senapati and Mao
+7279,2015-07-24,24.9818,93.5142,monsoon,50km,Manipur,Tamenglong Ward No-IV
+7295,2015-07-24,30.4517,78.1443,continuous_rain,25km,Uttarakhand,Kempty Road near Sia village
+7275,2015-07-24,34.258,75.4189,continuous_rain,1km,Kashmir,Baltal
+7296,2015-07-24,30.416,78.3415,continuous_rain,25km,Uttarakhand,Kempty Road near Kandikhal
+7270,2015-07-24,29.5863,80.2186,continuous_rain,5km,Uttarakhand,Pithoragarh
+7294,2015-07-24,30.4528,78.1045,continuous_rain,25km,Uttarakhand,Kempty Road near Kempty Falls
+7276,2015-07-25,26.1062,91.8717,continuous_rain,5km,Assam,"Dispur : According to report, a huge hillock slipped into the house after heavy rain where Dinesh Bodo along with his wife and daughter lived in. Thi*"
+7274,2015-07-25,15.3904,73.8182,downpour,5km,Goa,Vasco
+7287,2015-07-26,32.5606,76.1206,continuous_rain,5km,Himachal Pradesh,Chamba
+7289,2015-07-26,31.7085,76.9297,continuous_rain,5km,Himachal Pradesh,Mandi
+7273,2015-07-26,30.2411,78.9014,continuous_rain,5km,Uttarakhand,"Sirobagad, Rishikesh-Badrinath highway"
+7288,2015-07-26,31.9563,77.1135,continuous_rain,5km,Himachal Pradesh,Kullu
+7286,2015-07-26,31.1003,77.1751,continuous_rain,10km,Himachal Pradesh,Shimla
+7285,2015-07-26,31.1263,77.3525,continuous_rain,5km,Himachal Pradesh,"Klibi Patwar, Theog"
+7284,2015-07-27,33.2706,75.7702,downpour,10km,Kashmir,"Batote-Kishtwar highway, Kishtwar stretch"
+7292,2015-07-27,11.8348,75.4856,mining,5km,Kerala,"near a hill at Puthuvacherry, in Peralassery in Kannur"
+7297,2015-07-28,30.7204,79.0758,continuous_rain,5km,Uttarakhand,Kedarnath Yatra
+7302,2015-07-28,24.5938,72.7308,continuous_rain,5km,Rajasthan,Mount Abu
+7364,2015-07-31,24.819,94.3551,continuous_rain,10km,Manipur,Phungyar road
+7372,2015-07-31,25.0634,94.3415,continuous_rain,10km,Manipur,Naga Gate along the Ukhrul-Imphal route
+7366,2015-07-31,32.2241,76.3374,continuous_rain,1km,Himachal Pradesh,Chohla village of Kajlot panchayat
+7370,2015-08-01,24.1419,94.1078,continuous_rain,5km,Manipur,between Moltuk to New Songjang village
+7385,2015-08-01,24.004,93.9815,continuous_rain,10km,Manipur,"Holenjang, Chandel district"
+7369,2015-08-01,24.1988,94.1016,continuous_rain,10km,Manipur,between Chalong and Paraolon
+7383,2015-08-01,23.899,94.1434,rain,5km,Manipur,"Tuitung village, Khengjoi"
+7373,2015-08-01,24.9111,94.4759,continuous_rain,10km,Manipur,between Maku village and Kamjong sub division
+7305,2015-08-01,18.7687,73.3679,continuous_rain,1km,Maharashtra,Khandala tunnel
+7389,2015-08-01,24.4072,94.0644,continuous_rain,5km,Manipur,between Bongyang and Lokchao along the Imphal-Moreh highway
+7371,2015-08-01,23.9939,94.0573,continuous_rain,50km,Manipur,near S Lamphei Lamkhai and Sehlon village
+7391,2015-08-01,31.0358,78.8578,continuous_rain,50km,Uttarakhand,Gangotri highway
+7388,2015-08-01,24.416,94.0984,continuous_rain,5km,Manipur,Senam
+7374,2015-08-01,25.1122,94.3591,continuous_rain,10km,Manipur,Ukhrul town Circular road from Rayotang to Viewland Zone II
+7390,2015-08-01,24.4265,94.1913,continuous_rain,25km,Manipur,between Tengnoupal-Sita junction and Tengnoupal Power Sub-Station
+7384,2015-08-01,23.9278,94.0906,rain,5km,Manipur,"Wayang, Khengjoi"
+7375,2015-08-01,25.1941,94.4481,continuous_rain,25km,Manipur,Ukhrul NH 201-Jessami road
+7387,2015-08-01,24.954,94.2156,continuous_rain,50km,Manipur,Imphal-Ukhrul road
+7910,2015-08-01,24.3481,94.1146,unknown,10km,Manipur,Chandel
+7409,2015-08-02,25.72,94.6219,continuous_rain,10km,Nagaland,Meluri Sub-Division in Phek District of Nagaland
+7594,2015-08-05,15.3956,74.0113,mining,1km,Goa,"Shantinagar, Ponda"
+7598,2015-08-06,33.1078,74.7756,unknown,50km,Kashmir,the cave shrine located in Trikuta Hills of Reasi district
+7616,2015-08-06,11.6753,92.749,downpour,1km,Andaman and Nicobar Islands,Atlanta Point
+7596,2015-08-07,18.7631,73.347,continuous_rain,5km,Maharashtra,Adoshi tunnel
+7614,2015-08-08,31.8028,76.757,downpour,5km,Himachal Pradesh,"Dharampur, Mandi district"
+7613,2015-08-08,32.9961,75.1994,downpour,10km,Kashmir,Jammu-Srinagar National Highway at Kheri in Udhampur district
+7636,2015-08-09,33.3852,74.2562,downpour,25km,Kashmir,Khwas tehsil of Rajouri district
+7628,2015-08-09,31.6916,76.5102,rain,5km,Himachal Pradesh,NH 88
+7678,2015-08-11,32.1967,76.3194,rain,1km,Himachal Pradesh,Himachal Pradesh School Education Board
+7649,2015-08-11,31.3237,76.7622,downpour,5km,Himachal Pradesh,Gamraula near Bilaspur
+7666,2015-08-11,25.1019,93.3729,continuous_rain,5km,Manipur,Tousem
+7664,2015-08-11,24.7459,93.4251,continuous_rain,10km,Manipur,Nungba
+7665,2015-08-11,24.7016,93.5291,continuous_rain,5km,Manipur,Khoupum
+7676,2015-08-12,32.1764,76.3075,monsoon,10km,Himachal Pradesh,Dharamsala-Kangra state highway
+7660,2015-08-12,25.6237,94.1136,continuous_rain,5km,Nagaland,Phesama village
+7685,2015-08-13,31.7756,76.9876,unknown,5km,Himachal Pradesh,IIT Campus in Mandi
+7310,2015-08-15,30.9085,78.3299,continuous_rain,25km,Uttarakhand,Yamnotri highway
+7312,2015-08-15,18.7631,73.3471,monsoon,1km,Maharashtra,Adoshi Tunnel
+7311,2015-08-15,30.6494,79.5269,continuous_rain,5km,Uttarakhand,Lambagadh
+7309,2015-08-15,30.7864,78.616,continuous_rain,1km,Uttarakhand,Malla
+7308,2015-08-15,30.9111,78.6814,continuous_rain,5km,Uttarakhand,Gagnani
+7887,2015-08-16,27.8835,96.9262,continuous_rain,50km,Arunachal Pradesh,Hawai
+7335,2015-08-18,25.5145,90.2023,continuous_rain,1km,Meghalaya,Tura Civil Hospital
+7334,2015-08-18,28.1737,94.7596,unknown,unknown,Arunachal Pradesh,Arunachal Pradesh
+7329,2015-08-18,32.0275,77.3446,rain,1km,Himachal Pradesh,the Sikh shrine in Manikaran
+7701,2015-08-19,25.6278,94.1051,continuous_rain,5km,Nagaland,Phesama
+7699,2015-08-19,26.0214,94.5224,continuous_rain,50km,Nagaland,Zunheboto district
+7589,2015-08-19,25.2568,92.3825,rain,25km,Meghalaya,National Highway 44
+7590,2015-08-19,25.1416,92.3807,rain,5km,Meghalaya,Tongseng
+7706,2015-08-19,25.0728,92.3636,rain,5km,Meghalaya,National Highway at Kuliang
+7336,2015-08-19,25.2193,90.5549,continuous_rain,10km,Meghalaya,NH-62 at Sibbari
+7746,2015-08-20,32.6173,75.264,unknown,5km,Kashmir,Morha Kalana of panchyat Dhannuparole in Tehsil Ramkot
+7727,2015-08-20,25.6263,94.1057,continuous_rain,5km,Nagaland,between Phesama and Kuima in Nagaland
+7704,2015-08-20,32.6175,75.6157,unknown,5km,Kashmir,Morha-Chuhara village in Billawar tehsil
+7726,2015-08-22,31.0365,77.1213,downpour,5km,Himachal Pradesh,Shimla-Kalka National Highway near Shoghi
+7728,2015-08-22,26.1028,91.8806,continuous_rain,5km,Assam,Natonal Highway in Jorabat area
+7780,2015-08-26,23.3572,92.7878,continuous_rain,5km,Mizoram,Sailam village
+7778,2015-08-26,23.8447,93.0514,continuous_rain,10km,Mizoram,Phullen’s main road
+7836,2015-08-27,24.042,92.6724,downpour,10km,Mizoram,"National Highway 54, at Kawnpui town"
+7837,2015-08-27,23.7269,92.7265,downpour,5km,Mizoram,three graveyards within Aizawl
+7972,2015-08-28,23.4495,92.8112,downpour,25km,Mizoram,"Mizoram, India"
+7933,2015-09-01,26.1868,91.6739,rain,1km,Assam,Maligaon
+7923,2015-09-01,26.49349035,91.72137514,rain,10km,Assam,Amingaon
+7940,2015-09-03,33.6794,74.2525,unknown,25km,Kashmir,Poonch
+7961,2015-09-05,25.4551,84.5322,unknown,10km,Bihar,Bhojpur
+7956,2015-09-05,26.048,91.8695,unknown,1km,Meghalaya,Byrnihat
+8012,2015-09-06,25.9703,91.8584,unknown,1km,Meghalaya,"Umling, Meghalaya 793102, India"
+7950,2015-09-06,11.404,76.6952,unknown,1km,Tamil Nadu,"Ooty, India"
+7994,2015-09-07,11.81,78.2253,unknown,1km,Tamil Nadu,"Manjakuttai, Tamil Nadu, India"
+8224,2015-09-14,23.7313,92.7187,downpour,5km,Mizoram,"Aizawl, Mizoram, India"
+8223,2015-09-14,23.7348,92.7187,downpour,5km,Mizoram,"Aizawl, Mizoram, India"
+8227,2015-09-15,18.7734,82.8555,downpour,5km,Odisha,railway tracks between Dumriput and Damanjodi
+8233,2015-09-16,19.316,83.2414,downpour,25km,Odisha,"railway between Koraput and Rayagada in Odisha, India"
+8221,2015-09-16,18.7828,82.7935,downpour,1km,Odisha,"Dumuriput, Odisha 764021, India"
+8287,2015-09-21,19.4662,72.8276,downpour,1km,Maharashtra,Jivdani Temple
+8339,2015-09-23,26.1666,91.7042,continuous_rain,1km,Assam,Kamakhya Temple
+8366,2015-09-23,25.583,91.893,downpour,5km,Meghalaya,"Shillong, Meghalaya, India"
+8571,2015-10-02,17.6874,83.1993,downpour,1km,Andhra Pradesh,"Simhagiri Colony, Azeemabad, Pedagantyada, Visakhapatnam, Andhra Pradesh, India"
+8866,2015-10-25,33.3041,75.1982,downpour,5km,Kashmir,Ramsoo area of Ramban district
+8893,2015-10-31,11.3742,77.899,downpour,exact,Tamil Nadu,Arthanareeswarar Temple
+8892,2015-10-31,11.374,77.8987,downpour,exact,Tamil Nadu,Arthanareeswarar Temple
+8921,2015-11-07,11.3432,76.8285,unknown,5km,Tamil Nadu,Nilgiri Mountain Rail's Barliar-Coonoor sector
+8922,2015-11-07,11.3237,76.9101,unknown,5km,Tamil Nadu,Nilgiri Mountain Rail's Mettupalayam-Kallar sectors
+8944,2015-11-14,12.9746,80.2119,rain,1km,Tamil Nadu,Padmavathy Nagar in West Velachery
+9037,2015-12-07,31.6817,77.1209,unknown,1km,Himachal Pradesh,Hanogi
+8988,2015-12-07,10.2288,77.4767,rain,1km,Tamil Nadu,Upper Kodaikanal Road
+9096,2015-12-19,17.7345,83.2884,downpour,1km,Andhra Pradesh,Thatichetlapalem
+9092,2015-12-20,10.8319,78.7075,unknown,1km,Tamil Nadu,sanjeevinagar area
+9120,2015-12-24,28.5746,77.2791,construction,5km,NCT,New Friends Colony
+9144,2015-12-29,31.46626719,76.86927482,construction,50km,Himachal Pradesh,Hill collapses during construction
+9215,2016-01-14,27.1758,88.5294,unknown,1km,West Bengal,NH10 in Rangpo
+9351,2016-03-07,22.1337,78.8979,unknown,100km,Madhya Pradesh,Chhindwara
+9426,2016-03-26,33.04965334,75.29048614,continuous_rain,unknown,Kashmir,Jammu-Srinagar national highway
+9380,2016-04-04,34.4002,74.2798,continuous_rain,5km,Kashmir,Hanjishat village in Handwara area of Kupwara district
+9409,2016-04-13,11.3464,76.8076,construction,5km,Tamil Nadu,a construction site on Tiger Hill Road
+9405,2016-04-19,26.7223,95.0243,continuous_rain,1km,Nagaland,"Techahan Ward, Mon, Nagaland, India"
+7655,2016-04-22,27.5799,91.8569,continuous_rain,5km,Arunachal Pradesh,"Tawang, Arunachal Pradesh"
+9404,2016-05-01,28.0822,96.5316,downpour,1km,Arunachal Pradesh,"Hayuliang, Anjaw district,Arunachal Pradesh, India"
+9386,2016-05-09,10.3316,76.9592,construction,1km,Tamil Nadu,".5 km away from Valparai Police Station at a construction site, Valparai, Tamil Nadu, India"
+9335,2016-05-18,24.5202,92.7239,continuous_rain,1km,Assam,"Bilaipur, Hailakandi district, Assam, India"
+9338,2016-05-18,24.4638,92.4943,continuous_rain,10km,Assam,"Sonachirra, Karimganj district, Assam, India"
+9334,2016-05-18,24.5204,92.7264,continuous_rain,1km,Assam,"Bilaipur, Hailakandi district, Assam, India"
+9336,2016-05-18,24.5308,92.5121,continuous_rain,1km,Assam,"Ramchandi , Hailakandi District, Assam, India"
+9328,2016-05-20,8.2117,77.312,unknown,1km,Tamil Nadu,"Eraniel station,  Kanyakumari district, India"
+9314,2016-05-22,30.306,78.0648,rain,25km,Uttarakhand,"Chetra Village, Dehradun, India"
+9318,2016-05-23,30.7007,77.8644,rain,1km,Uttarakhand,"Chakrata, Uttarakhand, India"
+7736,2016-06-02,16.5145,80.6526,downpour,5km,Andhra Pradesh,Gunadala hill of Vijayawada
+8682,2016-06-05,24.6997,85.6285,downpour,1km,Bihar,"Kakolat Falls, Rajauli Sub-division, India"
+9199,2016-06-08,34.2952,75.3226,downpour,5km,Kashmir,"Srinagar-Leh highway in Shutkady near Sonamarg, Ganderbal district, Jammu and Kashmir, India"
+9168,2016-06-12,27.6438,93.871,downpour,10km,Arunachal Pradesh,"NH 13 10 kilometers from Old Ziro, Arunachal Pradesh, India"
+9169,2016-06-12,26.1677,94.2442,continuous_rain,100km,Nagaland,"on road between Mon and Tobu near Telangsao Hydro project , Nagaland, India"
+9142,2016-06-14,26.3185,94.5247,continuous_rain,1km,Nagaland,"lower Majakong Ward, Mokokchung, Nagaland, India"
+9141,2016-06-15,9.7967,77.0611,downpour,1km,Kerala,"Vazhavara, Idukki, Kerala, India"
+8860,2016-06-17,31.5124,78.1181,monsoon,1km,Himachal Pradesh,"Urni, Satluj river, Kinnaur district, Himachal Pradesh, India"
+8962,2016-06-18,15.0275,74.1623,downpour,25km,Goa,"main road between Gulem and Loliem and Cotigao, at Baddem, Goa, India"
+8744,2016-06-21,32.99,75.1892,downpour,1km,Kashmir,"Jammu-Srinagar national highway at Samroli, India"
+8745,2016-06-21,19.19,73.009,downpour,1km,Maharashtra,"Parsik Tunnel between Thane and Kalyan railway stations, India"
+8222,2016-06-22,26.1961,91.7825,downpour,5km,Assam,"Piyali Phukan Nagar, Guwahati, India"
+8163,2016-06-23,15.3739,73.8911,downpour,5km,Goa,"Vollant, Vasco, behind the KTC bus stand, Goa, India"
+8086,2016-06-24,12.8157,74.8586,downpour,exact,Karnataka,"Maya Bar, Thokkottu, India"
+7913,2016-06-26,18.241,73.4469,rain,1km,Maharashtra,"Raigad Fort, Raigad Fort Natural Reserve, Maharashtra, India"
+7920,2016-06-26,19.3805,84.5699,downpour,1km,Odisha,"Goddess Nijabankeswari Temple, Digapahandi, Ganjam district, Odisha, India"
+7932,2016-06-28,15.3455,73.8976,downpour,exact,Goa,"PHC Cansaulim, Goa, India"
+8032,2016-06-29,30.3299,79.3206,downpour,1km,Uttarakhand,"Nandprayag, Uttarakhand, India"
+8367,2016-06-30,29.8002,80.2565,monsoon,1km,Uttarakhand,"Didihat, Uttarakhand, India"
+8237,2016-07-01,27.0136,92.6351,downpour,1km,Arunachal Pradesh,"Old Inspection Bungalow, Bhalukpong town, West Kameng, Arunachal Pradesh, India"
+8472,2016-07-02,33.6296,74.5264,unknown,25km,Kashmir,"43 km-point on Mughal Road, Poonch district, Jammu and Kashmir, India"
+8482,2016-07-02,30.89221723,77.09003076,downpour,10km,Himachal Pradesh,"Highway 22, near Borag Bypass, near Solan, Himachal Pradesh, India"
+8680,2016-07-03,19.336,73.7793,monsoon,5km,Maharashtra,"Malshej ghat, Maharashtra, India"
+8654,2016-07-04,12.8041,74.8678,unknown,5km,Karnataka,"Kallarakodi, Ullal, India"
+8900,2016-07-07,25.0118,94.3136,monsoon,25km,Manipur,"Imphal-Ukhrul sector of National Highway 102, Manipur, India"
+8684,2016-07-07,25.9611,91.3681,continuous_rain,50km,Assam,"Kamrup district, Assam, India"
+8864,2016-07-07,10.0545,78.0298,mining,1km,Tamil Nadu,"Blue Metal Quarry, Kondayanpatti, Madurai District, India"
+8901,2016-07-10,25.7902,94.1318,downpour,25km,Nagaland,"National Highway 2, near Kohima, Nagaland, India"
+8916,2016-07-10,19.34,73.7746,unknown,1km,Maharashtra,"Ahmednagar-Thane Road , Malshej Ghat, Maharashtra, India"
+8930,2016-07-11,26.1699,94.4922,unknown,1km,Nagaland,"North Point Colony, Akuluto, Nagaland, India"
+8935,2016-07-12,15.6019,73.8093,monsoon,5km,Goa,"Gaunsawaddo, Mapusa, Goa, India"
+8998,2016-07-13,26.3221,80.4703,monsoon,1km,Uttar Pradesh,"Chandanpur village, Maharajpur, Kanpur, India"
+8995,2016-07-14,26.1963,91.8074,monsoon,5km,Assam,"Noonmati Nijarapar area of the city, Guwahati, Assam, India"
+8996,2016-07-14,26.1768,91.7702,monsoon,1km,Assam,"Pub Sarania hill, South Sarania, Guwahati, Assam, India"
+9002,2016-07-16,30.4554,78.0973,downpour,5km,Uttarakhand,"Mussoorie-Tehri bypass, near Landour, Uttarakhand, India"
+9006,2016-07-16,12.8962,74.8859,construction,5km,Karnataka,"Kulashekara-Konguru Mutt Road (Kongoor Mutt Road) near Mangaluru Junction-Panambur Railway line, near Mangaluru, India"
+9008,2016-07-16,30.3351,78.5113,rain,1km,Uttarakhand,"Mathyali village, Jakhnidhar, Uttarakhand, India"
+9010,2016-07-16,27.3034,93.804,downpour,5km,Arunachal Pradesh,"Hoj-Potin Highway, Arunachal Pradesh, India"
+9017,2016-07-17,30.1642,78.2936,downpour,1km,Uttarakhand,"Narendranagar bypass on the Rishikesh-Gangotri national highway,Tehri Garhwal district, Uttarakhand, India"
+9020,2016-07-17,29.9551,78.1677,downpour,exact,Uttarakhand,"Railway tunnel a few kilometres from the Haridwar railway station, between Haridwar and Dehradun, Uttarakhand, India"
+9048,2016-07-17,31.5007,78.1758,unknown,1km,Himachal Pradesh,"Karcham, Himachal Pradesh, India"
+9166,2016-07-18,30.7313,78.4358,rain,1km,Uttarakhand,"Gangotri Highway near Helgugad, Uttarkashi, Uttarakhand, India"
+9051,2016-07-19,26.09748244,91.8744337,unknown,25km,Meghalaya,"12th Mile area at Jorabat, Meghalaya, India"
+9124,2016-07-19,25.203,90.5573,continuous_rain,5km,Meghalaya,"Rongthragittim Songittal village, near Sibbari, South Garo Hills District, Meghalaya, India"
+9087,2016-07-19,28.235,94.9612,downpour,50km,Arunachal Pradesh,"5 km off Sangam point on Aalo- Pangin road, Arunachal Pradesh, India"
+9074,2016-07-20,27.1176,88.1069,downpour,1km,West Bengal,"Rimbik, Darjeeling, West Bengal state, India"
+9122,2016-07-20,26.1966,91.802,rain,5km,Assam,"Noonmati, Guwahati, Assam, India"
+9138,2016-07-21,26.9015,88.4719,rain,1km,West Bengal,"NH 10 between Coronation Bridge and Sevoke Kalibari, West Bengal, India"
+9178,2016-07-23,16.0781,78.8743,downpour,1km,Andhra Pradesh,"road leading to Patala Ganga and the ropeway in Srisailam, Andhra Pradesh, India"
+9186,2016-07-25,25.48,94.1383,continuous_rain,1km,Manipur,"Imphal-Dimapur road  in Tadubi, Senapati district, Manipur, India"
+9220,2016-07-26,27.1027,88.1218,downpour,1km,West Bengal,"Finchaytaar, Lodhoma, Darjeeling, India"
+9219,2016-07-26,26.0101,94.5282,downpour,5km,Nagaland,"Zunheboto, Nagaland, India"
+9216,2016-07-26,30.6935,77.4266,downpour,1km,Himachal Pradesh,"Jwagdhar village, Sangrah, Sirmaur district, Himachal Pradesh, India"
+9251,2016-07-28,25.8702,94.7844,downpour,1km,Nagaland,"Government Middle School (GMS) Kiphire station “B”, Kiphire, Nagaland, India"
+9232,2016-07-28,23.5397,93.3783,continuous_rain,1km,Mizoram,"Ngur, near Mizoram-Myanmar border, India"
+9252,2016-07-28,27.5748,91.8644,monsoon,5km,Arunachal Pradesh,"Dolma Lhakang complex, Lumla, Tawang,  Arunachal Pradesh, India"
+9257,2016-07-31,19.1869,73.02,downpour,1km,Maharashtra,"Parsik/ Nutan Tunnel on Central rail, near Diva, Mumbai, India"
+9258,2016-07-31,30.9753,78.4375,continuous_rain,1km,Uttarakhand,"Janki Chatti, Uttarakhand, India"
+9266,2016-07-31,25.4941,82.5725,rain,10km,Uttar Pradesh,"NH 5 near Rampur, Uttar Pradesh, India"
+9264,2016-07-31,31.6865,77.1043,rain,5km,Himachal Pradesh,"Hanogi on the Mandi-Kullu National Highway (NH-21), Himachal Pradesh, India"
+9356,2016-08-02,19.3421,73.7735,monsoon,1km,Maharashtra,"Malshej ghat, Maharashtra, India"
+9415,2016-08-03,18.3978,73.5086,downpour,1km,Maharashtra,"Lavasa near Ekaant Hotel Resort in Davse, Pune District, India"
+9449,2016-08-04,30.7386,79.4954,continuous_rain,5km,Uttarakhand,Valley of Flowers near Badrinath
+9447,2016-08-05,33.0068,74.9455,downpour,5km,Kashmir,"Banganga-Ardhkuwari road, enroute to he cave shrine of Mata Vaishnodevi in Jammu and Kashmir’s Reasi district"
+9464,2016-08-05,27.5754,91.9754,downpour,5km,Arunachal Pradesh,Babrang village under Jang circle in Tawang district
+9448,2016-08-05,29.5866,80.2154,downpour,10km,Uttarakhand,Bangapani area of Pithoragarh
+9474,2016-08-07,32.6987,75.0582,continuous_rain,10km,Kashmir,"Parmandal, Jammu"
+9478,2016-08-07,32.4298,75.5807,continuous_rain,5km,Kashmir,Kathua
+9476,2016-08-07,33.1457,75.7964,continuous_rain,25km,Kashmir,Doda-Kishtwar road
+9477,2016-08-07,33.0716,74.839,continuous_rain,10km,Kashmir,Reasi
+9465,2016-08-07,32.9834,75.6953,continuous_rain,25km,Kashmir,"Sheroora-Subardhar village,15 Km from Bhadarwah town"
+9475,2016-08-07,32.9041,75.0911,continuous_rain,25km,Kashmir,Kheri near Udhampur
+9468,2016-08-07,33.2483,75.2131,downpour,5km,Kashmir,"Seri, Ramban"
+9490,2016-08-29,31.5728,77.8561,continuous_rain,5km,Himachal Pradesh,NH-05 near Chaura village
+9507,2016-10-03,30.8974,77.0588,construction,10km,Himachal Pradesh,"Chakki-Ka-Mor, about 10 km from Parwanoo"
+9630,2016-10-04,29.8521,80.553,unknown,1km,Uttarakhand,Mahakali river at Bangabagad
+9584,2016-10-11,14.8009,74.118,downpour,10km,Karnataka,NH 66 at Mudaga
+9603,2016-10-12,26.8861,88.1704,downpour,10km,West Bengal,Mirik
+9587,2016-10-12,26.8692,88.4695,downpour,25km,West Bengal,between Siliguri and Sevak
+9604,2016-10-12,27.2676,88.2891,continuous_rain,10km,Sikkim,Legship
+9618,2016-10-15,26.9343,88.4486,downpour,1km,West Bengal,Kalijhora
+9617,2016-10-15,26.888,88.2796,unknown,5km,West Bengal,Zero near Kurseong
+9620,2016-10-15,27.172,88.5292,downpour,5km,Sikkim,Rangpo
+9619,2016-10-15,27.1695,88.3664,rain,5km,Sikkim,Namchi
+9638,2016-10-17,17.4655,78.4606,construction,1km,Telangana,Ferozeguda

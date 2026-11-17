@@ -311,24 +311,15 @@ def predict_landslide_risk(input_data: Dict[str, Any]) -> Dict[str, Any]:
     pore_slope = round(moisture * np.tan(slope_rad), 4)
     veg_slope = round(ndvi * np.cos(slope_rad), 4)
 
-    feature_order = [
-        "rainfall_24h",
-        "rainfall_72h",
-        "slope_deg",
-        "soil_moisture",
-        "ndvi",
-        "historical_incidents",
-        "elevation_amsl",
-        "antecedent_rain_index",
-        "pore_slope_interaction",
-        "vegetation_slope_defense"
-    ]
-
-    values_list = [
-        rain_24, rain_72, slope, moisture, ndvi, history, elev,
-        api_rain, pore_slope, veg_slope
-    ]
-    X_df = pd.DataFrame([values_list], columns=feature_order)
+    all_values = {
+        "rainfall_24h": rain_24, "rainfall_72h": rain_72, "slope_deg": slope,
+        "soil_moisture": moisture, "ndvi": ndvi, "historical_incidents": history,
+        "elevation_amsl": elev, "antecedent_rain_index": api_rain,
+        "pore_slope_interaction": pore_slope, "vegetation_slope_defense": veg_slope,
+    }
+    # Use exactly the columns (and order) the model was trained on
+    feature_order = (metadata or {}).get("features") or list(all_values)
+    X_df = pd.DataFrame([[all_values[f] for f in feature_order]], columns=feature_order)
 
     # 1. Random Forest Predicted Probability (0.0 to 100.0%)
     prob_class1 = float(model.predict_proba(X_df)[0, 1])
