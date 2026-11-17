@@ -224,5 +224,6 @@ def orchestrate_location_intelligence(
         }
     }
 
-    _ORCHESTRATOR_CACHE[cache_key] = {"data": bundle, "cached_at": now}
+    if not weather_data.get("client_supplied"):  # browser-supplied weather is for this request only
+        _ORCHESTRATOR_CACHE[cache_key] = {"data": bundle, "cached_at": now}
     return bundle
