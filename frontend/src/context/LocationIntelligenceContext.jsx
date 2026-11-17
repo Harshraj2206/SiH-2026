@@ -12,7 +12,7 @@ import { getLiveWeather } from '../services/weatherService';
 import { reverseGeocode, formatCoordinateFallback } from '../services/reverseGeocodeService';
 import { normalizeWeather } from '../utils/weatherNormalizer';
 import { buildEnvironmentState } from '../utils/astronomicalEngine';
-import { apiClient, fetchOpenMeteoRaw } from '../services/api';
+import { apiClient, fetchBrowserInputs } from '../services/api';
 
 const LocationIntelligenceContext = createContext(null);
 
@@ -257,9 +257,9 @@ export const LocationIntelligenceProvider = ({ children }) => {
   const updateDeepIntelligence = useCallback(async (lat, lon, sourceLabel) => {
     setIntelLoading(true);
     try {
-      const weather = await fetchOpenMeteoRaw(lat, lon);
+      const inputs = await fetchBrowserInputs(lat, lon);
       const res = await apiClient.post('/location-intelligence', {
-        lat, lng: lon, source: sourceLabel || 'Map Inspection / GPS', weather
+        lat, lng: lon, source: sourceLabel || 'Map Inspection / GPS', ...inputs
       }, { timeout: 15000 });
       if (res.data) {
         setIntelligence(res.data);

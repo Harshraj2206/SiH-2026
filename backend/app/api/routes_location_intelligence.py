@@ -10,6 +10,7 @@ from fastapi import APIRouter, Query, HTTPException
 from backend.app.services.data_source_orchestrator import orchestrate_location_intelligence
 from backend.app.services.global_routing_service import get_coordinates_from_query
 from backend.app.services.weather_resolver import use_client_weather
+from backend.app.services.elevation_service import use_client_elevation
 
 router = APIRouter(prefix="/api/location-intelligence", tags=["Location Intelligence"])
 
@@ -36,11 +37,13 @@ class LocationIntelligenceRequest(BaseModel):
     lng: float = Field(..., ge=-180.0, le=180.0)
     source: str = Field("Map Inspection / GPS", max_length=200)
     weather: Optional[Dict[str, Any]] = None  # raw Open-Meteo response fetched by the browser
+    elevation: Optional[list] = None  # Open-Meteo elevations [point, +0.001 lat, +0.001 lng] from the browser
 
 
 @router.post("")
 def post_location_intelligence(payload: LocationIntelligenceRequest):
     use_client_weather(payload.lat, payload.lng, payload.weather)
+    use_client_elevation(payload.lat, payload.lng, payload.elevation)
     try:
         return orchestrate_location_intelligence(payload.lat, payload.lng, source=payload.source)
     except Exception as e:
