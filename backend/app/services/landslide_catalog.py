@@ -3,6 +3,8 @@ LANDSLIDEGUARD SIH26001 - Geological Survey of India (GSI) & NASA GLC Landslide 
 Authoritative historical landslide database for the North Eastern Region & Himalayan Ghats.
 """
 
+import csv
+import os
 from typing import List, Dict, Any, Optional
 
 # Verified Historical Landslide Records from GSI National Landslide Susceptibility Mapping & NASA GLC
@@ -115,14 +117,25 @@ def _haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     return R * c
 
 
+_GLC_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "data", "glc_india_landslides.csv")
+_GLC_POINTS: Optional[List[tuple]] = None
+
+
+def _glc_points() -> List[tuple]:
+    """NASA Global Landslide Catalog events in India (same file the model was trained with)."""
+    global _GLC_POINTS
+    if _GLC_POINTS is None:
+        try:
+            with open(_GLC_PATH, newline="", encoding="utf-8") as f:
+                _GLC_POINTS = [(float(r["latitude"]), float(r["longitude"])) for r in csv.DictReader(f)]
+        except OSError:
+            _GLC_POINTS = []
+    return _GLC_POINTS
+
+
 def get_historical_density_score(latitude: float, longitude: float, radius_km: float = 35.0) -> int:
-    """Calculate actual catalogued landslide count within spatial radius (returns true count, never coercing 0 to 1)."""
-    count = 0
-    for h in GSI_HISTORICAL_LANDSLIDES:
-        dist = _haversine_km(latitude, longitude, h["latitude"], h["longitude"])
-        if dist <= radius_km:
-            count += 1
-    return count
+    """Count of NASA-catalogued landslides within radius_km (true count, 0 allowed)."""
+    return sum(1 for lat, lon in _glc_points() if _haversine_km(latitude, longitude, lat, lon) <= radius_km)
 
 
 def get_nearest_catalogued_landslide(latitude: float, longitude: float) -> Optional[Dict[str, Any]]:

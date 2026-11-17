@@ -50,12 +50,14 @@ async def predict_risk(input_data: PredictionInput):
 
 @router.get("/metrics")
 async def get_model_evaluation_metrics() -> Dict[str, Any]:
-    """
-    Returns authentic training metrics and stratified cross-validation results
-    evaluated on the GSI/NASA ground truth dataset for SIH technical auditing.
-    """
-    _, metadata = get_model()
-    return metadata or {}
+    """Training metadata and spatial cross-validation metrics of the deployed model."""
+    import hashlib
+    from backend.app.ml.predictor import MODEL_PATH
+    model, metadata = get_model()
+    with open(MODEL_PATH, "rb") as f:
+        sha256 = hashlib.sha256(f.read()).hexdigest()
+    return {**(metadata or {}), "model_sha256": sha256,
+            "n_estimators": model.n_estimators, "min_samples_leaf": model.min_samples_leaf}
 
 
 @router.get("/historical-replay")
@@ -153,18 +155,11 @@ async def get_historical_replay_scenarios() -> List[Dict[str, Any]]:
 
 @router.get("/spatial-metrics")
 async def get_spatial_validation_metrics() -> Dict[str, Any]:
-    """
-    Returns authentic spatial cross-validation metrics (GroupKFold by State and LeaveOneGroupOut by Region)
-    demonstrating model generalization across geographically separated Indian terrain corridors.
-    """
-    results_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "ml", "spatial_validation_results.json")
-    if os.path.exists(results_path):
-        import json
-        with open(results_path, "r") as f:
-            return json.load(f)
-
-    from backend.app.ml.spatial_cross_validation import run_spatial_cross_validation
-    return run_spatial_cross_validation()
+    """Spatial cross-validation of the deployed model (1-degree grid cells held out)."""
+    _, metadata = get_model()
+    metadata = metadata or {}
+    return {**metadata.get("metrics", {}), "dataset_size": metadata.get("dataset_size"),
+            "positives": metadata.get("positives"), "negatives": metadata.get("negatives")}
 
 
 @router.get("/provenance")

@@ -29,7 +29,6 @@ export const MlModelPage = () => {
   const [replayScenarios, setReplayScenarios] = useState([]);
   const [selectedReplayId, setSelectedReplayId] = useState('');
   const [modelMetrics, setModelMetrics] = useState(null);
-  const [spatialMetrics, setSpatialMetrics] = useState(null);
   const [provenanceData, setProvenanceData] = useState(null);
   const [showJudgePanel, setShowJudgePanel] = useState(false);
   const [dynamicPrediction, setDynamicPrediction] = useState(null);
@@ -39,14 +38,12 @@ export const MlModelPage = () => {
   useEffect(() => {
     const fetchAuditingData = async () => {
       try {
-        const [metricsData, replayData, spatialData, provData] = await Promise.all([
+        const [metricsData, replayData, provData] = await Promise.all([
           api.getModelMetrics().catch(() => null),
           api.getHistoricalReplay().catch(() => []),
-          api.getSpatialMetrics().catch(() => null),
           api.getFeatureProvenance().catch(() => null)
         ]);
         if (metricsData) setModelMetrics(metricsData);
-        if (spatialData) setSpatialMetrics(spatialData);
         if (provData) setProvenanceData(provData);
         if (replayData && replayData.length > 0) {
           setReplayScenarios(replayData);
@@ -288,7 +285,7 @@ export const MlModelPage = () => {
       <div className="bg-[#0a0a0a] border border-[#1a1a1a] p-6 rounded-2xl space-y-6 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-[#1a1a1a]">
           <div>
-            <span className="text-xs text-neutral-400 block uppercase font-medium" title="Random Forest ensemble output. Proportion of 150 decision trees indicating slope failure conditions. Uncalibrated probability.">
+            <span className="text-xs text-neutral-400 block uppercase font-medium" title="Random Forest ensemble output: share of decision trees indicating slope failure. A relative risk score, not a calibrated probability.">
               Random Forest Risk Score
             </span>
             {isDataInsufficient ? (
@@ -320,23 +317,23 @@ export const MlModelPage = () => {
             )}
             {!isDataInsufficient && (
               <div className="text-[11px] text-neutral-500 mt-1">
-                Ensemble output (150 trees). Not a calibrated probability of occurrence.
+                Ensemble output ({modelMetrics?.n_estimators ?? '—'} trees). Relative risk score, not a calibrated probability of occurrence.
               </div>
             )}
           </div>
 
           {/* Model Metadata with Genuine Metrics */}
           <div className="text-left sm:text-right text-xs space-y-1 text-neutral-400">
-            <div>Model: <strong className="text-neutral-200">Random Forest Classifier (150 Trees)</strong></div>
+            <div>Model: <strong className="text-neutral-200">Random Forest Classifier ({modelMetrics?.n_estimators ?? '—'} Trees)</strong></div>
             <div>
-              Holdout F1: <strong className="text-emerald-400 font-mono">{modelMetrics?.metrics?.f1_score ?? 86.88}%</strong> | 
-              Holdout Recall: <strong className="text-emerald-400 font-mono"> {modelMetrics?.metrics?.recall ?? 88.69}%</strong>
+              Spatial CV ROC-AUC: <strong className="text-emerald-400 font-mono">{modelMetrics?.metrics?.roc_auc ?? '—'}</strong> | 
+              Recall: <strong className="text-emerald-400 font-mono"> {modelMetrics?.metrics?.recall ?? '—'}%</strong>
             </div>
             <div>
               Tree Vote Consensus: <strong className="text-emerald-400 font-mono">{confidenceScore}%</strong> (Ensemble Agreement)
             </div>
             <div className="text-[11px] text-neutral-500">
-              Stratified 5-Fold F1: {modelMetrics?.metrics?.cv_f1_mean ?? 89.21}% | Spatial 5-Fold F1: {spatialMetrics?.spatial_group_kfold_by_state?.mean_f1 ?? 88.92}%
+              Trained on {modelMetrics?.dataset_size ?? '—'} real samples (NASA Global Landslide Catalog + ERA5 + Copernicus DEM)
             </div>
           </div>
         </div>
@@ -484,11 +481,11 @@ export const MlModelPage = () => {
                   </div>
                   <div className="p-2.5 rounded-xl bg-[#181818] border border-neutral-800">
                     <span className="text-neutral-500 block text-[10px]">Estimators</span>
-                    <strong className="text-emerald-400">150 Trees</strong>
+                    <strong className="text-emerald-400">{modelMetrics?.n_estimators ?? '—'} Trees</strong>
                   </div>
                   <div className="p-2.5 rounded-xl bg-[#181818] border border-neutral-800">
-                    <span className="text-neutral-500 block text-[10px]">Max Depth / Leaf</span>
-                    <strong className="text-white">Depth 10 | Leaf 2</strong>
+                    <span className="text-neutral-500 block text-[10px]">Min Leaf Size</span>
+                    <strong className="text-white">{modelMetrics?.min_samples_leaf ?? '—'}</strong>
                   </div>
                   <div className="p-2.5 rounded-xl bg-[#181818] border border-neutral-800">
                     <span className="text-neutral-500 block text-[10px]">Class Weight</span>
@@ -496,87 +493,45 @@ export const MlModelPage = () => {
                   </div>
                 </div>
                 <div className="p-2.5 rounded-xl bg-[#161616] border border-neutral-800/80 font-mono text-[10px] break-all">
-                  <span className="text-neutral-400">Immutable SHA-256 Checksum: </span>
-                  <strong className="text-emerald-300">6a579e8b53c12a37ca9f9b21429fa075bfba911ec6e5f25c1265ce96aefd0472</strong>
+                  <span className="text-neutral-400">Deployed model SHA-256: </span>
+                  <strong className="text-emerald-300">{modelMetrics?.model_sha256 ?? '—'}</strong>
                 </div>
               </div>
 
-              {/* Section 2: Dual Cross-Validation Framework */}
+              {/* Section 2: Spatial Cross-Validation on Real Data */}
               <div className="bg-[#121212] border border-neutral-800 p-4 rounded-2xl space-y-3">
                 <div className="flex items-center gap-2 text-white font-bold text-xs uppercase tracking-wider">
                   <BarChart2 className="w-4 h-4 text-blue-400" />
-                  <span>2. Dual Validation Framework: Random vs Spatial Group Cross-Validation</span>
+                  <span>2. Validation: Spatial Cross-Validation on Real Events</span>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {/* Standard Stratified CV */}
-                  <div className="p-3.5 rounded-xl bg-[#181818] border border-neutral-800 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-white text-[11px]">Stratified 5-Fold CV (Random Split)</span>
-                      <span className="text-neutral-400 text-[10px]">Baseline</span>
-                    </div>
-                    <div className="grid grid-cols-3 gap-2 text-center font-mono">
-                      <div className="p-1.5 rounded bg-black/40">
-                        <span className="text-neutral-500 block text-[9px]">Mean F1</span>
-                        <strong className="text-emerald-400">89.21%</strong>
-                      </div>
-                      <div className="p-1.5 rounded bg-black/40">
-                        <span className="text-neutral-500 block text-[9px]">Recall</span>
-                        <strong className="text-white">88.69%</strong>
-                      </div>
-                      <div className="p-1.5 rounded bg-black/40">
-                        <span className="text-neutral-500 block text-[9px]">ROC-AUC</span>
-                        <strong className="text-white">0.8672</strong>
-                      </div>
-                    </div>
-                    <p className="text-[10px] text-neutral-400">Standard 80/20 train/test split. High accuracy, but prone to geographic proximity correlation.</p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center font-mono">
+                  <div className="p-2 rounded bg-[#181818] border border-neutral-800">
+                    <span className="text-neutral-500 block text-[9px]">ROC-AUC</span>
+                    <strong className="text-white">{modelMetrics?.metrics?.roc_auc ?? '—'}</strong>
                   </div>
-
-                  {/* Spatial Group CV */}
-                  <div className="p-3.5 rounded-xl bg-blue-950/20 border border-blue-800/40 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-blue-300 text-[11px]">Spatial 5-Fold Group CV (by 11 States)</span>
-                      <span className="text-blue-400 font-mono text-[10px]">State-Disjoint</span>
-                    </div>
-                    <div className="grid grid-cols-3 gap-2 text-center font-mono">
-                      <div className="p-1.5 rounded bg-black/40">
-                        <span className="text-neutral-400 block text-[9px]">Spatial F1</span>
-                        <strong className="text-blue-300">{spatialMetrics?.spatial_group_kfold_by_state?.mean_f1 ?? 88.92}%</strong>
-                      </div>
-                      <div className="p-1.5 rounded bg-black/40">
-                        <span className="text-neutral-400 block text-[9px]">Spatial Rec</span>
-                        <strong className="text-white">{spatialMetrics?.spatial_group_kfold_by_state?.mean_recall ?? 92.54}%</strong>
-                      </div>
-                      <div className="p-1.5 rounded bg-black/40">
-                        <span className="text-neutral-400 block text-[9px]">Spatial AUC</span>
-                        <strong className="text-white">{spatialMetrics?.spatial_group_kfold_by_state?.mean_roc_auc ?? 0.8860}</strong>
-                      </div>
-                    </div>
-                    <p className="text-[10px] text-blue-200/70">Tested strictly on unseen Indian states. Confirms true territorial generalization across geomorphic domains.</p>
+                  <div className="p-2 rounded bg-[#181818] border border-neutral-800">
+                    <span className="text-neutral-500 block text-[9px]">Recall</span>
+                    <strong className="text-white">{modelMetrics?.metrics?.recall ?? '—'}%</strong>
+                  </div>
+                  <div className="p-2 rounded bg-[#181818] border border-neutral-800">
+                    <span className="text-neutral-500 block text-[9px]">Precision</span>
+                    <strong className="text-white">{modelMetrics?.metrics?.precision ?? '—'}%</strong>
+                  </div>
+                  <div className="p-2 rounded bg-[#181818] border border-neutral-800">
+                    <span className="text-neutral-500 block text-[9px]">F1</span>
+                    <strong className="text-white">{modelMetrics?.metrics?.f1_score ?? '—'}%</strong>
                   </div>
                 </div>
-
-                {/* Regional Leave-One-Out Breakdown */}
-                <div className="pt-2">
-                  <span className="text-[11px] font-bold text-neutral-300 block mb-1.5">Leave-One-Region-Out Generalization (Geographic Corridors):</span>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[10px] font-mono">
-                    <div className="p-2 rounded-lg bg-[#181818] border border-neutral-800">
-                      <span className="text-neutral-400 block truncate">Western Himalayas</span>
-                      <strong className="text-emerald-400">91.22% F1</strong> (94.7% Rec)
-                    </div>
-                    <div className="p-2 rounded-lg bg-[#181818] border border-neutral-800">
-                      <span className="text-neutral-400 block truncate">North Eastern Region</span>
-                      <strong className="text-emerald-400">90.67% F1</strong> (94.5% Rec)
-                    </div>
-                    <div className="p-2 rounded-lg bg-[#181818] border border-neutral-800">
-                      <span className="text-neutral-400 block truncate">Western Ghats</span>
-                      <strong className="text-emerald-400">87.31% F1</strong> (94.4% Rec)
-                    </div>
-                    <div className="p-2 rounded-lg bg-[#181818] border border-neutral-800">
-                      <span className="text-neutral-400 block truncate">Stable Valley Floors</span>
-                      <strong className="text-emerald-400">99.7% Spec</strong> (334/335 TN)
-                    </div>
-                  </div>
-                </div>
+                <p className="text-[11px] text-neutral-400">
+                  {modelMetrics?.positives ?? '—'} rain-triggered landslides from the NASA Global Landslide Catalog (India) and{' '}
+                  {modelMetrics?.negatives ?? '—'} non-landslide samples: the same place in the same season of another year, and
+                  points 15–60 km away on the same day. Rainfall and soil moisture come from ERA5 reanalysis, slope and elevation
+                  from the Copernicus DEM. Each fold holds out whole 1° grid cells, so the model is always tested on places it has not seen.
+                </p>
+                <p className="text-[10px] text-neutral-500">
+                  The score never decreases as rainfall, soil moisture or slope increase. It is a relative risk score from a 1:2 training
+                  set, not a calibrated probability. NDVI is shown for context but is not a model input.
+                </p>
               </div>
 
               {/* Section 3: Explainable AI Verification (Saabas) */}
@@ -591,7 +546,7 @@ export const MlModelPage = () => {
                 <div className="p-3 rounded-xl bg-[#181818] border border-neutral-800 font-mono text-[11px] space-y-1">
                   <div className="text-emerald-400 font-bold">Mathematical Identity Axiom Verified:</div>
                   <div className="text-neutral-300">sum(contributions[j]) + bias == predicted_probability</div>
-                  <div className="text-[10px] text-neutral-500">Maximum local error across all 1,400 samples: &lt; 1e-12.</div>
+                  <div className="text-[10px] text-neutral-500">Checked by an automated test against the deployed model.</div>
                 </div>
               </div>
 
@@ -668,16 +623,16 @@ export const MlModelPage = () => {
                       </tr>
                       <tr>
                         <td className="py-2 text-white font-bold">ndvi</td>
-                        <td className="py-2">Regional Climatological Baseline (Copernicus / MODIS)</td>
-                        <td className="py-2">Sector Baseline</td>
-                        <td className="py-2">Seasonal Climatology</td>
-                        <td className="py-2 text-amber-400">Regional Baseline</td>
+                        <td className="py-2">NASA MODIS MOD13Q1 (ORNL DAAC)</td>
+                        <td className="py-2">250 meters</td>
+                        <td className="py-2">16-day composite</td>
+                        <td className="py-2 text-amber-400">Context only (not a model input)</td>
                       </tr>
                       <tr>
                         <td className="py-2 text-white font-bold">historical_incidents</td>
-                        <td className="py-2">GSI NLSM & NASA Global Landslide Catalog</td>
-                        <td className="py-2">District Archive</td>
-                        <td className="py-2">Historic Archive</td>
+                        <td className="py-2">NASA Global Landslide Catalog (India)</td>
+                        <td className="py-2">Events within 35 km</td>
+                        <td className="py-2">Catalogue record</td>
                         <td className="py-2 text-neutral-400">Archival Catalog</td>
                       </tr>
                     </tbody>
