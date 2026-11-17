@@ -186,7 +186,7 @@ export const MlModelPage = () => {
           {/* SIH Judge Technical Panel Button */}
           <button
             onClick={() => setShowJudgePanel(true)}
-            className="px-3 py-1.5 rounded-tile transition-all flex items-center gap-1.5 bg-surface-2 text-label-2 border border-line hover:bg-surface-2 text-xs font-semibold active:scale-95"
+            className="px-3 py-1.5 rounded-full transition-all flex items-center gap-1.5 bg-surface-2 text-label-2 hover:bg-surface-2 text-xs font-semibold active:scale-95"
             title="Open SIH Judge Technical Audit & Provenance Panel"
           >
             <ShieldCheck className="w-3.5 h-3.5 text-label-2" />
@@ -197,7 +197,7 @@ export const MlModelPage = () => {
           <div className="flex bg-surface border border-line rounded-tile p-0.5 text-xs font-semibold">
             <button
               onClick={() => setViewMode('zones')}
-              className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-full transition-colors flex items-center gap-1.5 ${
                 viewMode === 'zones' 
                   ? 'bg-risk-low/[0.12] text-risk-low border border-risk-low/30 font-semibold' 
                   : 'text-label-2 hover:text-label'
@@ -208,9 +208,9 @@ export const MlModelPage = () => {
             </button>
             <button
               onClick={() => setViewMode('replay')}
-              className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-full transition-colors flex items-center gap-1.5 ${
                 viewMode === 'replay' 
-                  ? 'bg-surface-2 text-label-2 border border-line font-semibold' 
+                  ? 'bg-surface-2 text-label-2 font-semibold' 
                   : 'text-label-2 hover:text-label'
               }`}
             >
@@ -228,7 +228,7 @@ export const MlModelPage = () => {
                   const found = zones.find(z => z.zone_id === e.target.value);
                   if (found) setSelectedZone(found);
                 }}
-                className="bg-surface border border-line text-xs text-label rounded-tile px-3 py-2 focus:outline-none focus:border-risk-low/30 font-medium"
+                className="bg-surface border border-line text-xs text-label rounded-field px-3 py-2 focus:outline-none focus:border-risk-low/30 font-medium"
               >
                 {zones.map(z => (
                   <option key={z.zone_id} value={z.zone_id}>
@@ -244,7 +244,7 @@ export const MlModelPage = () => {
               <select
                 value={selectedReplayId}
                 onChange={(e) => setSelectedReplayId(e.target.value)}
-                className="bg-surface border border-line text-xs text-label-2 rounded-tile px-3 py-2 focus:outline-none focus:border-line font-medium"
+                className="bg-surface border border-line text-xs text-label-2 rounded-field px-3 py-2 focus:outline-none focus:border-line font-medium"
               >
                 {replayScenarios.map(r => (
                   <option key={r.scenario_id} value={r.scenario_id}>
@@ -266,7 +266,7 @@ export const MlModelPage = () => {
               <span className="font-semibold text-label text-xs">
                 Ground Truth Validation Result
               </span>
-              <span className="px-2 py-0.5 rounded tabular-nums font-semibold text-xs bg-risk-low/[0.12] text-risk-low border border-risk-low/30">
+              <span className="px-2 py-0.5 rounded-full tabular-nums font-semibold text-xs bg-risk-low/[0.12] text-risk-low border border-risk-low/30">
                 {selectedReplay.ground_truth.outcome_classification}
               </span>
             </div>
@@ -376,7 +376,7 @@ export const MlModelPage = () => {
                     </div>
                     <div className="flex items-center gap-1.5">
                       {delta && (
-                        <span className={`text-xs tabular-nums px-1.5 py-0.2 rounded ${
+                        <span className={`text-xs tabular-nums px-1.5 py-0.2 rounded-full ${
                           f.net_delta > 0 ? 'text-risk-critical bg-risk-critical/[0.12]' : 'text-risk-low bg-risk-low/[0.12]'
                         }`}>
                           {delta}
@@ -410,15 +410,15 @@ export const MlModelPage = () => {
           </div>
           <div>
             Data Health: {isDataInsufficient ? (
-              <span className="text-risk-critical font-semibold px-2 py-0.5 rounded bg-risk-critical/[0.12] border border-risk-critical/30">
+              <span className="text-risk-critical font-semibold px-2 py-0.5 rounded-full bg-risk-critical/[0.12] border border-risk-critical/30">
                 TELEMETRY UNAVAILABLE (PAUSED)
               </span>
             ) : currentZone?.is_weather_fallback || dynamicPrediction?.precision_context?.data_quality?.freshness_status === 'FALLBACK' ? (
-              <span className="text-risk-moderate font-semibold px-2 py-0.5 rounded bg-risk-moderate/[0.12] border border-risk-moderate/30">
+              <span className="text-risk-moderate font-semibold px-2 py-0.5 rounded-full bg-risk-moderate/[0.12] border border-risk-moderate/30">
                 FALLBACK ACTIVE (CAUTION)
               </span>
             ) : (
-              <span className="text-risk-low font-semibold px-2 py-0.5 rounded bg-risk-low/[0.12] border border-risk-low/30">
+              <span className="text-risk-low font-semibold px-2 py-0.5 rounded-full bg-risk-low/[0.12] border border-risk-low/30">
                 OPEN-METEO NWP GRID SYNCED
               </span>
             )}
@@ -429,7 +429,7 @@ export const MlModelPage = () => {
         <div className="pt-2">
           <button
             onClick={() => navigate('/safe-route')}
-            className="w-full py-3.5 bg-accent hover:opacity-90 text-white rounded-tile text-xs font-semibold flex items-center justify-center gap-2 transition-all active:scale-[0.99]"
+            className="w-full py-3.5 bg-accent hover:opacity-90 text-white rounded-full text-xs font-semibold flex items-center justify-center gap-2 transition-all active:scale-[0.99]"
           >
             <Navigation className="w-4 h-4" />
             <span>Plan Safe Evacuation Route</span>
@@ -459,7 +459,7 @@ export const MlModelPage = () => {
               </div>
               <button
                 onClick={() => setShowJudgePanel(false)}
-                className="p-2 rounded-tile text-label-2 hover:text-label hover:bg-surface-2 transition-colors"
+                className="p-2 rounded-full text-label-2 hover:text-label hover:bg-surface-2 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -505,19 +505,19 @@ export const MlModelPage = () => {
                   <span>2. Validation: Spatial Cross-Validation on Real Events</span>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center tabular-nums">
-                  <div className="p-2 rounded bg-surface-2 border border-line">
+                  <div className="p-2 rounded-tile bg-surface-2 border border-line">
                     <span className="text-label-3 block text-xs">ROC-AUC</span>
                     <strong className="text-label">{modelMetrics?.metrics?.roc_auc ?? '—'}</strong>
                   </div>
-                  <div className="p-2 rounded bg-surface-2 border border-line">
+                  <div className="p-2 rounded-tile bg-surface-2 border border-line">
                     <span className="text-label-3 block text-xs">Recall</span>
                     <strong className="text-label">{modelMetrics?.metrics?.recall ?? '—'}%</strong>
                   </div>
-                  <div className="p-2 rounded bg-surface-2 border border-line">
+                  <div className="p-2 rounded-tile bg-surface-2 border border-line">
                     <span className="text-label-3 block text-xs">Precision</span>
                     <strong className="text-label">{modelMetrics?.metrics?.precision ?? '—'}%</strong>
                   </div>
-                  <div className="p-2 rounded bg-surface-2 border border-line">
+                  <div className="p-2 rounded-tile bg-surface-2 border border-line">
                     <span className="text-label-3 block text-xs">F1</span>
                     <strong className="text-label">{modelMetrics?.metrics?.f1_score ?? '—'}%</strong>
                   </div>
@@ -649,7 +649,7 @@ export const MlModelPage = () => {
               </span>
               <button
                 onClick={() => setShowJudgePanel(false)}
-                className="px-4 py-2 bg-surface-2 hover:bg-surface-2 text-label font-semibold rounded-tile transition-colors"
+                className="px-4 py-2 bg-surface-2 hover:bg-surface-2 text-label font-semibold rounded-full transition-colors"
               >
                 Close Audit Panel
               </button>

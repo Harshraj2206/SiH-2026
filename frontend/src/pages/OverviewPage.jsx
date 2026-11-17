@@ -271,7 +271,7 @@ export const OverviewPage = () => {
                         setManualLocation(zone.center.lat, zone.center.lng, zone.name);
                       }
                     }}
-                    className={`px-2 py-2.5 rounded-[10px] flex items-center justify-between gap-3 text-left transition-colors ${active ? 'bg-surface-2' : 'hover:bg-surface-2/60'}`}
+                    className={`px-2 py-2.5 rounded-tile flex items-center justify-between gap-3 text-left transition-colors ${active ? 'bg-surface-2' : 'hover:bg-surface-2/60'}`}
                   >
                     <div className="min-w-0">
                       <div className="text-[13px] font-medium text-label truncate">{zone.name}</div>

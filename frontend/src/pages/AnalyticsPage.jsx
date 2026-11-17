@@ -66,7 +66,7 @@ export const AnalyticsPage = () => {
         <p className="text-sm text-label-2">{error}</p>
         <button
           onClick={loadAnalytics}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-accent hover:bg-accent text-label text-xs font-semibold rounded-tile transition"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-accent hover:bg-accent text-label text-xs font-semibold rounded-full transition"
         >
           <Activity className="w-4 h-4" />
           Retry Aggregation
@@ -84,11 +84,11 @@ export const AnalyticsPage = () => {
       <div className="bg-surface border border-line p-5 rounded-card flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-surface-2 border border-line flex items-center justify-center text-label-2">
+            <div className="w-8 h-8 rounded-tile bg-surface-2 border border-line flex items-center justify-center text-label-2">
               <BarChart3 className="w-5 h-5" />
             </div>
             <h1 className="text-xl font-semibold text-label">Disaster Telemetry & Model Analytics</h1>
-            <span className="text-xs px-2 py-0.5 rounded tabular-nums font-semibold bg-risk-low/[0.12] text-risk-low border border-risk-low/30">
+            <span className="text-xs px-2 py-0.5 rounded-full tabular-nums font-semibold bg-risk-low/[0.12] text-risk-low border border-risk-low/30">
               Authoritative WMO & Copernicus Telemetry
             </span>
           </div>

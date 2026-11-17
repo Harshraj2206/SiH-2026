@@ -94,7 +94,7 @@ export const ProfilePage = () => {
             {profileMsg.type === 'success' ? <CheckCircle2 className="w-4 h-4 text-risk-low" /> : <AlertCircle className="w-4 h-4 text-risk-critical" />}
             <span>{profileMsg.text}</span>
           </div>
-          <button onClick={() => setProfileMsg({ type: '', text: '' })} className="p-1 hover:bg-surface-2 rounded">
+          <button onClick={() => setProfileMsg({ type: '', text: '' })} className="p-1 hover:bg-surface-2 rounded-full">
             <X className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -137,7 +137,7 @@ export const ProfilePage = () => {
                 setEditPhone(currentUser?.phone || '');
                 setIsEditing(true);
               }}
-              className="px-4 py-2 bg-surface hover:bg-surface-2 text-label hover:text-label rounded-tile text-xs font-semibold border border-line flex items-center gap-1.5 transition-colors"
+              className="px-4 py-2 bg-surface hover:bg-surface-2 text-label hover:text-label rounded-full text-xs font-semibold flex items-center gap-1.5 transition-colors"
             >
               <Edit2 className="w-3.5 h-3.5 text-risk-low" />
               <span>Edit Profile</span>
@@ -145,7 +145,7 @@ export const ProfilePage = () => {
           ) : (
             <button
               onClick={() => setIsEditing(false)}
-              className="px-4 py-2 bg-surface hover:bg-surface-2 text-label-2 rounded-tile text-xs font-semibold transition-colors"
+              className="px-4 py-2 bg-surface hover:bg-surface-2 text-label-2 rounded-full text-xs font-semibold transition-colors"
             >
               Cancel
             </button>
@@ -153,7 +153,7 @@ export const ProfilePage = () => {
 
           <button
             onClick={logout}
-            className="px-4 py-2 bg-risk-critical/[0.12] hover:bg-risk-critical/[0.12] text-risk-critical hover:text-label border border-risk-critical/30 rounded-tile text-xs font-semibold flex items-center gap-1.5 transition-colors"
+            className="px-4 py-2 bg-risk-critical/[0.12] hover:bg-risk-critical/[0.12] text-risk-critical hover:text-label border border-risk-critical/30 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-colors"
           >
             <LogOut className="w-3.5 h-3.5 text-risk-critical" />
             <span>Sign Out</span>
@@ -177,7 +177,7 @@ export const ProfilePage = () => {
                 value={editFullName}
                 onChange={(e) => setEditFullName(e.target.value)}
                 required
-                className="w-full px-3.5 py-2.5 bg-surface border border-line rounded-tile text-xs text-label focus:outline-none focus:border-risk-low/30"
+                className="w-full px-3.5 py-2.5 bg-surface border border-line rounded-field text-xs text-label focus:outline-none focus:border-risk-low/30"
               />
             </div>
             <div className="space-y-1.5">
@@ -188,7 +188,7 @@ export const ProfilePage = () => {
                 value={editPhone}
                 onChange={(e) => setEditPhone(e.target.value)}
                 placeholder="+91 98XXX-XXXXX"
-                className="w-full px-3.5 py-2.5 bg-surface border border-line rounded-tile text-xs text-label focus:outline-none focus:border-risk-low/30 tabular-nums"
+                className="w-full px-3.5 py-2.5 bg-surface border border-line rounded-field text-xs text-label focus:outline-none focus:border-risk-low/30 tabular-nums"
               />
             </div>
           </div>
@@ -226,7 +226,7 @@ export const ProfilePage = () => {
           </div>
           <button
             onClick={() => setShowAddContact(!showAddContact)}
-            className="px-4 py-2 bg-risk-critical hover:bg-risk-critical text-label rounded-tile text-xs font-semibold flex items-center gap-1.5 transition-colors self-start sm:self-center"
+            className="px-4 py-2 bg-risk-critical hover:bg-risk-critical text-label rounded-full text-xs font-semibold flex items-center gap-1.5 transition-colors self-start sm:self-center"
           >
             <Plus className="w-4 h-4" />
             <span>Add Contact</span>
@@ -246,7 +246,7 @@ export const ProfilePage = () => {
                   value={newContact.name}
                   onChange={(e) => setNewContact({ ...newContact, name: e.target.value })}
                   required
-                  className="w-full px-3 py-2 bg-page border border-line rounded-lg text-xs text-label focus:outline-none focus:border-risk-critical/30"
+                  className="w-full px-3 py-2 bg-page border border-line rounded-field text-xs text-label focus:outline-none focus:border-risk-critical/30"
                 />
               </div>
               <div>
@@ -254,7 +254,7 @@ export const ProfilePage = () => {
                 <select
                   value={newContact.relationship}
                   onChange={(e) => setNewContact({ ...newContact, relationship: e.target.value })}
-                  className="w-full px-3 py-2 bg-page border border-line rounded-lg text-xs text-label focus:outline-none focus:border-risk-critical/30"
+                  className="w-full px-3 py-2 bg-page border border-line rounded-field text-xs text-label focus:outline-none focus:border-risk-critical/30"
                 >
                   <option value="Family">Family</option>
                   <option value="Parent">Parent</option>
@@ -271,7 +271,7 @@ export const ProfilePage = () => {
                   value={newContact.phone}
                   onChange={(e) => setNewContact({ ...newContact, phone: e.target.value })}
                   required
-                  className="w-full px-3 py-2 bg-page border border-line rounded-lg text-xs text-label focus:outline-none focus:border-risk-critical/30 tabular-nums"
+                  className="w-full px-3 py-2 bg-page border border-line rounded-field text-xs text-label focus:outline-none focus:border-risk-critical/30 tabular-nums"
                 />
               </div>
             </div>
@@ -286,7 +286,7 @@ export const ProfilePage = () => {
               <button
                 type="submit"
                 disabled={addingContact}
-                className="px-4 py-1.5 bg-risk-critical hover:bg-risk-critical text-label rounded-lg text-xs font-semibold"
+                className="px-4 py-1.5 bg-risk-critical hover:bg-risk-critical text-label rounded-full text-xs font-semibold"
               >
                 {addingContact ? 'Adding...' : 'Save Contact'}
               </button>
@@ -305,7 +305,7 @@ export const ProfilePage = () => {
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-xs text-label">{contact.name}</span>
-                    <span className="text-xs px-2 py-0.5 rounded bg-surface-2 text-risk-critical font-medium">
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-surface-2 text-risk-critical font-medium">
                       {contact.relationship}
                     </span>
                   </div>
@@ -317,7 +317,7 @@ export const ProfilePage = () => {
 
                 <button
                   onClick={() => handleDeleteContact(contact.id)}
-                  className="p-1.5 text-label-2 hover:text-risk-critical rounded-lg hover:bg-risk-critical/[0.12] transition-colors"
+                  className="p-1.5 text-label-2 hover:text-risk-critical rounded-full hover:bg-risk-critical/[0.12] transition-colors"
                   title="Delete Contact"
                 >
                   <Trash2 className="w-4 h-4" />

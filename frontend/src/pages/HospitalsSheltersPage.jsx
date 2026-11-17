@@ -36,9 +36,9 @@ export const HospitalsSheltersPage = () => {
     <div className="space-y-4 max-w-5xl mx-auto">
       
       {/* Top Header & Search Console */}
-      <div className="bg-surface border border-line p-3.5 rounded-lg flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <div className="bg-surface border border-line p-3.5 rounded-tile flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-md bg-surface-2 border border-line flex items-center justify-center text-label-2">
+          <div className="w-8 h-8 rounded-tile bg-surface-2 border border-line flex items-center justify-center text-label-2">
             <Ambulance className="w-4 h-4" />
           </div>
           <div>
@@ -53,7 +53,7 @@ export const HospitalsSheltersPage = () => {
 
         {/* Global Location Search & Live GPS */}
         <div className="flex items-center gap-2">
-          <form onSubmit={handleSearch} className="flex items-center bg-surface-2 px-2.5 py-1.5 rounded-md border border-line">
+          <form onSubmit={handleSearch} className="flex items-center bg-surface-2 px-2.5 py-1.5 rounded-tile border border-line">
             <Search className="w-3.5 h-3.5 text-label-2 mr-1.5" />
             <input
               type="text"
@@ -67,7 +67,7 @@ export const HospitalsSheltersPage = () => {
           <button
             onClick={useLiveGps}
             disabled={loading}
-            className="p-1.5 bg-surface-2 hover:bg-surface-2 text-label-2 hover:text-label border border-line rounded-md transition-colors"
+            className="p-1.5 bg-surface-2 hover:bg-surface-2 text-label-2 hover:text-label rounded-full transition-colors"
             title={t('use_my_gps') || 'Use My GPS'}
           >
             <Crosshair className={`w-3.5 h-3.5 text-label-2 ${loading ? 'animate-spin' : ''}`} />
@@ -76,12 +76,12 @@ export const HospitalsSheltersPage = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-1 bg-surface-2 p-1 rounded-md border border-line text-xs">
+      <div className="flex items-center gap-1 bg-surface-2 p-1 rounded-full border border-line text-xs">
         <button
           onClick={() => setActiveTab('hospitals')}
-          className={`px-4 py-1.5 rounded transition-colors flex items-center gap-1.5 ${
+          className={`px-4 py-1.5 rounded-full transition-colors flex items-center gap-1.5 ${
             activeTab === 'hospitals'
-              ? 'bg-surface-2 text-label font-semibold border border-line'
+              ? 'bg-surface-2 text-label font-semibold '
               : 'text-label-2 hover:text-label'
           }`}
         >
@@ -91,9 +91,9 @@ export const HospitalsSheltersPage = () => {
 
         <button
           onClick={() => setActiveTab('shelters')}
-          className={`px-4 py-1.5 rounded transition-colors flex items-center gap-1.5 ${
+          className={`px-4 py-1.5 rounded-full transition-colors flex items-center gap-1.5 ${
             activeTab === 'shelters'
-              ? 'bg-surface-2 text-label font-semibold border border-line'
+              ? 'bg-surface-2 text-label font-semibold '
               : 'text-label-2 hover:text-label'
           }`}
         >
@@ -107,7 +107,7 @@ export const HospitalsSheltersPage = () => {
         {(activeTab === 'hospitals' ? hospitals : shelters).map((item, idx) => (
           <div
             key={idx}
-            className="bg-surface border border-line p-3.5 rounded-lg hover:border-line transition-colors space-y-2"
+            className="bg-surface border border-line p-3.5 rounded-tile hover:border-line transition-colors space-y-2"
           >
             <div className="flex items-start justify-between gap-2">
               <div>
@@ -117,7 +117,7 @@ export const HospitalsSheltersPage = () => {
                   <span>{item.address || `${item.lat?.toFixed(4)}°N, ${item.lng?.toFixed(4)}°E`}</span>
                 </p>
               </div>
-              <span className="text-xs text-risk-low bg-risk-low/[0.12] border border-risk-low/30 px-1.5 py-0.2 rounded tabular-nums">
+              <span className="text-xs text-risk-low bg-risk-low/[0.12] border border-risk-low/30 px-1.5 py-0.2 rounded-full tabular-nums">
                 {item.distance_km ? `${item.distance_km} km` : 'Near'}
               </span>
             </div>
@@ -129,7 +129,7 @@ export const HospitalsSheltersPage = () => {
 
               <button
                 onClick={() => navigate('/safe-route')}
-                className="px-2.5 py-1 bg-accent hover:bg-accent text-label rounded text-xs font-medium flex items-center gap-1 transition-colors"
+                className="px-2.5 py-1 bg-accent hover:bg-accent text-label rounded-full text-xs font-medium flex items-center gap-1 transition-colors"
               >
                 <Navigation className="w-3 h-3" />
                 <span>{t('safe_route') || 'Route'}</span>

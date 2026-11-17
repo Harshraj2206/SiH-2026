@@ -661,7 +661,7 @@ export const ResourcesPage = () => {
             {locationMode === 'manual' ? (
               <button
                 onClick={() => requestGpsLocation()}
-                className="px-3 py-1.5 bg-surface-2 hover:bg-surface-2 border border-line text-label-2 text-xs rounded-tile font-medium flex items-center gap-1.5 transition-colors"
+                className="px-3 py-1.5 bg-surface-2 hover:bg-surface-2 text-label-2 text-xs rounded-full font-medium flex items-center gap-1.5 transition-colors"
               >
                 <Crosshair className="w-3.5 h-3.5" />
                 <span>Use My Current Location</span>
@@ -670,7 +670,7 @@ export const ResourcesPage = () => {
               <button
                 onClick={() => userCoords && fetchNearby(userCoords.lat, userCoords.lng, radiusKm, activeCategory, searchKeyword)}
                 disabled={loading}
-                className="px-3 py-1.5 bg-surface-2 hover:bg-surface-2 border border-line text-label hover:text-label text-xs rounded-tile font-medium flex items-center gap-1.5 transition-colors disabled:opacity-50"
+                className="px-3 py-1.5 bg-surface-2 hover:bg-surface-2 text-label hover:text-label text-xs rounded-full font-medium flex items-center gap-1.5 transition-colors disabled:opacity-50"
               >
                 <RefreshCw className={`w-3.5 h-3.5 text-risk-low ${loading ? 'animate-spin' : ''}`} />
                 <span>Refresh ({getUpdatedAgo()})</span>
@@ -678,17 +678,17 @@ export const ResourcesPage = () => {
             )}
 
             {/* Layout Toggle */}
-            <div className="bg-surface border border-[#222] p-1 rounded-tile flex items-center gap-1 text-xs">
+            <div className="bg-surface border border-[#222] p-1 rounded-full flex items-center gap-1 text-xs">
               <button
                 onClick={() => setViewLayout('split')}
-                className={`p-1.5 rounded-lg transition-colors ${viewLayout === 'split' ? 'bg-surface-2 text-label' : 'text-label-2 hover:text-label'}`}
+                className={`p-1.5 rounded-full transition-colors ${viewLayout === 'split' ? 'bg-surface-2 text-label' : 'text-label-2 hover:text-label'}`}
                 title="Split Map + List View"
               >
                 <MapIcon className="w-3.5 h-3.5" />
               </button>
               <button
                 onClick={() => setViewLayout('cards')}
-                className={`p-1.5 rounded-lg transition-colors ${viewLayout === 'cards' ? 'bg-surface-2 text-label' : 'text-label-2 hover:text-label'}`}
+                className={`p-1.5 rounded-full transition-colors ${viewLayout === 'cards' ? 'bg-surface-2 text-label' : 'text-label-2 hover:text-label'}`}
                 title="Card List Only"
               >
                 <List className="w-3.5 h-3.5" />
@@ -709,7 +709,7 @@ export const ResourcesPage = () => {
             </div>
 
             {userCoords?.accuracy && (
-              <span className={`text-xs px-2 py-0.5 rounded-md tabular-nums ${
+              <span className={`text-xs px-2 py-0.5 rounded-full tabular-nums ${
                 userCoords.accuracy <= 50 
                   ? 'bg-risk-low/[0.12] border border-risk-low/30 text-risk-low' 
                   : userCoords.accuracy <= 500
@@ -721,7 +721,7 @@ export const ResourcesPage = () => {
             )}
 
             {locationMode === 'manual' && (
-              <span className="text-xs px-2 py-0.5 rounded bg-risk-moderate/[0.12] border border-risk-moderate/30 text-risk-moderate tabular-nums">
+              <span className="text-xs px-2 py-0.5 rounded-full bg-risk-moderate/[0.12] border border-risk-moderate/30 text-risk-moderate tabular-nums">
                 Manual Selection Mode
               </span>
             )}
@@ -736,13 +736,13 @@ export const ResourcesPage = () => {
                 placeholder="Search city, area, PIN code..."
                 value={manualQuery}
                 onChange={(e) => setManualQuery(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 bg-surface border border-line rounded-tile text-xs text-label placeholder-label-3 focus:outline-none focus:border-risk-low/30 transition-colors"
+                className="w-full pl-8 pr-3 py-1.5 bg-surface border border-line rounded-full text-xs text-label placeholder-label-3 focus:outline-none focus:border-risk-low/30 transition-colors"
               />
             </div>
             <button
               type="submit"
               disabled={isSearchingLocation || !manualQuery.trim()}
-              className="px-3 py-1.5 bg-risk-low/[0.12] hover:bg-risk-low/[0.12] border border-risk-low/30 text-risk-low font-medium rounded-tile text-xs flex items-center gap-1 transition-colors disabled:opacity-40 shrink-0"
+              className="px-3 py-1.5 bg-risk-low/[0.12] hover:bg-risk-low/[0.12] border border-risk-low/30 text-risk-low font-medium rounded-full text-xs flex items-center gap-1 transition-colors disabled:opacity-40 shrink-0"
             >
               <span>{isSearchingLocation ? 'Searching...' : 'Go'}</span>
             </button>
@@ -776,7 +776,7 @@ export const ResourcesPage = () => {
           </div>
           <button
             onClick={() => requestGpsLocation()}
-            className="px-4 py-2 bg-accent hover:bg-accent text-label font-semibold rounded-tile text-xs flex items-center justify-center gap-1.5 transition-all self-start sm:self-center shrink-0"
+            className="px-4 py-2 bg-accent hover:bg-accent text-label font-semibold rounded-full text-xs flex items-center justify-center gap-1.5 transition-all self-start sm:self-center shrink-0"
           >
             <Crosshair className="w-3.5 h-3.5" />
             <span>Enable Location</span>
@@ -802,7 +802,7 @@ export const ResourcesPage = () => {
               setManualQuery('Bengaluru, Karnataka');
               handleManualSearch();
             }}
-            className="px-3 py-1.5 bg-surface-2 hover:bg-surface-2 border border-[#333] text-label text-xs font-medium rounded-tile transition-colors self-start sm:self-center shrink-0"
+            className="px-3 py-1.5 bg-surface-2 hover:bg-surface-2 border border-[#333] text-label text-xs font-medium rounded-full transition-colors self-start sm:self-center shrink-0"
           >
             Try Example: Bengaluru
           </button>
@@ -821,10 +821,10 @@ export const ResourcesPage = () => {
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
-                className={`px-3 py-2 rounded-tile text-xs font-medium flex items-center gap-2 transition-all shrink-0 ${
+                className={`px-3 py-2 rounded-full text-xs font-medium flex items-center gap-2 transition-all shrink-0 ${
                   isActive
                     ? 'bg-surface-2 text-label font-semibold shadow-sm '
-                    : 'bg-surface text-label-2 hover:text-label hover:bg-surface-2 border border-line'
+                    : 'bg-surface text-label-2 hover:text-label hover:bg-surface-2 '
                 }`}
               >
                 <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-black' : 'text-label-2'}`} />
@@ -842,12 +842,12 @@ export const ResourcesPage = () => {
         {/* Radius Selector Pills */}
         <div className="flex items-center gap-2 self-start md:self-center text-xs">
           <span className="text-label-2 font-medium hidden sm:inline">Search Radius:</span>
-          <div className="bg-surface border border-line p-1 rounded-tile flex items-center gap-1">
+          <div className="bg-surface border border-line p-1 rounded-full flex items-center gap-1">
             {SEARCH_RADII.map((r) => (
               <button
                 key={r}
                 onClick={() => setRadiusKm(r)}
-                className={`px-2.5 py-1 rounded-lg transition-colors tabular-nums font-medium ${
+                className={`px-2.5 py-1 rounded-full transition-colors tabular-nums font-medium ${
                   radiusKm === r
                     ? 'bg-surface-2 text-risk-low font-semibold border border-risk-low/30'
                     : 'text-label-2 hover:text-label'
@@ -887,12 +887,12 @@ export const ResourcesPage = () => {
                 {/* Header row: destination title + Exit button */}
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2 min-w-0">
-                    <div className="w-7 h-7 rounded-lg bg-risk-low/[0.12] border border-risk-low/30 flex items-center justify-center text-risk-low shrink-0">
+                    <div className="w-7 h-7 rounded-tile bg-risk-low/[0.12] border border-risk-low/30 flex items-center justify-center text-risk-low shrink-0">
                       <Route className="w-4 h-4" />
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-xs tabular-nums px-1.5 py-0.2 rounded bg-risk-low/[0.12] border border-risk-low/30 text-risk-low font-semibold">
+                        <span className="text-xs tabular-nums px-1.5 py-0.2 rounded-full bg-risk-low/[0.12] border border-risk-low/30 text-risk-low font-semibold">
                           IN-APP ROAD ROUTE
                         </span>
                         <span className="text-xs font-semibold text-label truncate">
@@ -907,7 +907,7 @@ export const ResourcesPage = () => {
 
                   <button
                     onClick={handleClearRoute}
-                    className="px-2 py-1 bg-surface hover:bg-surface-2 border border-line text-label-2 hover:text-label rounded-lg text-xs font-medium flex items-center gap-1 shrink-0 transition-colors"
+                    className="px-2 py-1 bg-surface hover:bg-surface-2 text-label-2 hover:text-label rounded-full text-xs font-medium flex items-center gap-1 shrink-0 transition-colors"
                     title="Exit in-app navigation and clear route"
                   >
                     <X className="w-3.5 h-3.5" />
@@ -948,7 +948,7 @@ export const ResourcesPage = () => {
                     </div>
                     <button
                       onClick={handleRecalculateRoute}
-                      className="px-2 py-0.5 bg-risk-moderate hover:bg-risk-moderate text-black font-semibold rounded text-xs shrink-0"
+                      className="px-2 py-0.5 bg-risk-moderate hover:bg-risk-moderate text-black font-semibold rounded-full text-xs shrink-0"
                     >
                       Recalculate
                     </button>
@@ -961,7 +961,7 @@ export const ResourcesPage = () => {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={handleStopNavigation}
-                        className="px-3 py-1.5 bg-risk-critical hover:bg-risk-critical text-label rounded-tile text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-colors"
+                        className="px-3 py-1.5 bg-risk-critical hover:bg-risk-critical text-label rounded-full text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-colors"
                       >
                         <Square className="w-3 h-3 fill-white" />
                         <span>Stop Navigation</span>
@@ -984,7 +984,7 @@ export const ResourcesPage = () => {
                   {activeRoute.segments && activeRoute.segments.length > 0 && (
                     <button
                       onClick={() => setShowRouteSteps(!showRouteSteps)}
-                      className="px-2.5 py-1.5 bg-surface-2 hover:bg-surface-2 border border-line text-label-2 hover:text-label rounded-tile text-xs font-medium flex items-center gap-1 transition-colors"
+                      className="px-2.5 py-1.5 bg-surface-2 hover:bg-surface-2 text-label-2 hover:text-label rounded-full text-xs font-medium flex items-center gap-1 transition-colors"
                     >
                       <span>Steps ({activeRoute.segments.length})</span>
                       {showRouteSteps ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
@@ -998,7 +998,7 @@ export const ResourcesPage = () => {
                     {activeRoute.segments.map((seg, sIdx) => (
                       <div
                         key={sIdx}
-                        className="p-2 rounded-lg bg-surface border border-line text-xs flex items-start gap-2 text-label-2"
+                        className="p-2 rounded-tile bg-surface border border-line text-xs flex items-start gap-2 text-label-2"
                       >
                         <span className="w-5 h-5 rounded bg-risk-low/[0.12] text-risk-low tabular-nums font-semibold flex items-center justify-center text-xs shrink-0 mt-0.5">
                           {seg.step_number || sIdx + 1}
@@ -1191,7 +1191,7 @@ export const ResourcesPage = () => {
                               {place.phone ? (
                                 <a
                                   href={`tel:${place.phone}`}
-                                  className="px-2 py-1 bg-risk-low hover:bg-risk-low text-label rounded text-xs font-semibold flex items-center gap-1"
+                                  className="px-2 py-1 bg-risk-low hover:bg-risk-low text-label rounded-full text-xs font-semibold flex items-center gap-1"
                                 >
                                   <Phone className="w-3 h-3" />
                                   <span>Call</span>
@@ -1203,7 +1203,7 @@ export const ResourcesPage = () => {
                               <button
                                 onClick={() => handleGetDirections(place)}
                                 disabled={isCalculatingRoute}
-                                className="px-2 py-1 bg-accent hover:bg-accent text-label rounded text-xs font-semibold flex items-center gap-1 ml-auto transition-colors disabled:opacity-50"
+                                className="px-2 py-1 bg-accent hover:bg-accent text-label rounded-full text-xs font-semibold flex items-center gap-1 ml-auto transition-colors disabled:opacity-50"
                                 title="Compute road route and navigate inside LANDSLIDEGUARD"
                               >
                                 <Navigation className="w-3 h-3 text-label" />
@@ -1225,7 +1225,7 @@ export const ResourcesPage = () => {
               {/* Map Floating Control: Recenter Button (Top-Right) */}
               <button
                 onClick={() => userCoords && setMapCenter({ lat: userCoords.lat, lng: userCoords.lng })}
-                className="absolute top-3 right-3 z-[1000] p-2 bg-surface hover:bg-surface-2 text-label border border-line rounded-tile backdrop-blur-sm transition-colors"
+                className="absolute top-3 right-3 z-[1000] p-2 bg-surface hover:bg-surface-2 text-label rounded-full backdrop-blur-sm transition-colors"
                 title="Recenter on My Location"
               >
                 <Crosshair className="w-4 h-4 text-risk-low" />
@@ -1254,7 +1254,7 @@ export const ResourcesPage = () => {
                       </span>
                       <button
                         onClick={() => setShowLayerMenu(false)}
-                        className="text-label-3 hover:text-label p-0.5 rounded transition-colors"
+                        className="text-label-3 hover:text-label p-0.5 rounded-full transition-colors"
                         aria-label="Close map type menu"
                       >
                         <X className="w-3 h-3" />
@@ -1279,7 +1279,7 @@ export const ResourcesPage = () => {
                             aria-label={`Switch to ${type.label} view`}
                             role="button"
                           >
-                            <div className={`w-9 h-7 rounded-lg flex items-center justify-center transition-colors ${
+                            <div className={`w-9 h-7 rounded-tile flex items-center justify-center transition-colors ${
                               isSelected ? 'bg-risk-low/[0.12] text-risk-low' : 'bg-[#222] text-label-2'
                             }`}>
                               <Icon className="w-4 h-4" />
@@ -1297,7 +1297,7 @@ export const ResourcesPage = () => {
                 {/* Compact Toggle Button (Google Maps Style) */}
                 <button
                   onClick={() => setShowLayerMenu(!showLayerMenu)}
-                  className={`px-3 py-1.5 bg-surface hover:bg-surface-2 backdrop-blur-md border rounded-tile flex items-center gap-2 text-xs font-semibold transition-all ${
+                  className={`px-3 py-1.5 bg-surface hover:bg-surface-2 backdrop-blur-md border rounded-full flex items-center gap-2 text-xs font-semibold transition-all ${
                     showLayerMenu 
                       ? 'border-risk-low/30 text-risk-low ' 
                       : 'border-line hover:border-line text-label'
@@ -1340,7 +1340,7 @@ export const ResourcesPage = () => {
                 </div>
                 <button
                   onClick={() => requestGpsLocation()}
-                  className="px-2.5 py-1 bg-risk-critical/[0.12] hover:bg-risk-critical/[0.12] text-risk-critical rounded-lg text-xs font-medium shrink-0"
+                  className="px-2.5 py-1 bg-risk-critical/[0.12] hover:bg-risk-critical/[0.12] text-risk-critical rounded-full text-xs font-medium shrink-0"
                 >
                   Retry GPS
                 </button>
@@ -1373,7 +1373,7 @@ export const ResourcesPage = () => {
                       setManualQuery('District Hospital');
                       handleManualSearch();
                     }}
-                    className="px-4 py-2 bg-surface-2 hover:bg-surface-2 text-label font-medium rounded-tile text-xs inline-flex items-center gap-1.5 transition-colors"
+                    className="px-4 py-2 bg-surface-2 hover:bg-surface-2 text-label font-medium rounded-full text-xs inline-flex items-center gap-1.5 transition-colors"
                   >
                     <span>Search by City Name</span>
                   </button>
@@ -1406,7 +1406,7 @@ export const ResourcesPage = () => {
                         <h3 className="font-semibold text-sm text-label tracking-tight leading-snug truncate">
                           {place.name}
                         </h3>
-                        <span className={`text-xs px-2 py-0.5 rounded tabular-nums font-semibold shrink-0 ${
+                        <span className={`text-xs px-2 py-0.5 rounded-full tabular-nums font-semibold shrink-0 ${
                           place.category === 'police'
                             ? 'bg-surface-2 border border-line text-label-2'
                             : place.category === 'fire'
@@ -1478,7 +1478,7 @@ export const ResourcesPage = () => {
                         <a
                           href={`tel:${phoneNumber}`}
                           onClick={(e) => e.stopPropagation()}
-                          className="px-3 py-1.5 bg-risk-low hover:bg-risk-low text-label font-semibold rounded-tile text-xs flex items-center gap-1.5 shadow-sm transition-colors"
+                          className="px-3 py-1.5 bg-risk-low hover:bg-risk-low text-label font-semibold rounded-full text-xs flex items-center gap-1.5 shadow-sm transition-colors"
                         >
                           <Phone className="w-3.5 h-3.5" />
                           <span>Call {phoneNumber}</span>
@@ -1486,7 +1486,7 @@ export const ResourcesPage = () => {
                       ) : (
                         <button
                           disabled
-                          className="px-3 py-1.5 bg-surface border border-line text-label-3 rounded-tile text-xs font-medium cursor-not-allowed flex items-center gap-1.5"
+                          className="px-3 py-1.5 bg-surface text-label-3 rounded-full text-xs font-medium cursor-not-allowed flex items-center gap-1.5"
                         >
                           <Phone className="w-3.5 h-3.5 text-label-3" />
                           <span>Phone unavailable</span>
@@ -1502,10 +1502,10 @@ export const ResourcesPage = () => {
                           handleGetDirections(place);
                         }}
                         disabled={isCalculatingRoute}
-                        className={`px-3 py-1.5 rounded-tile text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                        className={`px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all ${
                           activeRoute?.destination?.id === place.id
-                            ? 'bg-surface-2 text-label   font-semibold'
-                            : 'bg-surface-2 hover:bg-surface-2 border border-line text-label-2'
+                            ? 'bg-surface-2 text-label font-semibold'
+                            : 'bg-surface-2 hover:bg-surface-2 text-label-2'
                         } disabled:opacity-50`}
                         title="Calculate road route and navigate inside LANDSLIDEGUARD"
                       >
@@ -1527,7 +1527,7 @@ export const ResourcesPage = () => {
                             }
                           });
                         }}
-                        className="px-2.5 py-1.5 bg-risk-low/[0.12] hover:bg-risk-low/[0.12] border border-risk-low/30 text-risk-low rounded-tile text-xs font-medium flex items-center gap-1.5 transition-colors"
+                        className="px-2.5 py-1.5 bg-risk-low/[0.12] hover:bg-risk-low/[0.12] border border-risk-low/30 text-risk-low rounded-full text-xs font-medium flex items-center gap-1.5 transition-colors"
                         title="Open in Landslide Evacuation Safe Route Planner"
                       >
                         <Shield className="w-3.5 h-3.5" />
@@ -1539,7 +1539,7 @@ export const ResourcesPage = () => {
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}
-                        className="px-2.5 py-1.5 bg-surface-2 hover:bg-surface-2 border border-line text-label-2 hover:text-label rounded-tile text-xs font-medium flex items-center gap-1.5 transition-colors"
+                        className="px-2.5 py-1.5 bg-surface-2 hover:bg-surface-2 text-label-2 hover:text-label rounded-full text-xs font-medium flex items-center gap-1.5 transition-colors"
                         title="Open exact facility location on Google Maps"
                       >
                         <ExternalLink className="w-3 h-3" />
@@ -1552,7 +1552,7 @@ export const ResourcesPage = () => {
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}
-                          className="px-2.5 py-1.5 bg-surface-2 hover:bg-surface-2 border border-line text-label-2 hover:text-label rounded-tile text-xs font-medium flex items-center gap-1.5 transition-colors"
+                          className="px-2.5 py-1.5 bg-surface-2 hover:bg-surface-2 text-label-2 hover:text-label rounded-full text-xs font-medium flex items-center gap-1.5 transition-colors"
                         >
                           <span>Website</span>
                         </a>
@@ -1584,7 +1584,7 @@ export const ResourcesPage = () => {
               </div>
               <button
                 onClick={() => setShowKeyModal(false)}
-                className="p-1 rounded-lg text-label-2 hover:text-label hover:bg-surface-2 transition-colors"
+                className="p-1 rounded-full text-label-2 hover:text-label hover:bg-surface-2 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1608,7 +1608,7 @@ export const ResourcesPage = () => {
                 placeholder="AIzaSy..."
                 value={customApiKey}
                 onChange={(e) => setCustomApiKey(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-surface border border-line rounded-tile text-xs text-label placeholder-label-3 focus:outline-none focus:border-risk-low/30 tabular-nums"
+                className="w-full px-3.5 py-2.5 bg-surface border border-line rounded-field text-xs text-label placeholder-label-3 focus:outline-none focus:border-risk-low/30 tabular-nums"
               />
               <p className="text-xs text-label-3">
                 Key can also be defined via server environment variable <code className="text-label-2">GOOGLE_MAPS_API_KEY</code>.
@@ -1625,7 +1625,7 @@ export const ResourcesPage = () => {
             <div className="flex items-center justify-end gap-2 pt-2">
               <button
                 onClick={() => setShowKeyModal(false)}
-                className="px-4 py-2 bg-surface-2 hover:bg-surface-2 text-label text-xs font-medium rounded-tile transition-colors"
+                className="px-4 py-2 bg-surface-2 hover:bg-surface-2 text-label text-xs font-medium rounded-full transition-colors"
               >
                 Close
               </button>

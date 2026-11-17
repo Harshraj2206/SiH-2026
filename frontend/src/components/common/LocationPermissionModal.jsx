@@ -14,7 +14,7 @@ export const LocationPermissionModal = () => {
       <div className="relative w-full max-w-md bg-surface border border-line rounded-card p-6 shadow-slate-950 space-y-5">
         <button
           onClick={dismissLocationPrompt}
-          className="absolute top-4 right-4 text-label-2 hover:text-label p-1 rounded-lg hover:bg-surface-2 transition-colors"
+          className="absolute top-4 right-4 text-label-2 hover:text-label p-1 rounded-full hover:bg-surface-2 transition-colors"
           aria-label="Close"
         >
           <X className="w-4 h-4" />
@@ -45,13 +45,13 @@ export const LocationPermissionModal = () => {
         <div className="flex items-center gap-3 pt-2">
           <button
             onClick={dismissLocationPrompt}
-            className="flex-1 py-2.5 px-4 rounded-tile border border-line hover:bg-surface-2 text-xs font-semibold text-label-2 transition-colors"
+            className="flex-1 py-2.5 px-4 rounded-full bg-surface-2 hover:opacity-90 text-xs font-semibold text-label-2 transition-colors"
           >
             Not Now
           </button>
           <button
             onClick={requestLocationPermission}
-            className="flex-1 py-2.5 px-4 rounded-tile bg-surface-2 text-xs font-semibold text-label flex items-center justify-center gap-1.5 transition-all hover:scale-[1.02]"
+            className="flex-1 py-2.5 px-4 rounded-full bg-surface-2 text-xs font-semibold text-label flex items-center justify-center gap-1.5 transition-all hover:scale-[1.02]"
           >
             <MapPin className="w-4 h-4" />
             <span>Allow Location</span>

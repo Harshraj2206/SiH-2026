@@ -351,7 +351,7 @@ export const IncidentsExplorerPage = () => {
         <p className="text-sm text-label-2">{fetchError}</p>
         <button
           onClick={() => fetchIntelligence(true)}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-accent hover:bg-accent text-label text-xs font-semibold rounded-tile transition"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-accent hover:bg-accent text-label text-xs font-semibold rounded-full transition"
         >
           <RefreshCw className="w-4 h-4" />
           Retry Connection
@@ -366,7 +366,7 @@ export const IncidentsExplorerPage = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-line pb-4">
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <span className="px-2 py-0.5 rounded text-xs font-semibold bg-surface-2 text-label-2 border border-line flex items-center gap-1">
+            <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-surface-2 text-label-2 border border-line flex items-center gap-1">
               <Radio className="w-3 h-3 text-label-2 " />
               AUTHORITATIVE INDIA-WIDE LANDSLIDE INTELLIGENCE
             </span>
@@ -413,7 +413,7 @@ export const IncidentsExplorerPage = () => {
           </div>
           <button
             onClick={() => fetchIntelligence(true)}
-            className="px-3.5 py-1.5 bg-risk-critical/[0.12] hover:bg-risk-critical/[0.12] border border-risk-critical/30 rounded-tile font-semibold text-label text-xs transition shrink-0 self-start sm:self-auto flex items-center gap-1.5"
+            className="px-3.5 py-1.5 bg-risk-critical/[0.12] hover:bg-risk-critical/[0.12] border border-risk-critical/30 rounded-full font-semibold text-label text-xs transition shrink-0 self-start sm:self-auto flex items-center gap-1.5"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             Retry Feed
@@ -452,7 +452,7 @@ export const IncidentsExplorerPage = () => {
           <button
             onClick={detectUserLocation}
             disabled={locatingUser}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface border border-line hover:border-line text-xs text-label transition-colors flex-shrink-0"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface text-xs text-label transition-colors flex-shrink-0"
             title="Recalculate with device GPS"
           >
             <Crosshair className={`w-3.5 h-3.5 text-label-2 ${locatingUser ? 'animate-spin' : ''}`} />
@@ -473,7 +473,7 @@ export const IncidentsExplorerPage = () => {
           <button
             onClick={() => fetchIntelligence(true)}
             disabled={refreshing}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-2 hover:bg-surface-2 border border-line text-label-2 rounded-tile font-semibold text-xs transition-all shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-2 hover:bg-surface-2 text-label-2 rounded-full font-semibold text-xs transition-all shadow-sm"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
             {refreshing ? 'Syncing...' : 'Refresh Now'}
@@ -485,7 +485,7 @@ export const IncidentsExplorerPage = () => {
       <div className="flex flex-wrap items-center gap-2 border-b border-line pb-2">
         <button
           onClick={() => setActiveTab('confirmed')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-tile font-semibold text-xs transition-all ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-full font-semibold text-xs transition-all ${
             activeTab === 'confirmed'
               ? 'bg-risk-critical/[0.12] border border-risk-critical/30 text-risk-critical  '
               : 'bg-surface border border-line text-label-2 hover:text-label hover:border-line'
@@ -497,7 +497,7 @@ export const IncidentsExplorerPage = () => {
 
         <button
           onClick={() => setActiveTab('forecast')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-tile font-semibold text-xs transition-all ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-full font-semibold text-xs transition-all ${
             activeTab === 'forecast'
               ? 'bg-risk-moderate/[0.12] border border-risk-moderate/30 text-risk-moderate  '
               : 'bg-surface border border-line text-label-2 hover:text-label hover:border-line'
@@ -509,10 +509,10 @@ export const IncidentsExplorerPage = () => {
 
         <button
           onClick={() => setActiveTab('all')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-tile font-semibold text-xs transition-all ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-full font-semibold text-xs transition-all ${
             activeTab === 'all'
-              ? 'bg-surface-2 border border-line text-label-2  '
-              : 'bg-surface border border-line text-label-2 hover:text-label hover:border-line'
+              ? 'bg-surface-2 text-label-2 '
+              : 'bg-surface text-label-2 hover:text-label '
           }`}
         >
           <Globe className="w-3.5 h-3.5 text-label-2" />
@@ -521,10 +521,10 @@ export const IncidentsExplorerPage = () => {
 
         <button
           onClick={() => setActiveTab('simulation')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-tile font-semibold text-xs transition-all ml-auto ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-full font-semibold text-xs transition-all ml-auto ${
             activeTab === 'simulation'
-              ? 'bg-surface-2 border border-line text-label-2  '
-              : 'bg-surface border border-line text-label-2 hover:text-label hover:border-line'
+              ? 'bg-surface-2 text-label-2 '
+              : 'bg-surface text-label-2 hover:text-label '
           }`}
           title="Synthetic drill benchmarks for training and calibration"
         >
@@ -545,15 +545,15 @@ export const IncidentsExplorerPage = () => {
           </div>
 
           {/* Basemap Switcher */}
-          <div className="flex items-center gap-1.5 bg-page p-1 rounded-tile border border-line self-start sm:self-auto">
+          <div className="flex items-center gap-1.5 bg-page p-1 rounded-full border border-line self-start sm:self-auto">
             <span className="text-xs text-label-2 px-2 tabular-nums ">Map Type:</span>
             {MAP_TYPES.map((t) => (
               <button
                 key={t.id}
                 onClick={() => setMapType(t.id)}
-                className={`px-2 py-1 rounded-lg text-xs font-semibold transition-all ${
+                className={`px-2 py-1 rounded-full text-xs font-semibold transition-all ${
                   mapType === t.id
-                    ? 'bg-surface-2 text-label-2 border border-line'
+                    ? 'bg-surface-2 text-label-2 '
                     : 'text-label-2 hover:text-label'
                 }`}
               >
@@ -704,15 +704,15 @@ export const IncidentsExplorerPage = () => {
               <button
                 key={evId}
                 onClick={() => handleSelectEvent(ev)}
-                className={`flex-shrink-0 p-3 rounded-tile border text-left transition-all max-w-[210px] ${
+                className={`flex-shrink-0 p-3 rounded-tile text-left transition-all max-w-[210px] ${
                   isSel 
-                    ? 'bg-surface-2 border-line  ' 
-                    : 'bg-page border-line hover:border-line'
+                    ? 'bg-surface-2 ' 
+                    : 'bg-page '
                 }`}
               >
                 <div className="flex items-center justify-between text-xs mb-1 gap-1">
                   <span className="tabular-nums font-semibold text-label-2 truncate">{evId}</span>
-                  <span className={`px-1.5 py-0.2 rounded font-semibold text-xs border ${getSeverityBadge(ev.severity || ev.risk_level)}`}>
+                  <span className={`px-1.5 py-0.2 rounded-full font-semibold text-xs border ${getSeverityBadge(ev.severity || ev.risk_level)}`}>
                     {ev.severity || ev.risk_level}
                   </span>
                 </div>
@@ -739,7 +739,7 @@ export const IncidentsExplorerPage = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search district, highway, corridor..."
-            className="w-full pl-9 pr-3 py-2 bg-page border border-line rounded-tile text-xs text-label placeholder-label-3 focus:outline-none focus:border-line"
+            className="w-full pl-9 pr-3 py-2 bg-page border border-line rounded-full text-xs text-label placeholder-label-3 focus:outline-none focus:border-line"
           />
         </div>
 
@@ -748,7 +748,7 @@ export const IncidentsExplorerPage = () => {
           <select
             value={stateFilter}
             onChange={(e) => setStateFilter(e.target.value)}
-            className="w-full py-2 px-3 bg-page border border-line rounded-tile text-xs text-label focus:outline-none focus:border-line"
+            className="w-full py-2 px-3 bg-page border border-line rounded-field text-xs text-label focus:outline-none focus:border-line"
           >
             <option value="ALL">All Monitored States</option>
             {availableStates.map(st => (
@@ -762,7 +762,7 @@ export const IncidentsExplorerPage = () => {
           <select
             value={severityFilter}
             onChange={(e) => setSeverityFilter(e.target.value)}
-            className="w-full py-2 px-3 bg-page border border-line rounded-tile text-xs text-label focus:outline-none focus:border-line"
+            className="w-full py-2 px-3 bg-page border border-line rounded-field text-xs text-label focus:outline-none focus:border-line"
           >
             <option value="ALL">All Risk / Severity Levels</option>
             <option value="CRITICAL"> CRITICAL</option>
@@ -777,7 +777,7 @@ export const IncidentsExplorerPage = () => {
           <select
             value={verificationFilter}
             onChange={(e) => setVerificationFilter(e.target.value)}
-            className="w-full py-2 px-3 bg-page border border-line rounded-tile text-xs text-label focus:outline-none focus:border-line"
+            className="w-full py-2 px-3 bg-page border border-line rounded-field text-xs text-label focus:outline-none focus:border-line"
           >
             <option value="ALL">All Provenance Types</option>
             <option value="OFFICIAL">Official Government Record</option>
@@ -820,17 +820,17 @@ export const IncidentsExplorerPage = () => {
                 >
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="tabular-nums text-xs font-semibold text-label-2 bg-surface-2 px-2 py-0.5 rounded border border-line">
+                      <span className="tabular-nums text-xs font-semibold text-label-2 bg-surface-2 px-2 py-0.5 rounded-full border border-line">
                         {evId}
                       </span>
-                      <span className={`text-xs px-2 py-0.5 rounded font-semibold border ${getSeverityBadge(ev.severity || ev.risk_level)}`}>
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-semibold border ${getSeverityBadge(ev.severity || ev.risk_level)}`}>
                         {ev.severity || ev.risk_level}
                       </span>
-                      <span className={`text-xs px-2 py-0.5 rounded font-semibold border ${getVerificationBadge(ev.verification_status)}`}>
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-semibold border ${getVerificationBadge(ev.verification_status)}`}>
                         {isSim ? 'DEMO / SIMULATION' : ev.verification_status}
                       </span>
                       {isForecast && (
-                        <span className="text-xs px-2 py-0.5 rounded font-semibold bg-risk-moderate/[0.12] text-risk-moderate border border-risk-moderate/30">
+                        <span className="text-xs px-2 py-0.5 rounded-full font-semibold bg-risk-moderate/[0.12] text-risk-moderate border border-risk-moderate/30">
                           EARLY WARNING
                         </span>
                       )}
@@ -883,10 +883,10 @@ export const IncidentsExplorerPage = () => {
                     {selectedEvent.incident_id || selectedEvent.forecast_id}
                   </span>
                   <div className="flex items-center gap-1.5">
-                    <span className={`text-xs px-2.5 py-0.5 rounded font-semibold border ${getSeverityBadge(selectedEvent.severity || selectedEvent.risk_level)}`}>
+                    <span className={`text-xs px-2.5 py-0.5 rounded-full font-semibold border ${getSeverityBadge(selectedEvent.severity || selectedEvent.risk_level)}`}>
                       {selectedEvent.severity || selectedEvent.risk_level}
                     </span>
-                    <span className={`text-xs px-2 py-0.5 rounded font-semibold border ${getVerificationBadge(selectedEvent.verification_status)}`}>
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-semibold border ${getVerificationBadge(selectedEvent.verification_status)}`}>
                       {selectedEvent.is_simulation ? 'DEMO / SIMULATION' : selectedEvent.verification_status}
                     </span>
                   </div>
@@ -950,7 +950,7 @@ export const IncidentsExplorerPage = () => {
                 {expandWhyRisk && (
                   <div className="p-3.5 pt-0 border-t border-line text-xs space-y-2 text-label-2">
                     {selectedEvent.why_at_risk && (
-                      <p className="text-label-2 bg-surface-2 p-2.5 rounded-lg border border-line tabular-nums text-xs">
+                      <p className="text-label-2 bg-surface-2 p-2.5 rounded-tile border border-line tabular-nums text-xs">
                         {selectedEvent.why_at_risk}
                       </p>
                     )}
@@ -999,7 +999,7 @@ export const IncidentsExplorerPage = () => {
                   </div>
 
                   {selectedEvent.casualties_info && (
-                    <div className="text-xs text-label-2 bg-page px-3 py-1.5 rounded-lg border border-line tabular-nums">
+                    <div className="text-xs text-label-2 bg-page px-3 py-1.5 rounded-tile border border-line tabular-nums">
                       {selectedEvent.casualties_info}
                     </div>
                   )}

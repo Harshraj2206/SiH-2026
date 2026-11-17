@@ -108,7 +108,7 @@ export const CommunityPollPage = () => {
               <span className="text-xs font-semibold text-risk-low ">
                 Community Intelligence & AI Verification
               </span>
-              <span className="text-xs px-1.5 py-0.5 rounded bg-surface-2 text-label-2 tabular-nums border border-line">
+              <span className="text-xs px-1.5 py-0.5 rounded-full bg-surface-2 text-label-2 tabular-nums border border-line">
                 PROTOTYPE DEMONSTRATION
               </span>
             </div>
@@ -224,7 +224,7 @@ export const CommunityPollPage = () => {
             </h2>
           </div>
 
-          <div className="flex items-center gap-1.5 bg-surface p-1.5 rounded-tile border border-line text-xs">
+          <div className="flex items-center gap-1.5 bg-surface p-1.5 rounded-full border border-line text-xs">
             {[
               { id: 'ALL', label: 'All Reports' },
               { id: 'AI_VERIFIED', label: 'AI Cross-Checked' },
@@ -234,7 +234,7 @@ export const CommunityPollPage = () => {
               <button
                 key={tab.id}
                 onClick={() => setFilter(tab.id)}
-                className={`px-3 py-1.5 rounded-lg transition-colors font-medium ${
+                className={`px-3 py-1.5 rounded-full transition-colors font-medium ${
                   filter === tab.id
                     ? 'bg-surface-2 text-label font-semibold'
                     : 'text-label-2 hover:text-label'
@@ -285,7 +285,7 @@ export const CommunityPollPage = () => {
 
                   {/* Location & Report Type */}
                   <div className="flex items-center gap-2 flex-wrap text-xs">
-                    <span className="px-2 py-0.5 rounded bg-surface-2 text-label-2 font-medium">
+                    <span className="px-2 py-0.5 rounded-full bg-surface-2 text-label-2 font-medium">
                       {report.report_type || 'Ground Instability'}
                     </span>
                     <span className="text-label-2 flex items-center gap-1">
@@ -321,7 +321,7 @@ export const CommunityPollPage = () => {
 
                   <button
                     onClick={() => handleUpvoteReport(report.id)}
-                    className="flex items-center gap-1.5 px-3 py-1 bg-surface-2 hover:bg-surface-2 border border-line text-label-2 hover:text-label rounded-lg text-xs font-semibold transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-1 bg-surface-2 hover:bg-surface-2 text-label-2 hover:text-label rounded-full text-xs font-semibold transition-colors"
                   >
                     <ThumbsUp className="w-3 h-3 text-risk-low" />
                     <span>{reportVotes} Confirmed</span>

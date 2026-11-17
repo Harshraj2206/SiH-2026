@@ -41,7 +41,7 @@ export const PostDisasterAnalysisPage = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-line pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 rounded text-xs font-semibold bg-surface-2 text-label-2 border border-line flex items-center gap-1">
+            <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-surface-2 text-label-2 border border-line flex items-center gap-1">
               <BrainCircuit className="w-3 h-3" />
               DISASTER AUDIT & CONTINUOUS LEARNING
             </span>
@@ -93,7 +93,7 @@ export const PostDisasterAnalysisPage = () => {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-line pb-3">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="tabular-nums text-xs font-semibold text-label-2 bg-surface-2 px-2 py-0.5 rounded border border-line">
+                  <span className="tabular-nums text-xs font-semibold text-label-2 bg-surface-2 px-2 py-0.5 rounded-full border border-line">
                     {rec.record_id}
                   </span>
                   <span className="text-xs tabular-nums text-label-2">INCIDENT: {rec.incident_id}</span>

@@ -32,7 +32,7 @@ export const ZoneTelemetryDrawer = ({ zone, onClose }) => {
         <div className="flex items-start justify-between gap-2 border-b border-line pb-3">
           <div>
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className={`text-xs px-2 py-0.5 rounded font-semibold ${riskColor.badge}`}>
+              <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${riskColor.badge}`}>
                 {zone.risk_level} Risk
               </span>
             </div>
@@ -45,7 +45,7 @@ export const ZoneTelemetryDrawer = ({ zone, onClose }) => {
           {onClose && (
             <button
               onClick={onClose}
-              className="p-1 rounded-lg text-label-2 hover:text-label hover:bg-surface-2 transition-colors"
+              className="p-1 rounded-full text-label-2 hover:text-label hover:bg-surface-2 transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -74,7 +74,7 @@ export const ZoneTelemetryDrawer = ({ zone, onClose }) => {
 
           <div className="space-y-2">
             {factors.map((factor, idx) => (
-              <div key={idx} className="bg-surface border border-line p-2.5 rounded-lg text-xs space-y-1">
+              <div key={idx} className="bg-surface border border-line p-2.5 rounded-tile text-xs space-y-1">
                 <div className="flex justify-between text-label">
                   <span className="font-medium">{factor.name}</span>
                   <span className="tabular-nums text-label-2">{factor.value}</span>
@@ -95,7 +95,7 @@ export const ZoneTelemetryDrawer = ({ zone, onClose }) => {
       <div className="pt-2 border-t border-line">
         <button
           onClick={() => navigate('/safe-route')}
-          className="w-full py-2.5 bg-accent hover:opacity-90 text-white rounded-tile text-xs font-semibold flex items-center justify-center gap-1.5 transition-all "
+          className="w-full py-2.5 bg-accent hover:opacity-90 text-white rounded-full text-xs font-semibold flex items-center justify-center gap-1.5 transition-all "
         >
           <Navigation className="w-3.5 h-3.5" />
           <span>Get Safe Evacuation Route</span>

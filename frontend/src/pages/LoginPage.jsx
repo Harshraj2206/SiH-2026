@@ -66,7 +66,7 @@ export const LoginPage = () => {
         {/* Brand Header */}
         <div className="text-center space-y-1.5">
           <Link to="/" className="inline-flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-risk-critical/[0.12] border border-risk-critical/30 flex items-center justify-center text-risk-critical">
+            <div className="w-8 h-8 rounded-tile bg-risk-critical/[0.12] border border-risk-critical/30 flex items-center justify-center text-risk-critical">
               <Shield className="w-4 h-4" />
             </div>
             <div className="text-left">
@@ -81,7 +81,7 @@ export const LoginPage = () => {
         <div className="bg-surface-2 border border-line rounded-tile p-6 space-y-4">
           
           {errorMessage && (
-            <div className="p-3 rounded-lg bg-risk-critical/[0.12] border border-risk-critical/30 flex items-start gap-2.5 text-xs text-risk-critical">
+            <div className="p-3 rounded-tile bg-risk-critical/[0.12] border border-risk-critical/30 flex items-start gap-2.5 text-xs text-risk-critical">
               <AlertCircle className="w-4 h-4 text-risk-critical shrink-0 mt-0.5" />
               <span>{errorMessage}</span>
             </div>
@@ -106,7 +106,7 @@ export const LoginPage = () => {
                   autoComplete="username"
                   required
                   disabled={loading}
-                  className="w-full pl-9 pr-3 py-2 bg-surface-2 border border-line rounded-lg text-xs text-label placeholder-label-3 focus:outline-none focus:border-line transition-colors tabular-nums disabled:opacity-50"
+                  className="w-full pl-9 pr-3 py-2 bg-surface-2 border border-line rounded-field text-xs text-label placeholder-label-3 focus:outline-none focus:border-line transition-colors tabular-nums disabled:opacity-50"
                 />
               </div>
             </div>
@@ -137,7 +137,7 @@ export const LoginPage = () => {
                   autoComplete="current-password"
                   required
                   disabled={loading}
-                  className="w-full pl-9 pr-9 py-2 bg-surface-2 border border-line rounded-lg text-xs text-label placeholder-label-3 focus:outline-none focus:border-line transition-colors disabled:opacity-50 tabular-nums"
+                  className="w-full pl-9 pr-9 py-2 bg-surface-2 border border-line rounded-field text-xs text-label placeholder-label-3 focus:outline-none focus:border-line transition-colors disabled:opacity-50 tabular-nums"
                 />
                 <button
                   type="button"
@@ -154,7 +154,7 @@ export const LoginPage = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 px-4 bg-surface-2 hover:bg-[#1f3254] text-label border border-line rounded-lg text-xs tabular-nums font-semibold flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
+              className="w-full py-2.5 px-4 bg-surface-2 hover:bg-[#1f3254] text-label rounded-full text-xs tabular-nums font-semibold flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
             >
               {loading ? <span>Authenticating...</span> : <><span>Sign In</span><ArrowRight className="w-3.5 h-3.5 text-label-2" /></>}
             </button>
@@ -193,7 +193,7 @@ export const LoginPage = () => {
                   key={acc.role}
                   type="button"
                   onClick={() => handleQuickFill(acc)}
-                  className="w-full p-1.5 rounded-lg bg-surface-2 hover:bg-surface-2 border border-line text-left flex items-center justify-between transition-colors tabular-nums text-xs"
+                  className="w-full p-1.5 rounded-tile bg-surface-2 hover:bg-surface-2 text-left flex items-center justify-between transition-colors tabular-nums text-xs"
                 >
                   <span className="text-label font-semibold">{acc.role}</span>
                   <span className="text-label-2 text-xs">{acc.identifier}</span>

@@ -41,7 +41,7 @@ export const AlertsPage = () => {
         </div>
 
         {/* Filter Pills */}
-        <div className="flex items-center gap-1.5 bg-surface p-1.5 rounded-tile border border-line text-xs self-start sm:self-center">
+        <div className="flex items-center gap-1.5 bg-surface p-1.5 rounded-full border border-line text-xs self-start sm:self-center">
           {[
             { id: 'ALL', label: 'All' },
             { id: 'CRITICAL', label: 'Critical' },
@@ -51,7 +51,7 @@ export const AlertsPage = () => {
             <button
               key={cat.id}
               onClick={() => setCategoryFilter(cat.id)}
-              className={`px-3.5 py-1.5 rounded-lg transition-colors font-medium ${
+              className={`px-3.5 py-1.5 rounded-full transition-colors font-medium ${
                 categoryFilter === cat.id
                   ? 'bg-surface-2 text-label font-semibold'
                   : 'text-label-2 hover:text-label'
@@ -75,7 +75,7 @@ export const AlertsPage = () => {
           </div>
           <button
             onClick={() => refreshAllData()}
-            className="px-3.5 py-1.5 bg-risk-critical/[0.12] hover:bg-risk-critical/[0.12] border border-risk-critical/30 rounded-tile font-semibold text-label text-xs transition shrink-0 self-start sm:self-auto flex items-center gap-1.5"
+            className="px-3.5 py-1.5 bg-risk-critical/[0.12] hover:bg-risk-critical/[0.12] border border-risk-critical/30 rounded-full font-semibold text-label text-xs transition shrink-0 self-start sm:self-auto flex items-center gap-1.5"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             Retry

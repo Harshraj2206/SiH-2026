@@ -66,7 +66,7 @@ export const DataSourcesPage = () => {
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-risk-low " />
             <h1 className="text-xl font-semibold text-label">Authoritative Data Sources & Provenance Registry</h1>
-            <span className="text-xs tabular-nums font-semibold px-2 py-0.5 rounded bg-risk-low/[0.12] text-risk-low border border-risk-low/30">
+            <span className="text-xs tabular-nums font-semibold px-2 py-0.5 rounded-full bg-risk-low/[0.12] text-risk-low border border-risk-low/30">
               PRODUCTION INGESTION
             </span>
           </div>
@@ -77,7 +77,7 @@ export const DataSourcesPage = () => {
 
         <button
           onClick={fetchSources}
-          className="px-4 py-2 bg-surface-2 hover:bg-surface-2 text-label hover:text-label rounded-tile text-xs font-semibold border border-line flex items-center gap-1.5 transition-colors self-start md:self-center"
+          className="px-4 py-2 bg-surface-2 hover:bg-surface-2 text-label hover:text-label rounded-full text-xs font-semibold flex items-center gap-1.5 transition-colors self-start md:self-center"
         >
           <RefreshCw className={`w-3.5 h-3.5 text-label-2 ${loading ? 'animate-spin' : ''}`} />
           <span>Refresh API Status</span>
@@ -310,7 +310,7 @@ export const DataSourcesPage = () => {
               step="0.0001"
               value={testLat}
               onChange={(e) => setTestLat(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-page border border-line rounded-tile text-xs text-label tabular-nums focus:outline-none focus:border-line"
+              className="w-full px-3.5 py-2.5 bg-page border border-line rounded-field text-xs text-label tabular-nums focus:outline-none focus:border-line"
             />
           </div>
 
@@ -322,7 +322,7 @@ export const DataSourcesPage = () => {
               step="0.0001"
               value={testLng}
               onChange={(e) => setTestLng(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-page border border-line rounded-tile text-xs text-label tabular-nums focus:outline-none focus:border-line"
+              className="w-full px-3.5 py-2.5 bg-page border border-line rounded-field text-xs text-label tabular-nums focus:outline-none focus:border-line"
             />
           </div>
 
@@ -330,7 +330,7 @@ export const DataSourcesPage = () => {
             <button
               type="submit"
               disabled={inspecting}
-              className="w-full py-2.5 px-4 bg-surface-2 text-label rounded-tile text-xs font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+              className="w-full py-2.5 px-4 bg-surface-2 text-label rounded-full text-xs font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-50"
             >
               <Search className={`w-3.5 h-3.5 ${inspecting ? 'animate-spin' : ''}`} />
               <span>{inspecting ? 'Querying Live Feeds...' : 'Inspect Live Telemetry'}</span>
@@ -347,7 +347,7 @@ export const DataSourcesPage = () => {
                 <span className="text-xs font-semibold text-label">Live Ingested Observation for Location</span>
                 <span className="text-xs tabular-nums text-label-2">({inspectResult.coordinates.lat}°N, {inspectResult.coordinates.lng}°E)</span>
               </div>
-              <span className={`text-xs tabular-nums font-semibold px-2 py-0.5 rounded ${
+              <span className={`text-xs tabular-nums font-semibold px-2 py-0.5 rounded-full ${
                 inspectResult.risk_level === 'CRITICAL' ? 'bg-risk-critical/[0.12] text-risk-critical border border-risk-critical/30' :
                 inspectResult.risk_level === 'HIGH' ? 'bg-risk-moderate/[0.12] text-risk-moderate border border-risk-moderate/30' :
                 'bg-risk-low/[0.12] text-risk-low border border-risk-low/30'

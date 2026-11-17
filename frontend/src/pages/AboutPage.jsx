@@ -31,7 +31,7 @@ export const AboutPage = () => {
             <Shield className="w-5 h-5" />
           </div>
           <h1 className="text-xl font-semibold text-label">Smart India Hackathon 2026 Reference & Architecture</h1>
-          <span className="text-xs px-2.5 py-0.5 rounded tabular-nums font-semibold bg-risk-critical/[0.12] text-risk-critical border border-risk-critical/30">
+          <span className="text-xs px-2.5 py-0.5 rounded-full tabular-nums font-semibold bg-risk-critical/[0.12] text-risk-critical border border-risk-critical/30">
             SIH26001
           </span>
         </div>

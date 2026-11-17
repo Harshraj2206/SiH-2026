@@ -63,7 +63,7 @@ export const ForgotPasswordPage = () => {
               </p>
               <Link
                 to="/login"
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-tile bg-surface-2 hover:bg-surface-2 text-xs font-semibold text-label transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-surface-2 hover:bg-surface-2 text-xs font-semibold text-label transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />
                 <span>Return to Sign In</span>
@@ -85,7 +85,7 @@ export const ForgotPasswordPage = () => {
                     placeholder="officer@sdim.ner.gov.in or resident@..."
                     required
                     disabled={loading}
-                    className="w-full pl-10 pr-4 py-3 bg-page border border-line rounded-tile text-sm text-label placeholder-label-3 focus:outline-none focus:border-risk-critical/30 tabular-nums"
+                    className="w-full pl-10 pr-4 py-3 bg-page border border-line rounded-field text-sm text-label placeholder-label-3 focus:outline-none focus:border-risk-critical/30 tabular-nums"
                   />
                 </div>
               </div>
@@ -93,7 +93,7 @@ export const ForgotPasswordPage = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3.5 px-4 bg-surface-2 text-label rounded-tile text-sm font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+                className="w-full py-3.5 px-4 bg-surface-2 text-label rounded-full text-sm font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-50"
               >
                 {loading ? <span>Submitting...</span> : (
                   <>

@@ -25,13 +25,13 @@ export const LandingPage = () => {
       {/* Top Navbar */}
       <nav className="h-14 border-b border-line px-6 lg:px-12 flex items-center justify-between sticky top-0 bg-surface-2 backdrop-blur-md z-30">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-risk-critical/[0.12] border border-risk-critical/30 flex items-center justify-center text-risk-critical">
+          <div className="w-8 h-8 rounded-tile bg-risk-critical/[0.12] border border-risk-critical/30 flex items-center justify-center text-risk-critical">
             <Shield className="w-4 h-4" />
           </div>
           <div>
             <div className="flex items-center gap-1.5 leading-none">
               <span className="font-semibold text-sm text-label">LANDSAFE</span>
-              <span className="text-xs px-1.5 py-0.2 rounded tabular-nums font-semibold bg-surface-2 text-label-2 border border-line">
+              <span className="text-xs px-1.5 py-0.2 rounded-full tabular-nums font-semibold bg-surface-2 text-label-2 border border-line">
                 SIH26001
               </span>
             </div>
@@ -41,7 +41,7 @@ export const LandingPage = () => {
         <div className="flex items-center gap-3">
           <Link
             to="/sos"
-            className="px-3 py-1 bg-risk-critical/[0.12] hover:bg-risk-critical/[0.12] text-risk-critical border border-risk-critical/30 rounded-md text-xs font-semibold tabular-nums flex items-center gap-1.5 transition-colors"
+            className="px-3 py-1 bg-risk-critical/[0.12] hover:bg-risk-critical/[0.12] text-risk-critical border border-risk-critical/30 rounded-full text-xs font-semibold tabular-nums flex items-center gap-1.5 transition-colors"
           >
             <Radio className="w-3.5 h-3.5 text-risk-critical" />
             <span>SOS</span>
@@ -49,7 +49,7 @@ export const LandingPage = () => {
 
           <Link
             to="/overview"
-            className="px-3.5 py-1.5 bg-surface-2 hover:bg-[#182744] text-label hover:text-label border border-line rounded-md text-xs tabular-nums font-semibold flex items-center gap-1.5 transition-colors"
+            className="px-3.5 py-1.5 bg-surface-2 hover:bg-[#182744] text-label hover:text-label rounded-full text-xs tabular-nums font-semibold flex items-center gap-1.5 transition-colors"
           >
             <span>Command Center</span>
             <ChevronRight className="w-3.5 h-3.5 text-label-2" />
@@ -80,7 +80,7 @@ export const LandingPage = () => {
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3.5">
           <Link
             to="/overview"
-            className="px-6 py-2.5 bg-surface-2 hover:bg-[#1f3254] text-label border border-line rounded-lg text-sm tabular-nums font-semibold flex items-center gap-2 transition-colors"
+            className="px-6 py-2.5 bg-surface-2 hover:bg-[#1f3254] text-label rounded-full text-sm tabular-nums font-semibold flex items-center gap-2 transition-colors"
           >
             <span>GET STARTED</span>
             <ArrowRight className="w-4 h-4 text-label-2" />
@@ -88,7 +88,7 @@ export const LandingPage = () => {
 
           <Link
             to="/sos"
-            className="px-6 py-2.5 bg-risk-critical/[0.12] hover:bg-risk-critical/[0.12] text-risk-critical hover:text-label border border-risk-critical/30 rounded-lg text-sm tabular-nums font-semibold flex items-center gap-2 transition-colors"
+            className="px-6 py-2.5 bg-risk-critical/[0.12] hover:bg-risk-critical/[0.12] text-risk-critical hover:text-label border border-risk-critical/30 rounded-full text-sm tabular-nums font-semibold flex items-center gap-2 transition-colors"
           >
             <Radio className="w-4 h-4 text-risk-critical" />
             <span>EMERGENCY SOS</span>
@@ -111,7 +111,7 @@ export const LandingPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {/* 1. Predict */}
             <div className="bg-surface-2 border border-line p-5 rounded-tile space-y-2.5">
-              <div className="w-9 h-9 rounded-lg bg-surface-2 border border-line flex items-center justify-center text-label-2">
+              <div className="w-9 h-9 rounded-tile bg-surface-2 border border-line flex items-center justify-center text-label-2">
                 <Cpu className="w-4 h-4" />
               </div>
               <h3 className="text-sm font-semibold text-label">AI Hazard Prediction</h3>
@@ -122,7 +122,7 @@ export const LandingPage = () => {
 
             {/* 2. Route */}
             <div className="bg-surface-2 border border-line p-5 rounded-tile space-y-2.5">
-              <div className="w-9 h-9 rounded-lg bg-surface-2 border border-line flex items-center justify-center text-risk-low">
+              <div className="w-9 h-9 rounded-tile bg-surface-2 border border-line flex items-center justify-center text-risk-low">
                 <Navigation className="w-4 h-4" />
               </div>
               <h3 className="text-sm font-semibold text-label">Safe Route Planner</h3>
@@ -133,7 +133,7 @@ export const LandingPage = () => {
 
             {/* 3. Rescue */}
             <div className="bg-surface-2 border border-line p-5 rounded-tile space-y-2.5">
-              <div className="w-9 h-9 rounded-lg bg-surface-2 border border-line flex items-center justify-center text-risk-critical">
+              <div className="w-9 h-9 rounded-tile bg-surface-2 border border-line flex items-center justify-center text-risk-critical">
                 <Users className="w-4 h-4" />
               </div>
               <h3 className="text-sm font-semibold text-label">Emergency Coordination</h3>

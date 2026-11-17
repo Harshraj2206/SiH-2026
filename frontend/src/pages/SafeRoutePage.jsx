@@ -302,12 +302,12 @@ export const SafeRoutePage = () => {
     <div className="space-y-4">
       
       {/* Top Header & Search Console */}
-      <div className="bg-surface border border-line p-3.5 rounded-lg space-y-3">
+      <div className="bg-surface border border-line p-3.5 rounded-tile space-y-3">
         
         {/* Header Bar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-line pb-2.5">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-md bg-risk-low/[0.12] border border-risk-low/30 flex items-center justify-center text-risk-low">
+            <div className="w-8 h-8 rounded-tile bg-risk-low/[0.12] border border-risk-low/30 flex items-center justify-center text-risk-low">
               <Navigation className="w-4 h-4" />
             </div>
             <div>
@@ -321,10 +321,10 @@ export const SafeRoutePage = () => {
           </div>
 
           {/* Mode Switcher */}
-          <div className="flex items-center bg-surface-2 p-0.5 rounded-md border border-line text-xs">
+          <div className="flex items-center bg-surface-2 p-0.5 rounded-tile border border-line text-xs">
             <button
               onClick={() => { setRoutingMode('global'); setIsEvacuating(false); }}
-              className={`px-3 py-1 rounded transition-colors ${
+              className={`px-3 py-1 rounded-full transition-colors ${
                 routingMode === 'global' ? 'bg-surface-2 text-label font-semibold' : 'text-label-2 hover:text-label'
               }`}
             >
@@ -332,7 +332,7 @@ export const SafeRoutePage = () => {
             </button>
             <button
               onClick={() => { setRoutingMode('preset'); setIsEvacuating(false); }}
-              className={`px-3 py-1 rounded transition-colors ${
+              className={`px-3 py-1 rounded-full transition-colors ${
                 routingMode === 'preset' ? 'bg-surface-2 text-label font-semibold' : 'text-label-2 hover:text-label'
               }`}
             >
@@ -347,7 +347,7 @@ export const SafeRoutePage = () => {
             <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-center">
               
               {/* Origin Input */}
-              <div className="md:col-span-5 flex items-center bg-surface-2 border border-line focus-within:border-line rounded-md px-2.5 py-1.5">
+              <div className="md:col-span-5 flex items-center bg-surface-2 border border-line focus-within:border-line rounded-tile px-2.5 py-1.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-accent mr-2 shrink-0" />
                 <input
                   type="text"
@@ -363,7 +363,7 @@ export const SafeRoutePage = () => {
                 <button
                   type="button"
                   onClick={handleSwapLocations}
-                  className="p-1.5 rounded-md bg-surface-2 hover:bg-surface-2 text-label-2 hover:text-label border border-line transition-colors"
+                  className="p-1.5 rounded-full bg-surface-2 hover:bg-surface-2 text-label-2 hover:text-label transition-colors"
                   title={t('swap_locations') || 'Swap Origin and Destination'}
                 >
                   <ArrowUpDown className="w-3.5 h-3.5" />
@@ -371,7 +371,7 @@ export const SafeRoutePage = () => {
               </div>
 
               {/* Destination Input */}
-              <div className="md:col-span-4 flex items-center bg-surface-2 border border-line focus-within:border-risk-low/30 rounded-md px-2.5 py-1.5">
+              <div className="md:col-span-4 flex items-center bg-surface-2 border border-line focus-within:border-risk-low/30 rounded-tile px-2.5 py-1.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-risk-low mr-2 shrink-0" />
                 <input
                   type="text"
@@ -387,7 +387,7 @@ export const SafeRoutePage = () => {
                 <button
                   type="submit"
                   disabled={calculating}
-                  className="w-full py-1.5 px-3 bg-accent hover:bg-accent disabled:opacity-50 text-label rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+                  className="w-full py-1.5 px-3 bg-accent hover:bg-accent disabled:opacity-50 text-label rounded-full text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
                 >
                   <Navigation className={`w-3.5 h-3.5 ${calculating ? 'animate-spin' : ''}`} />
                   <span>{calculating ? (t('routing_in_progress') || 'Calculating...') : (t('route_calculate_btn') || 'Route')}</span>
@@ -397,7 +397,7 @@ export const SafeRoutePage = () => {
                   type="button"
                   onClick={handleUseCurrentLocation}
                   disabled={calculating}
-                  className="p-1.5 bg-surface-2 hover:bg-surface-2 text-label-2 hover:text-label border border-line rounded-md transition-colors shrink-0"
+                  className="p-1.5 bg-surface-2 hover:bg-surface-2 text-label-2 hover:text-label rounded-full transition-colors shrink-0"
                   title={t('use_my_gps') || 'Use My Current GPS'}
                 >
                   <Crosshair className="w-3.5 h-3.5 text-label-2" />
@@ -417,7 +417,7 @@ export const SafeRoutePage = () => {
                     setDestQuery(c.d);
                     handleExecuteGlobalRoute(c.o, c.d);
                   }}
-                  className="px-2 py-0.5 rounded bg-surface-2 hover:bg-surface-2 text-label-2 hover:text-label border border-line shrink-0 transition-colors"
+                  className="px-2 py-0.5 rounded-full bg-surface-2 hover:bg-surface-2 text-label-2 hover:text-label shrink-0 transition-colors"
                 >
                   {c.label}
                 </button>
@@ -427,7 +427,7 @@ export const SafeRoutePage = () => {
         ) : (
           /* Preset Corridor Dropdowns */
           <div className="flex flex-wrap items-center gap-3 text-xs">
-            <div className="flex items-center gap-1.5 bg-surface-2 px-2.5 py-1.5 rounded-lg border border-line">
+            <div className="flex items-center gap-1.5 bg-surface-2 px-2.5 py-1.5 rounded-tile border border-line">
               <span className="text-label-2 text-xs">ORIGIN:</span>
               <select
                 value={startNode}
@@ -453,7 +453,7 @@ export const SafeRoutePage = () => {
 
             <ArrowRight className="w-3.5 h-3.5 text-label-3 hidden sm:block" />
 
-            <div className="flex items-center gap-1.5 bg-surface-2 px-2.5 py-1.5 rounded-lg border border-line">
+            <div className="flex items-center gap-1.5 bg-surface-2 px-2.5 py-1.5 rounded-tile border border-line">
               <span className="text-label-2 text-xs">DESTINATION:</span>
               <select
                 value={destNode}
@@ -473,7 +473,7 @@ export const SafeRoutePage = () => {
             <button
               onClick={handleCalculatePresetRoute}
               disabled={calculating}
-              className="px-4 py-1.5 bg-surface-2 hover:bg-[#1f3254] text-label border border-line rounded-lg text-xs font-semibold transition-colors"
+              className="px-4 py-1.5 bg-surface-2 hover:bg-[#1f3254] text-label rounded-full text-xs font-semibold transition-colors"
             >
               {calculating ? 'Analyzing...' : 'Recalculate'}
             </button>
@@ -482,7 +482,7 @@ export const SafeRoutePage = () => {
       </div>
 
       {errorMsg && (
-        <div className="p-2.5 rounded-lg bg-risk-critical/[0.12] border border-risk-critical/30 text-risk-critical text-xs tabular-nums flex items-center gap-2">
+        <div className="p-2.5 rounded-tile bg-risk-critical/[0.12] border border-risk-critical/30 text-risk-critical text-xs tabular-nums flex items-center gap-2">
           <AlertTriangle className="w-4 h-4 text-risk-critical shrink-0" />
           <span>{errorMsg}</span>
         </div>
@@ -505,12 +505,12 @@ export const SafeRoutePage = () => {
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="text-xs px-2 py-0.5 rounded font-semibold bg-risk-low/[0.12] text-risk-low border border-risk-low/30">
+              <span className="text-xs px-2 py-0.5 rounded-full font-semibold bg-risk-low/[0.12] text-risk-low border border-risk-low/30">
                 {routeResult.safe_route.distance_km} KM • ~{routeResult.safe_route.travel_time_min} MIN
               </span>
               <button
                 onClick={() => setIsEvacuating(false)}
-                className="p-1 text-label-2 hover:text-label rounded bg-surface-2 border border-line"
+                className="p-1 text-label-2 hover:text-label rounded-full bg-surface-2 "
                 title="Exit Evacuation Mode"
               >
                 <X className="w-4 h-4" />
@@ -519,10 +519,10 @@ export const SafeRoutePage = () => {
           </div>
 
           {currentSegment && (
-            <div className="bg-surface-2 p-3 rounded-lg border border-risk-low/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="bg-surface-2 p-3 rounded-tile border border-risk-low/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs px-1.5 py-0.2 rounded font-semibold bg-surface-2 text-label-2 border border-line">
+                  <span className="text-xs px-1.5 py-0.2 rounded-full font-semibold bg-surface-2 text-label-2 border border-line">
                     STEP {currentStepIndex + 1} OF {totalSegments}
                   </span>
                   <span className="text-risk-low font-semibold text-xs">
@@ -541,14 +541,14 @@ export const SafeRoutePage = () => {
                 <button
                   onClick={() => setCurrentStepIndex(Math.max(0, currentStepIndex - 1))}
                   disabled={currentStepIndex === 0}
-                  className="px-2.5 py-1.5 bg-surface-2 hover:bg-[#182744] text-label-2 rounded border border-line text-xs font-semibold disabled:opacity-40"
+                  className="px-2.5 py-1.5 bg-surface-2 hover:bg-[#182744] text-label-2 rounded-full text-xs font-semibold disabled:opacity-40"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setCurrentStepIndex(Math.min(totalSegments - 1, currentStepIndex + 1))}
                   disabled={currentStepIndex === totalSegments - 1}
-                  className="px-3 py-1.5 bg-risk-low hover:bg-risk-low text-label rounded border border-risk-low/30 text-xs font-semibold flex items-center gap-1 disabled:opacity-40"
+                  className="px-3 py-1.5 bg-risk-low hover:bg-risk-low text-label rounded-full border border-risk-low/30 text-xs font-semibold flex items-center gap-1 disabled:opacity-40"
                 >
                   <span>NEXT STEP</span>
                   <ChevronRight className="w-4 h-4" />
@@ -603,7 +603,7 @@ export const SafeRoutePage = () => {
                     <span className="w-2 h-2 rounded-full bg-risk-low" />
                     <span className="text-xs font-semibold text-label ">ROUTE SUMMARY</span>
                   </div>
-                  <span className="text-xs px-2 py-0.5 rounded font-semibold bg-risk-low/[0.12] text-risk-low border border-risk-low/30">
+                  <span className="text-xs px-2 py-0.5 rounded-full font-semibold bg-risk-low/[0.12] text-risk-low border border-risk-low/30">
                     {routeResult.safe_route.safety_level}
                   </span>
                 </div>
@@ -630,7 +630,7 @@ export const SafeRoutePage = () => {
                 {/* Evacuation Mode CTA */}
                 <button
                   onClick={() => setIsEvacuating(true)}
-                  className={`w-full py-2 rounded-tile text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors ${
+                  className={`w-full py-2 rounded-full text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors ${
                     isEvacuating
                       ? 'bg-surface-2 text-risk-low border border-risk-low/30'
                       : 'bg-accent hover:opacity-90 text-white  '
@@ -661,7 +661,7 @@ export const SafeRoutePage = () => {
                     >
                       <div className="space-y-0.5 min-w-0">
                         <div className="flex items-center gap-1.5">
-                          <span className="tabular-nums text-xs px-1 bg-surface-2 text-risk-low rounded">
+                          <span className="tabular-nums text-xs px-1 bg-surface-2 text-risk-low rounded-full">
                             {idx + 1}
                           </span>
                           <span className="font-semibold text-label truncate">{seg.instruction || `${seg.from_name} → ${seg.to_name}`}</span>

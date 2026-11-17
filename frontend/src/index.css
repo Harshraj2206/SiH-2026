@@ -224,7 +224,7 @@
   background-color: #1C1C1E !important;
   color: #F5F5F7 !important;
   border: 1px solid #30363D !important;
-  border-radius: 6px !important;
+  border-radius: 12px !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
 }
 
@@ -417,7 +417,7 @@
   background-color: #FFFFFF !important;
   color: #1D1D1F !important;
   border: 1px solid #E2E8F0 !important;
-  border-radius: 8px !important;
+  border-radius: 12px !important;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
 }
 
@@ -648,4 +648,22 @@
     animation: none !important;
     transition: none !important;
   }
+}
+
+/* Map zoom buttons as an Apple-style rounded control */
+.leaflet-bar {
+  border: none !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+  background: rgb(var(--rgb-surface) / 0.85) !important;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+.leaflet-bar a {
+  background: transparent !important;
+  color: rgb(var(--rgb-label)) !important;
+  border-bottom: 1px solid rgb(var(--rgb-line)) !important;
+}
+.leaflet-bar a:last-child {
+  border-bottom: none !important;
 }

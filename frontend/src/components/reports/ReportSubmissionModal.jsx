@@ -138,7 +138,7 @@ export const ReportSubmissionModal = ({ isOpen, onClose }) => {
           <button
             onClick={onClose}
             disabled={submitting}
-            className="p-1.5 rounded-tile text-label-2 hover:text-label hover:bg-surface-2 transition-colors"
+            className="p-1.5 rounded-full text-label-2 hover:text-label hover:bg-surface-2 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -197,7 +197,7 @@ export const ReportSubmissionModal = ({ isOpen, onClose }) => {
                     setLongitude(z.center.lng);
                   }
                 }}
-                className="w-full px-3.5 py-2.5 bg-surface border border-line rounded-tile text-xs text-label focus:outline-none focus:border-risk-low/30 font-medium"
+                className="w-full px-3.5 py-2.5 bg-surface border border-line rounded-field text-xs text-label focus:outline-none focus:border-risk-low/30 font-medium"
               >
                 {(zones || []).map(z => (
                   <option key={z.zone_id} value={z.zone_id}>
@@ -242,7 +242,7 @@ export const ReportSubmissionModal = ({ isOpen, onClose }) => {
                 rows={3}
                 placeholder="Describe ground movement, width of cracks, falling rocks, or road blockages..."
                 required
-                className="w-full px-3.5 py-2.5 bg-surface border border-line rounded-tile text-xs text-label focus:outline-none focus:border-risk-low/30 placeholder-label-3 leading-relaxed"
+                className="w-full px-3.5 py-2.5 bg-surface border border-line rounded-field text-xs text-label focus:outline-none focus:border-risk-low/30 placeholder-label-3 leading-relaxed"
               />
             </div>
 

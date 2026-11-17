@@ -649,7 +649,7 @@ export const LeafletRiskMap = ({
         <div className="pointer-events-auto shrink-0">
           <button
             onClick={() => setShowLayerPanel(!showLayerPanel)}
-            className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 bg-surface border border-line hover:border-line text-label text-xs sm:text-xs font-medium rounded-full transition-all backdrop-blur-md active:scale-95"
+            className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 bg-surface text-label text-xs sm:text-xs font-medium rounded-full transition-all backdrop-blur-md active:scale-95"
           >
             <Layers className="w-3.5 h-3.5 text-label-2" />
             <span className="hidden sm:inline">{t('gis_layers') || 'GIS Layers'}</span>
@@ -680,10 +680,10 @@ export const LeafletRiskMap = ({
                 <button
                   key={key}
                   onClick={() => setActiveBasemap(key)}
-                  className={`py-1 px-2 rounded-lg text-xs border transition-colors text-left truncate ${
+                  className={`py-1 px-2 rounded-tile text-xs transition-colors text-left truncate ${
                     activeBasemap === key 
-                      ? 'bg-surface-2 border-line text-label-2 font-semibold' 
-                      : 'bg-surface-2 border-line text-label-2 hover:text-label'
+                      ? 'bg-surface-2 text-label-2 font-semibold' 
+                      : 'bg-surface-2 text-label-2 hover:text-label'
                   }`}
                 >
                   {item.label || item.name}
@@ -842,7 +842,7 @@ export const LeafletRiskMap = ({
                       setActiveLocationPin(null);
                       if (onSelectZone) onSelectZone(null);
                     }}
-                    className="w-full mt-1.5 px-2 py-1 bg-surface-2 hover:bg-surface-2 border border-line text-label rounded text-xs font-semibold transition-colors"
+                    className="w-full mt-1.5 px-2 py-1 bg-surface-2 hover:bg-surface-2 text-label rounded-full text-xs font-semibold transition-colors"
                   >
                     Remove Pin
                   </button>
@@ -932,7 +932,7 @@ export const LeafletRiskMap = ({
               <div className="p-2 space-y-1 min-w-[200px]">
                 <div className="flex items-center justify-between border-b border-line pb-1">
                   <span className="tabular-nums text-xs text-risk-moderate font-semibold">{inc.incident_id}</span>
-                  <span className="text-xs px-1 py-0.2 rounded font-semibold bg-surface-2 text-label-2">
+                  <span className="text-xs px-1 py-0.2 rounded-full font-semibold bg-surface-2 text-label-2">
                     {inc.status}
                   </span>
                 </div>
@@ -954,7 +954,7 @@ export const LeafletRiskMap = ({
               <div className="p-2 space-y-1 min-w-[220px]">
                 <div className="flex items-center justify-between border-b border-risk-critical/30 pb-1">
                   <span className="font-semibold text-risk-critical tabular-nums text-xs">🆘 {sos.sos_id}</span>
-                  <span className="text-xs px-1.5 py-0.2 rounded font-semibold bg-risk-critical text-label tabular-nums">
+                  <span className="text-xs px-1.5 py-0.2 rounded-full font-semibold bg-risk-critical text-label tabular-nums">
                     {sos.triage_priority}
                   </span>
                 </div>

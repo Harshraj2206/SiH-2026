@@ -93,7 +93,7 @@ export const Header = ({ onToggleSidebar }) => {
         <div className="relative">
           <button
             onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-            className="flex items-center gap-2 py-1 pl-1 pr-2 rounded-full hover:bg-surface-2 transition-colors text-left"
+            className="flex items-center gap-2 py-1 pl-1 pr-2 rounded-tile hover:bg-surface-2 transition-colors text-left"
           >
             <div className="w-7 h-7 rounded-full bg-surface-2 flex items-center justify-center text-xs font-semibold text-label">
               {currentUser?.full_name?.charAt(0) || 'U'}
@@ -121,7 +121,7 @@ export const Header = ({ onToggleSidebar }) => {
               <Link
                 to="/profile"
                 onClick={() => setUserDropdownOpen(false)}
-                className="mt-1 w-full px-2.5 py-1.5 rounded-lg text-[13px] flex items-center gap-2 text-label hover:bg-surface-2 transition-colors"
+                className="mt-1 w-full px-2.5 py-1.5 rounded-full text-[13px] flex items-center gap-2 text-label hover:bg-surface-2 transition-colors"
               >
                 <User className="w-4 h-4 text-label-2" strokeWidth={1.75} />
                 <span>Profile & Contacts</span>
@@ -132,7 +132,7 @@ export const Header = ({ onToggleSidebar }) => {
                   setUserDropdownOpen(false);
                   navigate('/login');
                 }}
-                className="w-full text-left px-2.5 py-1.5 rounded-lg text-[13px] flex items-center gap-2 text-risk-critical hover:bg-risk-critical/10 transition-colors"
+                className="w-full text-left px-2.5 py-1.5 rounded-tile text-[13px] flex items-center gap-2 text-risk-critical hover:bg-risk-critical/10 transition-colors"
               >
                 <LogOut className="w-4 h-4" strokeWidth={1.75} />
                 <span>Sign Out</span>
