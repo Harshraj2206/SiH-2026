@@ -1,6 +1,5 @@
 """
-LANDSLIDEGUARD SIH26001 - Data Sources & Real Geospatial Telemetry Inspector API
-Provides data provenance, freshness monitoring, reverse geocoding, and live coordinate inspection.
+Data sources list and the coordinate inspector (score any point in India from live data).
 """
 
 from typing import Dict, Any, Optional
@@ -29,70 +28,55 @@ class CoordinateInspectRequest(BaseModel):
 
 @router.get("/data-sources")
 async def get_data_sources_status() -> Dict[str, Any]:
-    """
-    Get live connection status, spatial resolution, and update frequency of all authoritative data sources.
-    """
-    now = datetime.now(timezone.utc).isoformat()
+    """The data sources LandSafe actually uses."""
     return {
-        "system_mode": "PRODUCTION_DATA_INGESTION",
-        "demo_mode_active": True,  # zones, facilities and catalog records are still demo seed data
-        "retrieved_at": now,
+        "retrieved_at": datetime.now(timezone.utc).isoformat(),
         "sources": [
             {
-                "id": "src-imd-meteo",
-                "name": "India Meteorological Department (IMD) / WMO High-Res Grid",
-                "category": "Meteorology & Precipitation",
-                "status": "CONNECTED",
-                "data_type": "Real-time Rainfall (1h, 24h, 72h), Temperature, Humidity, Wind",
-                "spatial_resolution": "0.1° (~10 km) Multi-Model ECMWF/IMD Reanalysis",
-                "update_frequency": "Every 15 Minutes (Cached)",
-                "provenance": "Official WMO-Compliant Open Meteorological Telemetry",
-                "last_successful_sync": now
+                "id": "open-meteo-weather",
+                "name": "Open-Meteo forecast API",
+                "category": "Rain, temperature, humidity, soil moisture",
+                "data_type": "Rain in the last 1, 24 and 72 hours; hourly forecast; topsoil (0-7 cm) moisture",
+                "spatial_resolution": "Global weather models, about 10-25 km grid",
+                "update_frequency": "Fetched every 15 minutes",
+                "url": "https://open-meteo.com",
             },
             {
-                "id": "src-nasa-smap",
-                "name": "NASA SMAP (Soil Moisture Active Passive) / ERA5-Land",
-                "category": "Volumetric Soil Water Saturation",
-                "status": "CONNECTED",
-                "data_type": "Topsoil (0-7 cm) & Root-Zone (7-28 cm) Moisture (m³/m³)",
-                "spatial_resolution": "9 km (~0.08° Grid)",
-                "update_frequency": "Hourly",
-                "provenance": "NASA L-band Microwave Radiometer Radiance Inversion",
-                "last_successful_sync": now
+                "id": "copernicus-dem",
+                "name": "Copernicus DEM GLO-90 (via Open-Meteo elevation API)",
+                "category": "Elevation and slope",
+                "data_type": "Elevation; slope from three points about 110 m apart",
+                "spatial_resolution": "90 m",
+                "update_frequency": "Static",
+                "url": "https://open-meteo.com/en/docs/elevation-api",
             },
             {
-                "id": "src-srtm-dem",
-                "name": "SRTM (Shuttle Radar Topography Mission) 1-ArcSecond",
-                "category": "Digital Elevation Model & Slope Gradient",
-                "status": "AVAILABLE",
-                "data_type": "Ground Elevation (meters AMSL) & Calculated Slope (degrees)",
-                "spatial_resolution": "30 meters (1 Arc-Second / 0.000277°)",
-                "update_frequency": "Static Georeferenced DEM (EGM96 Geoid)",
-                "provenance": "NASA / USGS SRTM Global Topography Dataset",
-                "last_successful_sync": now
+                "id": "nasa-glc",
+                "name": "NASA Global Landslide Catalog",
+                "category": "Past landslides",
+                "data_type": "1,265 Indian landslides, 2007-2016 (date, place, trigger)",
+                "spatial_resolution": "Point locations (accuracy given per event)",
+                "update_frequency": "Static copy in this app",
+                "url": "https://catalog.data.gov/dataset/global-landslide-catalog-export",
             },
             {
-                "id": "src-gsi-nlsm",
-                "name": "Geological Survey of India (GSI) NLSM / NASA GLC",
-                "category": "Historical Landslide Inventory",
-                "status": "AVAILABLE",
-                "data_type": "Historical Slope Failures, Debris Flows, Road Blockages",
-                "spatial_resolution": "Point-based GPS Coordinates & Polygon Ghats",
-                "update_frequency": "Annual Government Publication",
-                "provenance": "Ministry of Mines / Geological Survey of India",
-                "last_successful_sync": now
+                "id": "nasa-eonet",
+                "name": "NASA EONET",
+                "category": "Open natural events",
+                "data_type": "Open landslide and flood events inside India",
+                "spatial_resolution": "Point locations",
+                "update_frequency": "Fetched every 10 minutes",
+                "url": "https://eonet.gsfc.nasa.gov",
             },
             {
-                "id": "src-osm-roads",
-                "name": "OpenStreetMap (OSM) / Overpass Road Network",
-                "category": "Geospatial Routing & Highway Corridors",
-                "status": "CONNECTED",
-                "data_type": "National Highways (NH-6, NH-10, NH-29) & Mountain Ghat Bypasses",
-                "spatial_resolution": "Vector Topology (Sub-meter Accuracy)",
-                "update_frequency": "Real-time Vector Routing Graph",
-                "provenance": "OpenStreetMap Contributors & Ministry of Road Transport",
-                "last_successful_sync": now
-            }
+                "id": "osm",
+                "name": "OpenStreetMap",
+                "category": "Places, hospitals, shelters, roads",
+                "data_type": "Place names (Nominatim), facilities (Overpass), driving routes (OSRM)",
+                "spatial_resolution": "Map data",
+                "update_frequency": "Live",
+                "url": "https://www.openstreetmap.org",
+            },
         ]
     }
 
@@ -102,12 +86,11 @@ def inspect_coordinate_telemetry(payload: CoordinateInspectRequest) -> Dict[str,
     """
     Live Coordinate Inspector:
     Given any latitude/longitude clicked on the map or user GPS position:
-    1. Resolves real location name, district, and state using reverse geocoding.
-    2. Fetches real live weather & rainfall accumulations from IMD / Open-Meteo.
-    3. Queries real SRTM DEM elevation and calculates physical slope gradient.
-    4. Fetches real volumetric soil moisture.
-    5. Computes historical landslide proximity score from GSI catalog.
-    6. Evaluates Random Forest ML Hazard Model on real inputs.
+    1. Place name from reverse geocoding (OpenStreetMap Nominatim).
+    2. Live weather, rain and soil moisture from Open-Meteo.
+    3. Elevation and slope from the Copernicus DEM (via Open-Meteo).
+    4. Landslides within 35 km from the NASA Global Landslide Catalog.
+    5. Random Forest score on these inputs (India only).
     """
     lat, lng = payload.latitude, payload.longitude
     use_client_weather(lat, lng, payload.weather)
@@ -127,7 +110,7 @@ def inspect_coordinate_telemetry(payload: CoordinateInspectRequest) -> Dict[str,
     prediction, forecast_trend = score_features(built)
 
     ml_score = prediction.get("risk_score")
-    risk_level = prediction.get("risk_level", "DATA_INSUFFICIENT")
+    risk_level = prediction.get("risk_level")
 
     zone_id = f"GPS-{round(lat, 2)}-{round(lng, 2)}"
 
@@ -140,18 +123,18 @@ def inspect_coordinate_telemetry(payload: CoordinateInspectRequest) -> Dict[str,
         "formatted_address": geo["formatted_address"],
         "center": {"lat": lat, "lng": lng},
         "coordinates": {"lat": lat, "lng": lng},
-        "elevation_amsl": dem.get("elevation_meters_amsl"),
+        "elevation_amsl": f["elevation_amsl"],
         "slope_deg": slope_deg,
         "temperature_c": weather.get("temperature_c"),
         "humidity_pct": weather.get("humidity_pct"),
-        "is_day": weather.get("is_day", 1),
-        "cloud_cover_pct": weather.get("cloud_cover_pct", 0),
-        "snowfall_cm": weather.get("snowfall_cm", 0.0),
-        "condition": weather.get("condition", "Unknown"),
+        "is_day": weather.get("is_day"),
+        "cloud_cover_pct": weather.get("cloud_cover_pct"),
+        "snowfall_cm": weather.get("snowfall_cm"),
+        "condition": weather.get("condition"),
         "weather_code": weather.get("weather_code"),
         "weather_source": weather.get("source"),
         "observation_time": weather.get("observation_time"),
-        "rainfall_1h": weather.get("rainfall_1h_mm", 0.0),
+        "rainfall_1h": weather.get("rainfall_1h_mm"),
         "rainfall_24h": rain_24h,
         "rainfall_72h": rain_72h,
         "soil_moisture": moisture,

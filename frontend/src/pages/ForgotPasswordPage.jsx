@@ -38,8 +38,7 @@ export const ForgotPasswordPage = () => {
             </div>
             <span className="font-semibold text-lg text-label">LandSafe</span>
           </Link>
-          <h2 className="text-2xl font-semibold text-label">Password Recovery</h2>
-          <p className="text-xs text-label-2">Enter your registered email address to request account recovery instructions</p>
+          <h2 className="text-2xl font-semibold text-label">Forgot password</h2>
         </div>
 
         <div className="bg-surface backdrop-blur-xl rounded-card p-6 sm:p-8 space-y-6">
@@ -48,8 +47,8 @@ export const ForgotPasswordPage = () => {
           <div className="p-3.5 rounded-card bg-risk-moderate/[0.12] border-risk-moderate/30 flex items-start gap-3 text-xs text-risk-moderate">
             <Info className="w-4 h-4 text-risk-moderate shrink-0 mt-0.5" />
             <div>
-              <span className="font-semibold block">Prototype Environment Notice:</span>
-              <span>SMTP / External email delivery is <strong>Not configured</strong> in this offline hackathon build. For testing, please use the pre-created jury credentials on the login screen.</span>
+              <span className="font-semibold block">Reset emails are not available yet</span>
+              <span>LandSafe cannot send email yet. To reset your password, contact the LandSafe administrator.</span>
             </div>
           </div>
 

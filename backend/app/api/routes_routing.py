@@ -58,6 +58,8 @@ def compute_global_route(payload: GlobalRouteRequest):
             dest_name=payload.dest_name or "Destination"
         )
         return res
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Global routing error: {str(e)}")
 

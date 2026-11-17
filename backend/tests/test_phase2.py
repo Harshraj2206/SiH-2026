@@ -1,4 +1,4 @@
-"""Phase 2 tests: persistence, real rain windows/forecast, NDVI parsing, shared features, zone refresh."""
+"""Phase 2 tests: persistence, real rain windows/forecast, shared features, zone refresh."""
 import io
 import json
 from datetime import datetime, timedelta
@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 
 from backend.app.main import app
 from backend.app.database.store import StateStore, db_store
-from backend.app.services import feature_builder, ndvi_service, weather_resolver, zone_refresh
+from backend.app.services import feature_builder, weather_resolver, zone_refresh
 
 client = TestClient(app)
 
@@ -57,13 +57,6 @@ def test_rain_windows_use_current_hour_and_forecast(monkeypatch):
     weather_resolver._WEATHER_CACHE.clear()
 
 
-# ---------- NDVI ----------
-def test_ndvi_parse_subset():
-    assert ndvi_service.parse_subset({"scale": "0.0001", "subset": [{"data": [7234]}]}) == 0.723
-    assert ndvi_service.parse_subset({"scale": "0.0001", "subset": [{"data": [-3000]}]}) is None
-    assert ndvi_service.parse_subset({}) is None
-
-
 # ---------- Shared features ----------
 def _fake_inputs(monkeypatch, rain=40.0):
     weather = {"rainfall_24h_mm": rain, "rainfall_72h_mm": None if rain is None else rain * 2,
@@ -74,14 +67,12 @@ def _fake_inputs(monkeypatch, rain=40.0):
     monkeypatch.setattr(feature_builder, "fetch_live_meteorology", lambda lat, lon: weather)
     monkeypatch.setattr(feature_builder, "get_terrain_elevation_and_slope",
                         lambda lat, lon: {"slope_deg": 28.0, "elevation_amsl": 900.0, "is_dynamic": True, "source": "dem"})
-    monkeypatch.setattr(feature_builder, "get_ndvi",
-                        lambda lat, lon: {"ndvi": 0.6, "date": "2026-11-01", "status": "LIVE", "source": "modis"})
 
 
 def test_shared_features_give_real_forecast(monkeypatch):
     _fake_inputs(monkeypatch)
     built = feature_builder.build_features(25.83, 91.89)
-    assert built["context"]["latitude"] == 25.83 and built["features"]["ndvi"] == 0.6
+    assert built["context"]["latitude"] == 25.83 and built["features"]["ndvi"] is None
     prediction, trend = feature_builder.score_features(built)
     assert prediction["risk_score"] is not None
     assert [t["timeframe"] for t in trend] == ["Current", "+6h", "+12h", "+24h"]
@@ -105,8 +96,10 @@ def test_inspector_and_zone_score_a_point_the_same(monkeypatch):
 
 
 def test_zone_keeps_last_known_values_when_live_data_missing(monkeypatch):
-    _fake_inputs(monkeypatch, rain=None)
     zone = db_store.zones["NER-011"]
+    _fake_inputs(monkeypatch)
+    zone_refresh.refresh_zone(zone, force=True)
+    _fake_inputs(monkeypatch, rain=None)
     before = zone["risk_score"]
     zone_refresh.refresh_zone(zone, force=True)
     assert zone["risk_score"] == before and before is not None

@@ -16,9 +16,7 @@ export function formatCoordinateFallback(lat, lng) {
   if (typeof lat !== 'number' || typeof lng !== 'number' || isNaN(lat) || isNaN(lng)) {
     return 'Location Unavailable';
   }
-  const latCard = lat >= 0 ? 'N' : 'S';
-  const lngCard = lng >= 0 ? 'E' : 'W';
-  return `Coordinates (${Math.abs(lat).toFixed(4)}°${latCard}, ${Math.abs(lng).toFixed(4)}°${lngCard})`;
+  return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
 }
 
 /**
@@ -46,6 +44,7 @@ export async function reverseGeocode(lat, lng) {
 
   const fallback = {
     displayName: formatCoordinateFallback(lat, lng),
+    isFallback: true,
     city: '',
     state: '',
     country: '',
@@ -56,7 +55,7 @@ export async function reverseGeocode(lat, lng) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 6000);
 
-    const url = `https://nominatim.openstreetmap.org/reverse?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}&format=json&zoom=14&addressdetails=1`;
+    const url = `https://nominatim.openstreetmap.org/reverse?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}&format=json&zoom=14&addressdetails=1&accept-language=en`;
     const response = await fetch(url, {
       signal: controller.signal,
       headers: {
@@ -68,7 +67,6 @@ export async function reverseGeocode(lat, lng) {
 
     if (!response.ok) {
       console.warn(`[ReverseGeocode] Nominatim returned HTTP ${response.status}`);
-      geocodeCache.set(cacheKey, fallback);
       return fallback;
     }
 
@@ -113,7 +111,6 @@ export async function reverseGeocode(lat, lng) {
     return result;
   } catch (err) {
     console.warn('[ReverseGeocode] Error or timeout querying Nominatim:', err.message);
-    geocodeCache.set(cacheKey, fallback);
     return fallback;
   }
 }

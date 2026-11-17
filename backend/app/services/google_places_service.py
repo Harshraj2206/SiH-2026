@@ -129,16 +129,16 @@ def _query_google_places_new(
                 directions_url = f"https://www.google.com/maps/dir/?api=1&origin={latitude},{longitude}&destination={p_lat},{p_lng}"
 
                 types_list = p.get("types", [])
-                facility_type = "Hospital / Medical Center"
+                facility_type = "Hospital"
                 fac_cat = "hospitals"
                 if "police" in types_list:
-                    facility_type = "Police Station"
+                    facility_type = "Police station"
                     fac_cat = "police"
                 elif "fire_station" in types_list:
-                    facility_type = "Fire & Rescue Station"
+                    facility_type = "Fire station"
                     fac_cat = "fire"
                 elif "community_center" in types_list:
-                    facility_type = "Evacuation & Community Shelter"
+                    facility_type = "Community centre"
                     fac_cat = "shelters"
                 elif category.lower() in ["police", "fire", "shelters"]:
                     fac_cat = category.lower()
@@ -254,10 +254,10 @@ def _query_google_places_legacy(
 
     if is_all:
         specs = [
-            ("hospital", "hospitals", "General Hospital"),
-            ("police", "police", "Police Station"),
-            ("fire_station", "fire", "Fire & Rescue Station"),
-            ("local_government_office", "shelters", "Evacuation & Community Shelter")
+            ("hospital", "hospitals", "Hospital"),
+            ("police", "police", "Police station"),
+            ("fire_station", "fire", "Fire station"),
+            ("community_center", "shelters", "Community centre")
         ]
         all_results = []
         with ThreadPoolExecutor(max_workers=4) as executor:
@@ -270,16 +270,16 @@ def _query_google_places_legacy(
         return all_results if all_results else None
     else:
         type_mapping = {
-            "hospitals": ("hospital", "hospitals", "General Hospital"),
-            "hospital": ("hospital", "hospitals", "General Hospital"),
+            "hospitals": ("hospital", "hospitals", "Hospital"),
+            "hospital": ("hospital", "hospitals", "Hospital"),
             "ambulance": ("hospital", "hospitals", "Ambulance / Hospital"),
-            "police": ("police", "police", "Police Station"),
-            "fire": ("fire_station", "fire", "Fire & Rescue Station"),
-            "shelters": ("local_government_office", "shelters", "Evacuation & Community Shelter"),
+            "police": ("police", "police", "Police station"),
+            "fire": ("fire_station", "fire", "Fire station"),
+            "shelters": ("community_center", "shelters", "Community centre"),
             "blood_bank": ("hospital", "hospitals", "Blood Bank / Hospital"),
-            "rescue": ("fire_station", "fire", "Fire & Rescue Station")
+            "rescue": ("fire_station", "fire", "Fire station")
         }
-        spec = type_mapping.get(category.lower(), ("hospital", "hospitals", "General Hospital"))
+        spec = type_mapping.get(category.lower(), ("hospital", "hospitals", "Hospital"))
         res = _query_google_places_legacy_single(latitude, longitude, radius_meters, spec[0], spec[1], spec[2], api_key)
         return res if res else None
 
@@ -401,19 +401,19 @@ def _query_open_geospatial_facilities(
 
                     amenity = tags.get("amenity", "")
                     if amenity in ["hospital"]:
-                        facility_type = "Government / General Hospital"
+                        facility_type = "Hospital"
                         fac_cat = "hospitals"
                     elif amenity in ["clinic"]:
-                        facility_type = "Medical Clinic / Trauma Center"
+                        facility_type = "Clinic"
                         fac_cat = "hospitals"
                     elif amenity in ["police"]:
-                        facility_type = "Police Station"
+                        facility_type = "Police station"
                         fac_cat = "police"
                     elif amenity in ["fire_station"]:
-                        facility_type = "Fire & Rescue Station"
+                        facility_type = "Fire station"
                         fac_cat = "fire"
                     elif amenity in ["shelter", "community_centre"]:
-                        facility_type = "Evacuation & Community Shelter"
+                        facility_type = "Community centre"
                         fac_cat = "shelters"
                     else:
                         facility_type = "Emergency Facility"
@@ -521,10 +521,10 @@ def _query_nominatim_facilities(
         if is_all:
             # Query all emergency resource amenities in parallel
             amenity_configs = [
-                ("hospital", "hospitals", "Government / General Hospital"),
-                ("police", "police", "Police Station"),
-                ("fire_station", "fire", "Fire & Rescue Station"),
-                ("community_centre", "shelters", "Evacuation & Community Shelter"),
+                ("hospital", "hospitals", "Hospital"),
+                ("police", "police", "Police station"),
+                ("fire_station", "fire", "Fire station"),
+                ("community_centre", "shelters", "Community centre"),
             ]
             all_results = []
             with ThreadPoolExecutor(max_workers=4) as executor:
@@ -542,15 +542,15 @@ def _query_nominatim_facilities(
             return all_results
         else:
             amenity_map = {
-                "hospitals": ("hospital", "hospitals", "Government / General Hospital"),
-                "hospital": ("hospital", "hospitals", "Government / General Hospital"),
-                "ambulance": ("hospital", "hospitals", "Government / General Hospital"),
-                "police": ("police", "police", "Police Station"),
-                "fire": ("fire_station", "fire", "Fire & Rescue Station"),
-                "shelters": ("community_centre", "shelters", "Evacuation & Community Shelter"),
-                "blood_bank": ("hospital", "hospitals", "Government / General Hospital")
+                "hospitals": ("hospital", "hospitals", "Hospital"),
+                "hospital": ("hospital", "hospitals", "Hospital"),
+                "ambulance": ("hospital", "hospitals", "Hospital"),
+                "police": ("police", "police", "Police station"),
+                "fire": ("fire_station", "fire", "Fire station"),
+                "shelters": ("community_centre", "shelters", "Community centre"),
+                "blood_bank": ("hospital", "hospitals", "Hospital")
             }
-            code, cat_key, dtype = amenity_map.get(category.lower(), ("hospital", "hospitals", "Government / General Hospital"))
+            code, cat_key, dtype = amenity_map.get(category.lower(), ("hospital", "hospitals", "Hospital"))
             return _fetch_single_amenity(code, cat_key, dtype)
 
     except Exception as e:
@@ -644,8 +644,8 @@ def discover_nearby_emergency_resources(
     # Save complete cumulative pool for this center & category
     _LOCATION_PLACES_POOL[pool_key] = deduped_places
 
-    # 5. Filter strictly within requested maximum radius: distance_km <= radius_km * 1.05
-    places = [p for p in deduped_places if p["distance_km"] <= (radius_km * 1.05)]
+    # 5. Keep only places within the requested radius
+    places = [p for p in deduped_places if p["distance_km"] <= radius_km]
 
     # 6. Optional Keyword Filtering
     if keyword and keyword.strip():
@@ -673,7 +673,7 @@ def discover_nearby_emergency_resources(
             "retrieved_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             "message": (
                 "Live real-time places discovered via official Google Places API" if "Google" in used_provider
-                else ("Live facilities discovered via verified open geospatial infrastructure. To use Google Places API, add GOOGLE_MAPS_API_KEY in environment." if not is_google_configured else "Google Places returned 0 places in radius; verified open geospatial facilities shown.")
+                else ("From OpenStreetMap." if not is_google_configured else "Google Places found nothing in this radius, so places come from OpenStreetMap.")
             )
         }
     }

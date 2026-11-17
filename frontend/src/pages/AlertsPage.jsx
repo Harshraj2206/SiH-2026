@@ -15,8 +15,8 @@ export const AlertsPage = () => {
   const getLocationName = (alert) => {
     if (alert.location) return alert.location;
     const match = (zones || []).find(z => z.zone_id === alert.zone_id);
-    if (match) return `${match.name}, ${match.district}`;
-    return alert.zone_id ? alert.zone_id.replace('NER-', 'Himachal Sector ') : 'Kullu Corridor, HP';
+    if (match) return [match.name, match.district, match.state].filter(Boolean).join(', ');
+    return alert.zone_name || null;
   };
 
   const filteredAlerts = (alerts || []).filter(
@@ -33,9 +33,9 @@ export const AlertsPage = () => {
             <Bell className="w-5 h-5 text-risk-critical" />
           </div>
           <div>
-            <h1 className="text-lg font-semibold text-label">Active Alerts & Warnings</h1>
+            <h1 className="text-lg font-semibold text-label">Alerts</h1>
             <p className="text-xs text-label-2 mt-0.5">
-              Active landslide advisories, meteorological early warnings, and critical slope alerts across monitored corridors.
+              Monitored zones the LandSafe model scores as high or critical risk, or moderate with verified ground reports. These are not official government warnings.
             </p>
           </div>
         </div>
@@ -69,7 +69,7 @@ export const AlertsPage = () => {
           <div className="flex items-center gap-2.5">
             <AlertTriangle className="w-5 h-5 text-risk-critical shrink-0" />
             <div>
-              <span className="font-semibold block">Advisory Telemetry Service Unavailable</span>
+              <span className="font-semibold block">Alerts could not be loaded</span>
               <span className="text-label-2 text-xs">{alertsError}</span>
             </div>
           </div>
@@ -114,17 +114,20 @@ export const AlertsPage = () => {
                 {alert.reason}
               </p>
 
-              <div className="flex items-center gap-1.5 text-xs text-label-2 pt-1">
-                <MapPin className="w-3.5 h-3.5 text-risk-low shrink-0" />
-                <span className="font-medium text-label">{getLocationName(alert)}</span>
-              </div>
+              {alert.recommended_action && <p className="text-xs text-label">{alert.recommended_action}</p>}
+              {getLocationName(alert) && (
+                <div className="flex items-center gap-1.5 text-xs text-label-2 pt-1">
+                  <MapPin className="w-3.5 h-3.5 shrink-0" />
+                  <span className="font-medium text-label">{getLocationName(alert)}</span>
+                </div>
+              )}
             </div>
           );
         })}
 
         {filteredAlerts.length === 0 && (
           <div className="p-12 text-center text-xs text-label-2">
-            {alertsError ? 'Unable to verify active alerts due to API unavailability.' : 'No active alerts found for this category.'}
+            {alertsError ? 'Alerts are unavailable right now.' : 'No zone is at high or critical risk right now.'}
           </div>
         )}
       </div>

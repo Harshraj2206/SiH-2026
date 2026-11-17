@@ -163,7 +163,7 @@ export const RegisterPage = () => {
             </div>
             <div className="text-left">
               <span className="font-semibold text-lg text-label">LandSafe</span>
-              <span className="block text-xs tabular-nums text-label-2">SIH26001 • citizen onboarding</span>
+
             </div>
           </Link>
           <h2 className="text-xl font-semibold text-label tracking-tight pt-1">Create Account</h2>

@@ -120,8 +120,10 @@ def test_predict_landslide_risk_backward_compatibility():
         "rainfall_72h": 120.0,
         "slope_deg": 32.0,
         "soil_moisture": 0.45,
-        "ndvi": 0.40,
-        "historical_incidents": 3
+        "historical_incidents": 3,
+        "elevation_amsl": 1200.0,
+        "latitude": 31.10,
+        "longitude": 77.17
     })
     # Legacy keys
     assert "risk_score" in res
@@ -141,20 +143,16 @@ def test_predict_landslide_risk_backward_compatibility():
 
 
 def test_xai_factor_labels_and_units():
-    """Confirms that factors are properly labelled with physical units and no fake TreeSHAP or saturation claims."""
+    """Factors list only the real model inputs, with units."""
     res = predict_landslide_risk({
         "rainfall_24h": 40.0,
         "rainfall_72h": 80.0,
         "slope_deg": 25.0,
         "soil_moisture": 0.35,
-        "ndvi": 0.65,
-        "historical_incidents": 2
+        "historical_incidents": 2,
+        "elevation_amsl": 900.0
     })
-    factor_names = [f["name"] for f in res["xai"]["factors"]]
-    # Must use accurate terminology: Volumetric Soil Moisture and Historical Recorded Incidents
-    assert "Volumetric Soil Moisture" in factor_names
-    assert "Historical Recorded Incidents" in factor_names
-    # Check that soil moisture rawValue specifies m³/m³
-    sm_factor = next(f for f in res["xai"]["factors"] if f["name"] == "Volumetric Soil Moisture")
-    assert "m³/m³" in sm_factor["rawValue"]
-
+    factors = {f["name"]: f for f in res["xai"]["factors"]}
+    assert "Soil moisture" in factors and "%" in factors["Soil moisture"]["rawValue"]
+    assert "Past landslides nearby" in factors
+    assert not any("NDVI" in n or "Vegetation" in n for n in factors)

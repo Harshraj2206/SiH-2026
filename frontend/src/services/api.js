@@ -75,14 +75,6 @@ export const systemApi = {
   getHealth: async () => {
     const res = await apiClient.get('/health');
     return res.data;
-  },
-  resetDemoScenario: async () => {
-    const res = await apiClient.post('/simulation/reset');
-    return res.data;
-  },
-  advanceSimulationStep: async (step) => {
-    const res = await apiClient.post(`/simulation/step/${step}`);
-    return res.data;
   }
 };
 
@@ -265,18 +257,6 @@ export const sosApi = {
   }
 };
 
-// ---------------- Rescue Operations ----------------
-export const rescueApi = {
-  getRescueTeams: async () => {
-    const res = await apiClient.get('/rescue-teams');
-    return res.data;
-  },
-  updateTeamStatus: async (teamId, payload) => {
-    const res = await apiClient.patch(`/rescue-teams/${teamId}`, payload);
-    return res.data;
-  }
-};
-
 // ---------------- Emergency Resources (Roads, Hospitals, Shelters) ----------------
 export const resourcesApi = {
   getRoads: async () => {
@@ -312,14 +292,6 @@ export const resourcesApi = {
   }
 };
 
-// ---------------- Post-Disaster Analysis ----------------
-export const postDisasterApi = {
-  getEvents: async () => {
-    const res = await apiClient.get('/post-disaster');
-    return res.data;
-  }
-};
-
 // ---------------- Alerts & Subscriptions ----------------
 export const alertsApi = {
   getAlerts: async (params = {}) => {
@@ -348,9 +320,6 @@ export const analyticsApi = {
 export const api = {
   checkHealth: systemApi.getHealth,
   getHealth: systemApi.getHealth,
-  resetDemo: systemApi.resetDemoScenario,
-  resetDemoScenario: systemApi.resetDemoScenario,
-  advanceSimulationStep: systemApi.advanceSimulationStep,
 
   login: authApi.login,
   getProfile: authApi.getProfile,
@@ -384,16 +353,11 @@ export const api = {
   triggerSOS: sosApi.triggerSOS,
   triageSOS: sosApi.triageSOS,
 
-  getRescueTeams: rescueApi.getRescueTeams,
-  updateTeamStatus: rescueApi.updateTeamStatus,
-
   getRoads: resourcesApi.getRoads,
   updateRoadStatus: resourcesApi.updateRoadStatus,
   getHospitals: resourcesApi.getHospitals,
   getShelters: resourcesApi.getShelters,
   getNearbyResources: resourcesApi.getNearbyResources,
-
-  getPostDisasterEvents: postDisasterApi.getEvents,
 
   getAlerts: alertsApi.getAlerts,
   getAnalytics: analyticsApi.getOverview,

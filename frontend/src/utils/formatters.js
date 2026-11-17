@@ -15,25 +15,27 @@ const TONES = {
 export const getRiskLevelColor = (level) => TONES[level?.toUpperCase()] || TONES.LOW;
 
 export const getRiskScoreColor = (score) => {
-  if (score >= 81) return getRiskLevelColor('CRITICAL');
-  if (score >= 61) return getRiskLevelColor('HIGH');
-  if (score >= 31) return getRiskLevelColor('MODERATE');
+  // Same bands as the model: <=30 low, <=60 moderate, <=80 high, above 80 critical
+  if (score > 80) return getRiskLevelColor('CRITICAL');
+  if (score > 60) return getRiskLevelColor('HIGH');
+  if (score > 30) return getRiskLevelColor('MODERATE');
   return getRiskLevelColor('LOW');
 };
 
 export const formatScore = (score) => {
-  if (score === undefined || score === null) return '0.0';
+  if (score === undefined || score === null) return '—';
   return Number(score).toFixed(1);
 };
 
 export const formatDate = (isoString) => {
-  if (!isoString) return 'Just now';
-  try {
-    const d = new Date(isoString);
-    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' • ' + d.toLocaleDateString([], { month: 'short', day: 'numeric' });
-  } catch {
-    return isoString;
+  if (!isoString) return '—';
+  const d = new Date(isoString);
+  if (isNaN(d)) return isoString;
+  // Date-only values (e.g. "2024-07-30") have no time of day to show
+  if (/^\d{4}-\d{2}-\d{2}$/.test(isoString)) {
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
   }
+  return `${d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}, ${d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`;
 };
 
 export const getReportTypeIconName = (type) => {

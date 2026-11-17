@@ -23,6 +23,7 @@ import {
   Sparkles,
   Route
 } from 'lucide-react';
+import { PlaceSearch } from '../components/common/PlaceSearch';
 
 export const SafeRoutePage = () => {
   const { t } = useLanguage();
@@ -32,22 +33,10 @@ export const SafeRoutePage = () => {
 
   const [routingMode, setRoutingMode] = useState('global'); // 'global' | 'preset'
   
-  // Origin & Destination query inputs (Himachal Pradesh)
-  const [originQuery, setOriginQuery] = useState('Kullu, Himachal Pradesh');
-  const [destQuery, setDestQuery] = useState('Manali, Himachal Pradesh');
-  
-  const [originCoords, setOriginCoords] = useState({ 
-    lat: 31.9579, 
-    lng: 77.1095, 
-    name: 'Kullu Center, HP' 
-  });
-  
-  const [destCoords, setDestCoords] = useState({ 
-    lat: 32.2432, 
-    lng: 77.1892, 
-    name: 'Manali Safe Evacuation Center, HP' 
-  });
-  
+  // Start and destination: { lat, lng, name } chosen from the place search, or null
+  const [originCoords, setOriginCoords] = useState(null);
+  const [destCoords, setDestCoords] = useState(null);
+
   // Preset Corridors State
   const [waypoints, setWaypoints] = useState([]);
   const [roads, setRoads] = useState([]);
@@ -75,10 +64,7 @@ export const SafeRoutePage = () => {
   // Synchronize destination when navigated from Resources or other pages
   useEffect(() => {
     if (routeLocation?.state?.destCoords) {
-      setDestCoords(routeLocation.state.destCoords);
-      if (routeLocation.state.destQuery) {
-        setDestQuery(routeLocation.state.destQuery);
-      }
+      setDestCoords({ ...routeLocation.state.destCoords, name: routeLocation.state.destQuery || routeLocation.state.destCoords.name });
       setRoutingMode('global');
     }
   }, [routeLocation?.state]);
@@ -100,133 +86,30 @@ export const SafeRoutePage = () => {
     }
   };
 
-  // Unified Google Maps-Style Route Calculation
-  const handleExecuteGlobalRoute = async (oQuery = originQuery, dQuery = destQuery) => {
+  // Road route between the chosen start and destination
+  const handleExecuteGlobalRoute = async (origin = originCoords, dest = destCoords) => {
+    if (!origin || !dest) {
+      setErrorMsg('Choose a start and a destination.');
+      return;
+    }
+    if (Math.abs(origin.lat - dest.lat) < 0.0001 && Math.abs(origin.lng - dest.lng) < 0.0001) {
+      setErrorMsg('Start and destination are the same place.');
+      return;
+    }
     const seq = ++routeReqSeqRef.current;
     setCalculating(true);
     setErrorMsg(null);
-
     try {
-      let resolvedOrigin = originCoords;
-      let resolvedDest = destCoords;
-
-      // 1. Resolve Origin Coordinates
-      const oTrimmed = oQuery.trim();
-      const oCoordMatch = oTrimmed.match(/^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?)[,\s]+[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/);
-      if (oCoordMatch) {
-        const parts = oTrimmed.split(/[,\s]+/).filter(Boolean);
-        const lat = parseFloat(parts[0]);
-        const lng = parseFloat(parts[1]);
-        resolvedOrigin = { lat, lng, name: `${lat.toFixed(4)}, ${lng.toFixed(4)}` };
-        setOriginCoords(resolvedOrigin);
-      } else if (oTrimmed.toLowerCase().includes('current') || oTrimmed.toLowerCase().includes('gps') || oTrimmed.toLowerCase().includes('my location')) {
-        if (selectedLocation?.latitude) {
-          resolvedOrigin = {
-            lat: selectedLocation.latitude,
-            lng: selectedLocation.longitude,
-            name: selectedLocation.displayName || 'My Location'
-          };
-        }
-      } else {
-        let geoO = null;
-        try {
-          geoO = await safeRouteApi.geocodePlace(oTrimmed);
-        } catch {
-          // Fallback to client-side Nominatim if backend geocode encounters error
-          try {
-            const nomO = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(oTrimmed)}&limit=1`, {
-              headers: { 'Accept': 'application/json' }
-            });
-            const nomOData = await nomO.json();
-            if (nomOData && nomOData.length > 0) {
-              geoO = {
-                lat: parseFloat(nomOData[0].lat),
-                lng: parseFloat(nomOData[0].lon),
-                name: nomOData[0].display_name
-              };
-            }
-          } catch {
-            // Unresolved
-          }
-        }
-
-        if (geoO && typeof geoO.lat === 'number' && typeof geoO.lng === 'number') {
-          resolvedOrigin = geoO;
-          setOriginCoords(geoO);
-        } else {
-          throw new Error(`Start location "${oTrimmed}" could not be resolved. Please enter a valid city, town, or coordinates.`);
-        }
-      }
-
-      // 2. Resolve Destination Coordinates
-      const dTrimmed = dQuery.trim();
-      const dCoordMatch = dTrimmed.match(/^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?)[,\s]+[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/);
-      if (dCoordMatch) {
-        const parts = dTrimmed.split(/[,\s]+/).filter(Boolean);
-        const lat = parseFloat(parts[0]);
-        const lng = parseFloat(parts[1]);
-        resolvedDest = { lat, lng, name: `${lat.toFixed(4)}, ${lng.toFixed(4)}` };
-        setDestCoords(resolvedDest);
-      } else if (dTrimmed) {
-        let geoD = null;
-        try {
-          geoD = await safeRouteApi.geocodePlace(dTrimmed);
-        } catch {
-          // Graceful fallback to client-side Nominatim geocoding if backend is unreachable
-          try {
-            const nomResp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(dTrimmed)}&limit=1`, {
-              headers: { 'Accept': 'application/json' }
-            });
-            const nomData = await nomResp.json();
-            if (nomData && nomData.length > 0) {
-              geoD = {
-                lat: parseFloat(nomData[0].lat),
-                lng: parseFloat(nomData[0].lon),
-                name: nomData[0].display_name
-              };
-            }
-          } catch {
-            // Unresolved
-          }
-        }
-
-        if (geoD && typeof geoD.lat === 'number' && typeof geoD.lng === 'number') {
-          resolvedDest = geoD;
-          setDestCoords(geoD);
-        } else {
-          throw new Error(`Destination "${dTrimmed}" could not be resolved. Please enter a valid city, town, or hospital name.`);
-        }
-      }
-
-      if (
-        Math.abs(resolvedOrigin.lat - resolvedDest.lat) < 0.0001 &&
-        Math.abs(resolvedOrigin.lng - resolvedDest.lng) < 0.0001
-      ) {
-        throw new Error('Start location and Destination cannot be identical. Please specify a different destination.');
-      }
-
-      // 3. Compute Worldwide Road Route
-      const res = await safeRouteApi.calculateGlobalRoute(
-        resolvedOrigin.lat,
-        resolvedOrigin.lng,
-        resolvedDest.lat,
-        resolvedDest.lng,
-        resolvedOrigin.name || 'Origin',
-        resolvedDest.name || 'Destination'
-      );
- 
+      const res = await safeRouteApi.calculateGlobalRoute(origin.lat, origin.lng, dest.lat, dest.lng, origin.name, dest.name);
       if (seq !== routeReqSeqRef.current) return;
       setRouteResult(res);
       setCurrentStepIndex(0);
       setIsEvacuating(false);
     } catch (err) {
       if (seq !== routeReqSeqRef.current) return;
-      console.error('Global routing error:', err);
-      setErrorMsg(err?.response?.data?.detail || err.message || 'Unable to compute road route. Please verify place names.');
+      setErrorMsg(err?.response?.data?.detail || err.message || 'Could not find a road route between these places.');
     } finally {
-      if (seq === routeReqSeqRef.current) {
-        setCalculating(false);
-      }
+      if (seq === routeReqSeqRef.current) setCalculating(false);
     }
   };
 
@@ -249,52 +132,47 @@ export const SafeRoutePage = () => {
     }
   };
 
-  // Form Submission
   const handleFormSubmit = (e) => {
     e.preventDefault();
-    handleExecuteGlobalRoute(originQuery, destQuery);
+    handleExecuteGlobalRoute();
   };
 
-  // Use Current Live GPS
+  // Use the current location as the start
   const handleUseCurrentLocation = () => {
-    requestLocation();
     if (location?.latitude && location?.longitude) {
-      const coords = {
-        lat: location.latitude,
-        lng: location.longitude,
-        name: location.displayName || 'My Current Location'
-      };
-      setOriginCoords(coords);
-      setOriginQuery(location.displayName || 'My Current GPS Location');
-      handleExecuteGlobalRoute(location.displayName || 'My Current GPS Location', destQuery);
+      setOriginCoords({ lat: location.latitude, lng: location.longitude, name: location.displayName || 'My location' });
+    } else {
+      requestLocation();
     }
   };
 
-  // Swap Origin and Destination
   const handleSwapLocations = () => {
-    const tempCoords = originCoords;
-    const tempQuery = originQuery;
     setOriginCoords(destCoords);
-    setOriginQuery(destQuery);
-    setDestCoords(tempCoords);
-    setDestQuery(tempQuery);
-    handleExecuteGlobalRoute(destQuery, tempQuery);
+    setDestCoords(originCoords);
   };
 
-  // Initial calculation on mount
+  // Start from the user's location when it is known
   useEffect(() => {
-    handleExecuteGlobalRoute(originQuery, destQuery);
-  }, []);
+    if (!originCoords && location?.latitude && location?.longitude) {
+      setOriginCoords({ lat: location.latitude, lng: location.longitude, name: location.displayName || 'My location' });
+    }
+  }, [location?.latitude, location?.longitude]);
 
-  // Quick Corridors
-  const quickCorridors = [
-    { label: 'Sikkim NH-10 (Siliguri → Gangtok)', o: 'Siliguri, West Bengal', d: 'Gangtok, Sikkim' },
-    { label: 'Meghalaya NH-6 (Guwahati → Shillong)', o: 'Guwahati, Assam', d: 'Shillong, Meghalaya' },
-    { label: 'Himachal (Chandigarh → Shimla)', o: 'Chandigarh', d: 'Shimla, Himachal Pradesh' },
-    { label: 'Uttarakhand (Rishikesh → Badrinath)', o: 'Rishikesh, Uttarakhand', d: 'Badrinath, Uttarakhand' },
-    { label: 'Kerala Ghats (Kochi → Munnar)', o: 'Kochi, Kerala', d: 'Munnar, Kerala' },
-    { label: 'Karnataka (Harohalli → Patna)', o: 'Harohalli, Karnataka', d: 'Patna, Bihar' }
-  ];
+  const toPoint = (p) => ({ lat: p.latitude, lng: p.longitude, name: p.label });
+
+  const endpoint = (value, setValue, dotClass, placeholder) => (
+    value ? (
+      <div className="flex items-center gap-2 bg-surface-2 rounded-full px-3 py-2 min-w-0">
+        <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${dotClass}`} />
+        <span className="text-xs text-label truncate flex-1">{value.name}</span>
+        <button type="button" onClick={() => setValue(null)} className="text-label-2 hover:text-label shrink-0" title="Change">
+          <X className="w-3.5 h-3.5" />
+        </button>
+      </div>
+    ) : (
+      <PlaceSearch onSelect={(p) => setValue(toPoint(p))} placeholder={placeholder} />
+    )
+  );
 
   const currentSegment = routeResult?.safe_route?.segments?.[currentStepIndex];
   const totalSegments = routeResult?.safe_route?.segments?.length || 1;
@@ -313,10 +191,10 @@ export const SafeRoutePage = () => {
             </div>
             <div>
               <h1 className="text-sm font-semibold text-label">
-                {t('routing_title') || 'Safe Route Navigation & Hazard Avoidance'}
+                {t('routing_title') || 'Safe route'}
               </h1>
               <p className="text-xs text-label-2">
-                {t('routing_subtitle') || 'Real-world road routing with real-time slope and geotechnical landslide risk assessment'}
+                {t('routing_subtitle') || 'Road routes, with the risk of monitored zones along the way'}
               </p>
             </div>
           </div>
@@ -329,7 +207,7 @@ export const SafeRoutePage = () => {
                 routingMode === 'global' ? 'bg-label/[0.12] text-label font-semibold' : 'text-label-2 hover:text-label'
               }`}
             >
-              {t('mode_worldwide') || 'Worldwide Search'}
+              {t('mode_worldwide') || 'Any place'}
             </button>
             <button
               onClick={() => { setRoutingMode('preset'); setIsEvacuating(false); }}
@@ -337,7 +215,7 @@ export const SafeRoutePage = () => {
                 routingMode === 'preset' ? 'bg-label/[0.12] text-label font-semibold' : 'text-label-2 hover:text-label'
               }`}
             >
-              {t('mode_corridors') || 'Disaster Corridors'}
+              {t('mode_corridors') || 'Monitored roads'}
             </button>
           </div>
         </div>
@@ -347,16 +225,8 @@ export const SafeRoutePage = () => {
           <form onSubmit={handleFormSubmit} className="space-y-2">
             <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-center">
               
-              {/* Origin Input */}
-              <div className="md:col-span-5 flex items-center bg-surface-2 focus-within:border-line rounded-tile px-2.5 py-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-accent mr-2 shrink-0" />
-                <input
-                  type="text"
-                  value={originQuery}
-                  onChange={(e) => setOriginQuery(e.target.value)}
-                  placeholder={t('start_location_placeholder') || 'Start location, GPS, city, village...'}
-                  className="bg-transparent text-xs text-label placeholder-label-3 focus:outline-none w-full"
-                />
+              <div className="md:col-span-5 min-w-0">
+                {endpoint(originCoords, setOriginCoords, 'bg-accent', t('start_location_placeholder') || 'Start')}
               </div>
 
               {/* Swap Button */}
@@ -371,23 +241,15 @@ export const SafeRoutePage = () => {
                 </button>
               </div>
 
-              {/* Destination Input */}
-              <div className="md:col-span-4 flex items-center bg-surface-2 focus-within:border-risk-low/30 rounded-tile px-2.5 py-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-risk-low mr-2 shrink-0" />
-                <input
-                  type="text"
-                  value={destQuery}
-                  onChange={(e) => setDestQuery(e.target.value)}
-                  placeholder={t('destination_placeholder') || 'Destination, hospital, shelter...'}
-                  className="bg-transparent text-xs text-label placeholder-label-3 focus:outline-none w-full"
-                />
+              <div className="md:col-span-4 min-w-0">
+                {endpoint(destCoords, setDestCoords, 'bg-risk-low', t('destination_placeholder') || 'Destination')}
               </div>
 
               {/* Route Action Button */}
               <div className="md:col-span-2 flex items-center gap-1.5">
                 <button
                   type="submit"
-                  disabled={calculating}
+                  disabled={calculating || !originCoords || !destCoords}
                   className="w-full py-1.5 px-3 bg-accent hover:opacity-90 disabled:opacity-50 text-white rounded-full text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
                 >
                   <Navigation className={`w-3.5 h-3.5 ${calculating ? 'animate-spin' : ''}`} />
@@ -406,24 +268,6 @@ export const SafeRoutePage = () => {
               </div>
             </div>
 
-            {/* Quick Shortcuts */}
-            <div className="flex items-center gap-1.5 overflow-x-auto text-xs pt-1">
-              <span className="text-label-3 shrink-0 font-semibold">Fast Corridors:</span>
-              {quickCorridors.map((c, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => {
-                    setOriginQuery(c.o);
-                    setDestQuery(c.d);
-                    handleExecuteGlobalRoute(c.o, c.d);
-                  }}
-                  className="px-2 py-0.5 rounded-full whitespace-nowrap bg-surface-2 hover:bg-surface-2 text-label-2 hover:text-label shrink-0 transition-colors"
-                >
-                  {c.label}
-                </button>
-              ))}
-            </div>
           </form>
         ) : (
           /* Preset Corridor Dropdowns */
@@ -497,7 +341,7 @@ export const SafeRoutePage = () => {
               <span className="w-3 h-3 rounded-full bg-risk-low" />
               <div>
                 <span className="text-xs font-semibold text-risk-low block">
-                  MOVE TOWARD SAFE ZONE • TURN-BY-TURN ROAD GUIDANCE
+                  Step-by-step guidance
                 </span>
                 <span className="text-label text-xs font-semibold">
                   Destination: {routeResult.destination?.name}
@@ -507,7 +351,7 @@ export const SafeRoutePage = () => {
 
             <div className="flex items-center gap-2">
               <span className="text-xs px-2 py-0.5 rounded-full font-semibold bg-risk-low/[0.12] text-risk-low border-risk-low/30">
-                {routeResult.safe_route.distance_km} KM • ~{routeResult.safe_route.travel_time_min} MIN
+                {routeResult.safe_route.distance_km} km • about {routeResult.safe_route.travel_time_min} min
               </span>
               <button
                 onClick={() => setIsEvacuating(false)}
@@ -534,7 +378,8 @@ export const SafeRoutePage = () => {
                   {currentSegment.instruction}
                 </h3>
                 <p className="text-xs text-label-2 font-sans">
-                  Hazard: <strong className="text-risk-low">{currentSegment.risk_score}/100</strong> • Road: <strong className="text-label">{currentSegment.road_name}</strong>
+                  Road: <strong className="text-label">{currentSegment.road_name}</strong>
+                  {currentSegment.risk_score != null && <> • Risk: <strong className="text-label">{currentSegment.risk_score}/100</strong></>}
                 </p>
               </div>
 
@@ -569,7 +414,7 @@ export const SafeRoutePage = () => {
             <div className="flex items-center justify-between mb-2 text-xs">
               <span className="text-label font-semibold flex items-center gap-1.5">
                 <Compass className="w-3.5 h-3.5 text-risk-low" />
-                Live Road Path & Hazard Overlay
+                Route and risk zones
               </span>
               <div className="flex items-center gap-3 text-xs">
                 <span className="flex items-center gap-1 text-risk-low font-semibold">
@@ -620,7 +465,7 @@ export const SafeRoutePage = () => {
                   </div>
                   <div>
                     <span className="text-xs sm:text-xs text-label-2 block">Max slope</span>
-                    <strong className="text-xs sm:text-sm text-risk-low">{routeResult.safe_route.max_slope_deg || 3.5}°</strong>
+                    <strong className="text-xs sm:text-sm text-label">{routeResult.safe_route.max_slope_deg != null ? `${routeResult.safe_route.max_slope_deg}°` : '—'}</strong>
                   </div>
                 </div>
 
@@ -629,7 +474,7 @@ export const SafeRoutePage = () => {
                 </p>
 
                 {/* Evacuation Mode CTA */}
-                <button
+                {routeResult.safe_route.segments.length > 0 && <button
                   onClick={() => setIsEvacuating(true)}
                   className={`w-full py-2 rounded-full text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors ${
                     isEvacuating
@@ -638,8 +483,8 @@ export const SafeRoutePage = () => {
                   }`}
                 >
                   <Navigation className="w-3.5 h-3.5" />
-                  <span>{isEvacuating ? 'Evacuation guidance active' : 'Start evacuation'}</span>
-                </button>
+                  <span>{isEvacuating ? 'Guidance on' : 'Start step-by-step guidance'}</span>
+                </button>}
               </div>
 
               {/* Turn Steps List */}
@@ -650,6 +495,9 @@ export const SafeRoutePage = () => {
                 </div>
 
                 <div className="space-y-1.5 max-h-[220px] lg:max-h-[260px] overflow-y-auto pr-1">
+                  {routeResult.safe_route.segments.length === 0 && (
+                    <p className="text-xs text-label-2">Turn-by-turn steps are shown for routes up to 150 km.</p>
+                  )}
                   {routeResult.safe_route.segments.map((seg, idx) => (
                     <div
                       key={idx}
@@ -682,9 +530,9 @@ export const SafeRoutePage = () => {
               <div className="w-12 h-12 rounded-full bg-surface-2 flex items-center justify-center text-risk-low">
                 <Navigation className="w-6 h-6" />
               </div>
-              <h3 className="text-sm font-semibold text-label">Safe Route Planner Ready</h3>
+              <h3 className="text-sm font-semibold text-label">Plan a route</h3>
               <p className="text-xs text-label-2 max-w-xs leading-relaxed">
-                Enter your start location and destination above, then click <strong>Calculate Safe Route</strong> to compute hazard-avoiding evacuation corridors.
+                Choose a start and a destination above, then press <strong>Route</strong>.
               </p>
             </div>
           )}

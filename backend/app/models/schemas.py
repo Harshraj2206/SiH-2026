@@ -87,10 +87,13 @@ class PredictionInput(BaseModel):
     zone_id: Optional[str] = "NER-CUSTOM"
     rainfall_24h: Optional[float] = Field(None, ge=0.0, le=500.0, description="24-hour rainfall in mm (None if unavailable)")
     rainfall_72h: Optional[float] = Field(None, ge=0.0, le=1000.0, description="72-hour rainfall in mm")
-    slope_deg: Optional[float] = Field(18.0, ge=0.0, le=90.0, description="Slope gradient in degrees")
-    soil_moisture: Optional[float] = Field(0.35, ge=0.0, le=1.0, description="Volumetric soil moisture (0.0 to 1.0)")
-    ndvi: Optional[float] = Field(0.55, ge=0.0, le=1.0, description="Vegetation index (0.0 to 1.0)")
-    historical_incidents: Optional[int] = Field(1, ge=0, le=50, description="Past landslide incidents")
+    slope_deg: Optional[float] = Field(None, ge=0.0, le=90.0, description="Slope gradient in degrees")
+    soil_moisture: Optional[float] = Field(None, ge=0.0, le=1.0, description="Volumetric soil moisture (0.0 to 1.0)")
+    ndvi: Optional[float] = Field(None, ge=0.0, le=1.0, description="Not a model input; ignored")
+    historical_incidents: Optional[int] = Field(None, ge=0, le=500, description="Catalogued landslides within 35 km")
+    elevation_amsl: Optional[float] = Field(None, ge=-500.0, le=9000.0, description="Elevation in metres")
+    latitude: Optional[float] = Field(None, ge=-90.0, le=90.0)
+    longitude: Optional[float] = Field(None, ge=-180.0, le=180.0)
 
 
 class XAIFactor(BaseModel):
@@ -157,16 +160,16 @@ class RiskZoneSummary(BaseModel):
     rainfall_72h: float
     slope_deg: float
     soil_moisture: float
-    ndvi: float
-    land_cover: str
+    ndvi: Optional[float] = None
+    land_cover: Optional[str] = None
     historical_incidents: int
     community_report_count: int
     verified_report_count: int
-    coordinates: List[CoordinatePoint]
+    coordinates: Optional[List[CoordinatePoint]] = None
     center: CoordinatePoint
-    last_updated: str
+    last_updated: Optional[str] = None
     alert_status: Optional[str] = None
-    recommended_action: str
+    recommended_action: Optional[str] = None
     forecast_trend: Optional[List[ForecastPoint]] = None
     temperature_c: Optional[float] = None
     humidity_pct: Optional[float] = None
@@ -274,7 +277,7 @@ class CommunityReportResponse(BaseModel):
     zone_name: Optional[str]
     latitude: float
     longitude: float
-    location_name: str
+    location_name: Optional[str] = None
     report_type: str
     signs_observed: List[str]
     description: str
@@ -284,10 +287,6 @@ class CommunityReportResponse(BaseModel):
     verified_at: Optional[str] = None
     verified_by: Optional[str] = None
     reviewer_notes: Optional[str] = None
-    ai_verified: Optional[bool] = True
-    ai_confidence_score: Optional[float] = 92.0
-    ai_verification_checks: Optional[Dict[str, Any]] = None
-    ai_summary: Optional[str] = None
     upvotes: Optional[int] = 0
 
 
@@ -354,23 +353,24 @@ class IncidentResponse(BaseModel):
     status: str
     affected_zone_id: Optional[str] = None
     zone_name: Optional[str] = None
-    estimated_population: int = 0
+    estimated_population: Optional[int] = None
     blocked_roads: List[str] = []
-    injured_people: int = 0
-    missing_people: int = 0
-    evacuated_people: int = 0
+    deaths: Optional[int] = None
+    injured_people: Optional[int] = None
+    missing_people: Optional[int] = None
+    evacuated_people: Optional[int] = None
     source: str
     assigned_team_id: Optional[str] = None
     assigned_team_name: Optional[str] = None
     description: str
     updated_at: str
     # Verified India-Wide Landslide Intelligence Extensions
-    verification_status: Optional[str] = "VERIFIED"
+    verification_status: Optional[str] = None
     category: Optional[str] = "CONFIRMED_INCIDENT"
     source_url: Optional[str] = None
-    source_type: Optional[str] = "OFFICIAL"
+    source_type: Optional[str] = None
     source_priority_level: Optional[int] = 1
-    casualties_info: Optional[str] = "Casualties: Not reported"
+    casualties_info: Optional[str] = None
     reported_causes: Optional[List[str]] = []
     contributing_factors: Optional[List[str]] = []
     why_at_risk: Optional[str] = None
@@ -388,23 +388,22 @@ class LandslideRiskForecast(BaseModel):
     latitude: float
     longitude: float
     risk_level: str  # LOW, MODERATE, HIGH, CRITICAL
+    risk_score: Optional[float] = None
     scientific_reason: str
     forecast_window_hours: int = 24
-    rainfall_trigger_mm: float = 0.0
-    slope_gradient_deg: float = 0.0
-    gsi_susceptibility: str = "HIGH"
-    official_warning_level: str = "ORANGE_ALERT"
+    rainfall_trigger_mm: Optional[float] = None
+    slope_gradient_deg: Optional[float] = None
     primary_source: str
     source_url: Optional[str] = None
-    source_type: str = "OFFICIAL_MET_GEOLOGICAL"
-    verification_status: str = "OFFICIAL"
+    source_type: str = "LANDSAFE_MODEL"
+    verification_status: str = "MODEL_SCORE"
     category: str = "FORECAST_RISK"
     reported_causes: List[str] = []
     contributing_factors: List[str] = []
     why_at_risk: str
     timestamp: str
-    freshness_label: str
-    radius_km: float = 15.0
+    freshness_label: Optional[str] = None
+    radius_km: float = 5.0
 
 
 class IndiaWideIntelligenceResponse(BaseModel):
@@ -445,11 +444,11 @@ class SOSTriageUpdate(BaseModel):
 class SOSResponse(BaseModel):
     sos_id: str
     user_id: str
-    user_name: str
+    user_name: Optional[str] = None
     emergency_contact: Optional[str]
     latitude: float
     longitude: float
-    location_name: str
+    location_name: Optional[str] = None
     zone_id: Optional[str]
     timestamp: str
     people_count: int
@@ -468,34 +467,6 @@ class SOSResponse(BaseModel):
     destination_shelter_name: Optional[str] = None
     triage_notes: Optional[str] = None
     updated_at: str
-
-
-# ---------------- Rescue Team Schemas ----------------
-class RescueTeamUpdate(BaseModel):
-    status: Optional[str] = Field(None, description="AVAILABLE, DISPATCHED, ON_SITE, RETURNING, OFFLINE")
-    current_assignment_id: Optional[str] = None
-    latitude: Optional[float] = None
-    longitude: Optional[float] = None
-    eta_minutes: Optional[int] = None
-
-
-class RescueTeamResponse(BaseModel):
-    is_demo: Optional[bool] = None
-    team_id: str
-    name: str
-    team_type: str = Field(..., description="NDRF, SDRF, Police, Fire & Rescue, Medical, Volunteers")
-    base_location: str
-    members_count: int
-    leader_name: str
-    contact_phone: str
-    vehicle: str
-    equipment: List[str]
-    status: str
-    current_assignment_id: Optional[str] = None
-    current_assignment_title: Optional[str] = None
-    latitude: float
-    longitude: float
-    eta_minutes: int
 
 
 # ---------------- Roads & Blockages Schemas ----------------
@@ -523,7 +494,7 @@ class HospitalResponse(BaseModel):
     is_demo: Optional[bool] = None
     hospital_id: str
     name: str
-    type: str = "Civil / District Hospital"
+    type: Optional[str] = None
     district: str
     state: str
     latitude: float
@@ -531,10 +502,10 @@ class HospitalResponse(BaseModel):
     total_beds: Optional[int] = None
     available_beds: Optional[int] = None
     icu_available: Optional[int] = None
-    capacity_status: Optional[str] = "LIVE CAPACITY UNAVAILABLE"
-    trauma_center: bool = True
-    blood_bank: bool = True
-    contact_phone: str = "108"
+    capacity_status: Optional[str] = None
+    trauma_center: Optional[bool] = None
+    blood_bank: Optional[bool] = None
+    contact_phone: Optional[str] = None
     emergency_ambulance_count: Optional[int] = None
     source: Optional[str] = "OpenStreetMap Geographic Directory"
     data_category: Optional[str] = "DIRECTORY RECORD"
@@ -544,45 +515,22 @@ class ShelterResponse(BaseModel):
     is_demo: Optional[bool] = None
     shelter_id: str
     name: str
-    type: str = "Relief Camp / Community Hall"
+    type: Optional[str] = None
     district: str
     state: str
     latitude: float
     longitude: float
     capacity: Optional[int] = None
     current_occupancy: Optional[int] = None
-    capacity_status: Optional[str] = "OCCUPANCY TELEMETRY UNAVAILABLE"
-    facilities: List[str] = ["High-Ground Assembly", "Potable Water Supply"]
+    capacity_status: Optional[str] = None
+    facilities: List[str] = []
     food_supply_days: Optional[int] = None
-    medical_station: bool = True
-    contact_person: str = "Designated Relief Warden / SDMA Liaison"
-    contact_phone: str = "1070"
-    accessibility: str = "Paved Road Access"
+    medical_station: Optional[bool] = None
+    contact_person: Optional[str] = None
+    contact_phone: Optional[str] = None
+    accessibility: Optional[str] = None
     source: Optional[str] = "OpenStreetMap Geographic Directory"
     data_category: Optional[str] = "DIRECTORY RECORD"
-
-
-# ---------------- Post-Disaster Analysis Schemas ----------------
-class PostDisasterEventResponse(BaseModel):
-    is_demo: Optional[bool] = None
-    record_id: str
-    incident_id: str
-    event_name: str
-    date_occurred: str
-    district: str
-    pre_event_ml_risk: float
-    actual_rainfall_24h_mm: float
-    actual_slope_deg: float
-    community_reports_prior: int
-    time_to_first_response_min: int
-    total_people_evacuated: int
-    casualties: int
-    injuries_treated: int
-    primary_hospital_used: str
-    primary_shelter_used: str
-    primary_road_diverted_to: str
-    lessons_learned: str
-    model_calibration_feedback: str
 
 
 # ---------------- Alert & Subscription Schemas ----------------
@@ -598,8 +546,8 @@ class AlertItem(BaseModel):
     timestamp: str
     status: str = "ACTIVE"
     affected_highway: Optional[str] = None
-    source: Optional[str] = "State Disaster Management Authority (SDMA) / NDMA SACHET"
-    data_category: Optional[str] = "OFFICIAL WARNING"
+    source: Optional[str] = "LandSafe model"
+    data_category: Optional[str] = "MODEL WARNING"
     issued_at: Optional[str] = None
     expires_at: Optional[str] = None
 

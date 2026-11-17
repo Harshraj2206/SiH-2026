@@ -52,10 +52,10 @@ export const EmergencyProvider = ({ children }) => {
           if (prevSelected.is_live_inspected) {
             return prevSelected; // Keep user's live inspected location intact!
           }
-          const updated = (zonesData || []).find(z => z.zone_id === prevSelected.zone_id);
-          return updated || prevSelected;
+          const list = zonesData.status === 'fulfilled' ? (zonesData.value || []) : [];
+          return list.find(z => z.zone_id === prevSelected.zone_id) || prevSelected;
         }
-        return zonesData && zonesData.length > 0 ? (zonesData.find(z => z.zone_id === 'HP-01') || zonesData[0]) : null;
+        return null;
       });
     } catch (err) {
       console.error('Error loading landslide emergency data:', err);
@@ -76,17 +76,23 @@ export const EmergencyProvider = ({ children }) => {
     if (locationIntel?.location?.latitude && locationIntel?.weather && !locationIntel.weather.loading) {
       const loc = locationIntel.location;
       const w = locationIntel.weather;
-      const intel = locationIntel.intelligence || {};
+      const lat = Number(loc.latitude);
+      const lng = Number(loc.longitude);
+      // Use the model bundle only if it is for this same place
+      const raw = locationIntel.intelligence || {};
+      const same = raw.location && Math.abs(raw.location.latitude - lat) < 1e-4 && Math.abs(raw.location.longitude - lng) < 1e-4;
+      const intel = same ? raw : {};
       const t = intel.terrain || {};
       const r = intel.risk || {};
 
-      const lat = Number(loc.latitude);
-      const lng = Number(loc.longitude);
-
-      setSelectedZone(prev => ({
+      setSelectedZone(prev => {
+        // Values already fetched for this same point (e.g. by the map inspector) are kept
+        const samePrev = prev?.center && Math.abs(prev.center.lat - lat) < 1e-4 && Math.abs(prev.center.lng - lng) < 1e-4;
+        const keep = (key) => (same ? undefined : samePrev ? prev[key] : null);
+        return {
         ...prev,
         zone_id: `GPS-${lat.toFixed(2)}-${lng.toFixed(2)}`,
-        name: loc.displayName || `Sector (${lat.toFixed(3)}, ${lng.toFixed(3)})`,
+        name: (samePrev && prev.name) || loc.displayName || `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
         state: loc.state || loc.country || '',
         district: loc.city || '',
         formatted_address: loc.displayName,
@@ -100,16 +106,20 @@ export const EmergencyProvider = ({ children }) => {
         rainfall_1h: w.precipitation_mm ?? null,
         rain_current_mm: w.precipitation_mm ?? null,
         rainfall_24h: w.rainfall_24h ?? null,
-        soil_moisture: intel.soil_moisture?.volumetric_m3m3 ?? null,
-        slope_deg: t.slope_deg ?? 3.5,
-        risk_score: (w.rainfall_24h === null || w.rainfall_24h === undefined) ? null : (r.risk_score ?? null),
-        risk_level: (w.rainfall_24h === null || w.rainfall_24h === undefined) ? 'DATA_INSUFFICIENT' : (r.risk_level ?? 'LOW'),
+        soil_moisture: same ? (intel.soil_moisture?.volumetric_m3m3 ?? null) : keep('soil_moisture'),
+        slope_deg: same ? (t.slope_deg ?? null) : keep('slope_deg'),
+        risk_score: same ? (r.risk_score ?? null) : keep('risk_score'),
+        risk_level: same ? (r.risk_level ?? null) : keep('risk_level'),
+        xai: same ? (r.xai || null) : keep('xai'),
+        unavailability_reason: same ? (r.unavailability_reason || null) : keep('unavailability_reason'),
         weather_source: w.source,
         is_live_inspected: true,
-        is_weather_loading: false
-      }));
+        // still waiting for the model result for this point
+        is_weather_loading: !same && !samePrev && !!locationIntel.intelLoading
+        };
+      });
     }
-  }, [locationIntel?.location?.latitude, locationIntel?.location?.longitude, locationIntel?.location?.displayName, locationIntel?.weather, locationIntel?.intelligence]);
+  }, [locationIntel?.location?.latitude, locationIntel?.location?.longitude, locationIntel?.location?.displayName, locationIntel?.weather, locationIntel?.intelligence, locationIntel?.intelLoading]);
 
   const selectZoneById = (zoneId) => {
     const found = zones.find(z => z.zone_id === zoneId);
@@ -147,17 +157,6 @@ export const EmergencyProvider = ({ children }) => {
     }
   };
 
-  const handleResetDemo = async () => {
-    showToast('Resetting simulation state to baseline demonstration...', 'info');
-    try {
-      await api.resetDemo();
-      await refreshAllData();
-      showToast('Simulation state reset to pristine demo scenario.', 'success');
-    } catch (err) {
-      showToast('Failed to reset demo state.', 'error');
-    }
-  };
-
   return (
     <EmergencyContext.Provider
       value={{
@@ -176,8 +175,7 @@ export const EmergencyProvider = ({ children }) => {
         refreshAllData,
         refreshData: refreshAllData,
         handleCreateReport,
-        handleVerifyReport,
-        handleResetDemo
+        handleVerifyReport
       }}
     >
       {children}

@@ -177,9 +177,9 @@ def assess_data_quality(
             "historical_score": round(hist_score, 1)
         },
         "provenance_summary": {
-            "rainfall": "Open-Meteo NWP Grid (ECMWF IFS Multi-Model Reanalysis)",
+            "rainfall": "Open-Meteo",
             "terrain": "Copernicus 30m Global DEM (ESA) / Regional Baseline Profile",
-            "soil": "Open-Meteo / ECMWF IFS Land-Surface Grid (topsoil 0–7 cm)",
+            "soil": "Open-Meteo (topsoil 0-7 cm)",
             "vegetation": "Regional Climatological NDVI Estimate (Copernicus Global Land / MODIS)",
             "historical": "GSI NLSM & NASA GLC Historical Landslide Archive",
             "geology": "Regional Stratigraphic Engineering Estimate (GSI Geological Maps)"

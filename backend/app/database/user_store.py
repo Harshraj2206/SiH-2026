@@ -25,6 +25,9 @@ def _postgres_url() -> str:
     return url if url.startswith(("postgres://", "postgresql://")) else ""
 
 
+_OLD_DEMO_IDS = ("usr-admin-01", "usr-auth-01", "usr-rescue-01", "usr-med-01", "usr-resident-01")
+
+
 class _PgCursor:
     """Lets the sqlite-style queries below ('?' placeholders) run on Postgres."""
     def __init__(self, cur):
@@ -126,118 +129,31 @@ class UserDatabase:
         """)
         conn.commit()
 
-        # Check if default accounts need seeding
-        cursor.execute("SELECT COUNT(*) AS n FROM users")
-        count = cursor.fetchone()["n"]
-        if count == 0:
-            self._seed_default_users(conn)
+        # Earlier versions seeded demo accounts that posed as named officials (with made-up
+        # gov.in addresses and real-looking phone numbers). Remove exactly those accounts.
+        cursor.executemany("DELETE FROM password_reset_tokens WHERE user_id = ?", [(i,) for i in _OLD_DEMO_IDS])
+        cursor.executemany("DELETE FROM users WHERE id = ?", [(i,) for i in _OLD_DEMO_IDS])
+        conn.commit()
+        self._seed_admin_from_env(conn)
         conn.close()
 
-    def _seed_default_users(self, conn):
-        """Seed default pre-created privileged and resident accounts with env-configurable passwords."""
-        now = datetime.now(timezone.utc).isoformat()
-        def seed_pw(env_name: str, dev_default: str) -> str:
-            # In production the known demo passwords are never used: set the env var,
-            # otherwise the account gets an unguessable random password.
-            value = os.environ.get(env_name)
-            if value:
-                return value
-            if IS_PRODUCTION:
-                logging.getLogger("landslideguard").warning("%s not set; seeded account gets a random password.", env_name)
-                return secrets.token_urlsafe(24)
-            return dev_default
-
-        admin_pw = seed_pw("ADMIN_SEED_PASSWORD", "Admin@2026!")
-        officer_pw = seed_pw("OFFICER_SEED_PASSWORD", "Officer@2026!")
-        rescue_pw = seed_pw("RESCUE_SEED_PASSWORD", "Rescue@2026!")
-        med_pw = seed_pw("MEDICAL_SEED_PASSWORD", "Medical@2026!")
-        resident_pw = seed_pw("RESIDENT_SEED_PASSWORD", "Resident@2026!")
-
-        default_users = [
-            (
-                "usr-admin-01",
-                "Col. Rajesh Barua",
-                "admin_ndma",
-                "admin@landslideguard.gov.in",
-                "+91 11-26701700",
-                hash_pw(admin_pw),
-                "ADMIN",
-                1,
-                json.dumps([
-                    {"id": "c-01", "name": "NDMA Operations Cell", "relationship": "Command Desk", "phone": "+91 11-26701728"}
-                ]),
-                now,
-                now
-            ),
-            (
-                "usr-auth-01",
-                "Dr. Anamika Sharma",
-                "officer_sdma",
-                "officer@sdim.ner.gov.in",
-                "+91 364-2224150",
-                hash_pw(officer_pw),
-                "AUTHORITY",
-                1,
-                json.dumps([
-                    {"id": "c-02", "name": "Shillong Emergency Ops", "relationship": "SDMA Control", "phone": "+91 364-2224151"}
-                ]),
-                now,
-                now
-            ),
-            (
-                "usr-rescue-01",
-                "Sub-Inspector Wanbah Khonglah",
-                "sdrf_commander",
-                "rescue@sdrf.ner.gov.in",
-                "+91 3638-232100",
-                hash_pw(rescue_pw),
-                "RESCUE_TEAM",
-                1,
-                json.dumps([
-                    {"id": "c-03", "name": "SDRF Control Room Nongpoh", "relationship": "Base Station", "phone": "+91 3638-232101"}
-                ]),
-                now,
-                now
-            ),
-            (
-                "usr-med-01",
-                "Dr. Prabal Das",
-                "civil_hospital",
-                "medical@civilhosp.ner.gov.in",
-                "+91 3638-232222",
-                hash_pw(med_pw),
-                "MEDICAL_CENTER",
-                1,
-                json.dumps([
-                    {"id": "c-04", "name": "108 Ambulance Dispatch", "relationship": "Emergency Service", "phone": "108"}
-                ]),
-                now,
-                now
-            ),
-            (
-                "usr-resident-01",
-                "Tariang Lyngdoh",
-                "resident_nongpoh",
-                "resident@landslideguard.gov.in",
-                "+91 98620-11234",
-                hash_pw(resident_pw),
-                "USER",
-                1,
-                json.dumps([
-                    {"id": "c-05", "name": "Mayalang Lyngdoh", "relationship": "Brother", "phone": "+91 98620-55678"},
-                    {"id": "c-06", "name": "Civil Hospital Nongpoh", "relationship": "Hospital", "phone": "+91 3638-232222"}
-                ]),
-                now,
-                now
-            )
-        ]
-
+    def _seed_admin_from_env(self, conn):
+        """Create one admin account only when ADMIN_EMAIL and ADMIN_SEED_PASSWORD are set."""
+        email = os.environ.get("ADMIN_EMAIL")
+        password = os.environ.get("ADMIN_SEED_PASSWORD")
+        if not email or not password:
+            return
         cursor = conn.cursor()
-        cursor.executemany("""
+        cursor.execute("SELECT id FROM users WHERE LOWER(email) = LOWER(?)", (email,))
+        if cursor.fetchone():
+            return
+        now = datetime.now(timezone.utc).isoformat()
+        cursor.execute("""
         INSERT INTO users (id, full_name, username, email, phone, password_hash, role, is_active, emergency_contacts, created_at, updated_at)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT DO NOTHING
-        """, default_users)
+        """, ("usr-admin", "LandSafe Admin", os.environ.get("ADMIN_USERNAME", "admin"), email, None,
+              hash_pw(password), "ADMIN", 1, "[]", now, now))
         conn.commit()
 
     def _row_to_dict(self, row) -> Optional[Dict[str, Any]]:

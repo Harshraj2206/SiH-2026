@@ -25,7 +25,7 @@ def get_india_wide_intelligence(
 ):
     """
     Unified India-Wide Landslide Intelligence Feed.
-    Aggregates GSI / NLFC, ISRO / NRSC NDEM, IMD Severe Weather Warnings, and GDACS/NASA EONET.
+    Major landslides from published reports, open NASA EONET events in India, model risk for monitored zones, and the NASA Global Landslide Catalog.
     Provides verified confirmed incidents, predictive forecast risks, historical records, and demo drills.
     """
     return landslide_intelligence_pipeline.get_unified_intelligence(force_refresh=force_refresh)

@@ -14,13 +14,34 @@ import uuid
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any
 from backend.app.ml.predictor import predict_landslide_risk, categorize_risk_level, get_recommended_action
-from backend.app.ml.verifier import verify_landslide_report
 from backend.app.database.persistence import RecordStore
 
 logger = logging.getLogger("landslideguard")
 
 # Collections that change at runtime and must survive restarts.
 PERSISTED_COLLECTIONS = ("reports", "incidents", "sos_requests", "rescue_teams", "roads", "subscriptions")
+
+# Sample records seeded by earlier versions. They were made up, so they are removed from saved
+# state on load; anything people actually submitted is kept.
+_OLD_SEED_IDS = {
+    "reports": {"rep-001", "rep-002", "rep-003", "rep-004"},
+    "roads": {"road-nh6-sec1", "road-nh6-nongpoh", "road-nh6-umsning", "road-nh6-umiam", "road-shl-ascent",
+              "road-mawhati-bypass", "road-bhoirymbong-link", "road-neigrihms-bypass", "road-nh10-teesta",
+              "road-nh10-ranipool", "road-nh29-paglapahar"},
+    "incidents": {"LS-2026-NE-0042", "LS-2026-NE-0043", "LS-2026-NE-0044"},
+    "sos_requests": {"SOS-2026-00981", "SOS-2026-00982"},
+    "rescue_teams": {"team-ndrf-01", "team-sdrf-01", "team-police-01", "team-medical-01", "team-volunteers-01"},
+}
+
+# Live zone values kept across restarts, so a restart shows the last real readings, not nothing.
+_ZONE_LIVE_FIELDS = (
+    "rainfall_24h", "rainfall_72h", "slope_deg", "soil_moisture", "ndvi", "historical_incidents",
+    "elevation_amsl", "temperature_c", "humidity_pct", "weather_code", "condition", "is_day",
+    "cloud_cover_pct", "snowfall_cm", "rainfall_1h", "weather_source", "weather_status",
+    "weather_observation_time", "ml_base_score", "forecast_trend", "xai", "recommended_action",
+    "model_confidence", "tree_variance", "data_quality", "precision_context", "inference_status",
+    "provenance", "last_updated",
+)
 
 
 def persists(method):
@@ -32,6 +53,12 @@ def persists(method):
         return result
     return wrapper
 
+
+
+def _haversine_km(lat1, lng1, lat2, lng2):
+    dlat, dlng = math.radians(lat2 - lat1), math.radians(lng2 - lng1)
+    a = math.sin(dlat / 2) ** 2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlng / 2) ** 2
+    return 6371 * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
 class StateStore:
     def __init__(self):
@@ -46,12 +73,11 @@ class StateStore:
         self.roads: Dict[str, Dict[str, Any]] = {}
         self.hospitals: Dict[str, Dict[str, Any]] = {}
         self.shelters: Dict[str, Dict[str, Any]] = {}
-        self.post_disaster_events: Dict[str, Dict[str, Any]] = {}
         self.subscriptions: Dict[str, Dict[str, Any]] = {}
         self.poll_data: Dict[str, Any] = {
             "id": "poll-landslide-signs-today",
-            "question": "Have you noticed any signs of active landslide or ground movement near your district today?",
-            "description": "Daily citizen situational monitoring across Himachal Pradesh mountain sectors.",
+            "question": "Have you seen signs of a landslide near you today (cracks, falling rocks, tilting trees)?",
+            "description": "Answer once a day for the area around you.",
             "votes": {
                 "yes": 0,
                 "no": 0,
@@ -77,6 +103,10 @@ class StateStore:
                     "poll_voters": self.poll_voters,
                     "simulation_step": self.simulation_step,
                 })
+                self._records.replace("zones_live", {
+                    zid: {k: z.get(k) for k in _ZONE_LIVE_FIELDS}
+                    for zid, z in self.zones.items() if z.get("ml_base_score") is not None
+                })
             except Exception as e:
                 logger.error("State persistence failed: %s", e)
 
@@ -87,45 +117,39 @@ class StateStore:
                 self._persist()
                 return
             for name in PERSISTED_COLLECTIONS:
-                setattr(self, name, self._records.load(name))
+                loaded = self._records.load(name)
+                seeds = _OLD_SEED_IDS.get(name, set())
+                setattr(self, name, {k: v for k, v in loaded.items()
+                                     if k not in seeds and not (isinstance(v, dict) and v.get("is_demo"))})
+            if not self.subscriptions.get("sub-default"):
+                self._init_default_subscription()
+            for zid, live in (self._records.load("zones_live") or {}).items():
+                if zid in self.zones and live.get("ml_base_score") is not None:
+                    self.zones[zid].update(live)
+                    self.zones[zid]["inference_status"] = "STALE_LAST_KNOWN"
             meta = self._records.load("meta")
-            self.poll_data = meta.get("poll_data", self.poll_data)
+            saved_poll = meta.get("poll_data") or {}
+            self.poll_data.update({k: saved_poll[k] for k in ("votes", "date") if k in saved_poll})
             self.poll_voters = meta.get("poll_voters", self.poll_voters)
             self.simulation_step = meta.get("simulation_step", self.simulation_step)
             self._recalculate_all_fusion_internal()
             self._regenerate_alerts_internal()
+        self._persist()  # write back without the removed sample records
+
+    def _init_default_subscription(self):
+        self.subscriptions["sub-default"] = {
+            "subscription_id": "sub-default",
+            "user_id": None,
+            "selected_districts": [],
+            "risk_threshold": "HIGH",
+            "channels": ["IN_APP"],
+            "preferred_language": "en",
+            "status": "ACTIVE"
+        }
 
     def _init_data(self):
         # 1. User Accounts (RBAC Metadata)
-        self.users = {
-            "usr-resident-01": {
-                "id": "usr-resident-01",
-                "username": "resident_nongpoh",
-                "email": "resident@landslideguard.gov.in",
-                "role": "RESIDENT",
-                "full_name": "Tariang Lyngdoh",
-                "agency": "Ri-Bhoi Community Watch",
-                "created_at": "2026-08-01T10:00:00Z"
-            },
-            "usr-auth-01": {
-                "id": "usr-auth-01",
-                "username": "officer_sdma",
-                "email": "officer@sdim.ner.gov.in",
-                "role": "AUTHORITY",
-                "full_name": "Dr. Anamika Sharma",
-                "agency": "State Disaster Management Authority (SDMA - NER)",
-                "created_at": "2026-08-01T09:00:00Z"
-            },
-            "usr-admin-01": {
-                "id": "usr-admin-01",
-                "username": "ndma_admin",
-                "email": "admin@ndma.gov.in",
-                "role": "ADMIN",
-                "full_name": "Col. Rajesh Barua",
-                "agency": "National Disaster Management Authority (NDMA HQ)",
-                "created_at": "2026-08-01T08:00:00Z"
-            }
-        }
+        self.users = {}
 
         # 2. Risk Zones with Polygon Boundaries & Forecast Trends (Himachal Pradesh)
         raw_zones = [
@@ -403,725 +427,81 @@ class StateStore:
                 ]
             })
 
+        # Hill corridors elsewhere in India (Western Ghats, Uttarakhand, J&K, Darjeeling)
+        for zid, name, state, district, lat, lng in [
+            ("IN-KER-01", "Meppadi - Vythiri Ghat", "Kerala", "Wayanad", 11.605, 76.082),
+            ("IN-KER-02", "Munnar Gap Road (NH-85)", "Kerala", "Idukki", 9.851, 76.972),
+            ("IN-UK-01", "Rishikesh - Badrinath Highway", "Uttarakhand", "Chamoli", 30.407, 79.328),
+            ("IN-JK-01", "Ramban - Banihal (NH-44)", "Jammu & Kashmir", "Ramban", 33.242, 75.241),
+            ("IN-KA-01", "Madikeri - Sampaje Ghat (NH-275)", "Karnataka", "Kodagu", 12.424, 75.738),
+            ("IN-MH-01", "Varandha Ghat", "Maharashtra", "Raigad", 18.516, 73.181),
+            ("IN-WB-01", "Kurseong - Paglajhora (NH-110)", "West Bengal", "Darjeeling", 27.036, 88.263),
+        ]:
+            raw_zones.append({"zone_id": zid, "name": name, "state": state, "district": district,
+                              "center": {"lat": lat, "lng": lng}})
+
+        # Zones are real places, but every measurement and score comes only from the live
+        # refresh (Open-Meteo, Copernicus DEM, NASA landslide catalog). Until a zone has live
+        # data it is PENDING and is not shown or used for alerts.
+        _MEASURED = ("rainfall_24h", "rainfall_72h", "slope_deg", "soil_moisture", "ndvi",
+                     "historical_incidents", "land_cover", "coordinates")
         self.zones = {}
         for z in raw_zones:
-            z["is_demo"] = True
-            pred_result = predict_landslide_risk({
-                "rainfall_24h": z["rainfall_24h"],
-                "rainfall_72h": z["rainfall_72h"],
-                "slope_deg": z["slope_deg"],
-                "soil_moisture": z["soil_moisture"],
-                "ndvi": z["ndvi"],
-                "historical_incidents": z["historical_incidents"]
-            })
-
-            ml_score = pred_result["risk_score"]
-
-            # Only the current point: a real +6/12/24h outlook is added by the live refresh
-            # (Open-Meteo hourly forecast); seed data has no forecast.
-            forecast_trend = [
-                {"timeframe": "Current", "hour_offset": 0, "predicted_rainfall_mm": z["rainfall_24h"], "predicted_risk_score": ml_score, "risk_level": categorize_risk_level(ml_score)}
-            ]
-
-            z_entry = {
-                **z,
-                "ml_base_score": ml_score,
+            base = {k: v for k, v in z.items() if k not in _MEASURED}
+            self.zones[z["zone_id"]] = {
+                **base,
+                "rainfall_24h": None, "rainfall_72h": None, "slope_deg": None,
+                "soil_moisture": None, "historical_incidents": None, "elevation_amsl": None,
+                "ml_base_score": None,
                 "community_boost": 0.0,
-                "risk_score": ml_score,
-                "risk_level": categorize_risk_level(ml_score),
+                "risk_score": None,
+                "risk_level": "PENDING",
                 "community_report_count": 0,
                 "verified_report_count": 0,
-                "last_updated": datetime.now(timezone.utc).isoformat(),
-                "recommended_action": pred_result["xai"]["recommended_action"],
-                "xai": pred_result["xai"],
-                "forecast_trend": forecast_trend,
-                "alert_status": "CRITICAL WARNING" if ml_score > 80 else ("HIGH ADVISORY" if ml_score > 60 else None),
-                "model_confidence": pred_result.get("model_confidence", 85.0),
-                "tree_variance": pred_result.get("tree_variance", 0.05),
-                "data_quality": pred_result.get("data_quality", "HIGH (WMO / Copernicus DEM Calibrated)"),
-                "provenance": {
-                    "rainfall_source": "IMD / Open-Meteo WMO High-Res Grid (0.1°)",
-                    "dem_source": "SRTM 30m Global Digital Elevation Model",
-                    "soil_source": "NASA SMAP / ERA5-Land (9 km Grid)",
-                    "landslide_source": "Geological Survey of India (GSI) NLSM",
-                    "freshness_status": "DEMO_SEED",
-                    "rainfall_status": "DEMO_SEED",
-                    "is_demo": True
-                }
+                "last_updated": None,
+                "recommended_action": None,
+                "xai": {},
+                "forecast_trend": [],
+                "alert_status": None,
+                "inference_status": "PENDING",
+                "provenance": {},
             }
-            self.zones[z["zone_id"]] = z_entry
 
         # 3. Community Reports
-        self.reports = {
-            "rep-001": {
-                "id": "rep-001",
-                "user_id": "usr-resident-01",
-                "user_name": "Tariang Lyngdoh",
-                "user_role": "RESIDENT",
-                "zone_id": "NER-042",
-                "zone_name": "Nongpoh - Umsning Hill Cut (NH-6)",
-                "latitude": 25.8950,
-                "longitude": 91.8820,
-                "location_name": "NH-6 KM 48 Milestone, Nongpoh Ghat",
-                "report_type": "Cracks",
-                "signs_observed": ["Tension cracks on tarmac", "Subsurface soil shifting"],
-                "has_activity": True,
-                "description": "Noticed 3-inch wide tension cracks opening along the outer retaining wall after 6 hours of continuous downpour.",
-                "photo_url": "https://images.unsplash.com/photo-1547683905-f686c993aae5?auto=format&fit=crop&w=600&q=80",
-                "status": "VERIFIED",
-                "created_at": "2026-08-25T14:30:00Z",
-                "verified_at": "2026-08-25T15:10:00Z",
-                "verified_by": "Dr. Anamika Sharma (SDMA)",
-                "reviewer_notes": "Confirmed on site by Ri Bhoi field engineers. Retaining wall showing lateral displacement."
-            },
-            "rep-002": {
-                "id": "rep-002",
-                "user_id": "usr-resident-01",
-                "user_name": "Tariang Lyngdoh",
-                "user_role": "RESIDENT",
-                "zone_id": "NER-042",
-                "zone_name": "Nongpoh - Umsning Hill Cut (NH-6)",
-                "latitude": 25.8720,
-                "longitude": 91.8890,
-                "location_name": "Umsning Hill Curve 4",
-                "report_type": "Water seepage",
-                "signs_observed": ["Turbid water bubbling from toe of slope", "Muddy discharge across lane"],
-                "has_activity": True,
-                "description": "Heavy muddy water bubbling vigorously from the cut slope toe. Signs of pore pressure blowout.",
-                "photo_url": "https://images.unsplash.com/photo-1518458028785-8fbcd101ebb9?auto=format&fit=crop&w=600&q=80",
-                "status": "VERIFIED",
-                "created_at": "2026-08-25T16:15:00Z",
-                "verified_at": "2026-08-25T16:45:00Z",
-                "verified_by": "Dr. Anamika Sharma (SDMA)",
-                "reviewer_notes": "SDRF rapid unit flagged high pore-water saturation."
-            },
-            "rep-003": {
-                "id": "rep-003",
-                "user_id": "usr-resident-01",
-                "user_name": "Bimal Chettri",
-                "user_role": "RESIDENT",
-                "zone_id": "NER-011",
-                "zone_name": "Gangtok - Ranipool Canyon (NH-10)",
-                "latitude": 27.2910,
-                "longitude": 88.5620,
-                "location_name": "Ranipool Bridge Approach",
-                "report_type": "Falling rocks",
-                "signs_observed": ["Intermittent boulder fall", "Damaged guard rails"],
-                "has_activity": True,
-                "description": "Continuous small debris and rock fragments rolling down onto NH-10. Vehicles moving with high caution.",
-                "photo_url": "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=600&q=80",
-                "status": "VERIFIED",
-                "created_at": "2026-08-25T17:00:00Z",
-                "verified_at": "2026-08-25T17:30:00Z",
-                "verified_by": "Dr. Anamika Sharma (SDMA)",
-                "reviewer_notes": "Broader rockfall net required. Traffic police posted."
-            },
-            "rep-004": {
-                "id": "rep-004",
-                "user_id": "usr-resident-01",
-                "user_name": "Lalthan Sanga",
-                "user_role": "RESIDENT",
-                "zone_id": "NER-077",
-                "zone_name": "Kohima - Paglapahar Sinking Zone (NH-29)",
-                "latitude": 25.7180,
-                "longitude": 94.0210,
-                "location_name": "Paglapahar Ghat Milestone 12",
-                "report_type": "Slope movement",
-                "signs_observed": ["Tilted trees", "Road subsidence of 15cm"],
-                "has_activity": True,
-                "description": "Noticeable road sag and trees tilting downhill at approx 20 degrees. Heavy mud creeping toward edge.",
-                "photo_url": "https://images.unsplash.com/photo-1542314831-c6a4d2757276?auto=format&fit=crop&w=600&q=80",
-                "status": "PENDING",
-                "created_at": "2026-08-25T18:40:00Z",
-                "verified_at": None,
-                "verified_by": None,
-                "reviewer_notes": None
-            }
-        }
+        self.reports = {}
 
         # 4. Roads Database with Real-Time Obstruction Overrides
-        self.roads = {
-            "road-nh6-sec1": {
-                "road_id": "road-nh6-sec1",
-                "name": "GS Road Highway Sector 1",
-                "highway_code": "NH-6",
-                "from_junction": "GHY_HUB",
-                "to_junction": "BYR_JUNCT",
-                "distance_km": 14.5,
-                "status": "OPEN",
-                "obstruction_reason": None,
-                "zone_id": None,
-                "speed_limit_kmh": 65,
-                "last_updated": "2026-08-25T10:00:00Z"
-            },
-            "road-nh6-nongpoh": {
-                "road_id": "road-nh6-nongpoh",
-                "name": "NH-6 Nongpoh Ghat Cut",
-                "highway_code": "NH-6",
-                "from_junction": "BYR_JUNCT",
-                "to_junction": "NONGPOH_MID",
-                "distance_km": 24.0,
-                "status": "DANGEROUS",
-                "obstruction_reason": "Continuous debris slide at KM 48. Heavy vehicles restricted.",
-                "zone_id": "NER-042",
-                "speed_limit_kmh": 30,
-                "last_updated": "2026-08-25T16:00:00Z"
-            },
-            "road-nh6-umsning": {
-                "road_id": "road-nh6-umsning",
-                "name": "NH-6 Umsning Hill Pass",
-                "highway_code": "NH-6",
-                "from_junction": "NONGPOH_MID",
-                "to_junction": "UMSNING_CUT",
-                "distance_km": 18.5,
-                "status": "BLOCKED",
-                "obstruction_reason": "Major 40-meter mudflow across highway. Excavators deployed.",
-                "zone_id": "NER-042",
-                "speed_limit_kmh": 0,
-                "last_updated": "2026-08-25T17:30:00Z"
-            },
-            "road-nh6-umiam": {
-                "road_id": "road-nh6-umiam",
-                "name": "Umiam Gorge Expressway",
-                "highway_code": "NH-6",
-                "from_junction": "UMSNING_CUT",
-                "to_junction": "UMIAM_LAKE",
-                "distance_km": 16.0,
-                "status": "OPEN",
-                "obstruction_reason": None,
-                "zone_id": "NER-024",
-                "speed_limit_kmh": 55,
-                "last_updated": "2026-08-25T10:00:00Z"
-            },
-            "road-shl-ascent": {
-                "road_id": "road-shl-ascent",
-                "name": "Shillong City Ascent",
-                "highway_code": "SH-1",
-                "from_junction": "UMIAM_LAKE",
-                "to_junction": "SHL_CENTER",
-                "distance_km": 15.2,
-                "status": "OPEN",
-                "obstruction_reason": None,
-                "zone_id": "NER-024",
-                "speed_limit_kmh": 40,
-                "last_updated": "2026-08-25T10:00:00Z"
-            },
-            "road-mawhati-bypass": {
-                "road_id": "road-mawhati-bypass",
-                "name": "Mawhati Valley Rural Bypass",
-                "highway_code": "SH-14",
-                "from_junction": "BYR_JUNCT",
-                "to_junction": "MAWHATI_VALLEY",
-                "distance_km": 28.0,
-                "status": "OPEN",
-                "obstruction_reason": "Safe alternative valley corridor",
-                "zone_id": "NER-045",
-                "speed_limit_kmh": 55,
-                "last_updated": "2026-08-25T10:00:00Z"
-            },
-            "road-bhoirymbong-link": {
-                "road_id": "road-bhoirymbong-link",
-                "name": "Bhoirymbong Airport Link Road",
-                "highway_code": "SH-14",
-                "from_junction": "MAWHATI_VALLEY",
-                "to_junction": "BHOIRYMBONG_BYPASS",
-                "distance_km": 26.5,
-                "status": "OPEN",
-                "obstruction_reason": None,
-                "zone_id": "NER-045",
-                "speed_limit_kmh": 55,
-                "last_updated": "2026-08-25T10:00:00Z"
-            },
-            "road-neigrihms-bypass": {
-                "road_id": "road-neigrihms-bypass",
-                "name": "NEIGRIHMS Shillong East Bypass",
-                "highway_code": "SH-14B",
-                "from_junction": "BHOIRYMBONG_BYPASS",
-                "to_junction": "SHL_CENTER",
-                "distance_km": 18.2,
-                "status": "OPEN",
-                "obstruction_reason": None,
-                "zone_id": "NER-024",
-                "speed_limit_kmh": 45,
-                "last_updated": "2026-08-25T10:00:00Z"
-            },
-            "road-nh10-teesta": {
-                "road_id": "road-nh10-teesta",
-                "name": "NH-10 Teesta Canyon Road",
-                "highway_code": "NH-10",
-                "from_junction": "SILIGURI_HUB",
-                "to_junction": "RANGPO_CHECKPOST",
-                "distance_km": 68.0,
-                "status": "SLOW",
-                "obstruction_reason": "Single-lane traffic due to minor rockfall clearance",
-                "zone_id": "NER-011",
-                "speed_limit_kmh": 25,
-                "last_updated": "2026-08-25T15:00:00Z"
-            },
-            "road-nh10-ranipool": {
-                "road_id": "road-nh10-ranipool",
-                "name": "NH-10 Ranipool - Gangtok Ascent",
-                "highway_code": "NH-10",
-                "from_junction": "SINGTAM_JUNCT",
-                "to_junction": "GANGTOK_RIDGE",
-                "distance_km": 28.0,
-                "status": "DANGEROUS",
-                "obstruction_reason": "Sinking road shoulder at 9th Mile",
-                "zone_id": "NER-011",
-                "speed_limit_kmh": 20,
-                "last_updated": "2026-08-25T16:30:00Z"
-            },
-            "road-nh29-paglapahar": {
-                "road_id": "road-nh29-paglapahar",
-                "name": "NH-29 Paglapahar Landslide Ghat",
-                "highway_code": "NH-29",
-                "from_junction": "MEDZIPHEMA_FOOTHILLS",
-                "to_junction": "KOHIMA_CITY",
-                "distance_km": 48.0,
-                "status": "BLOCKED",
-                "obstruction_reason": "Massive mud-rock slide at Old Paglapahar. All traffic diverted.",
-                "zone_id": "NER-077",
-                "speed_limit_kmh": 0,
-                "last_updated": "2026-08-25T18:00:00Z"
-            }
-        }
+        self.roads = {}
 
         # 5. GDACS-Style Active Incidents Database (Pre-seeded Training Scenarios)
-        self.incidents = {
-            "LS-2026-NE-0042": {
-                "incident_id": "LS-2026-NE-0042",
-                "title": "Major Highway Blockade & Mudflow at Nongpoh Hill Cut",
-                "district": "Ri Bhoi",
-                "state": "Meghalaya",
-                "latitude": 25.8620,
-                "longitude": 91.8910,
-                "timestamp": "2026-08-25T16:30:00Z",
-                "severity": "CRITICAL",
-                "status": "RESPONDING",
-                "affected_zone_id": "NER-042",
-                "zone_name": "Nongpoh - Umsning Hill Cut (NH-6)",
-                "estimated_population": 4200,
-                "blocked_roads": ["NH-6 Umsning Hill Pass (KM 48-52)"],
-                "injured_people": 3,
-                "missing_people": 0,
-                "evacuated_people": 140,
-                "source": "Synthetic Scenario Dataset (NER Benchmark Drill)",
-                "assigned_team_id": "team-sdrf-01",
-                "assigned_team_name": "SDRF Ri-Bhoi Fast Response Unit",
-                "description": "Prolonged rainfall of 85.2mm caused sudden slope failure of 150m retaining section across NH-6. 2 vehicles partially buried, passengers rescued.",
-                "updated_at": "2026-08-25T18:00:00Z",
-                "verification_status": "DEMO / SIMULATION",
-                "category": "DEMO_SIMULATION",
-                "source_type": "SIMULATION",
-                "source_priority_level": 5,
-                "casualties_info": "Injured: 3 (Simulated Exercise)",
-                "reported_causes": ["Simulated Heavy Rainfall (>85mm)", "Synthetic Slope Cut"],
-                "contributing_factors": ["Simulation Calibration Model"],
-                "why_at_risk": "Pre-seeded drill scenario for testing multi-agency response dispatch. Not an active real-world landslide event.",
-                "freshness_label": "Simulated Drill Scenario",
-                "is_simulation": True
-            },
-            "LS-2026-NE-0043": {
-                "incident_id": "LS-2026-NE-0043",
-                "title": "Ranipool Riverbank Debris Slide on NH-10",
-                "district": "East Sikkim",
-                "state": "Sikkim",
-                "latitude": 27.2840,
-                "longitude": 88.5520,
-                "timestamp": "2026-08-25T15:10:00Z",
-                "severity": "HIGH",
-                "status": "VERIFIED",
-                "affected_zone_id": "NER-011",
-                "zone_name": "Gangtok - Ranipool Canyon (NH-10)",
-                "estimated_population": 6800,
-                "blocked_roads": ["NH-10 Ranipool 9th Mile"],
-                "injured_people": 1,
-                "missing_people": 0,
-                "evacuated_people": 65,
-                "source": "Synthetic Scenario Dataset (NER Benchmark Drill)",
-                "assigned_team_id": "team-police-01",
-                "assigned_team_name": "Sikkim Traffic & Mountain Police Unit",
-                "description": "Continuous rockfall and slush flow encroaching on left carriageway. Heavy machinery clearing single-lane corridor.",
-                "updated_at": "2026-08-25T17:15:00Z",
-                "verification_status": "DEMO / SIMULATION",
-                "category": "DEMO_SIMULATION",
-                "source_type": "SIMULATION",
-                "source_priority_level": 5,
-                "casualties_info": "Injured: 1 (Simulated Exercise)",
-                "reported_causes": ["Riverbank Toe Erosion (Simulated)"],
-                "contributing_factors": ["Simulation Calibration Model"],
-                "why_at_risk": "Pre-seeded drill scenario for testing mountain traffic diversion. Not an active real-world landslide event.",
-                "freshness_label": "Simulated Drill Scenario",
-                "is_simulation": True
-            },
-            "LS-2026-NE-0044": {
-                "incident_id": "LS-2026-NE-0044",
-                "title": "Paglapahar Ghat Subsidence & Sinking Roadbed",
-                "district": "Kohima",
-                "state": "Nagaland",
-                "latitude": 25.7210,
-                "longitude": 94.0080,
-                "timestamp": "2026-08-25T17:45:00Z",
-                "severity": "CRITICAL",
-                "status": "EVACUATING",
-                "affected_zone_id": "NER-077",
-                "zone_name": "Kohima - Paglapahar Sinking Zone (NH-29)",
-                "estimated_population": 2900,
-                "blocked_roads": ["NH-29 Paglapahar Ghat"],
-                "injured_people": 0,
-                "missing_people": 0,
-                "evacuated_people": 85,
-                "source": "Synthetic Scenario Dataset (NER Benchmark Drill)",
-                "assigned_team_id": "team-ndrf-01",
-                "assigned_team_name": "12th Battalion NDRF Unit C",
-                "description": "Severe 30cm vertical road drop with creeping embankment. Preventative evacuation of 24 downhill settlement homes underway.",
-                "updated_at": "2026-08-25T18:45:00Z",
-                "verification_status": "DEMO / SIMULATION",
-                "category": "DEMO_SIMULATION",
-                "source_type": "SIMULATION",
-                "source_priority_level": 5,
-                "casualties_info": "Casualties: None reported (Simulated Exercise)",
-                "reported_causes": ["Roadbed Embankment Creep (Simulated)"],
-                "contributing_factors": ["Simulation Calibration Model"],
-                "why_at_risk": "Pre-seeded drill scenario for testing rapid NDRF evacuation. Not an active real-world landslide event.",
-                "freshness_label": "Simulated Drill Scenario",
-                "is_simulation": True
-            }
-        }
+        self.incidents = {}
 
         # 6. Emergency SOS Requests Database with Triage Prioritization
-        self.sos_requests = {
-            "SOS-2026-00981": {
-                "sos_id": "SOS-2026-00981",
-                "user_id": "usr-citizen-981",
-                "user_name": "Mawlong & Family",
-                "emergency_contact": "+91 98620-11234",
-                "latitude": 25.8640,
-                "longitude": 91.8930,
-                "location_name": "Nongpoh Ghat Cut, near KM 49 milestone",
-                "zone_id": "NER-042",
-                "timestamp": "2026-08-25T17:10:00Z",
-                "people_count": 4,
-                "injury_severity": "SEVERE",
-                "is_trapped": True,
-                "priority_score": 96.5,
-                "triage_priority": "CRITICAL",
-                "status": "DISPATCHED",
-                "message": "Vehicle hit by sudden boulder slide on mountain cut. Two adults with head/limb injuries. Mud creeping into car doors. Need immediate extraction.",
-                "photo_url": "https://images.unsplash.com/photo-1547683905-f686c993aae5?auto=format&fit=crop&w=600&q=80",
-                "assigned_team_id": "team-sdrf-01",
-                "assigned_team_name": "SDRF Ri-Bhoi Fast Response Unit",
-                "destination_hospital_id": "hosp-nongpoh-civil",
-                "destination_hospital_name": "Civil Hospital Nongpoh (Trauma Care)",
-                "destination_shelter_id": "shelter-nongpoh-comm",
-                "destination_shelter_name": "Nongpoh Community Relief Center",
-                "triage_notes": "Immediate hydraulic cutter extraction required. 108 Ambulance en route.",
-                "updated_at": "2026-08-25T17:35:00Z"
-            },
-            "SOS-2026-00982": {
-                "sos_id": "SOS-2026-00982",
-                "user_id": "usr-citizen-982",
-                "user_name": "Dorjee Tamang",
-                "emergency_contact": "+91 94340-88712",
-                "latitude": 27.2880,
-                "longitude": 88.5580,
-                "location_name": "Ranipool Foothills settlement",
-                "zone_id": "NER-011",
-                "timestamp": "2026-08-25T17:40:00Z",
-                "people_count": 6,
-                "injury_severity": "MINOR",
-                "is_trapped": False,
-                "priority_score": 68.0,
-                "triage_priority": "EVACUATION",
-                "status": "IN_PROGRESS",
-                "message": "Water and silt entering home ground floor. Elderly grandmother needs transport to relief center.",
-                "photo_url": None,
-                "assigned_team_id": "team-volunteers-01",
-                "assigned_team_name": "Ri-Bhoi / Gangtok Youth Volunteer Corps",
-                "destination_hospital_id": None,
-                "destination_hospital_name": None,
-                "destination_shelter_id": "shelter-singtam-hs",
-                "destination_shelter_name": "Singtam Higher Secondary Safe Haven",
-                "triage_notes": "Assigned evacuation shuttle to community relief camp.",
-                "updated_at": "2026-08-25T18:00:00Z"
-            }
-        }
+        self.sos_requests = {}
 
         # 7. Rescue Teams Directory (Multi-Agency)
-        self.rescue_teams = {
-            "team-ndrf-01": {
-                "team_id": "team-ndrf-01",
-                "name": "12th Battalion NDRF Unit Alpha",
-                "team_type": "NDRF",
-                "base_location": "Guwahati Regional Base / Shillong Forward Post",
-                "members_count": 24,
-                "leader_name": "Inspector Vikram Negi",
-                "contact_phone": "+91 361-2244001",
-                "vehicle": "All-Terrain Heavy Rescue 4x4 + Earthmover",
-                "equipment": ["Hydraulic Cutters", "Search Dogs", "Inflatable Rafts", "Satellite Comms", "Life Detectors"],
-                "status": "DISPATCHED",
-                "current_assignment_id": "LS-2026-NE-0044",
-                "current_assignment_title": "Paglapahar Embankment Evacuation",
-                "latitude": 25.7350,
-                "longitude": 93.9800,
-                "eta_minutes": 15
-            },
-            "team-sdrf-01": {
-                "team_id": "team-sdrf-01",
-                "name": "SDRF Ri-Bhoi Fast Response Unit",
-                "team_type": "SDRF",
-                "base_location": "Nongpoh District Headquarters",
-                "members_count": 14,
-                "leader_name": "Sub-Inspector Wanbah Khonglah",
-                "contact_phone": "+91 3638-232100",
-                "vehicle": "Mountain Quick Response Troop Carrier (4WD)",
-                "equipment": ["Chainsaws", "Spreader Cutters", "Rope Rescue Rigs", "Trauma Stretchers", "Heavy Winch"],
-                "status": "ON_SITE",
-                "current_assignment_id": "SOS-2026-00981",
-                "current_assignment_title": "Nongpoh KM 49 Vehicle Extraction",
-                "latitude": 25.8640,
-                "longitude": 91.8930,
-                "eta_minutes": 0
-            },
-            "team-police-01": {
-                "team_id": "team-police-01",
-                "name": "Highway Patrol & Traffic Command Unit 4",
-                "team_type": "Police",
-                "base_location": "Umiam Checkpost",
-                "members_count": 8,
-                "leader_name": "Sub-Inspector S. Sangma",
-                "contact_phone": "+91 364-2591000",
-                "vehicle": "Interceptor Gypsies & Traffic Diversion Vans",
-                "equipment": ["Barricades", "Loudspeakers", "First Aid", "Variable Message Boards"],
-                "status": "AVAILABLE",
-                "current_assignment_id": None,
-                "current_assignment_title": None,
-                "latitude": 25.6600,
-                "longitude": 91.9100,
-                "eta_minutes": 8
-            },
-            "team-medical-01": {
-                "team_id": "team-medical-01",
-                "name": "108 Advance Life Support Mobile ICU",
-                "team_type": "Medical",
-                "base_location": "Civil Hospital Nongpoh",
-                "members_count": 4,
-                "leader_name": "Dr. Prabal Das (Emergency Med)",
-                "contact_phone": "108 / +91 3638-232108",
-                "vehicle": "4x4 Advance Life Support Ambulance",
-                "equipment": ["Defibrillator", "Portable Ventilator", "Oxygen Rigs", "Splints & Trauma Kits"],
-                "status": "DISPATCHED",
-                "current_assignment_id": "SOS-2026-00981",
-                "current_assignment_title": "Nongpoh Slide Trauma Transport",
-                "latitude": 25.8800,
-                "longitude": 91.8850,
-                "eta_minutes": 6
-            },
-            "team-volunteers-01": {
-                "team_id": "team-volunteers-01",
-                "name": "Ri-Bhoi Community Youth Responders",
-                "team_type": "Volunteers",
-                "base_location": "Bhoirymbong Youth Center",
-                "members_count": 30,
-                "leader_name": "Bah K. Marbaniang",
-                "contact_phone": "+91 98560-44211",
-                "vehicle": "Pickup 4x4s & Local Vans",
-                "equipment": ["Hand Tools", "Tarpaulins", "Drinking Water Cans", "First Aid Boxes"],
-                "status": "AVAILABLE",
-                "current_assignment_id": None,
-                "current_assignment_title": None,
-                "latitude": 25.7100,
-                "longitude": 92.0000,
-                "eta_minutes": 10
-            }
-        }
+        self.rescue_teams = {}
 
         # 8. Hospitals Directory with Real Capacity Telemetry
-        self.hospitals = {
-            "hosp-nongpoh-civil": {
-                "hospital_id": "hosp-nongpoh-civil",
-                "name": "Civil Hospital Nongpoh (District Emergency Center)",
-                "type": "District Hospital",
-                "district": "Ri Bhoi",
-                "state": "Meghalaya",
-                "latitude": 25.9050,
-                "longitude": 91.8810,
-                "source": "Demo seed (name and location only)",
-                "is_demo": True,
-                "trauma_center": True,
-                "blood_bank": True,
-                "contact_phone": "108",
-            },
-            "hosp-neigrihms-shl": {
-                "hospital_id": "hosp-neigrihms-shl",
-                "name": "NEIGRIHMS Super-Specialty Medical Institute",
-                "type": "Apex Trauma Institute",
-                "district": "East Khasi Hills",
-                "state": "Meghalaya",
-                "latitude": 25.5920,
-                "longitude": 91.9380,
-                "source": "Demo seed (name and location only)",
-                "is_demo": True,
-                "trauma_center": True,
-                "blood_bank": True,
-                "contact_phone": "108",
-            },
-            "hosp-stnm-gangtok": {
-                "hospital_id": "hosp-stnm-gangtok",
-                "name": "STNM Multi-Specialty Hospital Gangtok",
-                "type": "State Apex Hospital",
-                "district": "East Sikkim",
-                "state": "Sikkim",
-                "latitude": 27.3210,
-                "longitude": 88.5980,
-                "source": "Demo seed (name and location only)",
-                "is_demo": True,
-                "trauma_center": True,
-                "blood_bank": True,
-                "contact_phone": "108",
-            },
-            "hosp-naga-kohima": {
-                "hospital_id": "hosp-naga-kohima",
-                "name": "Naga Hospital Authority Kohima",
-                "type": "District Apex Hospital",
-                "district": "Kohima",
-                "state": "Nagaland",
-                "latitude": 25.6680,
-                "longitude": 94.1020,
-                "source": "Demo seed (name and location only)",
-                "is_demo": True,
-                "trauma_center": True,
-                "blood_bank": True,
-                "contact_phone": "108",
-            }
-        }
+        self.hospitals = {}
 
         # 9. Emergency Relief Shelters & Evacuation Camps
-        self.shelters = {
-            "shelter-nongpoh-comm": {
-                "shelter_id": "shelter-nongpoh-comm",
-                "name": "Nongpoh Community Hall & Relief Camp",
-                "type": "Designated Evacuation Shelter",
-                "district": "Ri Bhoi",
-                "state": "Meghalaya",
-                "latitude": 25.9080,
-                "longitude": 91.8750,
-                "facilities": [],
-                "source": "Demo seed (name and location only)",
-                "is_demo": True,
-                "medical_station": True,
-                "contact_phone": "1070",
-                "accessibility": "Direct Valley Access via Mawhati Route"
-            },
-            "shelter-shillong-stadium": {
-                "shelter_id": "shelter-shillong-stadium",
-                "name": "JN Indoor Stadium Shillong Relief Hub",
-                "type": "Major Regional Camp",
-                "district": "East Khasi Hills",
-                "state": "Meghalaya",
-                "latitude": 25.5860,
-                "longitude": 91.8890,
-                "facilities": [],
-                "source": "Demo seed (name and location only)",
-                "is_demo": True,
-                "medical_station": True,
-                "contact_phone": "1070",
-                "accessibility": "High Capacity Highway Link"
-            },
-            "shelter-singtam-hs": {
-                "shelter_id": "shelter-singtam-hs",
-                "name": "Singtam Higher Secondary Safe Haven",
-                "type": "Safe Hill School Camp",
-                "district": "East Sikkim",
-                "state": "Sikkim",
-                "latitude": 27.2360,
-                "longitude": 88.5020,
-                "facilities": [],
-                "source": "Demo seed (name and location only)",
-                "is_demo": True,
-                "medical_station": True,
-                "contact_phone": "1070",
-                "accessibility": "Low Slope Elevation"
-            },
-            "shelter-kohima-hall": {
-                "shelter_id": "shelter-kohima-hall",
-                "name": "Kohima Multipurpose Indoor Relief Camp",
-                "type": "Designated Evacuation Complex",
-                "district": "Kohima",
-                "state": "Nagaland",
-                "latitude": 25.6720,
-                "longitude": 94.1080,
-                "facilities": [],
-                "source": "Demo seed (name and location only)",
-                "is_demo": True,
-                "medical_station": True,
-                "contact_phone": "1070",
-                "accessibility": "Direct NH-29 Bypass Road"
-            }
-        }
+        self.shelters = {}
 
         # 10. Post-Disaster Analysis & Machine Learning Retrospective Records
-        self.post_disaster_events = {
-            "pda-2026-001": {
-                "record_id": "pda-2026-001",
-                "incident_id": "LS-2026-NE-0038",
-                "event_name": "Cherrapunji Escarpment Slope Failure Event",
-                "date_occurred": "2026-07-14",
-                "district": "East Khasi Hills",
-                "pre_event_ml_risk": 74.5,
-                "actual_rainfall_24h_mm": 192.0,
-                "actual_slope_deg": 36.5,
-                "community_reports_prior": 5,
-                "time_to_first_response_min": 18,
-                "total_people_evacuated": 310,
-                "casualties": 0,
-                "injuries_treated": 4,
-                "primary_hospital_used": "NEIGRIHMS Shillong",
-                "primary_shelter_used": "JN Indoor Stadium Shillong",
-                "primary_road_diverted_to": "Mawkdok Valley Link",
-                "lessons_learned": "Early alert issued 4 hours prior prevented tourist traffic from entering the canyon. Pre-positioned SDRF saved response time.",
-                "model_calibration_feedback": "Increased rainfall weight on limestone karst terrain by 4.2% based on moisture saturation curve."
-            },
-            "pda-2026-002": {
-                "record_id": "pda-2026-002",
-                "incident_id": "LS-2026-NE-0029",
-                "event_name": "NH-10 Ranipool Debris Chute Collapse",
-                "date_occurred": "2026-06-22",
-                "district": "East Sikkim",
-                "pre_event_ml_risk": 82.0,
-                "actual_rainfall_24h_mm": 160.0,
-                "actual_slope_deg": 39.0,
-                "community_reports_prior": 4,
-                "time_to_first_response_min": 14,
-                "total_people_evacuated": 180,
-                "casualties": 0,
-                "injuries_treated": 2,
-                "primary_hospital_used": "STNM Hospital Gangtok",
-                "primary_shelter_used": "Singtam Community Relief Camp",
-                "primary_road_diverted_to": "Dikchu Hydel Bypass",
-                "lessons_learned": "Dikchu alternate route successfully absorbed 85% of commuter load without bottleneck.",
-                "model_calibration_feedback": "Adjusted historical incident prior factor for NH-10 corridor."
-            }
-        }
 
         # 11. Alert Subscriptions
         self.subscriptions = {
             "sub-default": {
                 "subscription_id": "sub-default",
-                "user_id": "usr-resident-01",
-                "selected_districts": ["Ri Bhoi", "East Khasi Hills", "East Sikkim", "Kohima"],
+                "user_id": None,
+                "selected_districts": [],
                 "risk_threshold": "HIGH",
-                "channels": ["IN_APP", "EMAIL", "SMS_DEMO"],
+                "channels": ["IN_APP"],
                 "preferred_language": "en",
                 "status": "ACTIVE"
             }
         }
-
-        # Every seeded record above is demo data; tag it so the UI can label it.
-        for collection in (self.reports, self.incidents, self.rescue_teams, self.hospitals,
-                           self.shelters, self.post_disaster_events):
-            for record in collection.values():
-                record["is_demo"] = True
 
         # Calculate initial fusion and alerts
         self._recalculate_all_fusion_internal()
@@ -1150,75 +530,71 @@ class StateStore:
             else:
                 boost = 0.0
 
-            final_score = round(min(100.0, z["ml_base_score"] + boost), 1)
-            level = categorize_risk_level(final_score)
-
             z["community_report_count"] = tot_count
             z["verified_report_count"] = ver_count
             z["community_boost"] = boost
+            if z.get("ml_base_score") is None:  # no live data yet
+                continue
+            final_score = round(min(100.0, z["ml_base_score"] + boost), 1)
+            level = categorize_risk_level(final_score)
             z["risk_score"] = final_score
             z["risk_level"] = level
-            z["last_updated"] = datetime.now(timezone.utc).isoformat()
-            z["recommended_action"] = get_recommended_action(level, "heavy rainfall and verified ground instability")
+            if boost > 0:
+                z["recommended_action"] = get_recommended_action(level, "rainfall and verified ground reports")
 
     def _regenerate_alerts_internal(self):
+        """Alerts come only from zones scored with live data, using their real values."""
         self.alerts = {}
         alert_idx = 1
         for zid, z in self.zones.items():
-            score = z["risk_score"]
-            level = z["risk_level"]
+            score = z.get("risk_score")
+            if score is None:
+                continue
+            rain = z.get("rainfall_24h")
+            slope = z.get("slope_deg")
+            soil = z.get("soil_moisture")
+            verified = z.get("verified_report_count", 0)
+            facts = []
+            if rain is not None:
+                facts.append(f"{rain:g} mm rain in 24 h")
+            if slope is not None:
+                facts.append(f"slope {slope:g}°")
+            if soil is not None:
+                facts.append(f"soil moisture {round(soil * 100)}%")
+            if verified:
+                facts.append(f"{verified} verified ground report{'s' if verified != 1 else ''}")
+            reason = ", ".join(facts).capitalize() + "." if facts else ""
 
-            if score >= 80.0:
-                aid = f"ALT-{alert_idx:03d}"
-                self.alerts[aid] = {
-                    "id": aid,
-                    "zone_id": zid,
-                    "zone_name": z["name"],
-                    "category": "CRITICAL",
-                    "risk_score": score,
-                    "title": f"CRITICAL LANDSLIDE WARNING: {z['name']}",
-                    "reason": f"Rainfall {z['rainfall_24h']} mm in 24h + steep terrain ({z['slope_deg']}°) + {z['verified_report_count']} verified ground instability reports.",
-                    "recommended_action": "Evacuate non-essential personnel and divert all heavy transport through alternate valley bypass.",
-                    "timestamp": z["last_updated"],
-                    "status": "ACTIVE",
-                    "affected_highway": z["name"]
-                }
-                alert_idx += 1
-            elif score >= 60.0:
-                aid = f"ALT-{alert_idx:03d}"
-                self.alerts[aid] = {
-                    "id": aid,
-                    "zone_id": zid,
-                    "zone_name": z["name"],
-                    "category": "HIGH",
-                    "risk_score": score,
-                    "title": f"HIGH RISK ADVISORY: {z['name']}",
-                    "reason": f"Elevated saturation ({int(z['soil_moisture']*100)}% moisture) with ongoing monsoon front.",
-                    "recommended_action": "Activate road clearing teams, restrict night convoy movements, monitor inclinometer telemetry.",
-                    "timestamp": z["last_updated"],
-                    "status": "ACTIVE",
-                    "affected_highway": z["name"]
-                }
-                alert_idx += 1
-            elif score >= 35.0 and z["verified_report_count"] > 0:
-                aid = f"ALT-{alert_idx:03d}"
-                self.alerts[aid] = {
-                    "id": aid,
-                    "zone_id": zid,
-                    "zone_name": z["name"],
-                    "category": "MODERATE",
-                    "risk_score": score,
-                    "title": f"CAUTION: Verified Ground Movement in {z['name']}",
-                    "reason": f"Ground reports verified. Moderate slope destabilization under observation.",
-                    "recommended_action": "Drive with vigilance. Watch for loose debris on sharp turns.",
-                    "timestamp": z["last_updated"],
-                    "status": "ACTIVE",
-                    "affected_highway": z["name"]
-                }
-                alert_idx += 1
+            level = z.get("risk_level")  # same bands as the map and the model
+            if level == "CRITICAL":
+                category, title = "CRITICAL", f"Critical landslide risk: {z['name']}"
+                action = "Avoid travel through this area and follow local authority instructions."
+            elif level == "HIGH":
+                category, title = "HIGH", f"High landslide risk: {z['name']}"
+                action = "Avoid travel at night and watch for falling debris and cracks."
+            elif level == "MODERATE" and verified > 0:
+                category, title = "MODERATE", f"Ground movement reported: {z['name']}"
+                action = "Drive carefully and watch for loose debris on sharp turns."
+            else:
+                continue
+            aid = f"ALT-{alert_idx:03d}"
+            self.alerts[aid] = {
+                "id": aid,
+                "zone_id": zid,
+                "zone_name": z["name"],
+                "category": category,
+                "risk_score": score,
+                "title": title,
+                "reason": reason,
+                "recommended_action": action,
+                "timestamp": z.get("last_updated"),
+                "status": "ACTIVE",
+                "affected_highway": z["name"]
+            }
+            alert_idx += 1
 
     # ---------------- SOS Triage Scoring Engine ----------------
-    def calculate_sos_priority(self, people: int, severity: str, is_trapped: bool, zone_risk: float) -> tuple[float, str]:
+    def calculate_sos_priority(self, people: int, severity: str, is_trapped: bool, zone_risk: Optional[float]) -> tuple[float, str]:
         """
         Computes dynamic SOS Priority Score (0-100) and Triage Classification:
         CRITICAL | URGENT | EVACUATION | SAFE
@@ -1237,7 +613,8 @@ class StateStore:
         score += min(15.0, (people - 1) * 3.5)
 
         # Environmental risk multiplier
-        score += (zone_risk / 100.0) * 15.0
+        if zone_risk is not None:
+            score += (zone_risk / 100.0) * 15.0
 
         final_score = round(min(100.0, score), 1)
 
@@ -1258,6 +635,11 @@ class StateStore:
         with self.lock:
             return list(self.zones.values())
 
+    def get_scored_zones(self) -> List[Dict[str, Any]]:
+        """Zones that have real (live or last-known) data; PENDING zones are left out."""
+        with self.lock:
+            return [z for z in self.zones.values() if z.get("risk_score") is not None]
+
     def refresh_fusion_and_alerts(self):
         """Recompute community fusion and alerts after zone scores change (e.g. live refresh)."""
         with self.lock:
@@ -1270,7 +652,7 @@ class StateStore:
 
     def get_zone_risk_map(self) -> Dict[str, float]:
         with self.lock:
-            return {zid: z["risk_score"] for zid, z in self.zones.items()}
+            return {zid: z["risk_score"] for zid, z in self.zones.items() if z.get("risk_score") is not None}
 
     def get_all_reports(self, status_filter: Optional[str] = None) -> List[Dict[str, Any]]:
         with self.lock:
@@ -1287,21 +669,18 @@ class StateStore:
             zone_id = report_data.get("zone_id")
             zone_name = None
             if not zone_id:
+                # Link the report to a zone only if it is within 25 km of that zone's centre
                 lat, lng = report_data["latitude"], report_data["longitude"]
-                best_dist = 999999.0
+                best_dist = 25.0
                 for zid, z in self.zones.items():
-                    clat, clng = z["center"]["lat"], z["center"]["lng"]
-                    d = (lat - clat) ** 2 + (lng - clng) ** 2
-                    if d < best_dist:
+                    d = _haversine_km(lat, lng, z["center"]["lat"], z["center"]["lng"])
+                    if d <= best_dist:
                         best_dist = d
                         zone_id = zid
             
             matched_zone = self.zones.get(zone_id)
             if matched_zone:
                 zone_name = matched_zone["name"]
-
-            # Execute Multi-Agent AI Verification & Cross-Checking Engine
-            ai_result = verify_landslide_report(report_data, matched_zone)
 
             new_rep = {
                 "id": rep_id,
@@ -1312,22 +691,18 @@ class StateStore:
                 "zone_name": zone_name,
                 "latitude": report_data["latitude"],
                 "longitude": report_data["longitude"],
-                "location_name": report_data.get("location_name") or f"Near {zone_name or 'Himalayan Ridge'}",
+                "location_name": report_data.get("location_name") or (f"Near {zone_name}" if zone_name else None),
                 "report_type": report_data["report_type"],
                 "signs_observed": report_data.get("signs_observed", []),
                 "has_activity": report_data.get("has_activity", True),
                 "description": report_data["description"],
-                "photo_url": report_data.get("photo_url") or "https://images.unsplash.com/photo-1547683905-f686c993aae5?auto=format&fit=crop&w=600&q=80",
-                "status": ai_result["status"],
-                "ai_verified": ai_result["ai_verified"],
-                "ai_confidence_score": ai_result["ai_confidence_score"],
-                "ai_verification_checks": ai_result["ai_verification_checks"],
-                "ai_summary": ai_result["ai_summary"],
+                "photo_url": report_data.get("photo_url"),
+                "status": "PENDING",
                 "upvotes": 1,
                 "created_at": datetime.now(timezone.utc).isoformat(),
-                "verified_at": datetime.now(timezone.utc).isoformat() if ai_result["ai_verified"] else None,
-                "verified_by": "AI Multi-Agent Verification Pipeline" if ai_result["ai_verified"] else None,
-                "reviewer_notes": ai_result["ai_summary"] if ai_result["ai_verified"] else None
+                "verified_at": None,
+                "verified_by": None,
+                "reviewer_notes": None
             }
 
             self.reports[rep_id] = new_rep
@@ -1336,8 +711,16 @@ class StateStore:
             return new_rep
 
     # ---------------- Community Poll API ----------------
+    def _roll_poll_day(self):
+        """Votes count for the current UTC day only."""
+        today = datetime.now(timezone.utc).date().isoformat()
+        if self.poll_data.get("date") != today:
+            self.poll_data["date"] = today
+            self.poll_data["votes"] = {k: 0 for k in self.poll_data["votes"]}
+
     def get_community_poll(self) -> Dict[str, Any]:
         with self.lock:
+            self._roll_poll_day()
             total = sum(self.poll_data["votes"].values())
             tot = total or 1  # avoid division by zero in percentages
             return {
@@ -1348,19 +731,19 @@ class StateStore:
                 "options": [
                     {
                         "id": "yes",
-                        "label": "Yes (Observed Rockfall / Tension Cracks)",
+                        "label": "Yes, I saw signs",
                         "votes": self.poll_data["votes"]["yes"],
                         "percentage": round((self.poll_data["votes"]["yes"] / tot) * 100, 1)
                     },
                     {
                         "id": "no",
-                        "label": "No (Terrain Appears Stable)",
+                        "label": "No",
                         "votes": self.poll_data["votes"]["no"],
                         "percentage": round((self.poll_data["votes"]["no"] / tot) * 100, 1)
                     },
                     {
                         "id": "unsure",
-                        "label": "Not Sure / Low Visibility",
+                        "label": "Not sure",
                         "votes": self.poll_data["votes"]["unsure"],
                         "percentage": round((self.poll_data["votes"]["unsure"] / tot) * 100, 1)
                     }
@@ -1374,6 +757,7 @@ class StateStore:
             today = datetime.now(timezone.utc).date().isoformat()
             if self.poll_voters.get(user_id) == today:
                 return None
+            self._roll_poll_day()
             opt = option_id.lower().strip()
             if opt in self.poll_data["votes"]:
                 self.poll_data["votes"][opt] += 1
@@ -1500,16 +884,15 @@ class StateStore:
             lat, lng = data["latitude"], data["longitude"]
             
             # Find nearest zone risk
-            best_dist = 999999.0
+            best_dist = 25.0  # only a zone within 25 km affects priority
             zone_id = None
-            zone_risk = 50.0
+            zone_risk = None
             for zid, z in self.zones.items():
-                clat, clng = z["center"]["lat"], z["center"]["lng"]
-                d = (lat - clat) ** 2 + (lng - clng) ** 2
-                if d < best_dist:
+                d = _haversine_km(lat, lng, z["center"]["lat"], z["center"]["lng"])
+                if d <= best_dist:
                     best_dist = d
                     zone_id = zid
-                    zone_risk = z["risk_score"]
+                    zone_risk = z.get("risk_score")
 
             score, triage_cat = self.calculate_sos_priority(
                 people=data.get("people_count", 1),
@@ -1548,11 +931,11 @@ class StateStore:
             new_sos = {
                 "sos_id": sos_id,
                 "user_id": user.get("id", "usr-anonymous") if user else "usr-citizen",
-                "user_name": data.get("user_name") or (user.get("full_name") if user else "Citizen in Need"),
-                "emergency_contact": data.get("emergency_contact") or "+91 98000-00000",
+                "user_name": data.get("user_name") or (user.get("full_name") if user else None),
+                "emergency_contact": data.get("emergency_contact") or (user.get("phone") if user else None),
                 "latitude": lat,
                 "longitude": lng,
-                "location_name": data.get("location_name") or f"Emergency Location near {zone_id or 'Mountain Route'}",
+                "location_name": data.get("location_name"),
                 "zone_id": zone_id,
                 "timestamp": datetime.now(timezone.utc).isoformat(),
                 "people_count": data.get("people_count", 1),
@@ -1646,11 +1029,6 @@ class StateStore:
             return list(self.shelters.values())
 
     # ---------------- Post-Disaster Events API ----------------
-    def get_all_post_disaster_events(self) -> List[Dict[str, Any]]:
-        with self.lock:
-            return list(self.post_disaster_events.values())
-
-    # ---------------- Alerts API ----------------
     def get_all_alerts(self, category_filter: Optional[str] = None) -> List[Dict[str, Any]]:
         with self.lock:
             alerts_list = list(self.alerts.values())
@@ -1693,70 +1071,6 @@ class StateStore:
         with self.lock:
             return copy.deepcopy(self.users.get(user_id))
 
-    # ---------------- 12-Step Demo Scenario Stepper ----------------
-    @persists
-    def run_simulation_step(self, target_step: int) -> Dict[str, Any]:
-        with self.lock:
-            self.simulation_step = target_step
-
-            # Step 1: Baseline Weather increase
-            if target_step >= 1:
-                z = self.zones.get("NER-042")
-                if z:
-                    z["rainfall_24h"] = 105.0
-                    z["soil_moisture"] = 0.52
-                    z["ml_base_score"] = 68.5
-
-            # Step 2: High Advisory Alert Triggered
-            if target_step >= 2:
-                self._recalculate_all_fusion_internal()
-                self._regenerate_alerts_internal()
-
-            # Step 3 & 4: Community slope movement reports arrive -> CRITICAL fusion
-            if target_step >= 4:
-                # Add 3 verified reports to trigger full +15 boost
-                for rep in self.reports.values():
-                    if rep.get("zone_id") == "NER-042":
-                        rep["status"] = "VERIFIED"
-                self._recalculate_all_fusion_internal()
-                self._regenerate_alerts_internal()
-
-            # Step 5: Road Blockage on NH-6
-            if target_step >= 5:
-                if "road-nh6-umsning" in self.roads:
-                    self.roads["road-nh6-umsning"]["status"] = "BLOCKED"
-                    self.roads["road-nh6-umsning"]["obstruction_reason"] = "Massive mudflow across NH-6 KM 49. Complete road blockage."
-
-            # Step 8: SOS Request arrives
-            if target_step >= 8:
-                if "SOS-2026-00981" in self.sos_requests:
-                    self.sos_requests["SOS-2026-00981"]["status"] = "DISPATCHED"
-
-            # Step 9: Rescue Team assigned
-            if target_step >= 9:
-                if "team-sdrf-01" in self.rescue_teams:
-                    self.rescue_teams["team-sdrf-01"]["status"] = "ON_SITE"
-
-            # Step 11: Incident Resolved
-            if target_step >= 11:
-                if "LS-2026-NE-0042" in self.incidents:
-                    self.incidents["LS-2026-NE-0042"]["status"] = "RESOLVED"
-
-            return {
-                "step": target_step,
-                "status": "success",
-                "message": f"Simulation stepped to Step {target_step}",
-                "zone_NER042_risk": self.zones.get("NER-042", {}).get("risk_score"),
-                "road_nh6_status": self.roads.get("road-nh6-umsning", {}).get("status"),
-                "active_alerts_count": len(self.alerts)
-            }
-
-    @persists
-    def reset_demo_scenario(self):
-        with self.lock:
-            self._init_data()
-            self.simulation_step = 1
-            return {"status": "success", "message": "Demo state successfully reset to initial scenario."}
 
 
 # Global Singleton Store Instance

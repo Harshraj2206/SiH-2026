@@ -9,11 +9,10 @@ import networkx as nx
 from backend.app.routing.road_network import build_road_graph, NODES_DATA
 
 
-def calculate_segment_risk(edge_data: Dict[str, Any], zone_risks: Dict[str, float]) -> float:
-    zone_id = edge_data.get("zone_id")
-    if not zone_id:
-        return 5.0
-    return float(zone_risks.get(zone_id, 10.0))
+def calculate_segment_risk(edge_data: Dict[str, Any], zone_risks: Dict[str, float]) -> Optional[float]:
+    """Risk score of the zone this road passes through, or None when it has no score."""
+    score = zone_risks.get(edge_data.get("zone_id"))
+    return None if score is None else float(score)
 
 
 def compute_route_details(
@@ -44,7 +43,8 @@ def compute_route_details(
             total_time += time_m
 
             seg_risk = calculate_segment_risk(edge, zone_risks)
-            risk_scores.append(seg_risk)
+            if seg_risk is not None:
+                risk_scores.append(seg_risk)
 
             zone_id = edge.get("zone_id")
             if zone_id and zone_id not in zones_crossed:
@@ -75,10 +75,12 @@ def compute_route_details(
                 "zone_id": zone_id
             })
 
-    avg_risk = round(sum(risk_scores) / len(risk_scores), 1) if risk_scores else 5.0
-    max_risk = max(risk_scores) if risk_scores else 5.0
+    avg_risk = round(sum(risk_scores) / len(risk_scores), 1) if risk_scores else None
+    max_risk = max(risk_scores) if risk_scores else None
 
-    if avg_risk <= 30.0:
+    if avg_risk is None:
+        safety_level = "NO RISK DATA"
+    elif avg_risk <= 30.0:
         safety_level = "LOW RISK"
     elif avg_risk <= 60.0:
         safety_level = "MODERATE RISK"
@@ -131,7 +133,7 @@ def find_safe_and_fastest_routes(
     # 2. Risk-Aware & Blockage-Aware Weight Function
     def safe_route_weight_func(u, v, d):
         base_dist = d["distance_km"]
-        seg_risk = calculate_segment_risk(d, zone_risks)
+        seg_risk = calculate_segment_risk(d, zone_risks) or 0.0
 
         # Check real-time road obstruction status
         key1 = f"{u}_{v}"
@@ -171,7 +173,10 @@ def find_safe_and_fastest_routes(
     # Calculate differences
     dist_delta = round(safe_route["distance_km"] - fastest_route["distance_km"], 1)
     time_delta = safe_route["travel_time_min"] - fastest_route["travel_time_min"]
-    risk_reduction = round(fastest_route["average_risk"] - safe_route["average_risk"], 1)
+    if fastest_route["average_risk"] is None or safe_route["average_risk"] is None:
+        risk_reduction = None
+    else:
+        risk_reduction = round(fastest_route["average_risk"] - safe_route["average_risk"], 1)
 
     # Avoided high risk zones
     fastest_high_risk = [z for z in fastest_route["zones_crossed"] if zone_risks.get(z, 0) >= 60.0]
@@ -185,26 +190,27 @@ def find_safe_and_fastest_routes(
             avoided_blocked_roads.append(seg.get("road_name"))
 
     is_fallback = False
-    if safe_route["average_risk"] >= 60.0:
+    if safe_route["average_risk"] is None:
+        explanation = "No risk score is available yet for the zones on this route, so the shortest road is shown."
+    elif safe_route["average_risk"] >= 60.0:
         is_fallback = True
         explanation = (
-            f"Completely low-risk route unavailable due to regional terrain saturation. "
-            f"Showing the route with the lowest achievable risk (Average Risk: {safe_route['average_risk']}/100)."
+            f"Every route here passes through high-risk ground. "
+            f"Showing the lowest-risk option (average risk {safe_route['average_risk']}/100)."
         )
     elif fastest_path_nodes == safe_path_nodes:
         explanation = (
-            f"The primary corridor ({safe_route['distance_km']} km) is assessed as optimal and safe "
-            f"under prevailing weather conditions."
+            f"The shortest road ({safe_route['distance_km']} km) is also the lowest-risk one."
         )
     else:
         avoid_str = ""
         if avoided_blocked_roads:
             avoid_str = f"bypasses {len(avoided_blocked_roads)} blocked road section(s) ({', '.join(avoided_blocked_roads)}) and "
-        avoid_str += f"avoids {len(avoided_zones)} hazardous zone(s) ({', '.join(avoided_zones) if avoided_zones else 'critical cuts'})"
+        avoid_str += f"avoids {len(avoided_zones)} high-risk zone(s)" + (f" ({', '.join(avoided_zones)})" if avoided_zones else "")
 
         explanation = (
-            f"The recommended AI Safe Route is {abs(dist_delta)} km {'longer' if dist_delta > 0 else 'shorter'} "
-            f"({abs(time_delta)} mins delta) but successfully {avoid_str}, reducing hazard exposure by {max(0.0, risk_reduction)} points."
+            f"The safer route is {abs(dist_delta)} km {'longer' if dist_delta > 0 else 'shorter'} "
+            f"({abs(time_delta)} min difference) and {avoid_str}, lowering average risk by {max(0.0, risk_reduction or 0.0)} points."
         )
 
     return {

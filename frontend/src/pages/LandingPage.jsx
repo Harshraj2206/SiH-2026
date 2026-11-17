@@ -51,7 +51,7 @@ export const LandingPage = () => {
             to="/overview"
             className="px-3.5 py-1.5 bg-surface-2 hover:opacity-90 text-label hover:text-label rounded-full whitespace-nowrap text-xs tabular-nums font-semibold flex items-center gap-1.5 transition-colors"
           >
-            <span>Command Center</span>
+            <span>Open dashboard</span>
             <ChevronRight className="w-3.5 h-3.5 text-label-2" />
           </Link>
         </div>
@@ -63,17 +63,17 @@ export const LandingPage = () => {
         {/* Category Pill */}
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-2 text-xs tabular-nums font-semibold text-label-2 mb-6">
           <span className="w-1.5 h-1.5 rounded-full bg-risk-critical" />
-          <span>Predict · Prepare · Rescue</span>
+          <span>Landslide risk for India</span>
         </div>
 
         {/* Main Heading */}
         <h1 className="text-3xl sm:text-5xl lg:text-6xl font-semibold text-label tracking-tight max-w-3xl leading-[1.15]">
-          Landslide Early Warning & Emergency Response
+          Know your landslide risk
         </h1>
 
         {/* Supporting Text */}
         <p className="mt-5 text-base sm:text-lg text-label-2 max-w-2xl font-normal leading-relaxed">
-          Predict risk. Locate people in danger. Coordinate rescue. Find the safest way to safety.
+          Live landslide risk from rain and terrain, ground reports from people nearby, safe routes and the closest emergency services.
         </p>
 
         {/* Primary Action Buttons */}
@@ -101,10 +101,10 @@ export const LandingPage = () => {
         <div className="max-w-5xl mx-auto space-y-10">
           <div className="text-center space-y-1">
             <span className="text-xs tabular-nums font-semibold text-label-2">
-              Operational Framework
+              What it does
             </span>
             <h2 className="text-xl sm:text-2xl font-semibold text-label">
-              Intelligent Hazard Response Architecture
+              Three things LandSafe helps with
             </h2>
           </div>
 
@@ -114,9 +114,9 @@ export const LandingPage = () => {
               <div className="w-9 h-9 rounded-field bg-surface-2 flex items-center justify-center text-label-2">
                 <Cpu className="w-4 h-4" />
               </div>
-              <h3 className="text-sm font-semibold text-label">AI Hazard Prediction</h3>
+              <h3 className="text-sm font-semibold text-label">Risk score</h3>
               <p className="text-xs text-label-2 leading-relaxed">
-                Physics-informed machine learning evaluates live rainfall, terrain slope gradients, and soil moisture saturation.
+                A model trained on past Indian landslides scores live rain, soil moisture, slope and elevation for places in India.
               </p>
             </div>
 
@@ -127,7 +127,7 @@ export const LandingPage = () => {
               </div>
               <h3 className="text-sm font-semibold text-label">Safe Route Planner</h3>
               <p className="text-xs text-label-2 leading-relaxed">
-                Network graph routing calculates low-risk evacuation paths around active slope movements and blocked road corridors.
+                Road routes with the risk of the monitored zones they pass, so you can pick the safer way.
               </p>
             </div>
 
@@ -136,9 +136,9 @@ export const LandingPage = () => {
               <div className="w-9 h-9 rounded-field bg-surface-2 flex items-center justify-center text-label-2">
                 <Users className="w-4 h-4" />
               </div>
-              <h3 className="text-sm font-semibold text-label">Emergency Coordination</h3>
+              <h3 className="text-sm font-semibold text-label">Help nearby</h3>
               <p className="text-xs text-label-2 leading-relaxed">
-                Prioritized SOS triage connects distress beacons directly with NDRF and SDRF multi-agency response teams.
+                Find hospitals, police and shelters near you, call helplines, and share your location in an SOS request.
               </p>
             </div>
           </div>

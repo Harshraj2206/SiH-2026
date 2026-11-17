@@ -27,163 +27,15 @@ _CACHE_TTL = 900  # 15 minutes cache to prevent rate-limit exhaustion
 
 
 def resolve_weather_provider(country_code: Optional[str] = None) -> Dict[str, Any]:
-    """Determine the authoritative meteorological agency and provider metadata."""
-    cc = (country_code or "").upper().strip()
-    if cc == "IN":
-        return {
-            "provider_name": "Open-Meteo WMO Reanalysis Grid (ECMWF IFS)",
-            "agency": "Open-Meteo Numerical Weather Prediction Service",
-            "tier": "Global NWP Reanalysis Grid (0.1° / ~10 km)",
-            "spatial_resolution": "0.1° (~10 km)",
-            "update_interval": "Hourly",
-            "is_official": False
-        }
-    elif cc == "US":
-        return {
-            "provider_name": "NOAA / National Weather Service (NWS) Reanalysis",
-            "agency": "National Oceanic and Atmospheric Administration (NOAA)",
-            "tier": "TIER 1 (National Scientific Agency)",
-            "spatial_resolution": "0.1° (~10 km)",
-            "update_interval": "Hourly",
-            "is_official": True
-        }
-    elif cc == "JP":
-        return {
-            "provider_name": "Japan Meteorological Agency (JMA) Grid Model",
-            "agency": "JMA / Ministry of Land, Infrastructure, Transport and Tourism",
-            "tier": "TIER 1 (National Agency)",
-            "spatial_resolution": "0.05° (~5 km)",
-            "update_interval": "Hourly",
-            "is_official": True
-        }
-    elif cc in ["GB", "UK"]:
-        return {
-            "provider_name": "UK Met Office / ECMWF Integrated Forecasting Grid",
-            "agency": "UK Met Office / ECMWF",
-            "tier": "TIER 1 (National & Pan-European Agency)",
-            "spatial_resolution": "0.1° (~10 km)",
-            "update_interval": "Hourly",
-            "is_official": True
-        }
-    elif cc in ["DE", "FR", "IT", "CH", "AT", "ES"]:
-        return {
-            "provider_name": "ECMWF / DWD ICON Global & European Model",
-            "agency": "European Centre for Medium-Range Weather Forecasts",
-            "tier": "TIER 1 (Pan-European Meteorological Agency)",
-            "spatial_resolution": "0.1° (~10 km)",
-            "update_interval": "Hourly",
-            "is_official": True
-        }
-    elif cc == "AU":
-        return {
-            "provider_name": "Bureau of Meteorology (BOM) ACCESS Model Grid",
-            "agency": "Australian Bureau of Meteorology",
-            "tier": "TIER 1 (National Agency)",
-            "spatial_resolution": "0.1° (~10 km)",
-            "update_interval": "Hourly",
-            "is_official": True
-        }
-    elif cc == "BR":
-        return {
-            "provider_name": "INMET / CPTEC Global Reanalysis Grid",
-            "agency": "Instituto Nacional de Meteorologia (INMET)",
-            "tier": "TIER 1 (National Meteorological Institute)",
-            "spatial_resolution": "0.1° (~10 km)",
-            "update_interval": "Hourly",
-            "is_official": True
-        }
-    else:
-        return {
-            "provider_name": "WMO Global Reanalysis & ECMWF Multi-Model Grid",
-            "agency": "World Meteorological Organization (WMO) / ECMWF",
-            "tier": "TIER 2 (Global Scientific Grid)",
-            "spatial_resolution": "0.1° (~10 km)",
-            "update_interval": "Hourly",
-            "is_official": False
-        }
-
-
-def _fetch_secondary_live_weather(latitude: float, longitude: float, country_code: Optional[str] = None) -> Optional[Dict[str, Any]]:
-    """Secondary live WMO meteorological ingest from wttr.in when primary provider rate limits or times out."""
-    try:
-        url = f"https://wttr.in/{latitude:.4f},{longitude:.4f}?format=j1"
-        req = urllib.request.Request(url, headers={"User-Agent": "curl/7.68.0"})
-        with urllib.request.urlopen(req, timeout=4.0) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-            current = (data.get("current_condition") or [{}])[0]
-            weather_days = data.get("weather") or []
-            
-            temp_c = float(current.get("temp_C")) if current.get("temp_C") is not None else None
-            feels_like_c = float(current.get("FeelsLikeC")) if current.get("FeelsLikeC") is not None else temp_c
-            humidity = float(current.get("humidity")) if current.get("humidity") is not None else None
-            pressure = float(current.get("pressure")) if current.get("pressure") is not None else None
-            wind_kmh = float(current.get("windspeedKmph")) if current.get("windspeedKmph") is not None else None
-            wind_deg = float(current.get("winddirDegree")) if current.get("winddirDegree") is not None else None
-            cloud_cover = int(current.get("cloudcover") or 0)
-            precip_now = float(current.get("precipMM")) if current.get("precipMM") is not None else 0.0
-            
-            w_desc = (current.get("weatherDesc") or [{}])[0].get("value", "Clear")
-            w_code = int(current.get("weatherCode") or 0)
-            
-            p_24h = 0.0
-            sunrises = []
-            sunsets = []
-            forecast_trend = []
-            
-            if weather_days:
-                day0 = weather_days[0]
-                hourly = day0.get("hourly", [])
-                p_24h = round(sum(float(h.get("precipMM") or 0.0) for h in hourly), 1)
-                
-                astronomy = day0.get("astronomy", [{}])[0]
-                if astronomy.get("sunrise"):
-                    sunrises.append(astronomy.get("sunrise"))
-                if astronomy.get("sunset"):
-                    sunsets.append(astronomy.get("sunset"))
-                    
-                for h in hourly[:5]:
-                    forecast_trend.append({
-                        "timeframe": f"+{int(h.get('time', '0')) // 100}h",
-                        "timestamp": h.get("time"),
-                        "temperature_c": float(h.get("tempC") or 0),
-                        "precipitation_mm": float(h.get("precipMM") or 0)
-                    })
-
-            return {
-                "temperature_c": temp_c,
-                "feels_like_c": feels_like_c,
-                "relative_humidity_pct": humidity,
-                "surface_pressure_hpa": pressure,
-                "wind_speed_kmh": wind_kmh,
-                "wind_direction_deg": wind_deg,
-                "is_day": 1,
-                "cloud_cover_pct": cloud_cover,
-                "snowfall_cm": 0.0,
-                "condition": w_desc,
-                "weather_code": w_code,
-                "precipitation_1h_mm": precip_now,
-                "rain_current_mm": precip_now,
-                "precipitation_24h_mm": p_24h,
-                "precipitation_72h_mm": None,
-                "soil_moisture_m3m3": None,
-                "forecast_trend": forecast_trend,
-                "timezone": "Asia/Kolkata" if country_code == "IN" else "UTC",
-                "timezone_abbreviation": "IST" if country_code == "IN" else "UTC",
-                "utc_offset_seconds": 19800 if country_code == "IN" else 0,
-                "sunrise": sunrises[0] if sunrises else None,
-                "sunset": sunsets[0] if sunsets else None,
-                "source": "WMO Multi-Model Surface Grid (Secondary Failover)",
-                "agency": "World Meteorological Organization / National Numerical Prediction Grid",
-                "tier": "TIER 2 (Secondary Failover Grid)",
-                "spatial_resolution": "0.1° (~10 km)",
-                "observation_time": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-                "retrieval_time": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-                "status": "LIVE",
-                "quality": "HIGH"
-            }
-    except Exception as e:
-        print(f"Secondary weather fetch error: {e}")
-        return None
+    """All weather comes from the Open-Meteo forecast API, whatever the country."""
+    return {
+        "provider_name": "Open-Meteo",
+        "agency": "Open-Meteo (weather models from national services, chosen by Open-Meteo)",
+        "tier": "Open-Meteo forecast API",
+        "spatial_resolution": "about 10-25 km",
+        "update_interval": "Hourly",
+        "is_official": False
+    }
 
 
 _WEATHER_CACHE: Dict[str, Dict[str, Any]] = {}
@@ -201,12 +53,9 @@ def get_global_live_weather(latitude: float, longitude: float, country_code: Opt
     now = time.time()
     existing_entry = _WEATHER_CACHE.get(cache_key)
 
-    # A saved wttr.in result (no 72h rain or soil moisture) must not hide better
-    # Open-Meteo data that the user's browser sent for this point.
+    # Open-Meteo data the user's browser sent for this point (used if the server is rate-limited)
     client = _CLIENT_WEATHER.get()
     has_client = bool(client and client.get("key") == cache_key)
-    if has_client and existing_entry and existing_entry.get("data", {}).get("secondary_source"):
-        existing_entry = None
 
     # 1. Return fresh live cache if within 15 minutes
     if existing_entry and existing_entry.get("data", {}).get("status") in ["LIVE", "CACHED"]:
@@ -257,17 +106,7 @@ def get_global_live_weather(latitude: float, longitude: float, country_code: Opt
     if has_client:
         return dict(client["data"])
 
-    # 4. Query Secondary Failover (wttr.in)
-    print("Attempting secondary live meteorological failover...")
-    secondary = _fetch_secondary_live_weather(latitude, longitude, country_code)
-    if secondary:
-        secondary["status"] = "LIVE"
-        secondary["data_age_minutes"] = 0
-        secondary["secondary_source"] = True
-        _WEATHER_CACHE[cache_key] = {"data": secondary, "cached_at": now}
-        return secondary
-
-    # 5. Graceful Stale Cache Fallback (Up to 60 minutes)
+    # 4. Graceful Stale Cache Fallback (Up to 60 minutes)
     if existing_entry and existing_entry.get("data", {}).get("temperature_c") is not None:
         age_seconds = now - existing_entry["cached_at"]
         if age_seconds < _STALE_CACHE_TTL:
@@ -277,7 +116,7 @@ def get_global_live_weather(latitude: float, longitude: float, country_code: Opt
             cached_data["source"] = f"{cached_data.get('source', 'Open-Meteo')} (Cached {cached_data['data_age_minutes']}m ago)"
             return cached_data
 
-    # 6. Scientific Fallback with explicit null markers (UNKNOWN != ZERO)
+    # 5. Scientific Fallback with explicit null markers (UNKNOWN != ZERO)
     fallback = {
         "temperature_c": None,
         "feels_like_c": None,
@@ -285,10 +124,10 @@ def get_global_live_weather(latitude: float, longitude: float, country_code: Opt
         "surface_pressure_hpa": None,
         "wind_speed_kmh": None,
         "wind_direction_deg": None,
-        "is_day": 1,
-        "cloud_cover_pct": 0,
-        "snowfall_cm": 0.0,
-        "condition": "DATA UNAVAILABLE",
+        "is_day": None,
+        "cloud_cover_pct": None,
+        "snowfall_cm": None,
+        "condition": None,
         "weather_code": None,
         "precipitation_1h_mm": None,
         "rain_current_mm": None,
@@ -296,10 +135,10 @@ def get_global_live_weather(latitude: float, longitude: float, country_code: Opt
         "precipitation_72h_mm": None,
         "soil_moisture_m3m3": None,
         "forecast_trend": [],
-        "timezone": "Asia/Kolkata" if country_code == "IN" else "UTC",
-        "utc_offset_seconds": 19800 if country_code == "IN" else 0,
-        "sunrise": f"{time.strftime('%Y-%m-%d')}T06:10",
-        "sunset": f"{time.strftime('%Y-%m-%d')}T18:25",
+        "timezone": None,
+        "utc_offset_seconds": None,
+        "sunrise": None,
+        "sunset": None,
         "source": provider_info["provider_name"],
         "agency": provider_info["agency"],
         "tier": provider_info["tier"],
@@ -308,7 +147,7 @@ def get_global_live_weather(latitude: float, longitude: float, country_code: Opt
         "retrieval_time": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "status": "UNAVAILABLE",
         "data_age_minutes": None,
-        "quality": "ESTIMATED"
+        "quality": "UNAVAILABLE"
     }
     # Only cache failure for 10 seconds to prevent hammering, never poison cache for 15 minutes!
     _WEATHER_CACHE[cache_key] = {"data": fallback, "cached_at": now - (_CACHE_TTL - _FAIL_CACHE_TTL)}
@@ -424,10 +263,10 @@ def _parse_open_meteo(data: Dict[str, Any], provider_info: Dict[str, Any]) -> Di
                     "timeframe": label,
                     "timestamp": times[target_i],
                     "temperature_c": temps[target_i],
-                    "precipitation_mm": precip[target_i] if target_i < len(precip) else 0.0
+                    "precipitation_mm": precip[target_i] if target_i < len(precip) else None
                 })
 
-    weather_code = current.get("weather_code", 0)
+    weather_code = current.get("weather_code")
     condition_str = _map_wmo_code(weather_code)
 
     sunrises = daily.get("sunrise", [])
@@ -440,9 +279,9 @@ def _parse_open_meteo(data: Dict[str, Any], provider_info: Dict[str, Any]) -> Di
         "surface_pressure_hpa": current.get("surface_pressure"),
         "wind_speed_kmh": current.get("wind_speed_10m"),
         "wind_direction_deg": current.get("wind_direction_10m"),
-        "is_day": current.get("is_day", 1),
-        "cloud_cover_pct": current.get("cloud_cover", 0),
-        "snowfall_cm": current.get("snowfall", 0.0),
+        "is_day": current.get("is_day"),
+        "cloud_cover_pct": current.get("cloud_cover"),
+        "snowfall_cm": current.get("snowfall"),
         "condition": condition_str,
         "weather_code": weather_code,
         "precipitation_1h_mm": p_1h,
@@ -452,9 +291,9 @@ def _parse_open_meteo(data: Dict[str, Any], provider_info: Dict[str, Any]) -> Di
         "soil_moisture_m3m3": current_soil,
         "forecast_trend": forecast_trend,
         "rainfall_outlook": rainfall_outlook,
-        "timezone": data.get("timezone", "Asia/Kolkata"),
-        "timezone_abbreviation": data.get("timezone_abbreviation", "UTC"),
-        "utc_offset_seconds": data.get("utc_offset_seconds", 19800),
+        "timezone": data.get("timezone"),
+        "timezone_abbreviation": data.get("timezone_abbreviation"),
+        "utc_offset_seconds": data.get("utc_offset_seconds"),
         "sunrise": sunrises[0] if sunrises else None,
         "sunset": sunsets[0] if sunsets else None,
         "source": provider_info["provider_name"],

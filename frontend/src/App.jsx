@@ -19,13 +19,10 @@ import { AboutPage } from './pages/AboutPage';
 
 import { OverviewPage } from './pages/OverviewPage';
 import { CommunityPollPage } from './pages/CommunityPollPage';
-import { CommunityReportsPage } from './pages/CommunityReportsPage';
 import { GisMapPage } from './pages/GisMapPage';
 import { MlModelPage } from './pages/MlModelPage';
 import { AlertsPage } from './pages/AlertsPage';
 import { ResourcesPage } from './pages/ResourcesPage';
-import { HospitalsSheltersPage } from './pages/HospitalsSheltersPage';
-import { RescueOperationsPage } from './pages/RescueOperationsPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { SafeRoutePage } from './pages/SafeRoutePage';
 import { SosEmergencyPage } from './pages/SosEmergencyPage';
@@ -33,8 +30,6 @@ import { ProfilePage } from './pages/ProfilePage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
 import { IncidentsExplorerPage } from './pages/IncidentsExplorerPage';
 import { DataSourcesPage } from './pages/DataSourcesPage';
-import { PostDisasterAnalysisPage } from './pages/PostDisasterAnalysisPage';
-import { SimulatorPage } from './pages/SimulatorPage';
 
 export function App() {
   return (
@@ -66,8 +61,8 @@ export function App() {
                     {/* 2. Community Poll & Field Reports */}
                     <Route path="/community" element={<CommunityPollPage />} />
                     <Route path="/community-poll" element={<CommunityPollPage />} />
-                    <Route path="/community-reports" element={<CommunityReportsPage />} />
-                    <Route path="/reports" element={<CommunityReportsPage />} />
+                    <Route path="/community-reports" element={<Navigate to="/community" replace />} />
+                    <Route path="/reports" element={<Navigate to="/community" replace />} />
 
                     {/* 3. GIS Hazard Map */}
                     <Route path="/risk-map" element={<GisMapPage />} />
@@ -89,24 +84,15 @@ export function App() {
                     {/* 8. Emergency SOS */}
                     <Route path="/sos" element={<SosEmergencyPage />} />
 
-                    {/* 9. Rescue Operations */}
-                    <Route path="/rescue" element={<RescueOperationsPage />} />
-
                     {/* 10. Emergency Resources, Hospitals & Shelters */}
                     <Route path="/resources" element={<ResourcesPage />} />
-                    <Route path="/hospitals-shelters" element={<HospitalsSheltersPage />} />
+                    <Route path="/hospitals-shelters" element={<Navigate to="/resources" replace />} />
 
                     {/* 11. Regional Analytics & Telemetry */}
                     <Route path="/analytics" element={<AnalyticsPage />} />
 
-                    {/* 12. Post-Disaster Analysis */}
-                    <Route path="/post-disaster" element={<PostDisasterAnalysisPage />} />
-
                     {/* 13. Data Sources & Provenance */}
                     <Route path="/data-sources" element={<DataSourcesPage />} />
-
-                    {/* 14. Demo Simulator */}
-                    <Route path="/simulator" element={<SimulatorPage />} />
 
                     {/* 15. User Profile & Settings */}
                     <Route path="/profile" element={<ProfilePage />} />

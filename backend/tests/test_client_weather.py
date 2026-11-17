@@ -18,7 +18,6 @@ def _payload_at(lat, lon):
 
 def _fresh(monkeypatch):
     monkeypatch.setattr(weather_resolver.urllib.request, "urlopen", _rate_limited)
-    monkeypatch.setattr(weather_resolver, "_fetch_secondary_live_weather", lambda *a, **k: None)
     monkeypatch.setattr(weather_resolver.time, "sleep", lambda s: None)
     weather_resolver._WEATHER_CACHE.pop(weather_resolver._cache_key(LAT, LON), None)
 
@@ -46,14 +45,6 @@ def test_malformed_browser_weather_is_ignored(monkeypatch):
     _fresh(monkeypatch)
     weather_resolver.use_client_weather(LAT, LON, {"latitude": LAT, "longitude": LON, "current": "x"})
     assert weather_resolver.get_global_live_weather(LAT, LON)["status"] == "UNAVAILABLE"
-
-
-def test_saved_backup_weather_does_not_hide_browser_weather(monkeypatch):
-    _fresh(monkeypatch)
-    backup = {"status": "LIVE", "secondary_source": True, "precipitation_72h_mm": None, "temperature_c": 20.0}
-    weather_resolver._WEATHER_CACHE[weather_resolver._cache_key(LAT, LON)] = {"data": backup, "cached_at": weather_resolver.time.time()}
-    weather_resolver.use_client_weather(LAT, LON, _payload_at(LAT, LON))
-    assert weather_resolver.get_global_live_weather(LAT, LON)["precipitation_72h_mm"] == 72.0
 
 
 def test_browser_elevation_used_when_server_is_rate_limited(monkeypatch):

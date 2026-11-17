@@ -15,7 +15,8 @@ router = APIRouter(prefix="/api/sos", tags=["Emergency SOS & Triage"])
 
 @router.get("", response_model=List[SOSResponse])
 async def list_sos_requests(
-    triage: Optional[str] = Query(None, description="Filter by triage priority: CRITICAL, URGENT, EVACUATION, SAFE")
+    triage: Optional[str] = Query(None, description="Filter by triage priority: CRITICAL, URGENT, EVACUATION, SAFE"),
+    current_user: dict = Depends(require_roles(["AUTHORITY", "ADMIN"]))
 ):
     return db_store.get_all_sos(triage_filter=triage)
 

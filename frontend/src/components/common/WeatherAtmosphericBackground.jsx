@@ -54,7 +54,7 @@ export const WeatherAtmosphericBackground = ({ showStatus = true }) => {
     isDay, dayPhase, weatherCategory = 'clear', weatherCondition,
     sunScreenX, sunScreenY, isSunVisible, sunGlowOpacity = 0, isSunHorizon,
     moonScreenX, moonScreenY, isMoonVisible, moonIlluminationPct = 50,
-    localTimeString, localHour = 12, timezoneAbbr, displayName,
+    localTimeFormatted, localHour, timezoneAbbr, displayName,
   } = environment;
 
   const colors = skyFor(weatherCategory, isDay, dayPhase);
@@ -195,7 +195,7 @@ export const WeatherAtmosphericBackground = ({ showStatus = true }) => {
               {[['Dawn', 6], ['Noon', 12], ['Dusk', 18], ['Night', 0]].map(([label, hour]) => (
                 <button
                   key={label}
-                  onClick={() => setTimeOffsetHours(hour - localHour)}
+                  onClick={() => setTimeOffsetHours(hour - (localHour ?? hour))}
                   className="py-1.5 rounded-full bg-surface-2 hover:opacity-80 text-xs transition-opacity"
                 >
                   {label}
@@ -225,10 +225,8 @@ export const WeatherAtmosphericBackground = ({ showStatus = true }) => {
         >
           {isDay ? <Sun className="w-3.5 h-3.5" strokeWidth={1.75} /> : <Moon className="w-3.5 h-3.5" strokeWidth={1.75} />}
           <span className="text-label truncate max-w-[160px]">{displayName}</span>
-          <span>·</span>
-          <span className="tabular-nums">{localTimeString} {timezoneAbbr}</span>
-          <span>·</span>
-          <span>{weatherCondition}</span>
+          {localTimeFormatted && <><span>·</span><span className="tabular-nums">{localTimeFormatted} {timezoneAbbr}</span></>}
+          {weatherCondition && <><span>·</span><span>{weatherCondition}</span></>}
           {timeOffsetHours !== 0 && <span className="text-accent-text">({timeOffsetHours > 0 ? '+' : ''}{timeOffsetHours}h)</span>}
         </button>
       </div>

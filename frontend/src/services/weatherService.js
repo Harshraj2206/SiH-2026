@@ -58,7 +58,7 @@ const WMO_DESCRIPTIONS = {
  * @returns {Promise<Object>} Normalized weather payload
  */
 async function fetchDirectOpenMeteo(lat, lon) {
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,rain,weather_code,wind_speed_10m,is_day,cloud_cover&daily=sunrise,sunset,precipitation_sum&timezone=auto`;
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,rain,weather_code,wind_speed_10m,is_day,cloud_cover&hourly=precipitation&past_days=1&forecast_days=1&daily=sunrise,sunset&timezone=auto`;
   
   let lastErr = null;
   for (let attempt = 0; attempt < 2; attempt++) {
@@ -77,19 +77,21 @@ async function fetchDirectOpenMeteo(lat, lon) {
       const current = data.current || {};
       const daily = data.daily || {};
 
-      const precipSums = Array.isArray(daily.precipitation_sum) ? daily.precipitation_sum : [];
-      let rain24h = null;
-      if (typeof precipSums[0] === 'number') {
-        rain24h = Math.round(precipSums[0] * 10) / 10;
-      } else if (typeof current.precipitation === 'number') {
-        rain24h = Math.round(current.precipitation * 10) / 10;
-      }
+      // Rain over the 24 hourly values ending at the current hour (same local time format)
+      const hours = data.hourly?.time || [];
+      const precip = data.hourly?.precipitation || [];
+      const end = current.time ? hours.filter((t) => t <= current.time).length : 0;
+      const last24 = end >= 24 ? precip.slice(end - 24, end) : [];
+      const rain24h = last24.length === 24 && last24.every((v) => typeof v === 'number')
+        ? Math.round(last24.reduce((a, b) => a + b, 0) * 10) / 10
+        : null;
 
       const code = typeof current.weather_code === 'number' ? current.weather_code : null;
-      const condition = code !== null ? (WMO_DESCRIPTIONS[code] || 'Clear') : 'Clear';
+      const condition = code !== null ? (WMO_DESCRIPTIONS[code] || null) : null;
 
-      const sunrises = Array.isArray(daily.sunrise) ? daily.sunrise : [];
-      const sunsets = Array.isArray(daily.sunset) ? daily.sunset : [];
+      const today = (daily.time || []).indexOf((current.time || '').slice(0, 10));
+      const sunrises = today >= 0 ? [daily.sunrise?.[today]] : [];
+      const sunsets = today >= 0 ? [daily.sunset?.[today]] : [];
 
       return {
         status: 'LIVE',
@@ -102,18 +104,18 @@ async function fetchDirectOpenMeteo(lat, lon) {
         rainfall_24h: rain24h,
         rainfall_1h: typeof current.precipitation === 'number' ? current.precipitation : null,
         weather_code: code,
-        cloud_cover_pct: typeof current.cloud_cover === 'number' ? current.cloud_cover : 0,
+        cloud_cover_pct: typeof current.cloud_cover === 'number' ? current.cloud_cover : null,
         condition,
         wind_speed_kmh: typeof current.wind_speed_10m === 'number' ? current.wind_speed_10m : null,
-        is_day: current.is_day !== undefined ? Boolean(current.is_day) : true,
-        timezone: data.timezone || 'Asia/Kolkata',
-        timezone_abbreviation: data.timezone_abbreviation || 'UTC',
-        utc_offset_seconds: typeof data.utc_offset_seconds === 'number' ? data.utc_offset_seconds : 19800,
+        is_day: current.is_day !== undefined ? Boolean(current.is_day) : null,
+        timezone: data.timezone || null,
+        timezone_abbreviation: data.timezone_abbreviation || null,
+        utc_offset_seconds: typeof data.utc_offset_seconds === 'number' ? data.utc_offset_seconds : null,
         sunrise: sunrises[0] || null,
         sunset: sunsets[0] || null,
-        source: 'Open-Meteo NWP Grid (Direct Browser)',
+        source: 'Open-Meteo',
         data_age_minutes: 0,
-        observation_time: current.time || new Date().toISOString()
+        observation_time: current.time || null
       };
     } catch (err) {
       clearTimeout(timeoutId);
@@ -218,11 +220,11 @@ export async function getLiveWeather(lat, lon, forceRefresh = false) {
       rainfall_1h: null,
       rainfall_72h: null,
       weather_code: null,
-      condition: 'Telemetry Offline',
+      condition: null,
       wind_speed_kmh: null,
-      is_day: true,
-      cloud_cover_pct: 0,
-      source: 'Telemetry Offline',
+      is_day: null,
+      cloud_cover_pct: null,
+      source: null,
       data_age_minutes: null,
       observation_time: null
     };

@@ -27,7 +27,6 @@ import {
   Layers, 
   Navigation, 
   Crosshair, 
-  Search, 
   Ambulance, 
   Home, 
   Shield, 
@@ -38,6 +37,8 @@ import {
   Eye,
   AlertTriangle
 } from 'lucide-react';
+import { WorldBounds, WORLD_BOUNDS } from './WorldBounds';
+import { PlaceSearch } from '../common/PlaceSearch';
 
 // Fix default Leaflet marker icon URLs
 delete L.Icon.Default.prototype._getIconUrl;
@@ -246,9 +247,9 @@ export const LeafletRiskMap = ({
 }) => {
   const { t } = useLanguage();
   const { resolvedTheme } = useTheme();
-  const defaultCenter = [31.9579, 77.1095]; // Himachal Pradesh centroid
+  const defaultCenter = [22.6, 79.0]; // centre of India
   const [activeCenter, setActiveCenter] = useState(mapCenter || (selectedZone?.center ? [selectedZone.center.lat, selectedZone.center.lng] : defaultCenter));
-  const [activeZoom, setActiveZoom] = useState(mapZoom || (selectedZone ? 10 : 8.5));
+  const [activeZoom, setActiveZoom] = useState(mapZoom || (selectedZone ? 10 : 5));
 
   // Basemap & Layer Toggles (Adapts default tile provider to active Light / Dark theme)
   const [activeBasemap, setActiveBasemap] = useState(resolvedTheme === 'light' ? 'light' : 'dark');
@@ -274,14 +275,12 @@ export const LeafletRiskMap = ({
     location: userLocation,
     weather: userWeather,
     requestLocation: requestContextLocation,
-    setManualLocation: setContextManualLocation,
-    searchLocation: searchContextLocation
+    setManualLocation: setContextManualLocation
   } = useLocationIntelligence();
 
   // Single Active Location Pin State (strictly one location marker at a time)
   const [activeLocationPin, setActiveLocationPin] = useState(null); // { lat, lng, type: 'gps' | 'manual', accuracy, name }
   const [geoLocating, setGeoLocating] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const [showLayerPanel, setShowLayerPanel] = useState(false);
   const [showLegend, setShowLegend] = useState(true);
   const latestInspectionRef = useRef(0);
@@ -356,248 +355,70 @@ export const LeafletRiskMap = ({
     }
   };
 
-  // Location Search Handler - searches zones, Nominatim, and enriches with real weather
-  // Location Search Handler - searches zones, coordinates, Nominatim, and enriches with real weather
-  const handleSearchSubmit = async (e) => {
-    e.preventDefault();
-    if (!searchQuery.trim()) return;
-    const q = searchQuery.toLowerCase().trim();
+  // Real weather + model inspection for one point; shared by search and map clicks.
+  const inspectPoint = async (lat, lng, name) => {
     const reqId = ++latestInspectionRef.current;
-
-    // 0. Check if query is coordinates format (e.g. "31.1048, 77.1734")
-    const coordMatch = q.match(/^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?)[,\s]+[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/);
-    if (coordMatch) {
-      const parts = q.split(/[,\s]+/).filter(Boolean);
-      const parsedLat = parseFloat(parts[0]);
-      const parsedLng = parseFloat(parts[1]);
-      if (!isNaN(parsedLat) && !isNaN(parsedLng)) {
-        setActiveCenter([parsedLat, parsedLng]);
-        setActiveZoom(13);
-        const fallbackName = formatCoordinateFallback(parsedLat, parsedLng);
-        setActiveLocationPin({
-          lat: parsedLat,
-          lng: parsedLng,
-          type: 'manual',
-          name: fallbackName
-        });
-        setContextManualLocation(parsedLat, parsedLng, fallbackName);
-
-        try {
-          const [freshWeather, backendData] = await Promise.all([
-            getLiveWeather(parsedLat, parsedLng).catch(() => null),
-            api.inspectTelemetry(parsedLat, parsedLng).catch(() => null)
-          ]);
-          if (reqId !== latestInspectionRef.current) return;
-          if (onSelectZone) {
-            const r24 = freshWeather?.rainfall_24h ?? backendData?.rainfall_24h ?? null;
-            const r1h = freshWeather?.precipitation_mm ?? backendData?.rainfall_1h ?? null;
-            const isInsufficient = r24 === null;
-            const score = isInsufficient ? null : (backendData?.risk_score ?? null);
-            const level = isInsufficient ? 'DATA_INSUFFICIENT' : (backendData?.risk_level ?? 'LOW');
-
-            onSelectZone({
-              ...(backendData || {}),
-              latitude: parsedLat,
-              longitude: parsedLng,
-              center: { lat: parsedLat, lng: parsedLng },
-              name: fallbackName,
-              temperature_c: freshWeather?.temperature_c ?? backendData?.temperature_c ?? null,
-              humidity_pct: freshWeather?.humidity_pct ?? backendData?.humidity_pct ?? null,
-              weather_code: freshWeather?.weather_code ?? backendData?.weather_code ?? null,
-              condition: freshWeather?.condition || backendData?.condition || 'Clear',
-              is_day: freshWeather?.is_day ?? backendData?.is_day ?? true,
-              rainfall_24h: r24,
-              rainfall_1h: r1h,
-              weather_source: freshWeather?.source || backendData?.weather_source || 'Open-Meteo High-Resolution Real-Time Telemetry',
-              is_weather_loading: false,
-              is_live_inspected: true,
-              risk_score: score,
-              risk_level: level
-            });
-          }
-        } catch {
-          // Keep pin
-        }
-        return;
-      }
+    const fallbackName = name || formatCoordinateFallback(lat, lng);
+    setActiveLocationPin({ lat, lng, type: 'manual', name: fallbackName });
+    setContextManualLocation(lat, lng, name || undefined);
+    if (onSelectZone) {
+      onSelectZone({ latitude: lat, longitude: lng, center: { lat, lng }, name: fallbackName,
+                     is_weather_loading: true, is_live_inspected: true });
     }
 
-    // 1. Check existing known zones (exact name, district, or ID)
-    const matchedZone = zones.find(z => 
-      z.name.toLowerCase() === q || 
-      (z.district && z.district.toLowerCase() === q) ||
-      z.zone_id.toLowerCase() === q
-    );
+    const [weather, geo] = await Promise.all([
+      getLiveWeather(lat, lng).catch(() => null),
+      name ? Promise.resolve(null) : reverseGeocode(lat, lng).catch(() => null)
+    ]);
+    if (reqId !== latestInspectionRef.current) return;
+    const backend = await api.inspectTelemetry(lat, lng).catch(() => null);
+    if (reqId !== latestInspectionRef.current) return;
+    // Place name: the search label, else the browser lookup, else the server's lookup, else coordinates
+    const resolvedName = name || (!geo?.isFallback && geo?.displayName) || backend?.name || fallbackName;
+    setActiveLocationPin((prev) => (prev ? { ...prev, name: resolvedName } : null));
+    if (!onSelectZone) return;
 
-    if (matchedZone) {
-      setActiveCenter([matchedZone.center.lat, matchedZone.center.lng]);
-      setActiveZoom(11);
-      setActiveLocationPin({
-        lat: matchedZone.center.lat,
-        lng: matchedZone.center.lng,
-        type: 'manual',
-        name: matchedZone.name
-      });
-      if (onSelectZone) onSelectZone(matchedZone);
-      setContextManualLocation(matchedZone.center.lat, matchedZone.center.lng, matchedZone.name);
-      return;
-    }
-
-    // 2. Search via unified location service
-    try {
-      const searchRes = await searchContextLocation(searchQuery);
-      if (reqId !== latestInspectionRef.current) return;
-
-      if (searchRes && typeof searchRes.latitude === 'number' && typeof searchRes.longitude === 'number') {
-        setActiveCenter([searchRes.latitude, searchRes.longitude]);
-        setActiveZoom(12);
-        setActiveLocationPin({
-          lat: searchRes.latitude,
-          lng: searchRes.longitude,
-          type: 'manual',
-          name: searchRes.displayName
-        });
-
-        // Fetch fresh live weather and telemetry specifically for this newly searched location
-        const [freshWeather, backendData] = await Promise.all([
-          getLiveWeather(searchRes.latitude, searchRes.longitude).catch(() => null),
-          api.inspectTelemetry(searchRes.latitude, searchRes.longitude).catch(() => null)
-        ]);
-
-        if (reqId !== latestInspectionRef.current) return;
-
-        if (onSelectZone) {
-          const r24 = freshWeather?.rainfall_24h ?? backendData?.rainfall_24h ?? null;
-          const r1h = freshWeather?.precipitation_mm ?? backendData?.rainfall_1h ?? null;
-          const isInsufficient = r24 === null;
-          const score = isInsufficient ? null : (backendData?.risk_score ?? null);
-          const level = isInsufficient ? 'DATA_INSUFFICIENT' : (backendData?.risk_level ?? 'LOW');
-
-          onSelectZone({
-            ...(backendData || {}),
-            latitude: searchRes.latitude,
-            longitude: searchRes.longitude,
-            center: { lat: searchRes.latitude, lng: searchRes.longitude },
-            name: searchRes.displayName,
-            state: searchRes.state || '',
-            district: searchRes.city || '',
-            temperature_c: freshWeather?.temperature_c ?? backendData?.temperature_c ?? null,
-            humidity_pct: freshWeather?.humidity_pct ?? backendData?.humidity_pct ?? null,
-            weather_code: freshWeather?.weather_code ?? backendData?.weather_code ?? null,
-            condition: freshWeather?.condition || backendData?.condition || 'Clear',
-            is_day: freshWeather?.is_day ?? backendData?.is_day ?? true,
-            rainfall_24h: r24,
-            rainfall_1h: r1h,
-            weather_source: freshWeather?.source || backendData?.weather_source || 'Open-Meteo High-Resolution Real-Time Telemetry',
-            is_weather_loading: false,
-            is_live_inspected: true,
-            risk_score: score,
-            risk_level: level
-          });
-        }
-      } else {
-        alert(`Location "${searchQuery}" not found. Try searching a city, district, or mountain region.`);
-      }
-    } catch {
-      if (reqId === latestInspectionRef.current) {
-        alert(`Could not resolve location "${searchQuery}".`);
-      }
-    }
+    onSelectZone({
+      ...(backend || {}),
+      latitude: lat,
+      longitude: lng,
+      center: { lat, lng },
+      name: resolvedName,
+      state: geo?.state || backend?.state || '',
+      district: geo?.city || backend?.district || '',
+      temperature_c: weather?.temperature_c ?? backend?.temperature_c ?? null,
+      humidity_pct: weather?.humidity_pct ?? backend?.humidity_pct ?? null,
+      weather_code: weather?.weather_code ?? backend?.weather_code ?? null,
+      condition: weather?.condition || backend?.condition || null,
+      is_day: weather?.is_day ?? backend?.is_day ?? null,
+      rainfall_24h: weather?.rainfall_24h ?? backend?.rainfall_24h ?? null,
+      rainfall_1h: weather?.precipitation_mm ?? null,
+      weather_source: weather?.source || backend?.weather_source || null,
+      observation_time: weather?.observation_time || backend?.observation_time || null,
+      is_weather_loading: false,
+      is_live_inspected: true,
+      risk_score: backend?.risk_score ?? null,
+      risk_level: backend?.risk_level ?? null
+    });
   };
 
-  // Map Click Inspector - unified with real weather & reverse geocode
-  const handleMapClick = async (latlng) => {
-    // If clicked near existing pin (within ~400m), toggle OFF
-    if (activeLocationPin) {
-      const dLat = Math.abs(latlng.lat - activeLocationPin.lat);
-      const dLng = Math.abs(latlng.lng - activeLocationPin.lng);
-      if (dLat < 0.005 && dLng < 0.005) {
-        setActiveLocationPin(null);
-        if (onSelectZone) onSelectZone(null);
-        return;
-      }
+  const handlePlaceSelect = (place) => {
+    setActiveCenter([place.latitude, place.longitude]);
+    setActiveZoom(12);
+    inspectPoint(place.latitude, place.longitude, place.label);
+  };
+
+  const handleMapClick = (latlng) => {
+    // Clicking the current pin again removes it
+    if (activeLocationPin
+        && Math.abs(latlng.lat - activeLocationPin.lat) < 0.005
+        && Math.abs(latlng.lng - activeLocationPin.lng) < 0.005) {
+      latestInspectionRef.current += 1;
+      setActiveLocationPin(null);
+      if (onSelectZone) onSelectZone(null);
+      return;
     }
-
-    const fallbackName = formatCoordinateFallback(latlng.lat, latlng.lng);
-    const newPin = {
-      lat: latlng.lat,
-      lng: latlng.lng,
-      type: 'manual',
-      name: fallbackName
-    };
-    setActiveLocationPin(newPin);
-
-    // Sync to context
-    setContextManualLocation(latlng.lat, latlng.lng);
-
-    const reqId = ++latestInspectionRef.current;
-
-    // Immediately notify consumer with loading state
-    if (onSelectZone) {
-      onSelectZone({
-        latitude: latlng.lat,
-        longitude: latlng.lng,
-        center: { lat: latlng.lat, lng: latlng.lng },
-        is_weather_loading: true,
-        is_live_inspected: true,
-        name: fallbackName
-      });
-    }
-
-    try {
-      const [weatherData, geoData] = await Promise.all([
-        getLiveWeather(latlng.lat, latlng.lng).catch(() => null),
-        reverseGeocode(latlng.lat, latlng.lng).catch(() => null)
-      ]);
-
-      if (reqId !== latestInspectionRef.current) return;
-
-      const resolvedName = geoData?.displayName || fallbackName;
-      setActiveLocationPin(prev => prev ? ({ ...prev, name: resolvedName }) : null);
-
-      let backendData = null;
-      try {
-        backendData = await api.inspectTelemetry(latlng.lat, latlng.lng);
-      } catch {
-        // Backend optional
-      }
-
-      if (reqId !== latestInspectionRef.current) return;
-
-      if (onSelectZone) {
-        const r24 = weatherData?.rainfall_24h ?? backendData?.rainfall_24h ?? null;
-        const r1h = weatherData?.precipitation_mm ?? backendData?.rainfall_1h ?? null;
-        const isInsufficient = r24 === null;
-        const score = isInsufficient ? null : (backendData?.risk_score ?? null);
-        const level = isInsufficient ? 'DATA_INSUFFICIENT' : (backendData?.risk_level ?? 'LOW');
-
-        onSelectZone({
-          ...(backendData || {}),
-          latitude: latlng.lat,
-          longitude: latlng.lng,
-          center: { lat: latlng.lat, lng: latlng.lng },
-          name: resolvedName,
-          state: geoData?.state || backendData?.state || '',
-          district: geoData?.city || backendData?.district || '',
-          temperature_c: weatherData?.temperature_c ?? backendData?.temperature_c ?? null,
-          humidity_pct: weatherData?.humidity_pct ?? backendData?.humidity_pct ?? null,
-          weather_code: weatherData?.weather_code ?? backendData?.weather_code ?? null,
-          condition: weatherData?.condition || backendData?.condition || 'Clear',
-          is_day: weatherData?.is_day ?? backendData?.is_day ?? true,
-          rainfall_24h: r24,
-          rainfall_1h: r1h,
-          weather_source: weatherData?.source || backendData?.weather_source || 'Open-Meteo High-Resolution Real-Time Telemetry',
-          observation_time: weatherData?.observation_time || backendData?.observation_time || new Date().toISOString(),
-          is_weather_loading: false,
-          is_live_inspected: true,
-          risk_score: score,
-          risk_level: level
-        });
-      }
-    } catch (err) {
-      if (reqId !== latestInspectionRef.current) return;
-      console.warn('Map click inspection failed:', err);
-    }
+    inspectPoint(latlng.lat, latlng.lng, null);
   };
 
   return (
@@ -613,26 +434,11 @@ export const LeafletRiskMap = ({
       >
         {/* Left Search + Locate Group */}
         <div className="flex items-center gap-2 max-w-[calc(100%-80px)] sm:max-w-md w-full pointer-events-auto">
-          <form 
-            onSubmit={handleSearchSubmit} 
-            className="flex items-center bg-surface-2 backdrop-blur-md rounded-full px-3.5 py-1.5 sm:py-2 flex-1 min-w-[120px] focus-within:border-risk-low/30 focus-within:ring-1 focus-within:ring-risk-low/30 transition-all"
-            onKeyDown={(e) => e.stopPropagation()}
-          >
-            <button 
-              type="submit" 
-              className="text-label-2 hover:text-risk-low mr-2 flex-shrink-0 focus:outline-none transition-colors"
-              title="Search place or coordinates"
-            >
-              <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            </button>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={t('search_place_placeholder') || 'Search place, district, or coordinates...'}
-              className="bg-transparent text-xs sm:text-xs text-label placeholder-label-3 focus:outline-none w-full font-medium"
-            />
-          </form>
+          <PlaceSearch
+            onSelect={handlePlaceSelect}
+            placeholder={t('search_place_placeholder') || 'Search a place'}
+            className="flex-1 min-w-[120px]"
+          />
 
           <button
             onClick={handleLocateMe}
@@ -652,7 +458,7 @@ export const LeafletRiskMap = ({
             className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 bg-surface-2 text-label text-xs sm:text-xs font-medium rounded-full whitespace-nowrap transition-all backdrop-blur-md active:scale-95"
           >
             <Layers className="w-3.5 h-3.5 text-label-2" />
-            <span className="hidden sm:inline">{t('gis_layers') || 'GIS Layers'}</span>
+            <span className="hidden sm:inline">{t('gis_layers') || 'Layers'}</span>
           </button>
         </div>
       </div>
@@ -663,7 +469,7 @@ export const LeafletRiskMap = ({
           <div className="flex items-center justify-between pb-2 border-b border-line">
             <span className="text-xs font-semibold text-label flex items-center gap-1.5">
               <Compass className="w-3.5 h-3.5 text-label-2" />
-              {t('gis_overlays_basemap') || 'GIS Overlays & Basemap'}
+              {t('gis_overlays_basemap') || 'Map style and layers'}
             </span>
             <button onClick={() => setShowLayerPanel(false)} className="text-label-2 hover:text-label">
               <X className="w-3.5 h-3.5" />
@@ -673,7 +479,7 @@ export const LeafletRiskMap = ({
           {/* Basemap Selection */}
           <div className="space-y-1">
             <span className="text-xs font-semibold text-label-2 block">
-              {t('basemap_provider') || 'Basemap Provider'}
+              {t('basemap_provider') || 'Map style'}
             </span>
             <div className="grid grid-cols-2 gap-1.5">
               {Object.entries(BASEMAP_TILES).map(([key, item]) => (
@@ -695,7 +501,7 @@ export const LeafletRiskMap = ({
           {/* Operational Overlays */}
           <div className="space-y-1 pt-2 border-t border-line">
             <span className="text-xs font-semibold text-label-2 block">
-              {t('operational_layers') || 'Operational Layers'}
+              {t('operational_layers') || 'Layers'}
             </span>
             <div className="grid grid-cols-2 gap-1.5 text-xs">
               <label className="flex items-center gap-1.5 text-label-2 hover:text-label cursor-pointer">
@@ -708,6 +514,7 @@ export const LeafletRiskMap = ({
                 <span>{t('layer_risk_zones') || 'Risk Zones'} ({zones.length})</span>
               </label>
 
+              {incidents.length > 0 && (
               <label className="flex items-center gap-1.5 text-label-2 hover:text-label cursor-pointer">
                 <input
                   type="checkbox"
@@ -717,7 +524,9 @@ export const LeafletRiskMap = ({
                 />
                 <span>{t('layer_incidents') || 'Incidents'} ({incidents.length})</span>
               </label>
+              )}
 
+              {sosRequests.length > 0 && (
               <label className="flex items-center gap-1.5 text-label-2 hover:text-label cursor-pointer">
                 <input
                   type="checkbox"
@@ -727,7 +536,9 @@ export const LeafletRiskMap = ({
                 />
                 <span>{t('layer_sos_alerts') || 'SOS Alerts'} ({sosRequests.length})</span>
               </label>
+              )}
 
+              {reports.length > 0 && (
               <label className="flex items-center gap-1.5 text-label-2 hover:text-label cursor-pointer">
                 <input
                   type="checkbox"
@@ -737,7 +548,9 @@ export const LeafletRiskMap = ({
                 />
                 <span>{t('layer_reports') || 'Reports'} ({reports.length})</span>
               </label>
+              )}
 
+              {hospitals.length > 0 && (
               <label className="flex items-center gap-1.5 text-label-2 hover:text-label cursor-pointer">
                 <input
                   type="checkbox"
@@ -747,7 +560,9 @@ export const LeafletRiskMap = ({
                 />
                 <span>{t('layer_hospitals') || 'Hospitals'} ({hospitals.length})</span>
               </label>
+              )}
 
+              {shelters.length > 0 && (
               <label className="flex items-center gap-1.5 text-label-2 hover:text-label cursor-pointer">
                 <input
                   type="checkbox"
@@ -757,6 +572,7 @@ export const LeafletRiskMap = ({
                 />
                 <span>{t('layer_shelters') || 'Shelters'} ({shelters.length})</span>
               </label>
+              )}
             </div>
           </div>
         </div>
@@ -766,11 +582,7 @@ export const LeafletRiskMap = ({
       <MapContainer
         center={defaultCenter}
         zoom={6}
-        minZoom={2.5}
         maxZoom={19}
-        maxBounds={[[-85, -180], [85, 180]]}
-        maxBoundsViscosity={1.0}
-        worldCopyJump={false}
         scrollWheelZoom={true}
         zoomControl={false}
         attributionControl={true}
@@ -778,6 +590,7 @@ export const LeafletRiskMap = ({
       >
         {/* Dedicated Non-Overlapping Zoom Control placed cleanly at bottom-right */}
         <ZoomControl position="bottomright" />
+        <WorldBounds />
 
         <MapEventHandler 
           onMapClick={handleMapClick} 
@@ -797,7 +610,7 @@ export const LeafletRiskMap = ({
               maxNativeZoom={tile.maxNativeZoom || 17}
               maxZoom={tile.maxZoom || 19}
               noWrap={true}
-              bounds={[[-85, -180], [85, 180]]}
+              bounds={WORLD_BOUNDS}
             />
           );
         })()}
@@ -911,7 +724,7 @@ export const LeafletRiskMap = ({
                     <div className="text-xs p-1">
                       <div className="font-semibold text-label">{zone.name}</div>
                       <div className="text-xs text-label-2 tabular-nums">
-                        Corridor {zone.zone_id} • <span style={{ color: riskColor.hex }} className="font-semibold">{zone.risk_score}/100</span>
+                        {zone.state} • risk <span style={{ color: riskColor.hex }} className="font-semibold">{Math.round(zone.risk_score)}/100</span>
                       </div>
                     </div>
                   </Tooltip>

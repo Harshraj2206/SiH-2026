@@ -26,9 +26,9 @@ export const GisMapPage = () => {
             <Map className="w-5 h-5" />
           </div>
           <div>
-            <h1 className="text-base font-semibold text-label">GIS Hazard Map & Satellite Monitoring</h1>
+            <h1 className="text-base font-semibold text-label">Risk map</h1>
             <p className="text-xs text-label-2">
-              Interactive terrain layers, real-time risk heat zones, and road blockages across monitored corridors.
+              Monitored zones and their current risk. Search a place or tap the map to check any point.
             </p>
           </div>
         </div>
@@ -39,7 +39,7 @@ export const GisMapPage = () => {
             className="px-3.5 py-2 bg-accent hover:opacity-90 text-white rounded-full whitespace-nowrap text-xs font-semibold flex items-center gap-1.5 transition-all"
           >
             <Navigation className="w-3.5 h-3.5" />
-            <span>Plan Safe Route</span>
+            <span>Plan a safe route</span>
           </button>
         </div>
       </div>
@@ -74,9 +74,9 @@ export const GisMapPage = () => {
                 <Compass className="w-7 h-7 text-risk-low" />
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-label">Select Any Zone On Map</h3>
+                <h3 className="text-sm font-semibold text-label">Choose a place</h3>
                 <p className="text-xs text-label-2 max-w-xs leading-relaxed mt-1">
-                  Click any zone marker or heat polygon on the map to inspect slope risk, rainfall data, and evacuation options.
+                  Tap a zone or any point on the map to see its rain, terrain and risk score.
                 </p>
               </div>
             </div>

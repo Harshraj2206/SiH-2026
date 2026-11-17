@@ -93,6 +93,12 @@ def get_coordinates_from_query(query: str) -> Optional[Dict[str, Any]]:
     return None
 
 
+def _km(lat1, lng1, lat2, lng2):
+    dlat, dlng = math.radians(lat2 - lat1), math.radians(lng2 - lng1)
+    a = math.sin(dlat / 2) ** 2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlng / 2) ** 2
+    return 6371 * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+
 def calculate_global_road_route(
     start_lat: float,
     start_lng: float,
@@ -131,42 +137,15 @@ def calculate_global_road_route(
     route_data = None
     try:
         req = urllib.request.Request(osrm_url, headers={"User-Agent": "LandSafe-GlobalRouter/2.0"})
-        with urllib.request.urlopen(req, timeout=3.5) as response:
+        with urllib.request.urlopen(req, timeout=10) as response:
             res_json = json.loads(response.read().decode("utf-8"))
             if res_json.get("code") == "Ok" and res_json.get("routes"):
                 route_data = res_json["routes"][0]
     except Exception as e:
         print(f"OSRM routing query error: {e}")
 
-    # Fallback to direct corridor interpolation if OSRM is unreachable
     if not route_data:
-        steps_count = 12
-        coords = []
-        for i in range(steps_count + 1):
-            t = i / float(steps_count)
-            coords.append([start_lng + t * (dest_lng - start_lng), start_lat + t * (dest_lat - start_lat)])
-        
-        # Approximate distance in km
-        dlat = math.radians(dest_lat - start_lat)
-        dlng = math.radians(dest_lng - start_lng)
-        a = math.sin(dlat/2)**2 + math.cos(math.radians(start_lat)) * math.cos(math.radians(dest_lat)) * math.sin(dlng/2)**2
-        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
-        approx_dist_km = round(6371 * c * 1.25, 1)  # 1.25 winding factor for actual road distance
-        approx_time_min = round((approx_dist_km / 55.0) * 60)
-
-        route_data = {
-            "distance": approx_dist_km * 1000.0,
-            "duration": approx_time_min * 60.0,
-            "geometry": {"coordinates": coords},
-            "legs": [{
-                "steps": [{
-                    "maneuver": {"instruction": f"Proceed directly along national highway network toward {dest_name}", "type": "depart"},
-                    "name": "National Road Network",
-                    "distance": approx_dist_km * 1000.0,
-                    "duration": approx_time_min * 60.0
-                }]
-            }]
-        }
+        raise ValueError("No road route was found between these places (OpenStreetMap routing).")
 
     total_dist_km = round(route_data["distance"] / 1000.0, 1)
     total_time_min = round(route_data["duration"] / 60.0)
@@ -175,37 +154,38 @@ def calculate_global_road_route(
     # Convert coordinates format to {"lat": ..., "lng": ...}
     formatted_coords = [{"lat": pt[1], "lng": pt[0]} for pt in geo_coords]
 
-    # Sample route at key checkpoints (max 4 points to prevent API rate limiting)
+    # Measured slope at 4 points along the road (Copernicus DEM); points that fail are skipped.
     num_pts = len(formatted_coords)
-    if num_pts <= 4:
-        sample_indices = list(range(num_pts))
-    else:
-        sample_indices = [0, num_pts // 3, (2 * num_pts) // 3, num_pts - 1]
-
+    sample_indices = list(range(num_pts)) if num_pts <= 4 else [0, num_pts // 3, (2 * num_pts) // 3, num_pts - 1]
     sampled_slopes = []
     for idx in sample_indices:
         pt = formatted_coords[idx]
         try:
-            terrain = get_terrain_elevation_and_slope(pt["lat"], pt["lng"])
-            sampled_slopes.append(terrain.get("slope_deg", 5.0))
+            slope = get_terrain_elevation_and_slope(pt["lat"], pt["lng"]).get("slope_deg")
         except Exception:
-            sampled_slopes.append(5.0)
+            slope = None
+        if slope is not None:
+            sampled_slopes.append(slope)
+    avg_slope = round(sum(sampled_slopes) / len(sampled_slopes), 1) if sampled_slopes else None
+    max_slope = max(sampled_slopes) if sampled_slopes else None
 
-    avg_slope = round(sum(sampled_slopes) / len(sampled_slopes), 1) if sampled_slopes else 5.0
-    max_slope = max(sampled_slopes) if sampled_slopes else 5.0
-
-    # Risk score evaluation based on real terrain physics
-    # If slope is low (e.g. plains, city roads), risk is minimal (2-10 LOW)
-    # If slope is steep (>15-30° in mountain passes), risk elevates accordingly
-    if max_slope >= 30.0:
-        avg_risk = min(85.0, round(25.0 + max_slope * 1.5, 1))
-        safety_level = "HIGH RISK"
-    elif max_slope >= 15.0:
-        avg_risk = min(55.0, round(15.0 + max_slope * 1.2, 1))
-        safety_level = "MODERATE RISK"
+    # Risk: model scores of monitored zones within 10 km of the road.
+    from backend.app.database.store import db_store
+    step = max(1, num_pts // 200)
+    path = formatted_coords[::step]
+    near = []
+    for z in db_store.get_scored_zones():
+        zc = z["center"]
+        if any(_km(zc["lat"], zc["lng"], p["lat"], p["lng"]) <= 10.0 for p in path):
+            near.append(z)
+    if near:
+        max_risk = max(z["risk_score"] for z in near)
+        avg_risk = round(sum(z["risk_score"] for z in near) / len(near), 1)
+        safety_level = {"CRITICAL": "CRITICAL RISK", "HIGH": "HIGH RISK", "MODERATE": "MODERATE RISK"}.get(
+            max(near, key=lambda z: z["risk_score"])["risk_level"], "LOW RISK")
     else:
-        avg_risk = max(2.0, min(20.0, round(3.0 + avg_slope * 1.5, 1)))
-        safety_level = "LOW RISK"
+        max_risk = avg_risk = None
+        safety_level = "NO RISK DATA"
 
     # Extract step-by-step turn maneuvers
     segments = []
@@ -214,7 +194,9 @@ def calculate_global_road_route(
         for idx, step in enumerate(legs[0]["steps"]):
             step_dist_km = round(step.get("distance", 0.0) / 1000.0, 1)
             step_time_min = round(step.get("duration", 0.0) / 60.0)
-            road_name = step.get("name") or "Main Road"
+            # Road number first (e.g. NH10), then a name in Latin script; local-script names are skipped
+            name = step.get("name") or ""
+            road_name = step.get("ref") or (name if name and name.isascii() else "") or "an unnamed road"
             maneuver = step.get("maneuver", {})
             m_type = maneuver.get("type", "turn")
             m_modifier = maneuver.get("modifier", "")
@@ -223,8 +205,8 @@ def calculate_global_road_route(
             if m_type == "depart":
                 instruction = f"Head out on {road_name}"
             elif m_type == "arrive":
-                instruction = f"Arrive at destination: {dest_name}"
-            elif m_modifier:
+                instruction = f"Arrive at {dest_name}"
+            elif m_modifier and m_modifier != "straight":
                 instruction = f"Turn {m_modifier} onto {road_name}"
             else:
                 instruction = f"Continue along {road_name}"
@@ -233,43 +215,30 @@ def calculate_global_road_route(
                 segments.append({
                     "step_number": idx + 1,
                     "instruction": instruction,
-                    "road_name": road_name,
+                    "road_name": "" if m_type == "arrive" else road_name,
                     "distance_km": step_dist_km,
                     "travel_time_min": max(1, step_time_min),
-                    "risk_score": avg_risk,
-                    "road_status": "OPEN"
                 })
-
-    # If steps were too granular or empty, generate consolidated steps
-    if not segments:
-        segments = [{
-            "step_number": 1,
-            "instruction": f"Proceed from {start_name} toward {dest_name}",
-            "road_name": "Connected Highway Network",
-            "distance_km": total_dist_km,
-            "travel_time_min": total_time_min,
-            "risk_score": avg_risk,
-            "road_status": "OPEN"
-        }]
 
     route_details = {
         "nodes": [start_name, dest_name],
         "distance_km": total_dist_km,
         "travel_time_min": total_time_min,
         "average_risk": avg_risk,
-        "max_risk": avg_risk,
+        "max_risk": max_risk,
         "slope_deg": avg_slope,
         "max_slope_deg": max_slope,
         "safety_level": safety_level,
-        "zones_crossed": [],
+        "zones_crossed": [z["zone_id"] for z in near],
         "coordinates": formatted_coords,
         "segments": segments
     }
 
-    explanation = (
-        f"Real-world road navigation from {start_name} to {dest_name} ({total_dist_km} km, ~{total_time_min} mins). "
-        f"Average terrain slope is {avg_slope}° (Max: {max_slope}°). Overall hazard level is {safety_level}."
-    )
+    if near:
+        names = ", ".join(z["name"] for z in near)
+        explanation = f"The road passes within 10 km of {len(near)} monitored zone(s): {names}. Highest risk score {max_risk}/100."
+    else:
+        explanation = "No monitored landslide zone lies within 10 km of this road, so there is no risk score for it."
 
     return {
         "start": {

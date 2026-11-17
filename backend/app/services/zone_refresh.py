@@ -95,3 +95,4 @@ def refresh_all_zones(max_workers: int = 6) -> None:
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as pool:
         list(pool.map(lambda z: refresh_zone(z, force=True), zones))
     db_store.refresh_fusion_and_alerts()
+    db_store._persist()  # keep the latest real readings across restarts

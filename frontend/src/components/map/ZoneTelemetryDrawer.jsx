@@ -1,104 +1,99 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getRiskScoreColor, toLabel } from '../../utils/formatters';
-import { 
-  CloudRain, 
-  Mountain, 
-  Droplets, 
-  Navigation, 
-  X,
-  MapPin
-} from 'lucide-react';
+import { Navigation, X } from 'lucide-react';
+
+const fmt = (v, unit, digits = 1) => (typeof v === 'number' ? `${v.toFixed(digits)}${unit}` : '—');
 
 export const ZoneTelemetryDrawer = ({ zone, onClose }) => {
   const navigate = useNavigate();
   if (!zone) return null;
 
+  const hasScore = typeof zone.risk_score === 'number';
   const riskColor = getRiskScoreColor(zone.risk_score);
-
-  // Local factor contributions
-  const factors = zone.xai?.factors || [
-    { name: 'Slope Gradient Angle', importance_pct: 44.0, value: `${zone.slope_deg || 34}°` },
-    { name: '24h Cumulative Rainfall', importance_pct: 34.0, value: (zone.rainfall_24h !== null && zone.rainfall_24h !== undefined) ? `${zone.rainfall_24h} mm` : 'Unavailable' },
-    { name: 'Soil Moisture Saturation', importance_pct: 12.0, value: `${typeof zone.soil_moisture === 'number' ? (zone.soil_moisture <= 1 ? Math.round(zone.soil_moisture * 100) : zone.soil_moisture) : 'Unavailable'}` },
-    { name: 'Vegetation Canopy (NDVI)', importance_pct: 7.0, value: `${zone.ndvi || 0.40}` },
-    { name: 'Historical Incidents', importance_pct: 3.0, value: `${zone.historical_incidents || 2} events` }
-  ];
+  const factors = zone.xai?.factors || [];
+  const place = [zone.district, zone.state].filter(Boolean).join(', ');
 
   return (
-    <div className="bg-surface rounded-card p-5 flex flex-col justify-between space-y-4 select-none h-full">
-      <div>
-        {/* Header */}
+    <div className="bg-surface rounded-card p-5 flex flex-col justify-between space-y-4 h-full">
+      <div className="space-y-3">
         <div className="flex items-start justify-between gap-2 border-b border-line pb-3">
-          <div>
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${riskColor.badge}`}>
-                {toLabel(zone.risk_level)} Risk
-              </span>
-            </div>
-            <h3 className="font-semibold text-sm text-label mt-1 leading-snug">{zone.name}</h3>
-            <p className="text-xs text-label-2">
-              {zone.district ? `${zone.district}, ` : ''}{zone.state || (zone.country || 'Monitored Sector')}
-            </p>
+          <div className="min-w-0">
+            <h3 className="font-semibold text-sm text-label leading-snug">{zone.name}</h3>
+            {place && <p className="text-xs text-label-2">{place}</p>}
           </div>
-
           {onClose && (
-            <button
-              onClick={onClose}
-              className="p-1 rounded-full text-label-2 hover:text-label hover:bg-surface-2 transition-colors"
-            >
+            <button onClick={onClose} className="p-1 rounded-full text-label-2 hover:text-label" aria-label="Close">
               <X className="w-4 h-4" />
             </button>
           )}
         </div>
 
-        {/* Hazard Score Summary */}
-        <div className="mt-3 bg-surface-2 rounded-tile p-3.5 space-y-1">
-          <span className="text-xs text-label-2 block font-medium">Risk Score</span>
-          <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-semibold text-label font-sans">
-              {zone.risk_score}
-            </span>
-            <span className="text-xs text-label-3">/ 100</span>
-            <span className={`text-xs font-semibold ml-1 ${riskColor.text}`}>
-              ({zone.risk_level})
-            </span>
-          </div>
-        </div>
-
-        {/* Contributing Factors */}
-        <div className="mt-4 space-y-2.5">
-          <span className="text-xs font-semibold text-label block">
-            Contributing Factors
-          </span>
-
-          <div className="space-y-2">
-            {factors.map((factor, idx) => (
-              <div key={idx} className="bg-surface-2 p-2.5 rounded-tile text-xs space-y-1">
-                <div className="flex justify-between text-label">
-                  <span className="font-medium">{factor.name}</span>
-                  <span className="tabular-nums text-label-2">{factor.value}</span>
+        {zone.is_weather_loading ? (
+          <p className="text-xs text-label-2">Loading live data…</p>
+        ) : (
+          <>
+            <div className="bg-surface-2 rounded-tile p-3.5">
+              <span className="text-xs text-label-2 block">Landslide risk</span>
+              {hasScore ? (
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-semibold text-label">{Math.round(zone.risk_score)}</span>
+                  <span className="text-xs text-label-3">/ 100</span>
+                  <span className={`text-xs font-semibold ml-1 ${riskColor.text}`}>{toLabel(zone.risk_level)}</span>
                 </div>
-                <div className="w-full h-1.5 bg-surface-2 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-risk-low rounded-full"
-                    style={{ width: `${factor.importance_pct}%` }}
-                  />
-                </div>
+              ) : (
+                <p className="text-xs text-label mt-1">
+                  {zone.unavailability_reason || 'No score yet: live rain or terrain data is not available for this place.'}
+                </p>
+              )}
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 text-xs">
+              <div className="bg-surface-2 rounded-tile p-2">
+                <span className="text-label-2 block">Rain, 24 h</span>
+                <span className="text-label">{fmt(zone.rainfall_24h, ' mm')}</span>
               </div>
-            ))}
-          </div>
-        </div>
+              <div className="bg-surface-2 rounded-tile p-2">
+                <span className="text-label-2 block">Temperature</span>
+                <span className="text-label">{fmt(zone.temperature_c, '°C')}</span>
+              </div>
+              <div className="bg-surface-2 rounded-tile p-2">
+                <span className="text-label-2 block">Slope</span>
+                <span className="text-label">{fmt(zone.slope_deg, '°')}</span>
+              </div>
+            </div>
+
+            {hasScore && factors.length > 0 && (
+              <div className="space-y-2">
+                <span className="text-xs font-semibold text-label block">What drives this score</span>
+                {factors.map((f) => (
+                  <div key={f.name} className="bg-surface-2 p-2.5 rounded-tile text-xs space-y-1">
+                    <div className="flex justify-between text-label gap-2">
+                      <span>{f.name}</span>
+                      <span className="text-label-2">{f.value}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 h-1.5 bg-surface rounded-full overflow-hidden">
+                        <div className="h-full bg-label-2 rounded-full" style={{ width: `${f.importance_pct}%` }} />
+                      </div>
+                      <span className="text-label-2 w-14 text-right">{f.net_delta >= 0 ? 'raises' : 'lowers'}</span>
+                    </div>
+                  </div>
+                ))}
+                {zone.xai?.recommended_action && <p className="text-xs text-label-2">{zone.xai.recommended_action}</p>}
+              </div>
+            )}
+          </>
+        )}
       </div>
 
-      {/* Action CTA */}
       <div className="pt-2 border-t border-line">
         <button
           onClick={() => navigate('/safe-route')}
-          className="w-full py-2.5 bg-accent hover:opacity-90 text-white rounded-full text-xs font-semibold flex items-center justify-center gap-1.5 transition-all"
+          className="w-full py-2.5 bg-accent hover:opacity-90 text-white rounded-full text-xs font-semibold flex items-center justify-center gap-1.5"
         >
           <Navigation className="w-3.5 h-3.5" />
-          <span>Get Safe Evacuation Route</span>
+          <span>Plan a safe route</span>
         </button>
       </div>
     </div>

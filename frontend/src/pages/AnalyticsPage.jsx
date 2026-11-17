@@ -8,8 +8,8 @@ import {
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer, 
-  LineChart, 
-  Line, 
+  ScatterChart,
+  Scatter,
   AreaChart, 
   Area,
   Cell
@@ -39,7 +39,7 @@ export const AnalyticsPage = () => {
       setAnalytics(data);
     } catch (e) {
       console.error('Analytics aggregation error:', e);
-      setError(e?.response?.data?.detail || e.message || 'Unable to aggregate regional landslide telemetry.');
+      setError(e?.response?.data?.detail || e.message || 'The server did not respond.');
     } finally {
       setLoading(false);
     }
@@ -53,7 +53,7 @@ export const AnalyticsPage = () => {
     return (
       <div className="p-12 text-center text-label-2">
         <Activity className="w-8 h-8 animate-spin mx-auto text-label-2 mb-3" />
-        <p className="text-sm font-semibold">Aggregating Regional Landslide Telemetry & ML Metrics...</p>
+        <p className="text-sm font-semibold">Loading…</p>
       </div>
     );
   }
@@ -62,14 +62,14 @@ export const AnalyticsPage = () => {
     return (
       <div className="bg-surface rounded-card p-8 max-w-xl mx-auto text-center space-y-4 my-12">
         <ShieldAlert className="w-10 h-10 text-risk-critical mx-auto" />
-        <h2 className="text-lg font-semibold text-label">Telemetry Aggregation Unavailable</h2>
+        <h2 className="text-lg font-semibold text-label">Analytics could not be loaded</h2>
         <p className="text-sm text-label-2">{error}</p>
         <button
           onClick={loadAnalytics}
           className="inline-flex items-center gap-2 px-4 py-2 bg-accent hover:opacity-90 text-white text-xs font-semibold rounded-full whitespace-nowrap transition"
         >
           <Activity className="w-4 h-4" />
-          Retry Aggregation
+          Try again
         </button>
       </div>
     );
@@ -80,26 +80,14 @@ export const AnalyticsPage = () => {
   return (
     <div className="space-y-6">
       
-      {/* Header */}
-      <div className="bg-surface p-5 rounded-card flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-tile bg-surface-2 flex items-center justify-center text-label-2">
-              <BarChart3 className="w-5 h-5" />
-            </div>
-            <h1 className="text-xl font-semibold text-label">Disaster Telemetry & Model Analytics</h1>
-            <span className="text-xs px-2 py-0.5 rounded-full tabular-nums font-semibold bg-risk-low/[0.12] text-risk-low border-risk-low/30">
-              Authoritative WMO & Copernicus Telemetry
-            </span>
-          </div>
-          <p className="text-xs text-label-2 mt-1">
-            Statistical correlations between intense precipitation, slope morphology, community signals, and AI predictions across monitored mountain sectors.
-          </p>
+      <div className="bg-surface p-5 rounded-card flex items-center gap-3">
+        <div className="w-8 h-8 rounded-tile bg-surface-2 flex items-center justify-center text-label-2">
+          <BarChart3 className="w-5 h-5" />
         </div>
-
-        <span className="text-xs text-label-3 tabular-nums">
-          Updated: {new Date().toLocaleTimeString()}
-        </span>
+        <div>
+          <h1 className="text-xl font-semibold text-label">Analytics</h1>
+          <p className="text-xs text-label-2 mt-1">Current risk across monitored zones, rain against risk, and community reports.</p>
+        </div>
       </div>
 
       {/* Analytics Charts Grid */}
@@ -110,9 +98,9 @@ export const AnalyticsPage = () => {
           <div className="flex items-center justify-between border-b border-line pb-2.5">
             <h3 className="text-sm font-semibold text-label flex items-center gap-2">
               <ShieldAlert className="w-4 h-4 text-risk-critical" />
-              Regional Risk Classification Breakdown
+              Zones by risk level
             </h3>
-            <span className="text-xs tabular-nums text-label-2">{analytics.total_zones} Monitored Zones</span>
+            <span className="text-xs tabular-nums text-label-2">{analytics.total_zones} zones with a score</span>
           </div>
 
           <div className="h-64 w-full">
@@ -139,23 +127,28 @@ export const AnalyticsPage = () => {
           <div className="flex items-center justify-between border-b border-line pb-2.5">
             <h3 className="text-sm font-semibold text-label flex items-center gap-2">
               <CloudRain className="w-4 h-4 text-label-2" />
-              Rainfall (24h) vs Final Landslide Risk Score
+              Rain in the last 24 h against risk score
             </h3>
-            <span className="text-xs tabular-nums text-label-2">Physics Correlation</span>
+            <span className="text-xs tabular-nums text-label-2">One dot per zone</span>
           </div>
 
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={analytics.rainfall_vs_risk} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <ScatterChart margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#38383A" />
-                <XAxis dataKey="name" tick={{ fill: '#98989F', fontSize: 10 }} />
-                <YAxis tick={{ fill: '#98989F', fontSize: 10 }} />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#1C1C1E', borderColor: '#38383A', borderRadius: '12px', color: '#FFFFFF' }}
+                <XAxis type="number" dataKey="rainfall_24h" name="Rain, 24 h" unit=" mm" tick={{ fill: '#98989F', fontSize: 10 }} />
+                <YAxis type="number" dataKey="risk_score" name="Risk score" domain={[0, 100]} tick={{ fill: '#98989F', fontSize: 10 }} />
+                <Tooltip
+                  cursor={{ strokeDasharray: '3 3' }}
+                  content={({ active, payload }) => (active && payload?.length ? (
+                    <div className="bg-surface-2 rounded-tile px-3 py-2 text-xs text-label">
+                      <div className="font-semibold">{payload[0].payload.name}</div>
+                      <div>{payload[0].payload.rainfall_24h} mm rain · risk {payload[0].payload.risk_score}</div>
+                    </div>
+                  ) : null)}
                 />
-                <Line type="monotone" dataKey="risk_score" stroke="#4A86E8" strokeWidth={2} name="Risk Score (0-100)" dot={{ r: 3, fill: '#4A86E8' }} />
-                <Line type="monotone" dataKey="rainfall_24h" stroke="#98989F" strokeWidth={1.5} name="Rainfall 24h (mm)" dot={{ r: 2.5, fill: '#98989F' }} />
-              </LineChart>
+                <Scatter data={analytics.rainfall_vs_risk} fill="#98989F" />
+              </ScatterChart>
             </ResponsiveContainer>
           </div>
         </div>
@@ -165,7 +158,7 @@ export const AnalyticsPage = () => {
           <div className="flex items-center justify-between border-b border-line pb-2.5">
             <h3 className="text-sm font-semibold text-label flex items-center gap-2">
               <Users className="w-4 h-4 text-risk-moderate" />
-              Crowdsourced Ground Observations Timeline (24h)
+              Community reports, last 24 h
             </h3>
             <span className="text-xs tabular-nums text-risk-low">{analytics.verified_reports} Verified</span>
           </div>
@@ -184,9 +177,11 @@ export const AnalyticsPage = () => {
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#38383A" />
-                <XAxis dataKey="time" tick={{ fill: '#98989F', fontSize: 10 }} />
+                <XAxis dataKey="time" tick={{ fill: '#98989F', fontSize: 10 }}
+                  tickFormatter={(t) => new Date(t).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })} />
                 <YAxis tick={{ fill: '#98989F', fontSize: 10 }} />
-                <Tooltip 
+                <Tooltip
+                  labelFormatter={(t) => `4 hours to ${new Date(t).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`}
                   contentStyle={{ backgroundColor: '#1C1C1E', borderColor: '#38383A', borderRadius: '12px', color: '#FFFFFF' }}
                 />
                 <Area type="monotone" dataKey="reports" stroke="#98989F" fillOpacity={1} fill="url(#colorReports)" name="Total Reports" />
@@ -201,9 +196,9 @@ export const AnalyticsPage = () => {
           <div className="flex items-center justify-between border-b border-line pb-2.5">
             <h3 className="text-sm font-semibold text-label flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-label-2" />
-              Random Forest Global Feature Importance
+              What the model relies on most
             </h3>
-            <span className="text-xs tabular-nums text-label-2">Trained Model Weights</span>
+            <span className="text-xs tabular-nums text-label-2">Share of the model's decisions</span>
           </div>
 
           <div className="h-64 w-full">
@@ -227,20 +222,20 @@ export const AnalyticsPage = () => {
       <div className="bg-surface rounded-card p-5 space-y-3">
         <h3 className="text-sm font-semibold text-label flex items-center gap-2">
           <TrendingUp className="w-4 h-4 text-risk-critical" />
-          Highest Vulnerability Sector Rankings (Operational Telemetry)
+          Highest-risk zones
         </h3>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="border-b border-line text-label-2 tabular-nums text-xs">
-                <th className="py-2.5 px-3">Zone ID & Location</th>
+                <th className="py-2.5 px-3">Zone</th>
                 <th className="py-2.5 px-3">State</th>
-                <th className="py-2.5 px-3">ML Base</th>
-                <th className="py-2.5 px-3">Community Boost</th>
-                <th className="py-2.5 px-3">Final Risk Score</th>
-                <th className="py-2.5 px-3">Rainfall / Slope</th>
-                <th className="py-2.5 px-3">Verified Ground Reports</th>
+                <th className="py-2.5 px-3">Model score</th>
+                <th className="py-2.5 px-3">Added by verified reports</th>
+                <th className="py-2.5 px-3">Risk score</th>
+                <th className="py-2.5 px-3">Rain 24 h / slope</th>
+                <th className="py-2.5 px-3">Verified reports</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line font-medium">
@@ -249,13 +244,12 @@ export const AnalyticsPage = () => {
                 return (
                   <tr key={idx} className="hover:bg-surface-2 transition-colors">
                     <td className="py-2.5 px-3">
-                      <span className="tabular-nums font-semibold text-label-2 block">{zone.zone_id}</span>
                       <span className="text-label">{zone.name}</span>
                     </td>
                     <td className="py-2.5 px-3 text-label-2">{zone.state}</td>
                     <td className="py-2.5 px-3 tabular-nums text-label-2">{zone.ml_base}</td>
                     <td className="py-2.5 px-3 tabular-nums font-semibold text-risk-moderate">
-                      {zone.community_boost > 0 ? `+${zone.community_boost}` : '+0'}
+                      {zone.community_boost > 0 ? `+${zone.community_boost}` : '0'}
                     </td>
                     <td className="py-2.5 px-3 tabular-nums font-semibold text-sm" style={{ color: riskCol.hex }}>
                       {zone.risk_score}/100
@@ -264,7 +258,7 @@ export const AnalyticsPage = () => {
                       {zone.rainfall_24h} mm • {zone.slope_deg}°
                     </td>
                     <td className="py-2.5 px-3 text-label-2">
-                      <span className="tabular-nums font-semibold text-risk-low">{zone.verified_reports} verified</span>
+                      <span className="tabular-nums">{zone.verified_reports}</span>
                     </td>
                   </tr>
                 );

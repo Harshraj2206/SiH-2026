@@ -40,14 +40,16 @@ def test_in_app_navigation_routes():
         assert route["distance_km"] > 0, f"Distance must be > 0 for {fac['name']}"
         assert route["travel_time_min"] > 0, f"Travel time must be > 0 for {fac['name']}"
         assert len(route["coordinates"]) > 5, f"Road route coordinates must follow road network (>5 points) for {fac['name']}"
-        assert len(route["segments"]) > 0, f"Step-by-step turns must be present for {fac['name']}"
+        if route["distance_km"] < 150:  # turn-by-turn steps are only fetched for shorter routes
+            assert len(route["segments"]) > 0, f"Step-by-step turns must be present for {fac['name']}"
 
         print(f"\n[OK] Route to {fac['type']}: {fac['name']}")
         print(f"     * Distance: {route['distance_km']} km")
         print(f"     * Drive Time: ~{route['travel_time_min']} mins")
         print(f"     * Waypoints Count: {len(route['coordinates'])} points")
         print(f"     * Hazard Grade: {route['safety_level']} (Avg Slope: {route['slope_deg']} deg)")
-        print(f"     * First Instruction: {route['segments'][0]['instruction']} ({route['segments'][0]['distance_km']} km)")
+        if route['segments']:
+            print(f"     * First Instruction: {route['segments'][0]['instruction']} ({route['segments'][0]['distance_km']} km)")
         if len(route['segments']) > 1:
             print(f"     * Next Turn: {route['segments'][1]['instruction']}")
 

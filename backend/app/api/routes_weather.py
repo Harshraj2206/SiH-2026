@@ -17,7 +17,7 @@ def get_live_weather(
     lon: float = Query(..., ge=-180.0, le=180.0, description="Longitude coordinate (-180 to 180)")
 ) -> Dict[str, Any]:
     """
-    Get live, authoritative meteorological data from WMO satellite/reanalysis grid (Open-Meteo).
+    Live weather for a point from the Open-Meteo forecast API.
     Returns real temperature, humidity, rainfall (1h, 24h), wind, and deterministic WMO weather codes.
     """
     try:
@@ -31,8 +31,6 @@ def get_live_weather(
         condition = raw_weather.get("condition")
         if not condition and weather_code is not None:
             condition = _map_wmo_code(weather_code)
-        if not condition:
-            condition = "Clear Sky" if weather_code == 0 else "Partly Cloudy"
         raw_p1 = raw_weather.get("precipitation_1h_mm")
         raw_rain = raw_weather.get("rain_current_mm")
         raw_p24 = raw_weather.get("precipitation_24h_mm")
@@ -52,9 +50,9 @@ def get_live_weather(
             "surface_pressure_hpa": raw_weather.get("surface_pressure_hpa"),
             "wind_speed_kmh": raw_weather.get("wind_speed_kmh"),
             "wind_direction_deg": raw_weather.get("wind_direction_deg"),
-            "is_day": raw_weather.get("is_day", 1),
-            "cloud_cover_pct": raw_weather.get("cloud_cover_pct", 0),
-            "snowfall_cm": float(raw_weather.get("snowfall_cm")) if raw_weather.get("snowfall_cm") is not None else 0.0,
+            "is_day": raw_weather.get("is_day"),
+            "cloud_cover_pct": raw_weather.get("cloud_cover_pct"),
+            "snowfall_cm": raw_weather.get("snowfall_cm"),
             "precipitation_1h_mm": p_1h,
             "rain_current_mm": rain_now,
             "precipitation_24h_mm": p_24h,
@@ -64,19 +62,19 @@ def get_live_weather(
             "rainfall_72h": p_72h,
             "precipitation_mm": p_1h if p_1h is not None else rain_now,
             "soil_moisture_m3m3": raw_weather.get("soil_moisture_m3m3"),
-            "weather_code": weather_code if weather_code is not None else 0,
+            "weather_code": weather_code,
             "condition": condition,
             "forecast_trend": raw_weather.get("forecast_trend", []),
-            "timezone": raw_weather.get("timezone", "Asia/Kolkata"),
-            "timezone_abbreviation": raw_weather.get("timezone_abbreviation", "UTC"),
-            "utc_offset_seconds": raw_weather.get("utc_offset_seconds", 19800),
+            "timezone": raw_weather.get("timezone"),
+            "timezone_abbreviation": raw_weather.get("timezone_abbreviation"),
+            "utc_offset_seconds": raw_weather.get("utc_offset_seconds"),
             "sunrise": raw_weather.get("sunrise"),
             "sunset": raw_weather.get("sunset"),
-            "source": raw_weather.get("source", "Open-Meteo / WMO Satellite Grid"),
-            "agency": raw_weather.get("agency", "WMO / ECMWF Reanalysis"),
+            "source": raw_weather.get("source") or "Open-Meteo",
+            "agency": raw_weather.get("agency"),
             "observation_time": raw_weather.get("observation_time"),
             "retrieval_time": raw_weather.get("retrieval_time"),
-            "data_age_minutes": raw_weather.get("data_age_minutes", 0),
+            "data_age_minutes": raw_weather.get("data_age_minutes"),
             "status": raw_weather.get("status") if raw_weather.get("status") in ["LIVE", "CACHED", "UNAVAILABLE"] else ("LIVE" if temp is not None else "UNAVAILABLE")
         }
     except Exception as exc:

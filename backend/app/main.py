@@ -38,9 +38,7 @@ from backend.app.api.routes_routing import router as routing_router
 from backend.app.api.routes_reports import router as reports_router
 from backend.app.api.routes_incidents import router as incidents_router
 from backend.app.api.routes_sos import router as sos_router
-from backend.app.api.routes_rescue import router as rescue_router
 from backend.app.api.routes_resources import router as resources_router
-from backend.app.api.routes_post_disaster import router as post_disaster_router
 from backend.app.api.routes_alerts import router as alerts_router
 from backend.app.api.routes_analytics import router as analytics_router
 from backend.app.api.routes_simulation import router as simulation_router
@@ -118,9 +116,7 @@ app.include_router(routing_router)
 app.include_router(reports_router)
 app.include_router(incidents_router)
 app.include_router(sos_router)
-app.include_router(rescue_router)
 app.include_router(resources_router)
-app.include_router(post_disaster_router)
 app.include_router(alerts_router)
 app.include_router(analytics_router)
 app.include_router(simulation_router)

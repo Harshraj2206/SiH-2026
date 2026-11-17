@@ -3,6 +3,8 @@ LANDSAFE - Landslide Early Warning & Emergency Response System
 Analytics & Operational Metrics API
 """
 
+from datetime import datetime, timedelta, timezone
+
 from fastapi import APIRouter
 from backend.app.models.schemas import AnalyticsSummary
 from backend.app.database.store import db_store
@@ -13,7 +15,7 @@ router = APIRouter(prefix="/api/analytics", tags=["Analytics"])
 
 @router.get("", response_model=AnalyticsSummary)
 async def get_analytics_overview():
-    zones = db_store.get_all_zones()
+    zones = db_store.get_scored_zones()
     reports = db_store.get_all_reports()
     alerts = db_store.get_all_alerts()
     incidents = db_store.get_all_incidents()
@@ -50,25 +52,36 @@ async def get_analytics_overview():
     rainfall_vs_risk = [
         {
             "zone_id": z["zone_id"],
-            "name": z["name"].split(" ")[0],
-            "rainfall_24h": z["rainfall_24h"] if z.get("rainfall_24h") is not None else 0.0,
-            "slope_deg": z["slope_deg"],
-            "soil_moisture": round(z["soil_moisture"] * 100) if z.get("soil_moisture") is not None else 0,
-            "risk_score": z["risk_score"] if z.get("risk_score") is not None else 0.0,
+            "name": z["name"],
+            "rainfall_24h": z.get("rainfall_24h"),
+            "slope_deg": z.get("slope_deg"),
+            "soil_moisture": round(z["soil_moisture"] * 100) if z.get("soil_moisture") is not None else None,
+            "risk_score": z["risk_score"],
             "level": z["risk_level"]
         }
         for z in sorted(zones, key=lambda x: (x.get("rainfall_24h") is None, x.get("rainfall_24h") or 0.0))
     ]
 
-    # Reports timeline
-    reports_timeline = [
-        {"time": "06:00", "reports": 1, "verified": 1},
-        {"time": "09:00", "reports": 2, "verified": 2},
-        {"time": "12:00", "reports": 4, "verified": 3},
-        {"time": "15:00", "reports": 6, "verified": 4},
-        {"time": "18:00", "reports": max(8, len(reports)), "verified": ver_reports},
-        {"time": "Current", "reports": len(reports), "verified": ver_reports}
-    ]
+    # Reports submitted in the last 24 hours, in 4-hour buckets (UTC times; the UI shows local time)
+    now = datetime.now(timezone.utc)
+    buckets = []
+    for b in range(6):
+        start = now - timedelta(hours=24 - 4 * b)
+        end = start + timedelta(hours=4)
+        in_bucket = []
+        for r in reports:
+            try:
+                created = datetime.fromisoformat(str(r.get("created_at")).replace("Z", "+00:00"))
+            except ValueError:
+                continue
+            if start < created <= end:
+                in_bucket.append(r)
+        buckets.append({
+            "time": end.isoformat(),
+            "reports": len(in_bucket),
+            "verified": sum(1 for r in in_bucket if r.get("status") == "VERIFIED"),
+        })
+    reports_timeline = buckets
 
     # Top critical zones (Safe sorting on optional risk scores)
     top_critical_zones = [
@@ -91,16 +104,14 @@ async def get_analytics_overview():
     feature_importance_list = []
     if metadata and "feature_importances" in metadata:
         feat_names = {
-            "slope_deg": "Slope Angle (°)",
-            "pore_slope_interaction": "Pore-Saturation Shear Proxy",
-            "historical_incidents": "Historical Incident Frequency",
-            "elevation_amsl": "Elevation AMSL (m)",
-            "vegetation_slope_defense": "Vegetation Root Reinforcement",
-            "rainfall_72h": "72h Antecedent Rainfall (mm)",
-            "rainfall_24h": "24h Intense Precipitation (mm)",
-            "antecedent_rain_index": "Antecedent Precipitation Index",
-            "ndvi": "Vegetation Canopy Cover (NDVI)",
-            "soil_moisture": "Volumetric Soil Moisture (%)"
+            "slope_deg": "Slope",
+            "pore_slope_interaction": "Soil moisture × slope",
+            "historical_incidents": "Past landslides nearby",
+            "elevation_amsl": "Elevation",
+            "rainfall_72h": "Rain, 72 h",
+            "rainfall_24h": "Rain, 24 h",
+            "antecedent_rain_index": "Recent rain index",
+            "soil_moisture": "Soil moisture",
         }
         for k, v in metadata["feature_importances"].items():
             feature_importance_list.append({
