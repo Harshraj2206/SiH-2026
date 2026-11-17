@@ -129,25 +129,25 @@ const MAP_TYPES = [
 
 // Custom Leaflet DivIcons for distinct facility types
 const createMarkerIcon = (category, isSelected = false) => {
-  let bgColor = '#10b981'; // emerald
-  let borderColor = '#34d399';
+  let bgColor = '#6BBF8A'; // emerald
+  let borderColor = '#6BBF8A';
   let glyph = '🏥';
 
   if (category === 'police') {
     bgColor = '#0284c7'; // sky
-    borderColor = '#38bdf8';
+    borderColor = '#4A86E8';
     glyph = '👮';
   } else if (category === 'fire') {
-    bgColor = '#e11d48'; // rose
-    borderColor = '#fb7185';
+    bgColor = '#E06C66'; // rose
+    borderColor = '#E06C66';
     glyph = '🚒';
   } else if (category === 'shelters') {
-    bgColor = '#d97706'; // amber
-    borderColor = '#fbbf24';
+    bgColor = '#D4B24C'; // amber
+    borderColor = '#D4B24C';
     glyph = '⛺';
   } else if (category === 'user') {
-    bgColor = '#3b82f6'; // blue
-    borderColor = '#93c5fd';
+    bgColor = '#4A86E8'; // blue
+    borderColor = '#8AB4F8';
     glyph = '📍';
   }
 
@@ -624,33 +624,33 @@ export const ResourcesPage = () => {
     <div className="space-y-4 w-full select-none pb-12">
       
       {/* 1. Header & Location Bar */}
-      <div className="bg-[#0a0a0a] border border-[#1a1a1a] p-4 sm:p-5 rounded-2xl shadow-sm">
+      <div className="bg-surface border border-line p-4 sm:p-5 rounded-card shadow-sm">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           
           {/* Title & Description */}
           <div className="flex items-start sm:items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
-              <Ambulance className="w-5 h-5 text-emerald-400" />
+            <div className="w-10 h-10 rounded-tile bg-risk-low/[0.12] border border-risk-low/30 flex items-center justify-center text-risk-low shrink-0">
+              <Ambulance className="w-5 h-5 text-risk-low" />
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-lg font-bold text-white tracking-tight">Real-Time Emergency Resources</h1>
-                <span className="text-[10px] px-2 py-0.5 rounded-full font-mono bg-emerald-950/60 border border-emerald-500/40 text-emerald-400 font-semibold flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <h1 className="text-lg font-semibold text-label tracking-tight">Real-Time Emergency Resources</h1>
+                <span className="text-xs px-2 py-0.5 rounded-full tabular-nums bg-risk-low/[0.12] border border-risk-low/30 text-risk-low font-semibold flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-risk-low "></span>
                   LOCATION AWARE
                 </span>
                 {dataSourceInfo && (
                   <span 
                     onClick={() => setShowKeyModal(true)}
-                    className="text-[10px] px-2 py-0.5 rounded-full font-mono bg-neutral-900 border border-neutral-700 text-neutral-300 hover:text-white hover:border-neutral-500 cursor-pointer transition-colors flex items-center gap-1"
+                    className="text-xs px-2 py-0.5 rounded-full tabular-nums bg-surface border border-line text-label-2 hover:text-label hover:border-line cursor-pointer transition-colors flex items-center gap-1"
                     title="Click to view or configure Google Places API key"
                   >
-                    <Key className="w-2.5 h-2.5 text-amber-400" />
+                    <Key className="w-2.5 h-2.5 text-risk-moderate" />
                     <span>{dataSourceInfo.is_google_configured ? 'Google Places Active' : 'Open Infrastructure'}</span>
                   </span>
                 )}
               </div>
-              <p className="text-xs text-neutral-400 mt-0.5">
+              <p className="text-xs text-label-2 mt-0.5">
                 Authentic certified hospitals, trauma centers, and disaster response units discovered near your current GPS position.
               </p>
             </div>
@@ -661,7 +661,7 @@ export const ResourcesPage = () => {
             {locationMode === 'manual' ? (
               <button
                 onClick={() => requestGpsLocation()}
-                className="px-3 py-1.5 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/40 text-blue-400 text-xs rounded-xl font-medium flex items-center gap-1.5 transition-colors"
+                className="px-3 py-1.5 bg-surface-2 hover:bg-surface-2 border border-line text-label-2 text-xs rounded-tile font-medium flex items-center gap-1.5 transition-colors"
               >
                 <Crosshair className="w-3.5 h-3.5" />
                 <span>Use My Current Location</span>
@@ -670,25 +670,25 @@ export const ResourcesPage = () => {
               <button
                 onClick={() => userCoords && fetchNearby(userCoords.lat, userCoords.lng, radiusKm, activeCategory, searchKeyword)}
                 disabled={loading}
-                className="px-3 py-1.5 bg-[#141414] hover:bg-[#1f1f1f] border border-[#262626] text-neutral-200 hover:text-white text-xs rounded-xl font-medium flex items-center gap-1.5 transition-colors disabled:opacity-50"
+                className="px-3 py-1.5 bg-surface-2 hover:bg-surface-2 border border-line text-label hover:text-label text-xs rounded-tile font-medium flex items-center gap-1.5 transition-colors disabled:opacity-50"
               >
-                <RefreshCw className={`w-3.5 h-3.5 text-emerald-400 ${loading ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`w-3.5 h-3.5 text-risk-low ${loading ? 'animate-spin' : ''}`} />
                 <span>Refresh ({getUpdatedAgo()})</span>
               </button>
             )}
 
             {/* Layout Toggle */}
-            <div className="bg-[#121212] border border-[#222] p-1 rounded-xl flex items-center gap-1 text-xs">
+            <div className="bg-surface border border-[#222] p-1 rounded-tile flex items-center gap-1 text-xs">
               <button
                 onClick={() => setViewLayout('split')}
-                className={`p-1.5 rounded-lg transition-colors ${viewLayout === 'split' ? 'bg-neutral-800 text-white' : 'text-neutral-400 hover:text-white'}`}
+                className={`p-1.5 rounded-lg transition-colors ${viewLayout === 'split' ? 'bg-surface-2 text-label' : 'text-label-2 hover:text-label'}`}
                 title="Split Map + List View"
               >
                 <MapIcon className="w-3.5 h-3.5" />
               </button>
               <button
                 onClick={() => setViewLayout('cards')}
-                className={`p-1.5 rounded-lg transition-colors ${viewLayout === 'cards' ? 'bg-neutral-800 text-white' : 'text-neutral-400 hover:text-white'}`}
+                className={`p-1.5 rounded-lg transition-colors ${viewLayout === 'cards' ? 'bg-surface-2 text-label' : 'text-label-2 hover:text-label'}`}
                 title="Card List Only"
               >
                 <List className="w-3.5 h-3.5" />
@@ -698,30 +698,30 @@ export const ResourcesPage = () => {
         </div>
 
         {/* Location Status Bar */}
-        <div className="mt-4 pt-3 border-t border-[#181818] flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
+        <div className="mt-4 pt-3 border-t border-line flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-2 flex-wrap">
-            <div className="flex items-center gap-1.5 font-medium text-neutral-300">
-              <MapPin className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-              <span className="text-neutral-400">Search Center:</span>
-              <strong className="text-white truncate max-w-[320px] sm:max-w-md">
+            <div className="flex items-center gap-1.5 font-medium text-label-2">
+              <MapPin className="w-3.5 h-3.5 text-risk-low shrink-0" />
+              <span className="text-label-2">Search Center:</span>
+              <strong className="text-label truncate max-w-[320px] sm:max-w-md">
                 {userCoords?.area || (geoState === 'checking' ? 'Acquiring GPS location...' : 'Location not set')}
               </strong>
             </div>
 
             {userCoords?.accuracy && (
-              <span className={`text-[11px] px-2 py-0.5 rounded-md font-mono ${
+              <span className={`text-xs px-2 py-0.5 rounded-md tabular-nums ${
                 userCoords.accuracy <= 50 
-                  ? 'bg-emerald-950/40 border border-emerald-800/40 text-emerald-300' 
+                  ? 'bg-risk-low/[0.12] border border-risk-low/30 text-risk-low' 
                   : userCoords.accuracy <= 500
-                    ? 'bg-sky-950/40 border border-sky-800/40 text-sky-300'
-                    : 'bg-amber-950/40 border border-amber-800/40 text-amber-300'
+                    ? 'bg-surface-2 border border-line text-label-2'
+                    : 'bg-risk-moderate/[0.12] border border-risk-moderate/30 text-risk-moderate'
               }`}>
                 Accuracy: ±{userCoords.accuracy} m
               </span>
             )}
 
             {locationMode === 'manual' && (
-              <span className="text-[10px] px-2 py-0.5 rounded bg-amber-500/15 border border-amber-500/30 text-amber-400 font-mono">
+              <span className="text-xs px-2 py-0.5 rounded bg-risk-moderate/[0.12] border border-risk-moderate/30 text-risk-moderate tabular-nums">
                 Manual Selection Mode
               </span>
             )}
@@ -730,19 +730,19 @@ export const ResourcesPage = () => {
           {/* Manual Location Search Bar */}
           <form onSubmit={handleManualSearch} className="flex items-center gap-1.5 w-full md:w-auto">
             <div className="relative flex-1 md:w-64">
-              <Search className="w-3.5 h-3.5 text-neutral-500 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Search className="w-3.5 h-3.5 text-label-3 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 placeholder="Search city, area, PIN code..."
                 value={manualQuery}
                 onChange={(e) => setManualQuery(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 bg-[#121212] border border-[#262626] rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-emerald-500 transition-colors"
+                className="w-full pl-8 pr-3 py-1.5 bg-surface border border-line rounded-tile text-xs text-label placeholder-label-3 focus:outline-none focus:border-risk-low/30 transition-colors"
               />
             </div>
             <button
               type="submit"
               disabled={isSearchingLocation || !manualQuery.trim()}
-              className="px-3 py-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/40 text-emerald-400 font-medium rounded-xl text-xs flex items-center gap-1 transition-colors disabled:opacity-40 shrink-0"
+              className="px-3 py-1.5 bg-risk-low/[0.12] hover:bg-risk-low/[0.12] border border-risk-low/30 text-risk-low font-medium rounded-tile text-xs flex items-center gap-1 transition-colors disabled:opacity-40 shrink-0"
             >
               <span>{isSearchingLocation ? 'Searching...' : 'Go'}</span>
             </button>
@@ -751,8 +751,8 @@ export const ResourcesPage = () => {
 
         {/* Accuracy Warning Banner (if GPS accuracy > 500m) */}
         {userCoords?.accuracy > 500 && (
-          <div className="mt-3 p-2.5 bg-amber-950/30 border border-amber-500/30 rounded-xl text-amber-300 text-xs flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+          <div className="mt-3 p-2.5 bg-risk-moderate/[0.12] border border-risk-moderate/30 rounded-tile text-risk-moderate text-xs flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-risk-moderate shrink-0" />
             <span>
               Location accuracy is low (±{userCoords.accuracy} m). Move outdoors or near a window for more accurate emergency facility discovery.
             </span>
@@ -762,21 +762,21 @@ export const ResourcesPage = () => {
 
       {/* 2. Geolocation Permission States (Prompt / Denied Banner) */}
       {geoState === 'prompt' && !userCoords && (
-        <div className="bg-gradient-to-r from-blue-950/40 to-sky-950/20 border border-blue-500/30 p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="bg-surface-2 border border-line p-4 rounded-card flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-blue-500/20 border border-blue-500/40 flex items-center justify-center text-blue-400 shrink-0">
+            <div className="w-9 h-9 rounded-tile bg-surface-2 border border-line flex items-center justify-center text-label-2 shrink-0">
               <Navigation className="w-4 h-4 animate-bounce" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-white">Allow location access to find emergency resources near you</h3>
-              <p className="text-xs text-neutral-400 mt-0.5">
+              <h3 className="text-sm font-semibold text-label">Allow location access to find emergency resources near you</h3>
+              <p className="text-xs text-label-2 mt-0.5">
                 We use your exact coordinates to calculate drive distance and discover trauma centers in your area.
               </p>
             </div>
           </div>
           <button
             onClick={() => requestGpsLocation()}
-            className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-md shadow-blue-500/20 transition-all self-start sm:self-center shrink-0"
+            className="px-4 py-2 bg-accent hover:bg-accent text-label font-semibold rounded-tile text-xs flex items-center justify-center gap-1.5 transition-all self-start sm:self-center shrink-0"
           >
             <Crosshair className="w-3.5 h-3.5" />
             <span>Enable Location</span>
@@ -785,14 +785,14 @@ export const ResourcesPage = () => {
       )}
 
       {geoState === 'denied' && (
-        <div className="bg-gradient-to-r from-rose-950/40 to-neutral-950/30 border border-rose-500/30 p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="bg-surface-2 border border-risk-critical/30 p-4 rounded-card flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 shrink-0">
+            <div className="w-9 h-9 rounded-tile bg-risk-critical/[0.12] border border-risk-critical/30 flex items-center justify-center text-risk-critical shrink-0">
               <AlertTriangle className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-white">Location access is required to find emergency resources near you</h3>
-              <p className="text-xs text-neutral-400 mt-0.5">
+              <h3 className="text-sm font-semibold text-label">Location access is required to find emergency resources near you</h3>
+              <p className="text-xs text-label-2 mt-0.5">
                 Browser geolocation was declined. Use the search bar above to type any Indian city, landmark, or PIN code.
               </p>
             </div>
@@ -802,7 +802,7 @@ export const ResourcesPage = () => {
               setManualQuery('Bengaluru, Karnataka');
               handleManualSearch();
             }}
-            className="px-3 py-1.5 bg-[#1c1c1c] hover:bg-[#252525] border border-[#333] text-neutral-200 text-xs font-medium rounded-xl transition-colors self-start sm:self-center shrink-0"
+            className="px-3 py-1.5 bg-surface-2 hover:bg-surface-2 border border-[#333] text-label text-xs font-medium rounded-tile transition-colors self-start sm:self-center shrink-0"
           >
             Try Example: Bengaluru
           </button>
@@ -810,7 +810,7 @@ export const ResourcesPage = () => {
       )}
 
       {/* 3. Category & Radius Selector Bar */}
-      <div className="bg-[#0a0a0a] border border-[#1a1a1a] p-3 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-sm">
+      <div className="bg-surface border border-line p-3 rounded-card flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-sm">
         
         {/* Category Tabs */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
@@ -821,16 +821,16 @@ export const ResourcesPage = () => {
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
-                className={`px-3 py-2 rounded-xl text-xs font-medium flex items-center gap-2 transition-all shrink-0 ${
+                className={`px-3 py-2 rounded-tile text-xs font-medium flex items-center gap-2 transition-all shrink-0 ${
                   isActive
-                    ? 'bg-emerald-500 text-black font-bold shadow-sm shadow-emerald-500/20'
-                    : 'bg-[#121212] text-neutral-400 hover:text-white hover:bg-[#181818] border border-[#1f1f1f]'
+                    ? 'bg-surface-2 text-label font-semibold shadow-sm '
+                    : 'bg-surface text-label-2 hover:text-label hover:bg-surface-2 border border-line'
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-black' : 'text-neutral-400'}`} />
+                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-black' : 'text-label-2'}`} />
                 <span>{cat.label}</span>
                 {isActive && places.length > 0 && (
-                  <span className="ml-0.5 px-1.5 py-0.2 rounded-full text-[10px] bg-black/20 text-black font-mono">
+                  <span className="ml-0.5 px-1.5 py-0.2 rounded-full text-xs bg-surface-2 text-black tabular-nums">
                     {places.length}
                   </span>
                 )}
@@ -841,16 +841,16 @@ export const ResourcesPage = () => {
 
         {/* Radius Selector Pills */}
         <div className="flex items-center gap-2 self-start md:self-center text-xs">
-          <span className="text-neutral-400 font-medium hidden sm:inline">Search Radius:</span>
-          <div className="bg-[#121212] border border-[#1f1f1f] p-1 rounded-xl flex items-center gap-1">
+          <span className="text-label-2 font-medium hidden sm:inline">Search Radius:</span>
+          <div className="bg-surface border border-line p-1 rounded-tile flex items-center gap-1">
             {SEARCH_RADII.map((r) => (
               <button
                 key={r}
                 onClick={() => setRadiusKm(r)}
-                className={`px-2.5 py-1 rounded-lg transition-colors font-mono font-medium ${
+                className={`px-2.5 py-1 rounded-lg transition-colors tabular-nums font-medium ${
                   radiusKm === r
-                    ? 'bg-neutral-800 text-emerald-400 font-bold border border-emerald-500/30'
-                    : 'text-neutral-400 hover:text-white'
+                    ? 'bg-surface-2 text-risk-low font-semibold border border-risk-low/30'
+                    : 'text-label-2 hover:text-label'
                 }`}
               >
                 {r} km
@@ -861,14 +861,14 @@ export const ResourcesPage = () => {
       </div>
 
       {/* Radius context note */}
-      <div className="flex items-center justify-between text-xs px-1 text-neutral-400">
+      <div className="flex items-center justify-between text-xs px-1 text-label-2">
         <span className="flex items-center gap-1">
-          <Compass className="w-3.5 h-3.5 text-sky-400" />
-          Showing {activeCategory === 'all' ? 'all emergency resources' : (CATEGORIES.find(c => c.id === activeCategory)?.label || activeCategory)} within <strong className="text-neutral-200 font-mono">{radiusKm} km</strong> of your location
+          <Compass className="w-3.5 h-3.5 text-label-2" />
+          Showing {activeCategory === 'all' ? 'all emergency resources' : (CATEGORIES.find(c => c.id === activeCategory)?.label || activeCategory)} within <strong className="text-label tabular-nums">{radiusKm} km</strong> of your location
           {places.length > 0 && ` (${places.length} verified facilities)`}
         </span>
         {dataSourceInfo?.provider && (
-          <span className="text-[11px] text-neutral-500 font-mono hidden sm:inline">
+          <span className="text-xs text-label-3 tabular-nums hidden sm:inline">
             Source: {dataSourceInfo.provider}
           </span>
         )}
@@ -879,27 +879,27 @@ export const ResourcesPage = () => {
         
         {/* Map View (shown in 'split' or 'map' mode) */}
         {(viewLayout === 'split' || viewLayout === 'map') && (
-          <div className={`${viewLayout === 'split' ? 'lg:col-span-6 xl:col-span-5' : 'w-full'} h-[380px] lg:h-[640px] sticky top-4 rounded-2xl overflow-hidden border border-[#1f1f1f] shadow-md bg-[#0d0d0d] flex flex-col`}>
+          <div className={`${viewLayout === 'split' ? 'lg:col-span-6 xl:col-span-5' : 'w-full'} h-[380px] lg:h-[640px] sticky top-4 rounded-card overflow-hidden border border-line bg-surface flex flex-col`}>
             
             {/* Map Sub-Header & In-App Navigation Panel */}
             {activeRoute ? (
-              <div className="bg-[#0f1713] px-3.5 py-3 border-b border-emerald-500/30 z-10 space-y-2.5">
+              <div className="bg-surface-2 px-3.5 py-3 border-b border-risk-low/30 z-10 space-y-2.5">
                 {/* Header row: destination title + Exit button */}
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2 min-w-0">
-                    <div className="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0">
+                    <div className="w-7 h-7 rounded-lg bg-risk-low/[0.12] border border-risk-low/30 flex items-center justify-center text-risk-low shrink-0">
                       <Route className="w-4 h-4" />
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-950/80 border border-emerald-500/40 text-emerald-400 font-bold">
+                        <span className="text-xs tabular-nums px-1.5 py-0.2 rounded bg-risk-low/[0.12] border border-risk-low/30 text-risk-low font-semibold">
                           IN-APP ROAD ROUTE
                         </span>
-                        <span className="text-xs font-bold text-white truncate">
+                        <span className="text-xs font-semibold text-label truncate">
                           {activeRoute.destination.name}
                         </span>
                       </div>
-                      <p className="text-[11px] text-neutral-400 truncate">
+                      <p className="text-xs text-label-2 truncate">
                         Origin: {userCoords?.area || 'Your Location'}
                       </p>
                     </div>
@@ -907,7 +907,7 @@ export const ResourcesPage = () => {
 
                   <button
                     onClick={handleClearRoute}
-                    className="px-2 py-1 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-300 hover:text-white rounded-lg text-xs font-medium flex items-center gap-1 shrink-0 transition-colors"
+                    className="px-2 py-1 bg-surface hover:bg-surface-2 border border-line text-label-2 hover:text-label rounded-lg text-xs font-medium flex items-center gap-1 shrink-0 transition-colors"
                     title="Exit in-app navigation and clear route"
                   >
                     <X className="w-3.5 h-3.5" />
@@ -916,23 +916,23 @@ export const ResourcesPage = () => {
                 </div>
 
                 {/* Metric summary bar: Distance, ETA, and Landslide/Slope hazard grade */}
-                <div className="grid grid-cols-3 gap-2 bg-[#0a0f0c] p-2 rounded-xl border border-emerald-950 text-center">
+                <div className="grid grid-cols-3 gap-2 bg-surface p-2 rounded-tile border border-risk-low/30 text-center">
                   <div>
-                    <span className="text-[10px] text-neutral-400 block font-medium">Road Distance</span>
-                    <strong className="text-xs font-mono font-bold text-white">{activeRoute.distance_km} km</strong>
+                    <span className="text-xs text-label-2 block font-medium">Road Distance</span>
+                    <strong className="text-xs tabular-nums font-semibold text-label">{activeRoute.distance_km} km</strong>
                   </div>
                   <div>
-                    <span className="text-[10px] text-neutral-400 block font-medium">Est. Drive Time</span>
-                    <strong className="text-xs font-mono font-bold text-emerald-400">~{activeRoute.travel_time_min} mins</strong>
+                    <span className="text-xs text-label-2 block font-medium">Est. Drive Time</span>
+                    <strong className="text-xs tabular-nums font-semibold text-risk-low">~{activeRoute.travel_time_min} mins</strong>
                   </div>
                   <div>
-                    <span className="text-[10px] text-neutral-400 block font-medium">Hazard Profile</span>
-                    <strong className={`text-[11px] font-mono font-bold ${
+                    <span className="text-xs text-label-2 block font-medium">Hazard Profile</span>
+                    <strong className={`text-xs tabular-nums font-semibold ${
                       activeRoute.safety_level === 'HIGH RISK' 
-                        ? 'text-rose-400' 
+                        ? 'text-risk-critical' 
                         : activeRoute.safety_level === 'MODERATE RISK' 
-                          ? 'text-amber-400' 
-                          : 'text-emerald-400'
+                          ? 'text-risk-moderate' 
+                          : 'text-risk-low'
                     }`}>
                       {activeRoute.safety_level}
                     </strong>
@@ -941,14 +941,14 @@ export const ResourcesPage = () => {
 
                 {/* Off-Route Alert Banner */}
                 {isOffRoute && (
-                  <div className="p-2 bg-amber-950/50 border border-amber-500/50 rounded-xl text-amber-200 text-xs flex items-center justify-between gap-2 animate-pulse">
+                  <div className="p-2 bg-risk-moderate/[0.12] border border-risk-moderate/30 rounded-tile text-risk-moderate text-xs flex items-center justify-between gap-2 ">
                     <div className="flex items-center gap-1.5">
-                      <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+                      <AlertTriangle className="w-4 h-4 text-risk-moderate shrink-0" />
                       <span>You appear to be off route (&gt;150m from road).</span>
                     </div>
                     <button
                       onClick={handleRecalculateRoute}
-                      className="px-2 py-0.5 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded text-[11px] shrink-0"
+                      className="px-2 py-0.5 bg-risk-moderate hover:bg-risk-moderate text-black font-semibold rounded text-xs shrink-0"
                     >
                       Recalculate
                     </button>
@@ -961,20 +961,20 @@ export const ResourcesPage = () => {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={handleStopNavigation}
-                        className="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm transition-colors"
+                        className="px-3 py-1.5 bg-risk-critical hover:bg-risk-critical text-label rounded-tile text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-colors"
                       >
                         <Square className="w-3 h-3 fill-white" />
                         <span>Stop Navigation</span>
                       </button>
-                      <span className="text-[11px] text-emerald-400 font-mono flex items-center gap-1 font-semibold">
-                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                      <span className="text-xs text-risk-low tabular-nums flex items-center gap-1 font-semibold">
+                        <span className="w-2 h-2 rounded-full bg-risk-low "></span>
                         Live GPS Tracking
                       </span>
                     </div>
                   ) : (
                     <button
                       onClick={handleStartNavigation}
-                      className="px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-black rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md shadow-emerald-500/20 transition-all"
+                      className="px-3.5 py-1.5 bg-accent hover:opacity-90 text-white rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all"
                     >
                       <Play className="w-3 h-3 fill-black" />
                       <span>Start Navigation</span>
@@ -984,7 +984,7 @@ export const ResourcesPage = () => {
                   {activeRoute.segments && activeRoute.segments.length > 0 && (
                     <button
                       onClick={() => setShowRouteSteps(!showRouteSteps)}
-                      className="px-2.5 py-1.5 bg-[#141414] hover:bg-[#1f1f1f] border border-[#282828] text-neutral-300 hover:text-white rounded-xl text-xs font-medium flex items-center gap-1 transition-colors"
+                      className="px-2.5 py-1.5 bg-surface-2 hover:bg-surface-2 border border-line text-label-2 hover:text-label rounded-tile text-xs font-medium flex items-center gap-1 transition-colors"
                     >
                       <span>Steps ({activeRoute.segments.length})</span>
                       {showRouteSteps ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
@@ -994,21 +994,21 @@ export const ResourcesPage = () => {
 
                 {/* Turn-by-Turn Maneuvers List (Accordion) */}
                 {showRouteSteps && activeRoute.segments && activeRoute.segments.length > 0 && (
-                  <div className="mt-2 max-h-44 overflow-y-auto pr-1 space-y-1.5 scrollbar-thin border-t border-[#1f2821] pt-2">
+                  <div className="mt-2 max-h-44 overflow-y-auto pr-1 space-y-1.5 scrollbar-thin border-t border-line pt-2">
                     {activeRoute.segments.map((seg, sIdx) => (
                       <div
                         key={sIdx}
-                        className="p-2 rounded-lg bg-[#0a0f0c] border border-[#1d2720] text-xs flex items-start gap-2 text-neutral-300"
+                        className="p-2 rounded-lg bg-surface border border-line text-xs flex items-start gap-2 text-label-2"
                       >
-                        <span className="w-5 h-5 rounded bg-emerald-500/20 text-emerald-400 font-mono font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">
+                        <span className="w-5 h-5 rounded bg-risk-low/[0.12] text-risk-low tabular-nums font-semibold flex items-center justify-center text-xs shrink-0 mt-0.5">
                           {seg.step_number || sIdx + 1}
                         </span>
                         <div className="flex-1 min-w-0">
-                          <p className="text-white font-medium text-[11px] leading-snug">{seg.instruction}</p>
-                          <div className="flex items-center gap-2 mt-0.5 text-[10px] text-neutral-400 font-mono">
+                          <p className="text-label font-medium text-xs leading-snug">{seg.instruction}</p>
+                          <div className="flex items-center gap-2 mt-0.5 text-xs text-label-2 tabular-nums">
                             {seg.distance_km > 0 && <span>{seg.distance_km} km</span>}
                             {seg.travel_time_min > 0 && <span>~{seg.travel_time_min} min</span>}
-                            {seg.road_name && <span className="truncate text-neutral-500">{seg.road_name}</span>}
+                            {seg.road_name && <span className="truncate text-label-3">{seg.road_name}</span>}
                           </div>
                         </div>
                       </div>
@@ -1017,12 +1017,12 @@ export const ResourcesPage = () => {
                 )}
               </div>
             ) : (
-              <div className="bg-[#111] px-4 py-2.5 border-b border-[#1f1f1f] flex items-center justify-between text-xs z-10">
+              <div className="bg-[#111] px-4 py-2.5 border-b border-line flex items-center justify-between text-xs z-10">
                 <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                  <span className="font-bold text-white">Live Geospatial Radar</span>
+                  <span className="w-2 h-2 rounded-full bg-risk-low "></span>
+                  <span className="font-semibold text-label">Live Geospatial Radar</span>
                 </div>
-                <div className="flex items-center gap-2 text-neutral-400 font-mono text-[11px]">
+                <div className="flex items-center gap-2 text-label-2 tabular-nums text-xs">
                   <span>Center: {userCoords?.lat?.toFixed(3)}°N, {userCoords?.lng?.toFixed(3)}°E</span>
                 </div>
               </div>
@@ -1030,21 +1030,21 @@ export const ResourcesPage = () => {
 
             {/* Route Calculation Progress / Error Notification */}
             {isCalculatingRoute && (
-              <div className="bg-sky-950/70 border-b border-sky-500/40 px-4 py-2 text-xs text-sky-200 flex items-center gap-2 z-10">
-                <div className="w-3.5 h-3.5 border-2 border-sky-400 border-t-transparent rounded-full animate-spin"></div>
+              <div className="bg-surface-2 border-b border-line px-4 py-2 text-xs text-label-2 flex items-center gap-2 z-10">
+                <div className="w-3.5 h-3.5 border-2 border-line border-t-transparent rounded-full animate-spin"></div>
                 <span>Calculating road route to selected facility...</span>
               </div>
             )}
 
             {routeError && (
-              <div className="bg-rose-950/60 border-b border-rose-500/40 px-4 py-2 text-xs text-rose-200 flex items-center justify-between gap-2 z-10">
+              <div className="bg-risk-critical/[0.12] border-b border-risk-critical/30 px-4 py-2 text-xs text-risk-critical flex items-center justify-between gap-2 z-10">
                 <div className="flex items-center gap-1.5 truncate">
-                  <AlertTriangle className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                  <AlertTriangle className="w-3.5 h-3.5 text-risk-critical shrink-0" />
                   <span className="truncate">{routeError}</span>
                 </div>
                 <button
                   onClick={() => setRouteError(null)}
-                  className="text-rose-400 hover:text-white p-0.5 text-xs font-bold"
+                  className="text-risk-critical hover:text-label p-0.5 text-xs font-semibold"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -1056,15 +1056,15 @@ export const ResourcesPage = () => {
               {/* Live Turn-by-Turn HUD overlay inside map during Navigation */}
               {isNavigating && activeRoute && activeRoute.segments && activeRoute.segments[0] && (
                 <div className="absolute top-3 left-3 right-14 z-[1000] pointer-events-none">
-                  <div className="bg-[#0c140f]/95 backdrop-blur-md border border-emerald-500/50 p-2.5 rounded-2xl shadow-2xl flex items-center gap-2.5 pointer-events-auto">
-                    <div className="w-8 h-8 rounded-xl bg-emerald-500 text-black flex items-center justify-center shrink-0 shadow-md">
-                      <CornerUpRight className="w-5 h-5 font-bold" />
+                  <div className="bg-surface-2 backdrop-blur-md border border-risk-low/30 p-2.5 rounded-card flex items-center gap-2.5 pointer-events-auto">
+                    <div className="w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center shrink-0 ">
+                      <CornerUpRight className="w-5 h-5 font-semibold" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs font-bold text-white truncate leading-tight">
+                      <p className="text-xs font-semibold text-label truncate leading-tight">
                         {activeRoute.segments[0].instruction}
                       </p>
-                      <p className="text-[11px] text-emerald-400 font-mono">
+                      <p className="text-xs text-risk-low tabular-nums">
                         {activeRoute.distance_km} km remaining • ~{activeRoute.travel_time_min} mins
                       </p>
                     </div>
@@ -1123,7 +1123,7 @@ export const ResourcesPage = () => {
                       <Polyline
                         positions={activeRoute.coordinates.map((pt) => [pt.lat, pt.lng])}
                         pathOptions={{
-                          color: '#10b981',
+                          color: '#6BBF8A',
                           weight: 5,
                           opacity: 0.95,
                           lineCap: 'round',
@@ -1139,13 +1139,13 @@ export const ResourcesPage = () => {
                     icon={createMarkerIcon('user')}
                   >
                     <Popup className="custom-dark-popup">
-                      <div className="p-2 text-xs text-white">
-                        <strong className="text-blue-400 flex items-center gap-1 font-bold">
+                      <div className="p-2 text-xs text-label">
+                        <strong className="text-label-2 flex items-center gap-1 font-semibold">
                           <Crosshair className="w-3.5 h-3.5" />
                           <span>Your Location</span>
                         </strong>
-                        <p className="mt-1 text-neutral-300">{userCoords.area}</p>
-                        <p className="text-[10px] text-neutral-400 font-mono mt-1">
+                        <p className="mt-1 text-label-2">{userCoords.area}</p>
+                        <p className="text-xs text-label-2 tabular-nums mt-1">
                           Accuracy: ±{userCoords.accuracy} m
                         </p>
                       </div>
@@ -1157,8 +1157,8 @@ export const ResourcesPage = () => {
                     center={[userCoords.lat, userCoords.lng]}
                     radius={radiusKm * 1000}
                     pathOptions={{
-                      color: '#10b981',
-                      fillColor: '#10b981',
+                      color: '#6BBF8A',
+                      fillColor: '#6BBF8A',
                       fillOpacity: 0.04,
                       weight: 1.5,
                       dashArray: '4, 6'
@@ -1178,35 +1178,35 @@ export const ResourcesPage = () => {
                         }}
                       >
                         <Popup className="custom-dark-popup">
-                          <div className="p-2 text-xs text-white space-y-1.5 max-w-[240px]">
+                          <div className="p-2 text-xs text-label space-y-1.5 max-w-[240px]">
                             <div className="flex items-start justify-between gap-2">
-                              <h4 className="font-bold text-white text-xs">{place.name}</h4>
-                              <span className="text-[10px] text-emerald-400 font-mono font-bold shrink-0">
+                              <h4 className="font-semibold text-label text-xs">{place.name}</h4>
+                              <span className="text-xs text-risk-low tabular-nums font-semibold shrink-0">
                                 {place.distance_km} km
                               </span>
                             </div>
-                            <p className="text-[11px] text-neutral-400 leading-tight">{place.address}</p>
+                            <p className="text-xs text-label-2 leading-tight">{place.address}</p>
                             
-                            <div className="pt-2 flex items-center gap-2 border-t border-neutral-700">
+                            <div className="pt-2 flex items-center gap-2 border-t border-line">
                               {place.phone ? (
                                 <a
                                   href={`tel:${place.phone}`}
-                                  className="px-2 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[11px] font-bold flex items-center gap-1"
+                                  className="px-2 py-1 bg-risk-low hover:bg-risk-low text-label rounded text-xs font-semibold flex items-center gap-1"
                                 >
                                   <Phone className="w-3 h-3" />
                                   <span>Call</span>
                                 </a>
                               ) : (
-                                <span className="text-[10px] text-neutral-400 font-mono">No phone</span>
+                                <span className="text-xs text-label-2 tabular-nums">No phone</span>
                               )}
                               
                               <button
                                 onClick={() => handleGetDirections(place)}
                                 disabled={isCalculatingRoute}
-                                className="px-2 py-1 bg-sky-600 hover:bg-sky-500 text-white rounded text-[11px] font-bold flex items-center gap-1 ml-auto transition-colors disabled:opacity-50"
+                                className="px-2 py-1 bg-accent hover:bg-accent text-label rounded text-xs font-semibold flex items-center gap-1 ml-auto transition-colors disabled:opacity-50"
                                 title="Compute road route and navigate inside LANDSLIDEGUARD"
                               >
-                                <Navigation className="w-3 h-3 text-white" />
+                                <Navigation className="w-3 h-3 text-label" />
                                 <span>{activeRoute?.destination?.id === place.id ? 'Routing' : 'Directions'}</span>
                               </button>
                             </div>
@@ -1217,7 +1217,7 @@ export const ResourcesPage = () => {
                   })}
                 </MapContainer>
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-neutral-500 text-xs">
+                <div className="w-full h-full flex items-center justify-center text-label-3 text-xs">
                   Loading map coordinates...
                 </div>
               )}
@@ -1225,10 +1225,10 @@ export const ResourcesPage = () => {
               {/* Map Floating Control: Recenter Button (Top-Right) */}
               <button
                 onClick={() => userCoords && setMapCenter({ lat: userCoords.lat, lng: userCoords.lng })}
-                className="absolute top-3 right-3 z-[1000] p-2 bg-[#121212]/90 hover:bg-[#1f1f1f] text-neutral-200 border border-[#2a2a2a] rounded-xl shadow-lg backdrop-blur-sm transition-colors"
+                className="absolute top-3 right-3 z-[1000] p-2 bg-surface hover:bg-surface-2 text-label border border-line rounded-tile backdrop-blur-sm transition-colors"
                 title="Recenter on My Location"
               >
-                <Crosshair className="w-4 h-4 text-emerald-400" />
+                <Crosshair className="w-4 h-4 text-risk-low" />
               </button>
 
               {/* Google-Maps-Style Map Type / Basemap Switcher (Bottom-Left) */}
@@ -1243,18 +1243,18 @@ export const ResourcesPage = () => {
                 {/* Expanded Layer Selection Menu */}
                 {showLayerMenu && (
                   <div 
-                    className="mb-2 bg-[#121212]/95 backdrop-blur-md border border-[#2a2a2a] p-2 rounded-2xl shadow-2xl transition-all animate-in fade-in slide-in-from-bottom-2 duration-150"
+                    className="mb-2 bg-surface backdrop-blur-md border border-line p-2 rounded-card transition-all animate-in fade-in slide-in-from-bottom-2 duration-150"
                     role="region"
                     aria-label="Map type selection menu"
                   >
                     <div className="flex items-center justify-between pb-1.5 px-1 border-b border-[#222] mb-1.5">
-                      <span className="text-[11px] font-bold text-neutral-300 flex items-center gap-1.5">
-                        <Layers className="w-3.5 h-3.5 text-emerald-400" />
+                      <span className="text-xs font-semibold text-label-2 flex items-center gap-1.5">
+                        <Layers className="w-3.5 h-3.5 text-risk-low" />
                         <span>Map Type</span>
                       </span>
                       <button
                         onClick={() => setShowLayerMenu(false)}
-                        className="text-neutral-500 hover:text-white p-0.5 rounded transition-colors"
+                        className="text-label-3 hover:text-label p-0.5 rounded transition-colors"
                         aria-label="Close map type menu"
                       >
                         <X className="w-3 h-3" />
@@ -1269,10 +1269,10 @@ export const ResourcesPage = () => {
                           <button
                             key={type.id}
                             onClick={() => handleSelectMapType(type.id)}
-                            className={`flex flex-col items-center gap-1 p-1.5 rounded-xl transition-all ${
+                            className={`flex flex-col items-center gap-1 p-1.5 rounded-tile transition-all ${
                               isSelected
-                                ? 'bg-emerald-950/60 border-2 border-emerald-400 text-emerald-300 shadow-sm shadow-emerald-500/20 font-bold'
-                                : 'bg-[#181818] border border-[#262626] text-neutral-400 hover:text-white hover:border-[#383838]'
+                                ? 'bg-risk-low/[0.12] border-2 border-risk-low/30 text-risk-low shadow-sm  font-semibold'
+                                : 'bg-surface-2 border border-line text-label-2 hover:text-label hover:border-line'
                             }`}
                             style={{ width: '58px' }}
                             title={`Switch to ${type.label} (${type.subtitle})`}
@@ -1280,11 +1280,11 @@ export const ResourcesPage = () => {
                             role="button"
                           >
                             <div className={`w-9 h-7 rounded-lg flex items-center justify-center transition-colors ${
-                              isSelected ? 'bg-emerald-500/20 text-emerald-300' : 'bg-[#222] text-neutral-300'
+                              isSelected ? 'bg-risk-low/[0.12] text-risk-low' : 'bg-[#222] text-label-2'
                             }`}>
                               <Icon className="w-4 h-4" />
                             </div>
-                            <span className="text-[10px] leading-none truncate w-full text-center">
+                            <span className="text-xs leading-none truncate w-full text-center">
                               {type.label}
                             </span>
                           </button>
@@ -1297,16 +1297,16 @@ export const ResourcesPage = () => {
                 {/* Compact Toggle Button (Google Maps Style) */}
                 <button
                   onClick={() => setShowLayerMenu(!showLayerMenu)}
-                  className={`px-3 py-1.5 bg-[#121212]/90 hover:bg-[#1a1a1a] backdrop-blur-md border rounded-xl shadow-xl flex items-center gap-2 text-xs font-semibold transition-all ${
+                  className={`px-3 py-1.5 bg-surface hover:bg-surface-2 backdrop-blur-md border rounded-tile flex items-center gap-2 text-xs font-semibold transition-all ${
                     showLayerMenu 
-                      ? 'border-emerald-500 text-emerald-300 shadow-emerald-500/20' 
-                      : 'border-[#2a2a2a] hover:border-[#3a3a3a] text-neutral-200'
+                      ? 'border-risk-low/30 text-risk-low ' 
+                      : 'border-line hover:border-line text-label'
                   }`}
                   title="Change map style (Roadmap, Satellite, Terrain, Hybrid, Dark)"
                   aria-label="Map layers switcher"
                   aria-expanded={showLayerMenu}
                 >
-                  <Layers className="w-3.5 h-3.5 text-emerald-400" />
+                  <Layers className="w-3.5 h-3.5 text-risk-low" />
                   <span className="text-xs font-medium">{activeMapConfig.label}</span>
                 </button>
               </div>
@@ -1320,11 +1320,11 @@ export const ResourcesPage = () => {
             
             {/* Loading Indicator */}
             {loading && (
-              <div className="bg-[#0e0e0e] border border-[#1c1c1c] p-8 rounded-2xl flex flex-col items-center justify-center text-center space-y-3">
-                <div className="w-10 h-10 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin"></div>
+              <div className="bg-surface border border-line p-8 rounded-card flex flex-col items-center justify-center text-center space-y-3">
+                <div className="w-10 h-10 rounded-full border-2 border-risk-low/30 border-t-transparent animate-spin"></div>
                 <div>
-                  <h3 className="text-sm font-bold text-white">Finding emergency resources near you...</h3>
-                  <p className="text-xs text-neutral-400 mt-1">
+                  <h3 className="text-sm font-semibold text-label">Finding emergency resources near you...</h3>
+                  <p className="text-xs text-label-2 mt-1">
                     Querying live geospatial coordinates and calculating drive proximity.
                   </p>
                 </div>
@@ -1333,14 +1333,14 @@ export const ResourcesPage = () => {
 
             {/* Error Message */}
             {locationError && !loading && (
-              <div className="p-4 bg-rose-950/20 border border-rose-500/30 rounded-2xl text-rose-300 text-xs flex items-center justify-between gap-3">
+              <div className="p-4 bg-risk-critical/[0.12] border border-risk-critical/30 rounded-card text-risk-critical text-xs flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
-                  <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+                  <AlertTriangle className="w-4 h-4 text-risk-critical shrink-0" />
                   <span>{locationError}</span>
                 </div>
                 <button
                   onClick={() => requestGpsLocation()}
-                  className="px-2.5 py-1 bg-rose-600/30 hover:bg-rose-600/40 text-rose-200 rounded-lg text-xs font-medium shrink-0"
+                  className="px-2.5 py-1 bg-risk-critical/[0.12] hover:bg-risk-critical/[0.12] text-risk-critical rounded-lg text-xs font-medium shrink-0"
                 >
                   Retry GPS
                 </button>
@@ -1349,20 +1349,20 @@ export const ResourcesPage = () => {
 
             {/* Empty State: Zero Results in current radius */}
             {!loading && places.length === 0 && (
-              <div className="bg-[#0c0c0c] border border-[#1a1a1a] p-8 rounded-2xl text-center space-y-4">
-                <div className="w-12 h-12 mx-auto rounded-2xl bg-[#141414] border border-[#222] flex items-center justify-center text-neutral-400">
-                  <Building className="w-6 h-6 text-neutral-500" />
+              <div className="bg-surface border border-line p-8 rounded-card text-center space-y-4">
+                <div className="w-12 h-12 mx-auto rounded-card bg-surface-2 border border-[#222] flex items-center justify-center text-label-2">
+                  <Building className="w-6 h-6 text-label-3" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-white">No nearby facilities found within {radiusKm} km</h3>
-                  <p className="text-xs text-neutral-400 max-w-md mx-auto mt-1">
+                  <h3 className="text-base font-semibold text-label">No nearby facilities found within {radiusKm} km</h3>
+                  <p className="text-xs text-label-2 max-w-md mx-auto mt-1">
                     No verified {activeCategory} were detected within the active radius of your current location. Expand your search boundary to discover regional facilities.
                   </p>
                 </div>
                 {radiusKm < 50 ? (
                   <button
                     onClick={() => setRadiusKm(radiusKm === 5 ? 10 : radiusKm === 10 ? 25 : 50)}
-                    className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-xl text-xs inline-flex items-center gap-1.5 transition-colors shadow-sm"
+                    className="px-4 py-2 bg-accent hover:opacity-90 text-white font-semibold rounded-full text-xs inline-flex items-center gap-1.5 transition-colors shadow-sm"
                   >
                     <span>Search Wider Area ({radiusKm === 5 ? '10 km' : radiusKm === 10 ? '25 km' : '50 km'})</span>
                     <ChevronRight className="w-4 h-4" />
@@ -1373,7 +1373,7 @@ export const ResourcesPage = () => {
                       setManualQuery('District Hospital');
                       handleManualSearch();
                     }}
-                    className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-white font-medium rounded-xl text-xs inline-flex items-center gap-1.5 transition-colors"
+                    className="px-4 py-2 bg-surface-2 hover:bg-surface-2 text-label font-medium rounded-tile text-xs inline-flex items-center gap-1.5 transition-colors"
                   >
                     <span>Search by City Name</span>
                   </button>
@@ -1392,10 +1392,10 @@ export const ResourcesPage = () => {
                   key={place.id}
                   ref={(el) => (cardRefs.current[place.id] = el)}
                   onClick={() => handleSelectPlace(place)}
-                  className={`bg-[#0a0a0a] border rounded-2xl p-4 sm:p-5 transition-all cursor-pointer ${
+                  className={`bg-surface border rounded-card p-4 sm:p-5 transition-all cursor-pointer ${
                     isSelected 
-                      ? 'border-emerald-500/80 bg-gradient-to-r from-emerald-950/15 to-[#0e0e0e] shadow-lg shadow-emerald-500/5' 
-                      : 'border-[#1a1a1a] hover:border-[#2a2a2a]'
+                      ? 'border-risk-low/30 bg-surface-2    ' 
+                      : 'border-line hover:border-line'
                   }`}
                 >
                   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
@@ -1403,58 +1403,58 @@ export const ResourcesPage = () => {
                     {/* Facility Info */}
                     <div className="space-y-1.5 flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="font-bold text-sm text-white tracking-tight leading-snug truncate">
+                        <h3 className="font-semibold text-sm text-label tracking-tight leading-snug truncate">
                           {place.name}
                         </h3>
-                        <span className={`text-[10px] px-2 py-0.5 rounded font-mono font-bold shrink-0 ${
+                        <span className={`text-xs px-2 py-0.5 rounded tabular-nums font-semibold shrink-0 ${
                           place.category === 'police'
-                            ? 'bg-sky-950/50 border border-sky-600/40 text-sky-300'
+                            ? 'bg-surface-2 border border-line text-label-2'
                             : place.category === 'fire'
-                              ? 'bg-rose-950/50 border border-rose-600/40 text-rose-300'
+                              ? 'bg-risk-critical/[0.12] border border-risk-critical/30 text-risk-critical'
                               : place.category === 'shelters'
-                                ? 'bg-amber-950/50 border border-amber-600/40 text-amber-300'
-                                : 'bg-emerald-950/50 border border-emerald-600/40 text-emerald-300'
+                                ? 'bg-risk-moderate/[0.12] border border-risk-moderate/30 text-risk-moderate'
+                                : 'bg-risk-low/[0.12] border border-risk-low/30 text-risk-low'
                         }`}>
                           {place.type || 'Emergency Facility'}
                         </span>
                       </div>
 
                       {/* Distance & Address */}
-                      <p className="text-xs text-neutral-400 flex items-start gap-1.5">
-                        <MapPin className="w-3.5 h-3.5 text-neutral-500 shrink-0 mt-0.5" />
+                      <p className="text-xs text-label-2 flex items-start gap-1.5">
+                        <MapPin className="w-3.5 h-3.5 text-label-3 shrink-0 mt-0.5" />
                         <span className="line-clamp-2 leading-relaxed">{place.address}</span>
                       </p>
 
                       {/* Status & Ratings Meta */}
-                      <div className="flex items-center gap-3 pt-1 text-[11px] text-neutral-400 flex-wrap">
+                      <div className="flex items-center gap-3 pt-1 text-xs text-label-2 flex-wrap">
                         {place.opening_hours ? (
-                          <span className="flex items-center gap-1 text-emerald-400 font-medium">
+                          <span className="flex items-center gap-1 text-risk-low font-medium">
                             <Clock className="w-3 h-3" />
                             <span>{place.opening_hours}</span>
                           </span>
                         ) : place.open_now !== null && place.open_now !== undefined ? (
-                          <span className={`flex items-center gap-1 font-medium ${place.open_now ? 'text-emerald-400' : 'text-neutral-500'}`}>
+                          <span className={`flex items-center gap-1 font-medium ${place.open_now ? 'text-risk-low' : 'text-label-3'}`}>
                             <Clock className="w-3 h-3" />
                             <span>{place.open_now ? 'Open Now' : 'Closed'}</span>
                           </span>
                         ) : (
-                          <span className="text-neutral-500 flex items-center gap-1">
+                          <span className="text-label-3 flex items-center gap-1">
                             <Clock className="w-3 h-3" />
                             <span>Hours unavailable</span>
                           </span>
                         )}
 
                         {place.rating ? (
-                          <span className="flex items-center gap-1 text-amber-400 font-mono">
+                          <span className="flex items-center gap-1 text-risk-moderate tabular-nums">
                             <Star className="w-3 h-3 fill-amber-400" />
                             <span>{place.rating.toFixed(1)}</span>
                             {place.review_count && (
-                              <span className="text-neutral-500">({place.review_count})</span>
+                              <span className="text-label-3">({place.review_count})</span>
                             )}
                           </span>
                         ) : null}
 
-                        <span className="text-neutral-600 font-mono">
+                        <span className="text-label-3 tabular-nums">
                           ID: {place.place_id ? place.place_id.slice(-6) : place.id.slice(-6)}
                         </span>
                       </div>
@@ -1462,7 +1462,7 @@ export const ResourcesPage = () => {
 
                     {/* Prominent Distance Badge */}
                     <div className="shrink-0 flex sm:flex-col items-center sm:items-end justify-between gap-1">
-                      <div className="px-2.5 py-1 rounded-xl bg-[#141414] border border-[#222] font-mono text-xs font-bold text-emerald-400 flex items-center gap-1">
+                      <div className="px-2.5 py-1 rounded-tile bg-surface-2 border border-[#222] tabular-nums text-xs font-semibold text-risk-low flex items-center gap-1">
                         <Navigation className="w-3 h-3" />
                         <span>{place.distance_km} km away</span>
                       </div>
@@ -1470,7 +1470,7 @@ export const ResourcesPage = () => {
                   </div>
 
                   {/* Actions Toolbar */}
-                  <div className="mt-4 pt-3 border-t border-[#181818] flex items-center justify-between gap-2 flex-wrap">
+                  <div className="mt-4 pt-3 border-t border-line flex items-center justify-between gap-2 flex-wrap">
                     
                     {/* Left: Call Action */}
                     <div className="flex items-center gap-2">
@@ -1478,7 +1478,7 @@ export const ResourcesPage = () => {
                         <a
                           href={`tel:${phoneNumber}`}
                           onClick={(e) => e.stopPropagation()}
-                          className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 shadow-sm transition-colors"
+                          className="px-3 py-1.5 bg-risk-low hover:bg-risk-low text-label font-semibold rounded-tile text-xs flex items-center gap-1.5 shadow-sm transition-colors"
                         >
                           <Phone className="w-3.5 h-3.5" />
                           <span>Call {phoneNumber}</span>
@@ -1486,9 +1486,9 @@ export const ResourcesPage = () => {
                       ) : (
                         <button
                           disabled
-                          className="px-3 py-1.5 bg-neutral-900 border border-neutral-800 text-neutral-500 rounded-xl text-xs font-medium cursor-not-allowed flex items-center gap-1.5"
+                          className="px-3 py-1.5 bg-surface border border-line text-label-3 rounded-tile text-xs font-medium cursor-not-allowed flex items-center gap-1.5"
                         >
-                          <Phone className="w-3.5 h-3.5 text-neutral-600" />
+                          <Phone className="w-3.5 h-3.5 text-label-3" />
                           <span>Phone unavailable</span>
                         </button>
                       )}
@@ -1502,10 +1502,10 @@ export const ResourcesPage = () => {
                           handleGetDirections(place);
                         }}
                         disabled={isCalculatingRoute}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                        className={`px-3 py-1.5 rounded-tile text-xs font-semibold flex items-center gap-1.5 transition-all ${
                           activeRoute?.destination?.id === place.id
-                            ? 'bg-emerald-500 text-black shadow-md shadow-emerald-500/20 font-bold'
-                            : 'bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-400'
+                            ? 'bg-surface-2 text-label   font-semibold'
+                            : 'bg-surface-2 hover:bg-surface-2 border border-line text-label-2'
                         } disabled:opacity-50`}
                         title="Calculate road route and navigate inside LANDSLIDEGUARD"
                       >
@@ -1527,7 +1527,7 @@ export const ResourcesPage = () => {
                             }
                           });
                         }}
-                        className="px-2.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 rounded-xl text-xs font-medium flex items-center gap-1.5 transition-colors"
+                        className="px-2.5 py-1.5 bg-risk-low/[0.12] hover:bg-risk-low/[0.12] border border-risk-low/30 text-risk-low rounded-tile text-xs font-medium flex items-center gap-1.5 transition-colors"
                         title="Open in Landslide Evacuation Safe Route Planner"
                       >
                         <Shield className="w-3.5 h-3.5" />
@@ -1539,7 +1539,7 @@ export const ResourcesPage = () => {
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}
-                        className="px-2.5 py-1.5 bg-[#141414] hover:bg-[#1f1f1f] border border-[#262626] text-neutral-300 hover:text-white rounded-xl text-xs font-medium flex items-center gap-1.5 transition-colors"
+                        className="px-2.5 py-1.5 bg-surface-2 hover:bg-surface-2 border border-line text-label-2 hover:text-label rounded-tile text-xs font-medium flex items-center gap-1.5 transition-colors"
                         title="Open exact facility location on Google Maps"
                       >
                         <ExternalLink className="w-3 h-3" />
@@ -1552,7 +1552,7 @@ export const ResourcesPage = () => {
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}
-                          className="px-2.5 py-1.5 bg-[#141414] hover:bg-[#1f1f1f] border border-[#262626] text-neutral-300 hover:text-white rounded-xl text-xs font-medium flex items-center gap-1.5 transition-colors"
+                          className="px-2.5 py-1.5 bg-surface-2 hover:bg-surface-2 border border-line text-label-2 hover:text-label rounded-tile text-xs font-medium flex items-center gap-1.5 transition-colors"
                         >
                           <span>Website</span>
                         </a>
@@ -1570,37 +1570,37 @@ export const ResourcesPage = () => {
 
       {/* 5. Google Places API Key Configuration Modal */}
       {showKeyModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[2000] flex items-center justify-center p-4">
-          <div className="bg-[#111111] border border-[#262626] rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+        <div className="fixed inset-0 bg-surface-2 backdrop-blur-sm z-[2000] flex items-center justify-center p-4">
+          <div className="bg-surface border border-line rounded-card max-w-lg w-full p-6 space-y-4">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                <div className="w-9 h-9 rounded-tile bg-risk-moderate/[0.12] border border-risk-moderate/30 flex items-center justify-center text-risk-moderate">
                   <Key className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-white">Google Maps Platform Integration</h3>
-                  <p className="text-xs text-neutral-400">Places API & Places API (New) Configuration</p>
+                  <h3 className="text-base font-semibold text-label">Google Maps Platform Integration</h3>
+                  <p className="text-xs text-label-2">Places API & Places API (New) Configuration</p>
                 </div>
               </div>
               <button
                 onClick={() => setShowKeyModal(false)}
-                className="p-1 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors"
+                className="p-1 rounded-lg text-label-2 hover:text-label hover:bg-surface-2 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="space-y-2 text-xs text-neutral-300 leading-relaxed bg-[#181818] p-3.5 rounded-xl border border-[#262626]">
+            <div className="space-y-2 text-xs text-label-2 leading-relaxed bg-surface-2 p-3.5 rounded-tile border border-line">
               <p>
-                <strong>Architecture:</strong> When an API Key is present, LandSafe automatically connects to official <strong>Google Places API (New)</strong> (<code className="text-emerald-400">places:searchNearby</code>) for verified facility coordinates, hours, ratings, and phone numbers.
+                <strong>Architecture:</strong> When an API Key is present, LandSafe automatically connects to official <strong>Google Places API (New)</strong> (<code className="text-risk-low">places:searchNearby</code>) for verified facility coordinates, hours, ratings, and phone numbers.
               </p>
-              <p className="text-neutral-400">
+              <p className="text-label-2">
                 When no key is configured in the environment, the system gracefully queries verified open geospatial infrastructure (OpenStreetMap / Overpass) so you get 100% real, authentic facilities for any location in India with zero fake data.
               </p>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-neutral-300">
+              <label className="text-xs font-medium text-label-2">
                 Google Maps API Key (Optional Override)
               </label>
               <input
@@ -1608,16 +1608,16 @@ export const ResourcesPage = () => {
                 placeholder="AIzaSy..."
                 value={customApiKey}
                 onChange={(e) => setCustomApiKey(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-[#0d0d0d] border border-[#282828] rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-emerald-500 font-mono"
+                className="w-full px-3.5 py-2.5 bg-surface border border-line rounded-tile text-xs text-label placeholder-label-3 focus:outline-none focus:border-risk-low/30 tabular-nums"
               />
-              <p className="text-[11px] text-neutral-500">
-                Key can also be defined via server environment variable <code className="text-neutral-400">GOOGLE_MAPS_API_KEY</code>.
+              <p className="text-xs text-label-3">
+                Key can also be defined via server environment variable <code className="text-label-2">GOOGLE_MAPS_API_KEY</code>.
               </p>
             </div>
 
             {keySavedMsg && (
-              <div className="p-2.5 bg-emerald-950/40 border border-emerald-500/30 rounded-xl text-emerald-300 text-xs flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <div className="p-2.5 bg-risk-low/[0.12] border border-risk-low/30 rounded-tile text-risk-low text-xs flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-risk-low shrink-0" />
                 <span>{keySavedMsg}</span>
               </div>
             )}
@@ -1625,13 +1625,13 @@ export const ResourcesPage = () => {
             <div className="flex items-center justify-end gap-2 pt-2">
               <button
                 onClick={() => setShowKeyModal(false)}
-                className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs font-medium rounded-xl transition-colors"
+                className="px-4 py-2 bg-surface-2 hover:bg-surface-2 text-label text-xs font-medium rounded-tile transition-colors"
               >
                 Close
               </button>
               <button
                 onClick={handleSaveApiKey}
-                className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs rounded-xl transition-colors shadow-sm"
+                className="px-4 py-2 bg-accent hover:opacity-90 text-white font-semibold text-xs rounded-full transition-colors shadow-sm"
               >
                 Save & Apply
               </button>

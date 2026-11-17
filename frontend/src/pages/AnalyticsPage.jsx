@@ -24,7 +24,7 @@ import {
   ShieldAlert,
   Layers
 } from 'lucide-react';
-import { getRiskScoreColor } from '../utils/formatters';
+import { getRiskScoreColor, getRiskLevelColor } from '../utils/formatters';
 
 export const AnalyticsPage = () => {
   const [analytics, setAnalytics] = useState(null);
@@ -51,8 +51,8 @@ export const AnalyticsPage = () => {
 
   if (loading) {
     return (
-      <div className="p-12 text-center text-slate-400">
-        <Activity className="w-8 h-8 animate-spin mx-auto text-cyan-400 mb-3" />
+      <div className="p-12 text-center text-label-2">
+        <Activity className="w-8 h-8 animate-spin mx-auto text-label-2 mb-3" />
         <p className="text-sm font-semibold">Aggregating Regional Landslide Telemetry & ML Metrics...</p>
       </div>
     );
@@ -60,13 +60,13 @@ export const AnalyticsPage = () => {
 
   if (error && !analytics) {
     return (
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 max-w-xl mx-auto text-center space-y-4 my-12">
-        <ShieldAlert className="w-10 h-10 text-rose-500 mx-auto" />
-        <h2 className="text-lg font-bold text-white">Telemetry Aggregation Unavailable</h2>
-        <p className="text-sm text-slate-400">{error}</p>
+      <div className="bg-surface border border-line rounded-card p-8 max-w-xl mx-auto text-center space-y-4 my-12">
+        <ShieldAlert className="w-10 h-10 text-risk-critical mx-auto" />
+        <h2 className="text-lg font-semibold text-label">Telemetry Aggregation Unavailable</h2>
+        <p className="text-sm text-label-2">{error}</p>
         <button
           onClick={loadAnalytics}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold rounded-xl transition"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-accent hover:bg-accent text-label text-xs font-semibold rounded-tile transition"
         >
           <Activity className="w-4 h-4" />
           Retry Aggregation
@@ -81,23 +81,23 @@ export const AnalyticsPage = () => {
     <div className="space-y-6">
       
       {/* Header */}
-      <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-surface border border-line p-5 rounded-card flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+            <div className="w-8 h-8 rounded-lg bg-surface-2 border border-line flex items-center justify-center text-label-2">
               <BarChart3 className="w-5 h-5" />
             </div>
-            <h1 className="text-xl font-black text-white">Disaster Telemetry & Model Analytics</h1>
-            <span className="text-xs px-2 py-0.5 rounded font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+            <h1 className="text-xl font-semibold text-label">Disaster Telemetry & Model Analytics</h1>
+            <span className="text-xs px-2 py-0.5 rounded tabular-nums font-semibold bg-risk-low/[0.12] text-risk-low border border-risk-low/30">
               Authoritative WMO & Copernicus Telemetry
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-label-2 mt-1">
             Statistical correlations between intense precipitation, slope morphology, community signals, and AI predictions across monitored mountain sectors.
           </p>
         </div>
 
-        <span className="text-[11px] text-slate-500 font-mono">
+        <span className="text-xs text-label-3 tabular-nums">
           Updated: {new Date().toLocaleTimeString()}
         </span>
       </div>
@@ -106,27 +106,27 @@ export const AnalyticsPage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* 1. Risk Distribution Bar Chart */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-3">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
-            <h3 className="text-sm font-extrabold text-white flex items-center gap-2">
-              <ShieldAlert className="w-4 h-4 text-rose-400" />
+        <div className="bg-surface border border-line rounded-card p-5 space-y-3">
+          <div className="flex items-center justify-between border-b border-line pb-2.5">
+            <h3 className="text-sm font-semibold text-label flex items-center gap-2">
+              <ShieldAlert className="w-4 h-4 text-risk-critical" />
               Regional Risk Classification Breakdown
             </h3>
-            <span className="text-xs font-mono text-slate-400">{analytics.total_zones} Monitored Zones</span>
+            <span className="text-xs tabular-nums text-label-2">{analytics.total_zones} Monitored Zones</span>
           </div>
 
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={analytics.risk_distribution} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                <XAxis dataKey="level" tick={{ fill: '#94a3b8', fontSize: 10 }} />
-                <YAxis tick={{ fill: '#94a3b8', fontSize: 10 }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#38383A" />
+                <XAxis dataKey="level" tick={{ fill: '#98989F', fontSize: 10 }} />
+                <YAxis tick={{ fill: '#98989F', fontSize: 10 }} />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '0.5rem', color: '#f8fafc' }}
+                  contentStyle={{ backgroundColor: '#1C1C1E', borderColor: '#38383A', borderRadius: '12px', color: '#FFFFFF' }}
                 />
                 <Bar dataKey="count" radius={[6, 6, 0, 0]}>
                   {analytics.risk_distribution.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
+                    <Cell key={`cell-${index}`} fill={getRiskLevelColor(String(entry.level).split(' ')[0]).hex} />
                   ))}
                 </Bar>
               </BarChart>
@@ -135,39 +135,39 @@ export const AnalyticsPage = () => {
         </div>
 
         {/* 2. Rainfall vs Risk Score Correlation */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-3">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
-            <h3 className="text-sm font-extrabold text-white flex items-center gap-2">
-              <CloudRain className="w-4 h-4 text-cyan-400" />
+        <div className="bg-surface border border-line rounded-card p-5 space-y-3">
+          <div className="flex items-center justify-between border-b border-line pb-2.5">
+            <h3 className="text-sm font-semibold text-label flex items-center gap-2">
+              <CloudRain className="w-4 h-4 text-label-2" />
               Rainfall (24h) vs Final Landslide Risk Score
             </h3>
-            <span className="text-xs font-mono text-slate-400">Physics Correlation</span>
+            <span className="text-xs tabular-nums text-label-2">Physics Correlation</span>
           </div>
 
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={analytics.rainfall_vs_risk} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                <XAxis dataKey="name" tick={{ fill: '#94a3b8', fontSize: 10 }} />
-                <YAxis tick={{ fill: '#94a3b8', fontSize: 10 }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#38383A" />
+                <XAxis dataKey="name" tick={{ fill: '#98989F', fontSize: 10 }} />
+                <YAxis tick={{ fill: '#98989F', fontSize: 10 }} />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '0.5rem', color: '#f8fafc' }}
+                  contentStyle={{ backgroundColor: '#1C1C1E', borderColor: '#38383A', borderRadius: '12px', color: '#FFFFFF' }}
                 />
-                <Line type="monotone" dataKey="risk_score" stroke="#ef4444" strokeWidth={2.5} name="Risk Score (0-100)" dot={{ r: 4, fill: '#ef4444' }} />
-                <Line type="monotone" dataKey="rainfall_24h" stroke="#38bdf8" strokeWidth={2} name="Rainfall 24h (mm)" dot={{ r: 3, fill: '#38bdf8' }} />
+                <Line type="monotone" dataKey="risk_score" stroke="#4A86E8" strokeWidth={2} name="Risk Score (0-100)" dot={{ r: 3, fill: '#4A86E8' }} />
+                <Line type="monotone" dataKey="rainfall_24h" stroke="#98989F" strokeWidth={1.5} name="Rainfall 24h (mm)" dot={{ r: 2.5, fill: '#98989F' }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* 3. Community Reports Timeline */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-3">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
-            <h3 className="text-sm font-extrabold text-white flex items-center gap-2">
-              <Users className="w-4 h-4 text-amber-400" />
+        <div className="bg-surface border border-line rounded-card p-5 space-y-3">
+          <div className="flex items-center justify-between border-b border-line pb-2.5">
+            <h3 className="text-sm font-semibold text-label flex items-center gap-2">
+              <Users className="w-4 h-4 text-risk-moderate" />
               Crowdsourced Ground Observations Timeline (24h)
             </h3>
-            <span className="text-xs font-mono text-emerald-400">{analytics.verified_reports} Verified</span>
+            <span className="text-xs tabular-nums text-risk-low">{analytics.verified_reports} Verified</span>
           </div>
 
           <div className="h-64 w-full">
@@ -175,47 +175,47 @@ export const AnalyticsPage = () => {
               <AreaChart data={analytics.reports_timeline} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorReports" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.4}/>
-                    <stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#98989F" stopOpacity={0.4}/>
+                    <stop offset="95%" stopColor="#98989F" stopOpacity={0}/>
                   </linearGradient>
                   <linearGradient id="colorVerified" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.4}/>
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#4A86E8" stopOpacity={0.4}/>
+                    <stop offset="95%" stopColor="#4A86E8" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                <XAxis dataKey="time" tick={{ fill: '#94a3b8', fontSize: 10 }} />
-                <YAxis tick={{ fill: '#94a3b8', fontSize: 10 }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#38383A" />
+                <XAxis dataKey="time" tick={{ fill: '#98989F', fontSize: 10 }} />
+                <YAxis tick={{ fill: '#98989F', fontSize: 10 }} />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '0.5rem', color: '#f8fafc' }}
+                  contentStyle={{ backgroundColor: '#1C1C1E', borderColor: '#38383A', borderRadius: '12px', color: '#FFFFFF' }}
                 />
-                <Area type="monotone" dataKey="reports" stroke="#f59e0b" fillOpacity={1} fill="url(#colorReports)" name="Total Reports" />
-                <Area type="monotone" dataKey="verified" stroke="#10b981" fillOpacity={1} fill="url(#colorVerified)" name="Verified Reports" />
+                <Area type="monotone" dataKey="reports" stroke="#98989F" fillOpacity={1} fill="url(#colorReports)" name="Total Reports" />
+                <Area type="monotone" dataKey="verified" stroke="#4A86E8" fillOpacity={1} fill="url(#colorVerified)" name="Verified Reports" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* 4. Global Random Forest Feature Importance */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-3">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
-            <h3 className="text-sm font-extrabold text-white flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-purple-400" />
+        <div className="bg-surface border border-line rounded-card p-5 space-y-3">
+          <div className="flex items-center justify-between border-b border-line pb-2.5">
+            <h3 className="text-sm font-semibold text-label flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-label-2" />
               Random Forest Global Feature Importance
             </h3>
-            <span className="text-xs font-mono text-slate-400">Trained Model Weights</span>
+            <span className="text-xs tabular-nums text-label-2">Trained Model Weights</span>
           </div>
 
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={analytics.feature_importance} layout="vertical" margin={{ top: 10, right: 20, left: 40, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                <XAxis type="number" tick={{ fill: '#94a3b8', fontSize: 10 }} domain={[0, 50]} unit="%" />
-                <YAxis dataKey="factor" type="category" tick={{ fill: '#94a3b8', fontSize: 9 }} width={120} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#38383A" />
+                <XAxis type="number" tick={{ fill: '#98989F', fontSize: 10 }} domain={[0, 50]} unit="%" />
+                <YAxis dataKey="factor" type="category" tick={{ fill: '#98989F', fontSize: 9 }} width={120} />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '0.5rem', color: '#f8fafc' }}
+                  contentStyle={{ backgroundColor: '#1C1C1E', borderColor: '#38383A', borderRadius: '12px', color: '#FFFFFF' }}
                 />
-                <Bar dataKey="weight" fill="#a855f7" radius={[0, 6, 6, 0]} name="Weight (%)" />
+                <Bar dataKey="weight" fill="#4A86E8" radius={[0, 6, 6, 0]} name="Weight (%)" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -224,16 +224,16 @@ export const AnalyticsPage = () => {
       </div>
 
       {/* Top Critical Slopes Ranking Table */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-3">
-        <h3 className="text-sm font-extrabold text-white flex items-center gap-2">
-          <TrendingUp className="w-4 h-4 text-rose-400" />
+      <div className="bg-surface border border-line rounded-card p-5 space-y-3">
+        <h3 className="text-sm font-semibold text-label flex items-center gap-2">
+          <TrendingUp className="w-4 h-4 text-risk-critical" />
           Highest Vulnerability Sector Rankings (Operational Telemetry)
         </h3>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="border-b border-slate-800 text-slate-400 font-mono text-[11px]">
+              <tr className="border-b border-line text-label-2 tabular-nums text-xs">
                 <th className="py-2.5 px-3">Zone ID & Location</th>
                 <th className="py-2.5 px-3">State</th>
                 <th className="py-2.5 px-3">ML Base</th>
@@ -243,28 +243,28 @@ export const AnalyticsPage = () => {
                 <th className="py-2.5 px-3">Verified Ground Reports</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60 font-medium">
+            <tbody className="divide-y divide-line font-medium">
               {analytics.top_critical_zones.map((zone, idx) => {
                 const riskCol = getRiskScoreColor(zone.risk_score);
                 return (
-                  <tr key={idx} className="hover:bg-slate-800/40 transition-colors">
+                  <tr key={idx} className="hover:bg-surface-2 transition-colors">
                     <td className="py-2.5 px-3">
-                      <span className="font-mono font-bold text-cyan-400 block">{zone.zone_id}</span>
-                      <span className="text-slate-200">{zone.name}</span>
+                      <span className="tabular-nums font-semibold text-label-2 block">{zone.zone_id}</span>
+                      <span className="text-label">{zone.name}</span>
                     </td>
-                    <td className="py-2.5 px-3 text-slate-300">{zone.state}</td>
-                    <td className="py-2.5 px-3 font-mono text-slate-300">{zone.ml_base}</td>
-                    <td className="py-2.5 px-3 font-mono font-bold text-amber-400">
+                    <td className="py-2.5 px-3 text-label-2">{zone.state}</td>
+                    <td className="py-2.5 px-3 tabular-nums text-label-2">{zone.ml_base}</td>
+                    <td className="py-2.5 px-3 tabular-nums font-semibold text-risk-moderate">
                       {zone.community_boost > 0 ? `+${zone.community_boost}` : '+0'}
                     </td>
-                    <td className="py-2.5 px-3 font-mono font-extrabold text-sm" style={{ color: riskCol.hex }}>
+                    <td className="py-2.5 px-3 tabular-nums font-semibold text-sm" style={{ color: riskCol.hex }}>
                       {zone.risk_score}/100
                     </td>
-                    <td className="py-2.5 px-3 font-mono text-slate-300">
+                    <td className="py-2.5 px-3 tabular-nums text-label-2">
                       {zone.rainfall_24h} mm • {zone.slope_deg}°
                     </td>
-                    <td className="py-2.5 px-3 text-slate-300">
-                      <span className="font-mono font-bold text-emerald-400">{zone.verified_reports} verified</span>
+                    <td className="py-2.5 px-3 text-label-2">
+                      <span className="tabular-nums font-semibold text-risk-low">{zone.verified_reports} verified</span>
                     </td>
                   </tr>
                 );

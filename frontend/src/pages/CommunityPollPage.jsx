@@ -98,24 +98,24 @@ export const CommunityPollPage = () => {
     <div className="space-y-6 w-full select-none pb-12">
       
       {/* Header Banner */}
-      <div className="bg-[#0a0a0a] border border-[#1a1a1a] p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+      <div className="bg-surface border border-line p-5 rounded-card flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
         <div className="flex items-center gap-3.5">
-          <div className="w-11 h-11 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+          <div className="w-11 h-11 rounded-card bg-risk-low/[0.12] border border-risk-low/30 flex items-center justify-center text-risk-low shrink-0">
             <Vote className="w-5 h-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-semibold text-emerald-400 uppercase tracking-wider">
+              <span className="text-xs font-semibold text-risk-low ">
                 Community Intelligence & AI Verification
               </span>
-              <span className="text-[9px] px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-400 font-mono border border-neutral-700">
+              <span className="text-xs px-1.5 py-0.5 rounded bg-surface-2 text-label-2 tabular-nums border border-line">
                 PROTOTYPE DEMONSTRATION
               </span>
             </div>
-            <h1 className="text-lg font-bold text-white mt-0.5">
+            <h1 className="text-lg font-semibold text-label mt-0.5">
               Community Poll & Ground Hazard Reports
             </h1>
-            <p className="text-xs text-neutral-400 mt-0.5">
+            <p className="text-xs text-label-2 mt-0.5">
               Submit observations, vote on active situational polls, and view multi-agent cross-checked ground reports.
             </p>
           </div>
@@ -123,7 +123,7 @@ export const CommunityPollPage = () => {
 
         <button
           onClick={() => setSubmissionModalOpen(true)}
-          className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-xl text-xs flex items-center gap-2 transition-all shadow-md shadow-emerald-500/20 self-start sm:self-center active:scale-[0.99]"
+          className="px-4 py-2.5 bg-accent hover:opacity-90 text-white font-semibold rounded-full text-xs flex items-center gap-2 transition-all self-start sm:self-center active:scale-[0.99]"
         >
           <PlusCircle className="w-4 h-4" />
           <span>Post Hazard Observation</span>
@@ -133,24 +133,24 @@ export const CommunityPollPage = () => {
       {/* ─────────────────────────────────────────────────────────────
           1. ACTIVE COMMUNITY POLL CARD (Full Width Interactive)
           ───────────────────────────────────────────────────────────── */}
-      <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-2xl p-6 shadow-sm space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#181818] pb-3">
+      <div className="bg-surface border border-line rounded-card p-6 shadow-sm space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-line pb-3">
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-            <h2 className="text-sm font-bold text-white font-sans uppercase tracking-wider">
+            <span className="w-2.5 h-2.5 rounded-full bg-risk-low " />
+            <h2 className="text-sm font-semibold text-label font-sans ">
               Active Daily Poll
             </h2>
           </div>
-          <span className="text-xs font-mono text-neutral-400">
+          <span className="text-xs tabular-nums text-label-2">
             {poll.total_votes} Citizen Votes Recorded Today
           </span>
         </div>
 
         <div>
-          <h3 className="text-base font-bold text-neutral-100 leading-snug">
+          <h3 className="text-base font-semibold text-label leading-snug">
             {poll.question}
           </h3>
-          <p className="text-xs text-neutral-400 mt-1">
+          <p className="text-xs text-label-2 mt-1">
             {poll.description}
           </p>
         </div>
@@ -164,30 +164,30 @@ export const CommunityPollPage = () => {
                 key={opt.id}
                 onClick={() => handleVotePoll(opt.id)}
                 disabled={voting}
-                className={`p-4 rounded-xl border text-left transition-all relative overflow-hidden flex flex-col justify-between space-y-3 ${
+                className={`p-4 rounded-tile border text-left transition-all relative overflow-hidden flex flex-col justify-between space-y-3 ${
                   isSelected
-                    ? 'bg-[#141414] border-emerald-500 text-white shadow-md shadow-emerald-500/10'
-                    : 'bg-[#0f0f0f] border-[#1e1e1e] text-neutral-300 hover:border-neutral-700'
+                    ? 'bg-surface-2 border-risk-low/30 text-label  '
+                    : 'bg-surface border-line text-label-2 hover:border-line'
                 }`}
               >
                 <div className="flex items-start justify-between gap-2">
-                  <span className="font-semibold text-xs text-neutral-100 leading-snug">
+                  <span className="font-semibold text-xs text-label leading-snug">
                     {opt.label}
                   </span>
                   {isSelected && (
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 text-risk-low shrink-0" />
                   )}
                 </div>
 
                 <div className="space-y-1.5 w-full">
-                  <div className="flex items-center justify-between text-xs font-mono">
-                    <span className="text-neutral-400 text-[11px]">{opt.votes} votes</span>
-                    <span className="font-bold text-emerald-400">{opt.percentage}%</span>
+                  <div className="flex items-center justify-between text-xs tabular-nums">
+                    <span className="text-label-2 text-xs">{opt.votes} votes</span>
+                    <span className="font-semibold text-risk-low">{opt.percentage}%</span>
                   </div>
-                  <div className="w-full h-2 bg-[#181818] rounded-full overflow-hidden">
+                  <div className="w-full h-2 bg-surface-2 rounded-full overflow-hidden">
                     <div 
                       className={`h-full rounded-full transition-all duration-500 ${
-                        opt.id === 'yes' ? 'bg-emerald-500' : opt.id === 'no' ? 'bg-amber-500' : 'bg-sky-500'
+                        opt.id === 'yes' ? 'bg-risk-low' : opt.id === 'no' ? 'bg-risk-moderate' : 'bg-accent'
                       }`}
                       style={{ width: `${opt.percentage}%` }}
                     />
@@ -199,11 +199,11 @@ export const CommunityPollPage = () => {
         </div>
 
         {voteError && (
-          <div className="text-xs text-red-400 pt-1">{voteError}</div>
+          <div className="text-xs text-risk-critical pt-1">{voteError}</div>
         )}
 
         {userVoted && (
-          <div className="text-xs text-emerald-400 flex items-center gap-1.5 pt-1">
+          <div className="text-xs text-risk-low flex items-center gap-1.5 pt-1">
             <CheckCircle2 className="w-4 h-4" />
             <span>Thank you for contributing! Your vote has been incorporated into regional situational fusion.</span>
           </div>
@@ -218,13 +218,13 @@ export const CommunityPollPage = () => {
         {/* Controls & Filter Pills */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-emerald-400" />
-            <h2 className="text-sm font-bold text-white uppercase tracking-wider">
+            <Sparkles className="w-4 h-4 text-risk-low" />
+            <h2 className="text-sm font-semibold text-label ">
               AI-Verified Ground Hazard Reports ({filteredReports.length})
             </h2>
           </div>
 
-          <div className="flex items-center gap-1.5 bg-[#0a0a0a] p-1.5 rounded-xl border border-[#1a1a1a] text-xs">
+          <div className="flex items-center gap-1.5 bg-surface p-1.5 rounded-tile border border-line text-xs">
             {[
               { id: 'ALL', label: 'All Reports' },
               { id: 'AI_VERIFIED', label: 'AI Cross-Checked' },
@@ -236,8 +236,8 @@ export const CommunityPollPage = () => {
                 onClick={() => setFilter(tab.id)}
                 className={`px-3 py-1.5 rounded-lg transition-colors font-medium ${
                   filter === tab.id
-                    ? 'bg-emerald-500 text-black font-bold'
-                    : 'text-neutral-400 hover:text-white'
+                    ? 'bg-surface-2 text-label font-semibold'
+                    : 'text-label-2 hover:text-label'
                 }`}
               >
                 {tab.label}
@@ -256,28 +256,28 @@ export const CommunityPollPage = () => {
             return (
               <div 
                 key={reportKey} 
-                className="bg-[#0a0a0a] border border-[#1a1a1a] hover:border-[#282828] p-5 rounded-2xl space-y-3.5 transition-colors shadow-sm flex flex-col justify-between"
+                className="bg-surface border border-line hover:border-line p-5 rounded-card space-y-3.5 transition-colors shadow-sm flex flex-col justify-between"
               >
                 <div className="space-y-2.5">
                   {/* Top Bar: Reporter & AI Badge */}
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <div className="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold flex items-center justify-center">
+                      <div className="w-7 h-7 rounded-full bg-risk-low/[0.12] text-risk-low text-xs font-semibold flex items-center justify-center">
                         {report.user_name?.charAt(0) || 'R'}
                       </div>
                       <div>
-                        <span className="font-bold text-xs text-white block leading-tight">
+                        <span className="font-semibold text-xs text-label block leading-tight">
                           {report.user_name || 'Resident Observer'}
                         </span>
-                        <span className="text-[10px] text-neutral-400 block font-mono">
+                        <span className="text-xs text-label-2 block tabular-nums">
                           {formatDate(report.created_at || report.timestamp)}
                         </span>
                       </div>
                     </div>
 
                     {isAiVerified && (
-                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-[10px] font-semibold shrink-0">
-                        <BrainCircuit className="w-3 h-3 text-emerald-400" />
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-risk-low/[0.12] border border-risk-low/30 text-risk-low text-xs font-semibold shrink-0">
+                        <BrainCircuit className="w-3 h-3 text-risk-low" />
                         <span>AI Cross-Checked ({report.ai_confidence_score || 94.2}%)</span>
                       </div>
                     )}
@@ -285,28 +285,28 @@ export const CommunityPollPage = () => {
 
                   {/* Location & Report Type */}
                   <div className="flex items-center gap-2 flex-wrap text-xs">
-                    <span className="px-2 py-0.5 rounded bg-[#181818] text-neutral-300 font-medium">
+                    <span className="px-2 py-0.5 rounded bg-surface-2 text-label-2 font-medium">
                       {report.report_type || 'Ground Instability'}
                     </span>
-                    <span className="text-neutral-400 flex items-center gap-1">
-                      <MapPin className="w-3 h-3 text-amber-400 shrink-0" />
+                    <span className="text-label-2 flex items-center gap-1">
+                      <MapPin className="w-3 h-3 text-risk-moderate shrink-0" />
                       <span className="truncate">{getLocationText(report)}</span>
                     </span>
                   </div>
 
                   {/* Description */}
-                  <p className="text-xs text-neutral-200 leading-relaxed">
+                  <p className="text-xs text-label leading-relaxed">
                     {report.description}
                   </p>
 
                   {/* AI Multi-Agent Verification Note */}
                   {report.ai_summary && (
-                    <div className="p-2.5 bg-[#0f0f0f] border border-[#1e1e1e] rounded-xl text-[11px] text-neutral-300 space-y-1">
-                      <span className="text-[10px] uppercase font-bold text-emerald-400 flex items-center gap-1">
+                    <div className="p-2.5 bg-surface border border-line rounded-tile text-xs text-label-2 space-y-1">
+                      <span className="text-xs font-semibold text-risk-low flex items-center gap-1">
                         <ShieldCheck className="w-3 h-3" />
                         <span>AI Agent Telemetry Verification</span>
                       </span>
-                      <p className="text-neutral-400 leading-snug">
+                      <p className="text-label-2 leading-snug">
                         {report.ai_summary}
                       </p>
                     </div>
@@ -314,16 +314,16 @@ export const CommunityPollPage = () => {
                 </div>
 
                 {/* Bottom Upvote & Confirm Bar */}
-                <div className="flex items-center justify-between pt-2 border-t border-[#181818] text-xs">
-                  <span className="text-[11px] text-neutral-400 font-mono">
-                    Status: <strong className="text-emerald-400">Verified Ground Truth</strong>
+                <div className="flex items-center justify-between pt-2 border-t border-line text-xs">
+                  <span className="text-xs text-label-2 tabular-nums">
+                    Status: <strong className="text-risk-low">Verified Ground Truth</strong>
                   </span>
 
                   <button
                     onClick={() => handleUpvoteReport(report.id)}
-                    className="flex items-center gap-1.5 px-3 py-1 bg-[#141414] hover:bg-[#1c1c1c] border border-[#222222] text-neutral-300 hover:text-white rounded-lg text-xs font-semibold transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-1 bg-surface-2 hover:bg-surface-2 border border-line text-label-2 hover:text-label rounded-lg text-xs font-semibold transition-colors"
                   >
-                    <ThumbsUp className="w-3 h-3 text-emerald-400" />
+                    <ThumbsUp className="w-3 h-3 text-risk-low" />
                     <span>{reportVotes} Confirmed</span>
                   </button>
                 </div>

@@ -117,20 +117,20 @@ export const ReportSubmissionModal = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-in fade-in select-none">
-      <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-3xl max-w-xl w-full p-6 shadow-2xl space-y-5 text-neutral-100 my-8">
+    <div className="fixed inset-0 z-50 bg-surface-2 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-in fade-in select-none">
+      <div className="bg-surface border border-line rounded-card max-w-xl w-full p-6 space-y-5 text-label my-8">
         
         {/* Modal Header */}
-        <div className="flex items-center justify-between border-b border-[#1a1a1a] pb-4">
+        <div className="flex items-center justify-between border-b border-line pb-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+            <div className="w-10 h-10 rounded-tile bg-risk-low/[0.12] border border-risk-low/30 flex items-center justify-center text-risk-low">
               <Bot className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-white leading-tight">
+              <h2 className="text-base font-semibold text-label leading-tight">
                 Submit Ground Hazard Observation
               </h2>
-              <p className="text-xs text-neutral-400">
+              <p className="text-xs text-label-2">
                 Cross-checked automatically via AI Agent verification before posting.
               </p>
             </div>
@@ -138,7 +138,7 @@ export const ReportSubmissionModal = ({ isOpen, onClose }) => {
           <button
             onClick={onClose}
             disabled={submitting}
-            className="p-1.5 rounded-xl text-neutral-400 hover:text-white hover:bg-[#181818] transition-colors"
+            className="p-1.5 rounded-tile text-label-2 hover:text-label hover:bg-surface-2 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -146,32 +146,32 @@ export const ReportSubmissionModal = ({ isOpen, onClose }) => {
 
         {/* AI Cross-Check Pipeline Overlay */}
         {submitting && (
-          <div className="p-5 rounded-2xl bg-[#0f0f0f] border border-emerald-500/40 space-y-4 animate-in fade-in">
-            <div className="flex items-center gap-2 text-xs font-bold text-emerald-400 uppercase tracking-wider">
-              <BrainCircuit className="w-4 h-4 animate-pulse" />
+          <div className="p-5 rounded-card bg-surface border border-risk-low/30 space-y-4 animate-in fade-in">
+            <div className="flex items-center gap-2 text-xs font-semibold text-risk-low ">
+              <BrainCircuit className="w-4 h-4 " />
               <span>AI Multi-Agent Verification in Progress...</span>
             </div>
 
             <div className="space-y-2.5 text-xs">
-              <div className={`flex items-center gap-2.5 transition-colors ${aiCheckingStep >= 1 ? 'text-white' : 'text-neutral-500'}`}>
-                {aiCheckingStep > 1 ? <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" /> : <Loader2 className="w-4 h-4 animate-spin text-emerald-400 shrink-0" />}
+              <div className={`flex items-center gap-2.5 transition-colors ${aiCheckingStep >= 1 ? 'text-label' : 'text-label-3'}`}>
+                {aiCheckingStep > 1 ? <CheckCircle2 className="w-4 h-4 text-risk-low shrink-0" /> : <Loader2 className="w-4 h-4 animate-spin text-risk-low shrink-0" />}
                 <span>1. Cross-referencing IMD / WMO live rainfall telemetry ({latitude}°N, {longitude}°E)...</span>
               </div>
 
-              <div className={`flex items-center gap-2.5 transition-colors ${aiCheckingStep >= 2 ? 'text-white' : 'text-neutral-500'}`}>
-                {aiCheckingStep > 2 ? <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" /> : aiCheckingStep === 2 ? <Loader2 className="w-4 h-4 animate-spin text-emerald-400 shrink-0" /> : <div className="w-4 h-4 rounded-full border border-neutral-700 shrink-0" />}
+              <div className={`flex items-center gap-2.5 transition-colors ${aiCheckingStep >= 2 ? 'text-label' : 'text-label-3'}`}>
+                {aiCheckingStep > 2 ? <CheckCircle2 className="w-4 h-4 text-risk-low shrink-0" /> : aiCheckingStep === 2 ? <Loader2 className="w-4 h-4 animate-spin text-risk-low shrink-0" /> : <div className="w-4 h-4 rounded-full border border-line shrink-0" />}
                 <span>2. Evaluating Digital Elevation Model slope gradient & soil moisture saturation...</span>
               </div>
 
-              <div className={`flex items-center gap-2.5 transition-colors ${aiCheckingStep >= 3 ? 'text-white' : 'text-neutral-500'}`}>
-                {aiCheckingStep > 3 ? <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" /> : aiCheckingStep === 3 ? <Loader2 className="w-4 h-4 animate-spin text-emerald-400 shrink-0" /> : <div className="w-4 h-4 rounded-full border border-neutral-700 shrink-0" />}
+              <div className={`flex items-center gap-2.5 transition-colors ${aiCheckingStep >= 3 ? 'text-label' : 'text-label-3'}`}>
+                {aiCheckingStep > 3 ? <CheckCircle2 className="w-4 h-4 text-risk-low shrink-0" /> : aiCheckingStep === 3 ? <Loader2 className="w-4 h-4 animate-spin text-risk-low shrink-0" /> : <div className="w-4 h-4 rounded-full border border-line shrink-0" />}
                 <span>3. Performing NLP geotechnical indicator & spatial cluster corroboration...</span>
               </div>
 
               {aiCheckingStep === 4 && (
-                <div className="pt-2 text-xs text-emerald-400 font-bold flex items-center gap-2">
+                <div className="pt-2 text-xs text-risk-low font-semibold flex items-center gap-2">
                   <ShieldCheck className="w-5 h-5" />
-                  <span>✓ Verification Complete (94.2% Confidence). Report approved & posted to live dashboard!</span>
+                  <span> Verification Complete (94.2% Confidence). Report approved & posted to live dashboard!</span>
                 </div>
               )}
             </div>
@@ -183,7 +183,7 @@ export const ReportSubmissionModal = ({ isOpen, onClose }) => {
             
             {/* 1. Target Mountain Zone Selector */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-neutral-300">
+              <label className="text-xs font-semibold text-label-2">
                 Monitored Mountain Sector
               </label>
               <select
@@ -197,7 +197,7 @@ export const ReportSubmissionModal = ({ isOpen, onClose }) => {
                     setLongitude(z.center.lng);
                   }
                 }}
-                className="w-full px-3.5 py-2.5 bg-[#121212] border border-[#222222] rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500 font-medium"
+                className="w-full px-3.5 py-2.5 bg-surface border border-line rounded-tile text-xs text-label focus:outline-none focus:border-risk-low/30 font-medium"
               >
                 {(zones || []).map(z => (
                   <option key={z.zone_id} value={z.zone_id}>
@@ -209,7 +209,7 @@ export const ReportSubmissionModal = ({ isOpen, onClose }) => {
 
             {/* 2. Observable Signs Checklist */}
             <div className="space-y-2">
-              <label className="text-xs font-semibold text-neutral-300 block">
+              <label className="text-xs font-semibold text-label-2 block">
                 Observed Physical Landslide Indicators
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -218,13 +218,13 @@ export const ReportSubmissionModal = ({ isOpen, onClose }) => {
                     key={i}
                     type="button"
                     onClick={() => toggleSign(opt.label, opt.type)}
-                    className={`p-2.5 rounded-xl border text-left text-xs transition-colors flex items-center gap-2 ${
+                    className={`p-2.5 rounded-tile border text-left text-xs transition-colors flex items-center gap-2 ${
                       selectedSigns.includes(opt.label)
-                        ? 'bg-[#181818] border-emerald-500 text-emerald-300 font-semibold'
-                        : 'bg-[#0f0f0f] border-[#1e1e1e] text-neutral-400 hover:border-neutral-700'
+                        ? 'bg-surface-2 border-risk-low/30 text-risk-low font-semibold'
+                        : 'bg-surface border-line text-label-2 hover:border-line'
                     }`}
                   >
-                    <span className={`w-2 h-2 rounded-full ${selectedSigns.includes(opt.label) ? 'bg-emerald-400' : 'bg-neutral-600'}`} />
+                    <span className={`w-2 h-2 rounded-full ${selectedSigns.includes(opt.label) ? 'bg-risk-low' : 'bg-surface-2'}`} />
                     <span className="truncate">{opt.label}</span>
                   </button>
                 ))}
@@ -233,7 +233,7 @@ export const ReportSubmissionModal = ({ isOpen, onClose }) => {
 
             {/* 3. Description Field */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-neutral-300">
+              <label className="text-xs font-semibold text-label-2">
                 Observation Details
               </label>
               <textarea
@@ -242,22 +242,22 @@ export const ReportSubmissionModal = ({ isOpen, onClose }) => {
                 rows={3}
                 placeholder="Describe ground movement, width of cracks, falling rocks, or road blockages..."
                 required
-                className="w-full px-3.5 py-2.5 bg-[#121212] border border-[#222222] rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500 placeholder-neutral-500 leading-relaxed"
+                className="w-full px-3.5 py-2.5 bg-surface border border-line rounded-tile text-xs text-label focus:outline-none focus:border-risk-low/30 placeholder-label-3 leading-relaxed"
               />
             </div>
 
             {/* 4. Action Buttons */}
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#1a1a1a]">
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-line">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 text-xs text-neutral-400 hover:text-white"
+                className="px-4 py-2 text-xs text-label-2 hover:text-label"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-xl text-xs flex items-center gap-2 transition-all shadow-md shadow-emerald-500/20 active:scale-[0.99]"
+                className="px-6 py-2.5 bg-accent hover:opacity-90 text-white font-semibold rounded-full text-xs flex items-center gap-2 transition-all active:scale-[0.99]"
               >
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>Verify & Post Report</span>

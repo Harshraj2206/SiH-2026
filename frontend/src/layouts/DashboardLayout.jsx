@@ -37,8 +37,8 @@ export const DashboardLayout = () => {
   }, []);
 
   return (
-    <div className="min-h-screen relative text-neutral-100 flex flex-col bg-transparent selection:bg-emerald-500/30 selection:text-white">
-      {/* Dynamic Weather-Adaptive Atmospheric Background */}
+    <div className="min-h-screen relative text-label flex flex-col selection:bg-accent/30">
+      {/* Live weather sky for the selected location */}
       <WeatherAtmosphericBackground />
 
       <div className="flex flex-1 pt-0 relative z-10">
@@ -49,20 +49,20 @@ export const DashboardLayout = () => {
 
           {/* Action Notification Toast Banner */}
           {actionMessage && (
-            <div className="px-4 py-2.5 bg-[#0a0a0a]/90 backdrop-blur-md border-b border-[#1f1f1f] animate-in fade-in">
+            <div className="px-4 py-2.5 bg-surface/90 backdrop-blur-xl border-b border-line">
               <div className="w-full px-2 flex items-center justify-between gap-3 text-xs">
                 <div className="flex items-center gap-2">
-                  {actionMessage.type === 'success' && <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />}
-                  {actionMessage.type === 'error' && <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />}
-                  {actionMessage.type === 'info' && <Info className="w-4 h-4 text-sky-400 shrink-0" />}
-                  <span className="text-neutral-200 font-medium">{actionMessage.message}</span>
+                  {actionMessage.type === 'success' && <CheckCircle2 className="w-4 h-4 text-risk-low shrink-0" />}
+                  {actionMessage.type === 'error' && <AlertCircle className="w-4 h-4 text-risk-critical shrink-0" />}
+                  {actionMessage.type === 'info' && <Info className="w-4 h-4 text-label-2 shrink-0" />}
+                  <span className="text-label">{actionMessage.message}</span>
                 </div>
               </div>
             </div>
           )}
 
           {/* Main Content Area - Full Width & Responsive Padding */}
-          <main className="flex-1 p-3.5 sm:p-5 lg:p-7 overflow-x-hidden w-full bg-transparent">
+          <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-x-hidden w-full">
             <Outlet />
           </main>
         </div>

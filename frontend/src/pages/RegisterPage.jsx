@@ -46,7 +46,7 @@ export const RegisterPage = () => {
 
   // Password Strength Evaluation
   const calculatePasswordStrength = (pwd) => {
-    if (!pwd) return { score: 0, label: 'None', color: 'bg-slate-700' };
+    if (!pwd) return { score: 0, label: 'None', color: 'bg-surface-2' };
     let score = 0;
     if (pwd.length >= 8) score += 1;
     if (/[A-Z]/.test(pwd)) score += 1;
@@ -54,10 +54,10 @@ export const RegisterPage = () => {
     if (/[0-9]/.test(pwd)) score += 1;
     if (/[!@#$%^&*(),.?":{}|<>\-_+=\[\]\\/`~]/.test(pwd)) score += 1;
 
-    if (score <= 2) return { score: 1, label: 'Weak', color: 'bg-red-500', width: 'w-1/4' };
-    if (score === 3) return { score: 2, label: 'Fair', color: 'bg-amber-500', width: 'w-2/4' };
-    if (score === 4) return { score: 3, label: 'Good', color: 'bg-cyan-500', width: 'w-3/4' };
-    return { score: 4, label: 'Strong', color: 'bg-emerald-500', width: 'w-full' };
+    if (score <= 2) return { score: 1, label: 'Weak', color: 'bg-risk-critical', width: 'w-1/4' };
+    if (score === 3) return { score: 2, label: 'Fair', color: 'bg-risk-moderate', width: 'w-2/4' };
+    if (score === 4) return { score: 3, label: 'Good', color: 'bg-accent', width: 'w-3/4' };
+    return { score: 4, label: 'Strong', color: 'bg-risk-low', width: 'w-full' };
   };
 
   const strength = calculatePasswordStrength(formData.password);
@@ -127,24 +127,24 @@ export const RegisterPage = () => {
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen relative flex flex-col justify-center items-center px-4 py-12 bg-[#070b14] text-slate-100 selection:bg-red-500 selection:text-white">
+      <div className="min-h-screen relative flex flex-col justify-center items-center px-4 py-12 bg-surface-2 text-label selection:bg-risk-critical selection:text-label">
         <Terrain3DBackground />
-        <div className="w-full max-w-md bg-[#0d1527] border border-emerald-500/40 rounded-xl p-6 shadow-xl text-center space-y-4 animate-in fade-in">
-          <div className="w-12 h-12 rounded-full bg-emerald-950/40 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mx-auto">
+        <div className="w-full max-w-md bg-surface-2 border border-risk-low/30 rounded-tile p-6 text-center space-y-4 animate-in fade-in">
+          <div className="w-12 h-12 rounded-full bg-risk-low/[0.12] border border-risk-low/30 flex items-center justify-center text-risk-low mx-auto">
             <CheckCircle2 className="w-6 h-6" />
           </div>
           <div className="space-y-1">
-            <h2 className="text-xl font-bold text-white">Account Created</h2>
-            <p className="text-xs text-slate-300">
+            <h2 className="text-xl font-semibold text-label">Account Created</h2>
+            <p className="text-xs text-label-2">
               Welcome to <strong>LANDSAFE</strong>, {formData.fullName}. Your citizen dashboard is ready.
             </p>
           </div>
           <button
             onClick={() => navigate('/overview', { replace: true })}
-            className="w-full py-2.5 px-4 bg-[#16243d] hover:bg-[#1f3254] text-white border border-cyan-500/40 rounded-lg text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition-colors"
+            className="w-full py-2.5 px-4 bg-surface-2 hover:bg-[#1f3254] text-label border border-line rounded-lg text-xs tabular-nums font-semibold flex items-center justify-center gap-1.5 transition-colors"
           >
             <span>Open Dashboard</span>
-            <ArrowRight className="w-4 h-4 text-cyan-400" />
+            <ArrowRight className="w-4 h-4 text-label-2" />
           </button>
         </div>
       </div>
@@ -152,28 +152,28 @@ export const RegisterPage = () => {
   }
 
   return (
-    <div className="min-h-screen relative flex flex-col justify-center items-center px-4 py-12 bg-[#070b14] text-slate-100 selection:bg-red-500 selection:text-white">
+    <div className="min-h-screen relative flex flex-col justify-center items-center px-4 py-12 bg-surface-2 text-label selection:bg-risk-critical selection:text-label">
       <Terrain3DBackground />
 
       <div className="w-full max-w-lg space-y-5 z-10 animate-in fade-in duration-200">
         <div className="text-center space-y-1.5">
           <Link to="/" className="inline-flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-red-950/40 border border-red-500/40 flex items-center justify-center text-red-400">
+            <div className="w-8 h-8 rounded-lg bg-risk-critical/[0.12] border border-risk-critical/30 flex items-center justify-center text-risk-critical">
               <Shield className="w-4 h-4" />
             </div>
             <div className="text-left">
-              <span className="font-black text-lg tracking-wider text-white">LANDSAFE</span>
-              <span className="block text-[10px] font-mono text-slate-400">SIH26001 • CITIZEN ONBOARDING</span>
+              <span className="font-semibold text-lg text-label">LANDSAFE</span>
+              <span className="block text-xs tabular-nums text-label-2">SIH26001 • CITIZEN ONBOARDING</span>
             </div>
           </Link>
-          <h2 className="text-xl font-bold text-white tracking-tight pt-1">Create Account</h2>
+          <h2 className="text-xl font-semibold text-label tracking-tight pt-1">Create Account</h2>
         </div>
 
-        <div className="bg-[#0d1527] border border-[#1c2b48] rounded-xl p-6 shadow-xl space-y-4">
+        <div className="bg-surface-2 border border-line rounded-tile p-6 space-y-4">
           
           {errorMessage && (
-            <div className="p-3 rounded-lg bg-red-950/60 border border-red-500/40 flex items-start gap-2.5 text-xs text-red-300">
-              <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+            <div className="p-3 rounded-lg bg-risk-critical/[0.12] border border-risk-critical/30 flex items-start gap-2.5 text-xs text-risk-critical">
+              <AlertCircle className="w-4 h-4 text-risk-critical shrink-0 mt-0.5" />
               <span>{errorMessage}</span>
             </div>
           )}
@@ -181,7 +181,7 @@ export const RegisterPage = () => {
           <form onSubmit={handleSubmit} className="space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <div className="space-y-1">
-                <label className="block text-xs font-mono font-medium text-slate-300" htmlFor="fullName">
+                <label className="block text-xs tabular-nums font-medium text-label-2" htmlFor="fullName">
                   Full Name *
                 </label>
                 <input
@@ -192,12 +192,12 @@ export const RegisterPage = () => {
                   placeholder="Rohan Lyngdoh"
                   required
                   disabled={loading}
-                  className="w-full px-3 py-2 bg-[#090f1d] border border-[#1c2b48] rounded-lg text-xs text-white placeholder-slate-400 focus:outline-none focus:border-cyan-500 font-mono disabled:opacity-50"
+                  className="w-full px-3 py-2 bg-surface-2 border border-line rounded-lg text-xs text-label placeholder-label-3 focus:outline-none focus:border-line tabular-nums disabled:opacity-50"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="block text-xs font-mono font-medium text-slate-300" htmlFor="username">
+                <label className="block text-xs tabular-nums font-medium text-label-2" htmlFor="username">
                   Username *
                 </label>
                 <input
@@ -208,14 +208,14 @@ export const RegisterPage = () => {
                   placeholder="rohan_lyngdoh"
                   required
                   disabled={loading}
-                  className="w-full px-3 py-2 bg-[#090f1d] border border-[#1c2b48] rounded-lg text-xs text-white placeholder-slate-400 focus:outline-none focus:border-cyan-500 font-mono disabled:opacity-50"
+                  className="w-full px-3 py-2 bg-surface-2 border border-line rounded-lg text-xs text-label placeholder-label-3 focus:outline-none focus:border-line tabular-nums disabled:opacity-50"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <div className="space-y-1">
-                <label className="block text-xs font-mono font-medium text-slate-300" htmlFor="email">
+                <label className="block text-xs tabular-nums font-medium text-label-2" htmlFor="email">
                   Email Address *
                 </label>
                 <input
@@ -226,12 +226,12 @@ export const RegisterPage = () => {
                   placeholder="rohan@example.com"
                   required
                   disabled={loading}
-                  className="w-full px-3 py-2 bg-[#090f1d] border border-[#1c2b48] rounded-lg text-xs text-white placeholder-slate-400 focus:outline-none focus:border-cyan-500 font-mono disabled:opacity-50"
+                  className="w-full px-3 py-2 bg-surface-2 border border-line rounded-lg text-xs text-label placeholder-label-3 focus:outline-none focus:border-line tabular-nums disabled:opacity-50"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="block text-xs font-mono font-medium text-slate-300" htmlFor="phone">
+                <label className="block text-xs tabular-nums font-medium text-label-2" htmlFor="phone">
                   Phone Number
                 </label>
                 <input
@@ -241,14 +241,14 @@ export const RegisterPage = () => {
                   onChange={(e) => handleChange('phone', e.target.value)}
                   placeholder="+91 98620-XXXXX"
                   disabled={loading}
-                  className="w-full px-3 py-2 bg-[#090f1d] border border-[#1c2b48] rounded-lg text-xs text-white placeholder-slate-400 focus:outline-none focus:border-cyan-500 font-mono disabled:opacity-50"
+                  className="w-full px-3 py-2 bg-surface-2 border border-line rounded-lg text-xs text-label placeholder-label-3 focus:outline-none focus:border-line tabular-nums disabled:opacity-50"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <div className="space-y-1">
-                <label className="block text-xs font-mono font-medium text-slate-300" htmlFor="password">
+                <label className="block text-xs tabular-nums font-medium text-label-2" htmlFor="password">
                   Password *
                 </label>
                 <div className="relative">
@@ -260,12 +260,12 @@ export const RegisterPage = () => {
                     placeholder="Min 8 chars"
                     required
                     disabled={loading}
-                    className="w-full pl-3 pr-8 py-2 bg-[#090f1d] border border-[#1c2b48] rounded-lg text-xs text-white placeholder-slate-400 focus:outline-none focus:border-cyan-500 font-mono disabled:opacity-50"
+                    className="w-full pl-3 pr-8 py-2 bg-surface-2 border border-line rounded-lg text-xs text-label placeholder-label-3 focus:outline-none focus:border-line tabular-nums disabled:opacity-50"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-white"
+                    className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-label-2 hover:text-label"
                   >
                     {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                   </button>
@@ -273,7 +273,7 @@ export const RegisterPage = () => {
               </div>
 
               <div className="space-y-1">
-                <label className="block text-xs font-mono font-medium text-slate-300" htmlFor="confirmPassword">
+                <label className="block text-xs tabular-nums font-medium text-label-2" htmlFor="confirmPassword">
                   Confirm Password *
                 </label>
                 <div className="relative">
@@ -285,12 +285,12 @@ export const RegisterPage = () => {
                     placeholder="Re-enter password"
                     required
                     disabled={loading}
-                    className="w-full pl-3 pr-8 py-2 bg-[#090f1d] border border-[#1c2b48] rounded-lg text-xs text-white placeholder-slate-400 focus:outline-none focus:border-cyan-500 font-mono disabled:opacity-50"
+                    className="w-full pl-3 pr-8 py-2 bg-surface-2 border border-line rounded-lg text-xs text-label placeholder-label-3 focus:outline-none focus:border-line tabular-nums disabled:opacity-50"
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-white"
+                    className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-label-2 hover:text-label"
                   >
                     {showConfirmPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                   </button>
@@ -305,9 +305,9 @@ export const RegisterPage = () => {
                 type="checkbox"
                 checked={formData.termsAccepted}
                 onChange={(e) => handleChange('termsAccepted', e.target.checked)}
-                className="mt-0.5 rounded bg-[#090f1d] border-[#1c2b48] text-cyan-600 focus:ring-0"
+                className="mt-0.5 rounded bg-surface-2 border-line text-label-2 focus:ring-0"
               />
-              <label htmlFor="terms" className="text-[11px] text-slate-300 font-mono">
+              <label htmlFor="terms" className="text-xs text-label-2 tabular-nums">
                 I accept the Terms of Service & Privacy Policy.
               </label>
             </div>
@@ -316,18 +316,18 @@ export const RegisterPage = () => {
             <button
               type="submit"
               disabled={loading || !formData.termsAccepted}
-              className="w-full py-2.5 px-4 bg-[#16243d] hover:bg-[#1f3254] text-white border border-cyan-500/40 rounded-lg text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
+              className="w-full py-2.5 px-4 bg-surface-2 hover:bg-[#1f3254] text-label border border-line rounded-lg text-xs tabular-nums font-semibold flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
             >
-              {loading ? <span>Creating Account...</span> : <><span>Create Account</span><ArrowRight className="w-3.5 h-3.5 text-cyan-400" /></>}
+              {loading ? <span>Creating Account...</span> : <><span>Create Account</span><ArrowRight className="w-3.5 h-3.5 text-label-2" /></>}
             </button>
           </form>
 
-          <div className="pt-2 border-t border-[#1c2b48] text-center">
+          <div className="pt-2 border-t border-line text-center">
             <Link
               to="/login"
-              className="text-xs text-slate-400 hover:text-cyan-300 transition-colors font-mono"
+              className="text-xs text-label-2 hover:text-label-2 transition-colors tabular-nums"
             >
-              Already registered? <strong className="text-white underline">Sign In</strong>
+              Already registered? <strong className="text-label underline">Sign In</strong>
             </Link>
           </div>
         </div>
